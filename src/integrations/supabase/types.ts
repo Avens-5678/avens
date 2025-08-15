@@ -14,7 +14,388 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      about_content: {
+        Row: {
+          created_at: string
+          founder_image_url: string | null
+          founder_name: string
+          founder_note: string
+          founder_quote: string
+          full_about_text: string
+          id: string
+          mission_statement: string
+          updated_at: string
+          vision_statement: string
+        }
+        Insert: {
+          created_at?: string
+          founder_image_url?: string | null
+          founder_name: string
+          founder_note: string
+          founder_quote: string
+          full_about_text: string
+          id?: string
+          mission_statement: string
+          updated_at?: string
+          vision_statement: string
+        }
+        Update: {
+          created_at?: string
+          founder_image_url?: string | null
+          founder_name?: string
+          founder_note?: string
+          founder_quote?: string
+          full_about_text?: string
+          id?: string
+          mission_statement?: string
+          updated_at?: string
+          vision_statement?: string
+        }
+        Relationships: []
+      }
+      awards: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          title: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          title: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          title?: string
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string
+          event_type: Database["public"]["Enums"]["event_type"]
+          hero_image_url: string | null
+          id: string
+          is_active: boolean | null
+          process_description: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          event_type: Database["public"]["Enums"]["event_type"]
+          hero_image_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          process_description: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          event_type?: Database["public"]["Enums"]["event_type"]
+          hero_image_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          process_description?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      form_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          event_type: Database["public"]["Enums"]["event_type"] | null
+          form_type: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          rental_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+          form_type: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          rental_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+          form_type?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          rental_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_submissions_rental_id_fkey"
+            columns: ["rental_id"]
+            isOneToOne: false
+            referencedRelation: "rentals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hero_banners: {
+        Row: {
+          button_text: string | null
+          created_at: string
+          display_order: number | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          image_url: string
+          is_active: boolean | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          button_text?: string | null
+          created_at?: string
+          display_order?: number | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id?: string
+          image_url: string
+          is_active?: boolean | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          button_text?: string | null
+          created_at?: string
+          display_order?: number | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          image_url?: string
+          is_active?: boolean | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      news_achievements: {
+        Row: {
+          content: string
+          created_at: string
+          display_order: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          short_content: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          short_content: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          short_content?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portfolio: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          event_id: string
+          id: string
+          image_url: string
+          is_before: boolean | null
+          is_before_after: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          event_id: string
+          id?: string
+          image_url: string
+          is_before?: boolean | null
+          is_before_after?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          event_id?: string
+          id?: string
+          image_url?: string
+          is_before?: boolean | null
+          is_before_after?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rentals: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          price_range: string | null
+          short_description: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          price_range?: string | null
+          short_description: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          price_range?: string | null
+          short_description?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          is_active: boolean | null
+          short_description: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id?: string
+          is_active?: boolean | null
+          short_description: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          is_active?: boolean | null
+          short_description?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trusted_clients: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          logo_url: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          logo_url: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +404,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      event_type:
+        | "wedding"
+        | "corporate"
+        | "birthday"
+        | "anniversary"
+        | "social"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +537,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      event_type: [
+        "wedding",
+        "corporate",
+        "birthday",
+        "anniversary",
+        "social",
+        "other",
+      ],
+    },
   },
 } as const

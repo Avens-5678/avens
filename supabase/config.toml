@@ -1,5 +1,8 @@
 project_id = "czwoehqeytppuqjkcjoc"
 
+[functions.form-notification]
+verify_jwt = false
+
 [api]
 enabled = true
 port = 54321

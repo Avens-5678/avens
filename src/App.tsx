@@ -10,7 +10,8 @@ import Gallery from "./pages/Gallery";
 import About from "./pages/About";
 import EventDetail from "./pages/EventDetail";
 import Ecommerce from "./pages/Ecommerce";
-import AdminLayout from "./pages/admin/AdminLayout";
+import Auth from "./pages/Auth";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,8 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/events/:eventType" element={<EventDetail />} />
           <Route path="/ecommerce" element={<Ecommerce />} />
-          <Route path="/admin" element={<AdminLayout />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

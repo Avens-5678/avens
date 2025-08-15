@@ -51,7 +51,7 @@ const InquiryForm = ({
     setIsLoading(true);
 
     try {
-      const { error } = await supabase
+      const { data: submission, error } = await supabase
         .from("form_submissions")
         .insert({
           name: values.name,
@@ -61,9 +61,22 @@ const InquiryForm = ({
           form_type: formType,
           event_type: (values.eventType as any) || null,
           rental_id: rentalId || null,
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Trigger notification
+      try {
+        await supabase.functions.invoke('notify-form-submission', {
+          body: { submissionId: submission.id }
+        });
+      } catch (notificationError) {
+        console.warn('Notification failed:', notificationError);
+        // Don't fail the form submission if notification fails
+      }
+
 
       toast({
         title: "Message Sent!",

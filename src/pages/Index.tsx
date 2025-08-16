@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import InquiryForm from "@/components/Forms/InquiryForm";
+import Autoplay from "embla-carousel-autoplay";
 
 const Index = () => {
   const { data: heroBanners, isLoading: loadingBanners } = useHeroBanners();
@@ -39,7 +40,18 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20"></div>
         
         {heroBanners && heroBanners.length > 0 ? (
-          <Carousel className="w-full h-screen relative">
+          <Carousel 
+            className="w-full h-screen relative"
+            plugins={[
+              Autoplay({
+                delay: 15000,
+              }),
+            ]}
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+          >
             <CarouselContent>
               {heroBanners.map((banner) => (
                 <CarouselItem key={banner.id} className="relative">

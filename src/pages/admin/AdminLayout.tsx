@@ -44,14 +44,26 @@ const AdminLayout = () => {
 
   const checkAdminUser = async (email: string) => {
     try {
+      // Use the secure function instead of direct table access
       const { data: adminData, error } = await supabase
-        .from("admin_users")
-        .select("*")
-        .eq("email", email)
-        .eq("is_active", true)
-        .maybeSingle();
+        .rpc('get_admin_users_secure')
+        .then(result => ({
+          data: result.data?.find((admin: any) => admin.email === email && admin.is_active),
+          error: result.error
+        }));
 
-      if (error || !adminData) {
+      if (error) {
+        console.error('Error checking admin user:', error);
+        await supabase.auth.signOut();
+        toast({
+          title: "Access Denied",
+          description: "Admin privileges required.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!adminData) {
         await supabase.auth.signOut();
         toast({
           title: "Access Denied",

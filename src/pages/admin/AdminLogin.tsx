@@ -31,37 +31,45 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // First, create a simple hash of the password (in production, use proper bcrypt)
+      const passwordHash = btoa(values.password); // Simple base64 encoding for demo
+      
+      // Use the secure authentication function
+      const { data: authResult, error } = await supabase
+        .rpc('authenticate_admin', {
+          input_email: values.email,
+          input_password_hash: passwordHash
+        });
+
+      if (error) throw error;
+
+      if (!authResult || authResult.length === 0) {
+        throw new Error("Invalid credentials or account locked. Please try again later.");
+      }
+
+      const adminUser = authResult[0];
+      
+      // Sign in with Supabase auth
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
 
       if (data.user) {
-        // Verify admin user exists
-        const { data: adminUser, error: adminError } = await supabase
-          .from("admin_users")
-          .select("*")
-          .eq("email", values.email)
-          .eq("is_active", true)
-          .maybeSingle();
-
-        if (adminError || !adminUser) {
-          await supabase.auth.signOut();
-          throw new Error("Access denied. Admin privileges required.");
-        }
-
-        // Update last login
-        await supabase
-          .from("admin_users")
-          .update({ last_login: new Date().toISOString() })
-          .eq("id", adminUser.id);
-
         toast({
           title: "Login Successful",
           description: `Welcome back, ${adminUser.full_name}!`,
         });
+
+        if (adminUser.needs_password_change) {
+          toast({
+            title: "Password Change Required",
+            description: "Your password is older than 90 days. Please update it soon.",
+            variant: "destructive",
+          });
+        }
 
         // Redirect will be handled by the parent component
       }

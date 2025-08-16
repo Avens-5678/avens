@@ -55,34 +55,52 @@ export type Database = {
       }
       admin_users: {
         Row: {
+          account_locked_until: string | null
           created_at: string
+          created_by: string | null
           email: string
           full_name: string
           id: string
           is_active: boolean | null
+          last_failed_login: string | null
           last_login: string | null
+          last_password_reset: string | null
+          login_attempts: number | null
+          password_changed_at: string | null
           password_hash: string
           role: string | null
           updated_at: string
         }
         Insert: {
+          account_locked_until?: string | null
           created_at?: string
+          created_by?: string | null
           email: string
           full_name: string
           id?: string
           is_active?: boolean | null
+          last_failed_login?: string | null
           last_login?: string | null
+          last_password_reset?: string | null
+          login_attempts?: number | null
+          password_changed_at?: string | null
           password_hash: string
           role?: string | null
           updated_at?: string
         }
         Update: {
+          account_locked_until?: string | null
           created_at?: string
+          created_by?: string | null
           email?: string
           full_name?: string
           id?: string
           is_active?: boolean | null
+          last_failed_login?: string | null
           last_login?: string | null
+          last_password_reset?: string | null
+          login_attempts?: number | null
+          password_changed_at?: string | null
           password_hash?: string
           role?: string | null
           updated_at?: string
@@ -515,12 +533,58 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      authenticate_admin: {
+        Args: { input_email: string; input_password_hash: string }
+        Returns: {
+          admin_id: string
+          email: string
+          full_name: string
+          is_active: boolean
+          login_attempts: number
+          needs_password_change: boolean
+          role: string
+        }[]
+      }
+      create_admin_user: {
+        Args: {
+          input_email: string
+          input_full_name: string
+          input_password_hash: string
+          input_role?: string
+        }
+        Returns: string
+      }
+      get_admin_users_secure: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          account_locked_until: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean
+          last_failed_login: string
+          last_login: string
+          login_attempts: number
+          password_changed_at: string
+          role: string
+          updated_at: string
+        }[]
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
       is_current_user_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      unlock_admin_account: {
+        Args: { admin_id: string }
+        Returns: boolean
+      }
+      update_admin_password: {
+        Args: { admin_id: string; new_password_hash: string }
         Returns: boolean
       }
     }

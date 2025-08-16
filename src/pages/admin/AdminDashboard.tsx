@@ -17,11 +17,13 @@ import {
   MessageSquare, 
   Award,
   Settings,
-  BarChart3
+  BarChart3,
+  Volume2
 } from "lucide-react";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
 import EnhancedPortfolioManager from "@/components/admin/EnhancedPortfolioManager";
 import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboard";
+import AudioManager from "@/components/admin/AudioManager";
 
 interface AdminDashboardProps {
   adminUser: any;
@@ -85,7 +87,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -121,6 +123,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <TabsTrigger value="settings" className="flex items-center space-x-2">
               <Award className="h-4 w-4" />
               <span className="hidden sm:inline">News & Awards</span>
+            </TabsTrigger>
+            <TabsTrigger value="audio" className="flex items-center space-x-2">
+              <Volume2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Audio</span>
             </TabsTrigger>
           </TabsList>
 
@@ -401,6 +407,11 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 defaultValues={{ is_active: true, display_order: 0 }}
               />
             </div>
+          </TabsContent>
+
+          {/* Audio Management */}
+          <TabsContent value="audio">
+            <AudioManager />
           </TabsContent>
         </Tabs>
       </div>

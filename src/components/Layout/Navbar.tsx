@@ -48,14 +48,6 @@ const Navbar = () => {
             >
               <Link to="#contact">Contact Us</Link>
             </Button>
-            <Button 
-              asChild
-              variant="outline"
-              size="sm"
-              className="ml-2"
-            >
-              <Link to="/admin">Admin</Link>
-            </Button>
           </div>
 
           {/* Mobile Menu Button */}

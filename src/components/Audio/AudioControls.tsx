@@ -18,8 +18,22 @@ const AudioControls = () => {
     togglePlay();
   };
 
+  // Show controls even if audio isn't loaded, but with different state
   if (!isLoaded) {
-    return null;
+    return (
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-full px-4 py-2 shadow-lg">
+        <Music className="h-4 w-4 text-muted-foreground" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          disabled
+        >
+          <Play className="h-4 w-4" />
+        </Button>
+        <span className="text-xs text-muted-foreground">Loading audio...</span>
+      </div>
+    );
   }
 
   return (

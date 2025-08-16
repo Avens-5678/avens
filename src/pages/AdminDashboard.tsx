@@ -383,9 +383,8 @@ const AdminDashboard = () => {
                   { name: "title", label: "Image Title/Description", type: "text", required: true },
                   { name: "image_url", label: "Gallery Image", type: "image", required: true },
                   { name: "event_id", label: "Event ID", type: "text", required: true },
-                  { name: "tag", label: "Tag", type: "select", options: [
-                    "ceremony", "reception", "decoration", "catering", "entertainment", 
-                    "venue", "flowers", "lighting", "photography", "setup", "other"
+                  { name: "tag", label: "Event Type Tag", type: "select", options: [
+                    "wedding", "corporate", "birthday", "equipment_rental"
                   ]},
                   { name: "display_order", label: "Display Order", type: "number" },
                   { name: "is_before_after", label: "Before/After Image", type: "boolean" },

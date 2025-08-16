@@ -121,7 +121,7 @@ export const usePortfolio = (eventId?: string) => {
     queryFn: async () => {
       let query = supabase
         .from("portfolio")
-        .select("*, events(event_type, title)")
+        .select("*, events!portfolio_event_id_fkey(event_type, title)")
         .order("display_order", { ascending: true });
 
       if (eventId) {

@@ -1,22 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-// Hook for site settings (audio configuration)
-export const useSiteSettings = () => {
-  return useQuery({
-    queryKey: ["site-settings"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("*")
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-};
-
 export const useHeroBanners = () => {
   return useQuery({
     queryKey: ["hero-banners"],

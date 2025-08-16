@@ -466,30 +466,6 @@ export type Database = {
         }
         Relationships: []
       }
-      site_settings: {
-        Row: {
-          background_audio_enabled: boolean | null
-          background_audio_url: string | null
-          created_at: string
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          background_audio_enabled?: boolean | null
-          background_audio_url?: string | null
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Update: {
-          background_audio_enabled?: boolean | null
-          background_audio_url?: string | null
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       team_members: {
         Row: {
           created_at: string

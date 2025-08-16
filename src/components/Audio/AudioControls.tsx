@@ -31,7 +31,7 @@ const AudioControls = () => {
         >
           <Play className="h-4 w-4" />
         </Button>
-        <span className="text-xs text-muted-foreground">No audio configured</span>
+        <span className="text-xs text-muted-foreground">Loading audio...</span>
       </div>
     );
   }

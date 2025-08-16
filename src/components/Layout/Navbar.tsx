@@ -1,9 +1,20 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Menu, X } from "lucide-react";
+import InquiryForm from "@/components/Forms/InquiryForm";
 
 const Navbar = () => {
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -43,12 +54,21 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Button 
-              asChild
-              className="bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300"
-            >
-              <Link to="#contact">Contact Us</Link>
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300">
+                  Contact Us
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogTitle>Contact Us</DialogTitle>
+                <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
+                <InquiryForm 
+                  formType="contact"
+                  title="Contact Us"
+                />
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Mobile Menu Button */}
@@ -80,12 +100,24 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <Button 
-                asChild
-                className="self-start bg-gradient-to-r from-primary to-accent"
-              >
-                <Link to="#contact" onClick={() => setIsMenuOpen(false)}>Contact Us</Link>
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="self-start bg-gradient-to-r from-primary to-accent"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Contact Us
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogTitle>Contact Us</DialogTitle>
+                  <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
+                  <InquiryForm 
+                    formType="contact"
+                    title="Contact Us"
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         )}

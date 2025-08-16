@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import CrudInterface from "@/components/admin/CrudInterface";
 import AdminDataTable from "@/components/admin/AdminDataTable";
-import { useServices, useRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions } from "@/hooks/useData";
+import { useServices, useRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions, useNewsAchievements, useAwards } from "@/hooks/useData";
 import { 
   LogOut, 
   Home, 
@@ -40,6 +40,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const { data: portfolio } = usePortfolio();
   const { data: clients } = useTrustedClients();
   const { data: formSubmissions } = useFormSubmissions();
+  const { data: newsAchievements } = useNewsAchievements();
+  const { data: awards } = useAwards();
 
   const handleLogout = async () => {
     try {
@@ -360,20 +362,43 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <EnhancedFormSubmissions formSubmissions={formSubmissions || []} />
           </TabsContent>
 
-          {/* Settings placeholder */}
+          {/* Settings - News & Achievements and Awards */}
           <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground mb-4">
-                    Settings management interface coming soon.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-8">
+              {/* News & Achievements Management */}
+              <AdminDataTable
+                title="News & Achievements"
+                data={newsAchievements || []}
+                queryKey="news-achievements"
+                tableName="news_achievements"
+                fields={[
+                  { name: "title", label: "Title", type: "text", required: true },
+                  { name: "short_content", label: "Short Content", type: "text", required: true },
+                  { name: "content", label: "Full Content", type: "textarea", required: true },
+                  { name: "image_url", label: "Image URL", type: "image" },
+                  { name: "display_order", label: "Display Order", type: "number" },
+                  { name: "is_active", label: "Active", type: "boolean" }
+                ]}
+                defaultValues={{ is_active: true, display_order: 0 }}
+              />
+
+              {/* Awards Management */}
+              <AdminDataTable
+                title="Awards"
+                data={awards || []}
+                queryKey="awards"
+                tableName="awards"
+                fields={[
+                  { name: "title", label: "Award Title", type: "text", required: true },
+                  { name: "description", label: "Description", type: "textarea", required: true },
+                  { name: "year", label: "Year", type: "number" },
+                  { name: "logo_url", label: "Logo URL", type: "image" },
+                  { name: "display_order", label: "Display Order", type: "number" },
+                  { name: "is_active", label: "Active", type: "boolean" }
+                ]}
+                defaultValues={{ is_active: true, display_order: 0 }}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

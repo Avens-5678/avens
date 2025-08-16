@@ -315,6 +315,7 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
                 { name: "short_description", label: "Short Description", type: "text", required: true },
                 { name: "description", label: "Description", type: "textarea", required: true },
                 { name: "price_range", label: "Price Range", type: "text" },
+                { name: "image_url", label: "Image URL", type: "image" },
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}
@@ -378,6 +379,9 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
                             <div><span className="font-medium">Phone:</span> {submission.phone || 'N/A'}</div>
                             <div><span className="font-medium">Event Type:</span> {submission.event_type || 'N/A'}</div>
                             <div><span className="font-medium">Form Type:</span> {submission.form_type}</div>
+                            {submission.rental_title && (
+                              <div><span className="font-medium">Equipment:</span> {submission.rental_title}</div>
+                            )}
                             <div><span className="font-medium">Message:</span> {submission.message}</div>
                             <div><span className="font-medium">Submitted:</span> {new Date(submission.created_at).toLocaleDateString()}</div>
                           </div>

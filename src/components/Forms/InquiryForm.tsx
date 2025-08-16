@@ -24,6 +24,7 @@ interface InquiryFormProps {
   formType?: "inquiry" | "contact" | "rental";
   eventType?: string;
   rentalId?: string;
+  rentalTitle?: string;
   title?: string;
 }
 
@@ -31,6 +32,7 @@ const InquiryForm = ({
   formType = "inquiry", 
   eventType, 
   rentalId, 
+  rentalTitle,
   title = "Get In Touch" 
 }: InquiryFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +63,7 @@ const InquiryForm = ({
           form_type: formType,
           event_type: (values.eventType as any) || null,
           rental_id: rentalId || null,
+          rental_title: rentalTitle || null,
         })
         .select()
         .single();

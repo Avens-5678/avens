@@ -193,6 +193,7 @@ export type Database = {
           name: string
           phone: string | null
           rental_id: string | null
+          rental_title: string | null
           status: string | null
           updated_at: string
         }
@@ -206,6 +207,7 @@ export type Database = {
           name: string
           phone?: string | null
           rental_id?: string | null
+          rental_title?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -219,6 +221,7 @@ export type Database = {
           name?: string
           phone?: string | null
           rental_id?: string | null
+          rental_title?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -393,6 +396,7 @@ export type Database = {
           description: string
           display_order: number | null
           id: string
+          image_url: string | null
           is_active: boolean | null
           price_range: string | null
           short_description: string
@@ -404,6 +408,7 @@ export type Database = {
           description: string
           display_order?: number | null
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           price_range?: string | null
           short_description: string
@@ -415,6 +420,7 @@ export type Database = {
           description?: string
           display_order?: number | null
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           price_range?: string | null
           short_description?: string

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
@@ -72,9 +73,23 @@ const CorporateEvents = () => {
                 </p>
               </div>
 
-              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
-                Book a Consultation <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
+                    Book a Consultation <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Book Corporate Event Consultation</DialogTitle>
+                  </DialogHeader>
+                  <InquiryForm 
+                    formType="inquiry"
+                    eventType="corporate"
+                    title="Book Consultation"
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
 
             {/* Image Side */}
@@ -294,9 +309,23 @@ const CorporateEvents = () => {
             </p>
 
             <div className="pt-6">
-              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-4 text-lg">
-                Book a Consultation
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-4 text-lg">
+                    Book a Consultation
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Book Corporate Event Consultation</DialogTitle>
+                  </DialogHeader>
+                  <InquiryForm 
+                    formType="inquiry"
+                    eventType="corporate"
+                    title="Book Consultation"
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>

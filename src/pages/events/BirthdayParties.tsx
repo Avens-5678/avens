@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
@@ -302,6 +302,8 @@ const BirthdayParties = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
+                  <DialogTitle className="sr-only">Start Planning Your Birthday Party</DialogTitle>
+                  <DialogDescription className="sr-only">Fill out this form to begin planning your birthday celebration</DialogDescription>
                   <InquiryForm 
                     formType="inquiry"
                     eventType="birthday"

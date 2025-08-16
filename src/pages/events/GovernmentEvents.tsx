@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
@@ -303,6 +303,8 @@ const GovernmentEvents = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
+                  <DialogTitle className="sr-only">Schedule Official Consultation</DialogTitle>
+                  <DialogDescription className="sr-only">Request a consultation for your government event</DialogDescription>
                   <InquiryForm 
                     formType="inquiry"
                     eventType="government"

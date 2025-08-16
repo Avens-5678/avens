@@ -8,7 +8,7 @@ import { useHeroBanners, useServices, useRentals, useTrustedClients, useNewsAchi
 import { ArrowRight, Sparkles, Clock, Users, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import InquiryForm from "@/components/Forms/InquiryForm";
 
 const Index = () => {
@@ -182,9 +182,12 @@ const Index = () => {
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-md">
+                      <DialogTitle className="sr-only">Rental Inquiry</DialogTitle>
+                      <DialogDescription className="sr-only">Submit an inquiry for equipment rental</DialogDescription>
                       <InquiryForm 
                         formType="rental"
                         rentalId={rental.id}
+                        rentalTitle={rental.title}
                         title="Rental Inquiry"
                       />
                     </DialogContent>
@@ -326,6 +329,8 @@ const Index = () => {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
+                <DialogTitle className="sr-only">Contact Us</DialogTitle>
+                <DialogDescription className="sr-only">Get in touch with us for your event planning needs</DialogDescription>
                 <InquiryForm 
                   formType="contact"
                   title="Contact Us"

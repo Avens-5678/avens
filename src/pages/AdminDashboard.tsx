@@ -262,6 +262,11 @@ const AdminDashboard = () => {
                                 Event: {submission.event_type}
                               </p>
                             )}
+                            {submission.rental_title && (
+                              <p className="text-sm text-muted-foreground mt-2">
+                                <span className="font-medium">Equipment:</span> {submission.rental_title}
+                              </p>
+                            )}
                           </div>
                           <div className="flex items-start justify-between">
                             <div>
@@ -484,9 +489,11 @@ const AdminDashboard = () => {
                   { name: "short_description", label: "Short Description", type: "textarea", required: true },
                   { name: "description", label: "Description", type: "textarea", required: true },
                   { name: "price_range", label: "Price Range", type: "text" },
+                  { name: "image_url", label: "Image URL", type: "image" },
                   { name: "display_order", label: "Display Order", type: "number" },
                   { name: "is_active", label: "Active", type: "boolean" }
                 ]}
+                defaultValues={{ is_active: true, display_order: 0 }}
               />
             </div>
           </TabsContent>

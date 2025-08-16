@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SiteSettings {
@@ -32,7 +32,8 @@ interface AudioProviderProps {
 }
 
 export const AudioProvider = ({ children }: AudioProviderProps) => {
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolumeState] = useState(0.3);
@@ -40,7 +41,7 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [audioSettings, setAudioSettings] = useState<SiteSettings | null>(null);
 
-  // Fetch audio settings from database
+  // Fetch audio settings from Supabase
   useEffect(() => {
     const fetchAudioSettings = async () => {
       try {
@@ -72,21 +73,20 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
 
     // Create audio element with the URL from database
     const newAudio = new Audio(audioSettings.background_audio_url);
-    setAudio(newAudio);
-    // Load user preferences
+    audioRef.current = newAudio;
+
+    // Load saved preferences
     const savedPreferences = localStorage.getItem('audioPreferences');
     if (savedPreferences) {
       const { volume: savedVolume, isMuted: savedMuted } = JSON.parse(savedPreferences);
-      setVolumeState(savedVolume);
-      setIsMuted(savedMuted);
+      setVolumeState(savedVolume ?? 0.3);
+      setIsMuted(savedMuted ?? false);
     }
-
-    if (!newAudio) return;
 
     // Configure audio
     newAudio.loop = true;
     newAudio.preload = 'auto';
-    newAudio.volume = volume;
+    newAudio.volume = isMuted ? 0 : volume;
 
     // Audio event listeners
     const handleCanPlay = () => setIsLoaded(true);
@@ -106,27 +106,29 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
       newAudio.removeEventListener('ended', handleEnded);
       newAudio.pause();
       newAudio.src = '';
+      audioRef.current = null;
     };
-  }, [audioSettings, volume]);
+  }, [audioSettings]);
 
+  // Update volume & mute state safely
   useEffect(() => {
-    audio.volume = isMuted ? 0 : volume;
-  }, [audio, volume, isMuted]);
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume;
+    }
+  }, [volume, isMuted]);
 
+  // Save preferences
   useEffect(() => {
-    // Save preferences
     localStorage.setItem('audioPreferences', JSON.stringify({ volume, isMuted }));
   }, [volume, isMuted]);
 
   const initializeAudio = async () => {
-    if (isInitialized) return;
-    
+    if (isInitialized || !audioRef.current) return;
+
     try {
-      // Try to play (will fail if autoplay is blocked)
-      await audio.play();
+      await audioRef.current.play();
       setIsInitialized(true);
     } catch (error) {
-      // Autoplay was blocked, user needs to interact first
       console.log('Autoplay blocked, waiting for user interaction');
       setIsInitialized(true);
     }
@@ -136,12 +138,13 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     if (!isInitialized) {
       await initializeAudio();
     }
+    if (!audioRef.current) return;
 
     try {
       if (isPlaying) {
-        audio.pause();
+        audioRef.current.pause();
       } else {
-        await audio.play();
+        await audioRef.current.play();
       }
     } catch (error) {
       console.error('Audio play error:', error);
@@ -149,7 +152,7 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    setIsMuted((prev) => !prev);
   };
 
   const setVolume = (newVolume: number) => {

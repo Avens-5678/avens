@@ -362,7 +362,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <EnhancedFormSubmissions formSubmissions={formSubmissions || []} />
           </TabsContent>
 
-          {/* Settings - News & Achievements and Awards */}
+          {/* News & Achievements and Awards */}
           <TabsContent value="settings">
             <div className="space-y-8">
               {/* News & Achievements Management */}

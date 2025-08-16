@@ -155,11 +155,14 @@ const AdminDataTable = ({ title, data, queryKey, tableName, fields, defaultValue
               <SelectValue placeholder={`Select ${field.label}`} />
             </SelectTrigger>
             <SelectContent>
-              {field.options?.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
+              {field.options?.map((option) => {
+                const [value, label] = option.includes('|') ? option.split('|') : [option, option];
+                return (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         );

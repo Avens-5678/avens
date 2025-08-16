@@ -382,7 +382,13 @@ const AdminDashboard = () => {
                 fields={[
                   { name: "title", label: "Image Title/Description", type: "text", required: true },
                   { name: "image_url", label: "Gallery Image", type: "image", required: true },
-                  { name: "event_id", label: "Event ID", type: "text", required: true },
+                  { 
+                    name: "event_id", 
+                    label: "Event", 
+                    type: "select", 
+                    required: true,
+                    options: events?.map(event => `${event.id}|${event.title} (${event.event_type})`) || []
+                  },
                   { name: "tag", label: "Event Type Tag", type: "select", options: [
                     "wedding", "corporate", "birthday", "equipment_rental"
                   ]},

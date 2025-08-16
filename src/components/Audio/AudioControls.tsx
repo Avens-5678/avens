@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useAudio } from "@/context/AudioProvider";
+import { useAudio } from "@/contexts/AudioProvider";
 import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX, Play, Pause } from "lucide-react";
 

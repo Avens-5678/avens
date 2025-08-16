@@ -304,6 +304,7 @@ export type Database = {
       }
       portfolio: {
         Row: {
+          album_url: string | null
           created_at: string
           display_order: number | null
           event_id: string
@@ -316,6 +317,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          album_url?: string | null
           created_at?: string
           display_order?: number | null
           event_id: string
@@ -328,6 +330,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          album_url?: string | null
           created_at?: string
           display_order?: number | null
           event_id?: string

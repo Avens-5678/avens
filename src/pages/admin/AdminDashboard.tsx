@@ -19,6 +19,9 @@ import {
   Settings,
   BarChart3
 } from "lucide-react";
+import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
+import EnhancedPortfolioManager from "@/components/admin/EnhancedPortfolioManager";
+import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboard";
 
 interface AdminDashboardProps {
   adminUser: any;
@@ -118,6 +121,7 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            <GoogleAnalyticsDashboard />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -327,18 +331,9 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
 
           {/* Portfolio Management */}
           <TabsContent value="portfolio">
-            <CrudInterface
-              title="Portfolio"
-              data={portfolio || []}
-              tableName="portfolio"
-              fields={[
-                { name: "title", label: "Title", type: "text", required: true },
-                { name: "image_url", label: "Image URL", type: "image", required: true },
-                { name: "tag", label: "Tag", type: "text" },
-                { name: "display_order", label: "Display Order", type: "number" },
-                { name: "is_before_after", label: "Before/After", type: "boolean" },
-                { name: "is_before", label: "Is Before Image", type: "boolean" }
-              ]}
+            <EnhancedPortfolioManager 
+              portfolio={portfolio || []} 
+              events={events || []}
             />
           </TabsContent>
 
@@ -359,44 +354,7 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
 
           {/* Form Submissions */}
           <TabsContent value="forms">
-            <Card>
-              <CardHeader>
-                <CardTitle>Form Submissions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                 <div className="space-y-4">
-                   {formSubmissions?.length > 0 ? (
-                    formSubmissions.map((submission) => (
-                      <Card key={submission.id}>
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">{submission.name}</CardTitle>
-                            <Badge variant={submission.status === 'new' ? 'default' : 'secondary'}>
-                              {submission.status}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid gap-2 text-sm">
-                            <div><span className="font-medium">Email:</span> {submission.email}</div>
-                            <div><span className="font-medium">Phone:</span> {submission.phone || 'N/A'}</div>
-                            <div><span className="font-medium">Event Type:</span> {submission.event_type || 'N/A'}</div>
-                            <div><span className="font-medium">Form Type:</span> {submission.form_type}</div>
-                            {submission.rental_title && (
-                              <div><span className="font-medium">Equipment:</span> {submission.rental_title}</div>
-                            )}
-                            <div><span className="font-medium">Message:</span> {submission.message}</div>
-                            <div><span className="font-medium">Submitted:</span> {new Date(submission.created_at).toLocaleDateString()}</div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground text-center py-8">No form submissions yet.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <EnhancedFormSubmissions formSubmissions={formSubmissions || []} />
           </TabsContent>
 
           {/* Settings placeholder */}

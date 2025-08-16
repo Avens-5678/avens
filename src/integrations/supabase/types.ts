@@ -298,6 +298,7 @@ export type Database = {
           image_url: string
           is_before: boolean | null
           is_before_after: boolean | null
+          tag: string | null
           title: string
           updated_at: string
         }
@@ -309,6 +310,7 @@ export type Database = {
           image_url: string
           is_before?: boolean | null
           is_before_after?: boolean | null
+          tag?: string | null
           title: string
           updated_at?: string
         }
@@ -320,6 +322,7 @@ export type Database = {
           image_url?: string
           is_before?: boolean | null
           is_before_after?: boolean | null
+          tag?: string | null
           title?: string
           updated_at?: string
         }

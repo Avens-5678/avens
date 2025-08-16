@@ -2,13 +2,16 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Layout from "@/components/Layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
-import { ArrowRight, Camera, Calendar, MapPin } from "lucide-react";
+import { ArrowRight, Camera, Calendar, MapPin, Filter } from "lucide-react";
+import { useState } from "react";
 
 const Portfolio = () => {
   const { data: events, isLoading: loadingEvents } = useEvents();
   const { data: portfolio, isLoading: loadingPortfolio } = usePortfolio();
+  const [selectedTag, setSelectedTag] = useState<string>("all");
 
   if (loadingEvents || loadingPortfolio) {
     return (
@@ -22,6 +25,16 @@ const Portfolio = () => {
       </Layout>
     );
   }
+
+  // Get unique tags from portfolio
+  const uniqueTags = Array.from(new Set(portfolio?.map(item => item.tag).filter(Boolean))) as string[];
+  
+  // Filter portfolio by selected tag
+  const getFilteredPortfolio = (eventId: string) => {
+    const eventPortfolio = portfolio?.filter(item => item.event_id === eventId) || [];
+    if (selectedTag === "all") return eventPortfolio;
+    return eventPortfolio.filter(item => item.tag === selectedTag);
+  };
 
   // Filter events that have portfolio items to create event cards
   const eventsWithPortfolio = events?.filter(event => 
@@ -46,12 +59,41 @@ const Portfolio = () => {
         </div>
       </section>
 
+      {/* Filter Section */}
+      <section className="py-12 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h2 className="text-2xl font-bold">Browse by Category</h2>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedTag} onValueChange={setSelectedTag}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filter by tag" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {uniqueTags.map((tag) => (
+                    <SelectItem key={tag} value={tag}>
+                      {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Event Cards Grid */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           {eventsWithPortfolio.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {eventsWithPortfolio.map((event) => (
+              {eventsWithPortfolio.map((event) => {
+                const filteredPortfolio = getFilteredPortfolio(event.id);
+                if (selectedTag !== "all" && filteredPortfolio.length === 0) return null;
+                
+                return (
                 <Card key={event.id} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 bg-gradient-to-br from-card via-card to-card/50">
                   {/* Hero Image */}
                   <div className="aspect-[4/3] overflow-hidden relative">
@@ -103,7 +145,8 @@ const Portfolio = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-20">

@@ -166,3 +166,19 @@ export const useAboutContent = () => {
     },
   });
 };
+
+export const useFormSubmissions = () => {
+  return useQuery({
+    queryKey: ["form-submissions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("form_submissions")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};

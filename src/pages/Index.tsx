@@ -238,50 +238,67 @@ const Index = () => {
         </section>
       )}
 
-      {/* News & Achievements */}
+      {/* News & Achievements - Creative Design */}
       {newsAchievements && newsAchievements.length > 0 && (
-        <section className="py-20">
-          <div className="container mx-auto px-4">
+        <section className="py-20 bg-gradient-to-br from-primary/5 via-accent/5 to-background relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <Badge variant="secondary" className="mb-4">
-                <Award className="mr-2 h-4 w-4" />
-                Latest News
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full mb-6">
+                <Award className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 News & Achievements
               </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Celebrating our journey of success and recognition
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {newsAchievements.map((news) => (
-                <Card key={news.id} className="hover:shadow-lg transition-all duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              {newsAchievements.map((news, index) => (
+                <Card key={news.id} className={`group hover:shadow-2xl transition-all duration-500 border-0 bg-background/80 backdrop-blur-sm ${
+                  index % 2 === 0 ? 'md:translate-y-8' : ''
+                }`}>
                   {news.image_url && (
-                    <div className="aspect-video overflow-hidden rounded-t-lg">
+                    <div className="aspect-[16/10] overflow-hidden rounded-t-xl relative">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
                       <img 
                         src={news.image_url} 
                         alt={news.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                     </div>
                   )}
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold line-clamp-2">
+                  <CardContent className="p-8">
+                    <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors duration-300">
                       {news.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground line-clamp-3">
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed mb-6">
                       {news.short_content}
                     </p>
+                    <div className="flex items-center text-sm text-accent font-medium">
+                      <div className="w-12 h-0.5 bg-gradient-to-r from-primary to-accent mr-3"></div>
+                      Achievement Unlocked
+                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
             <div className="text-center">
-              <Button asChild variant="outline" size="lg">
+              <Button 
+                asChild 
+                size="lg"
+                className="bg-gradient-to-r from-primary to-accent hover:shadow-xl transition-all duration-300 text-lg px-8 py-3"
+              >
                 <Link to="/about">
-                  Read More <ArrowRight className="ml-2 h-5 w-5" />
+                  Discover Our Story <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>

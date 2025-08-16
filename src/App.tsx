@@ -14,6 +14,10 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import WeddingEvents from "./pages/events/WeddingEvents";
+import CorporateEvents from "./pages/events/CorporateEvents";
+import BirthdayParties from "./pages/events/BirthdayParties";
+import EquipmentRental from "./pages/events/EquipmentRental";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +34,10 @@ const App = () => (
           <Route path="/portfolio/:eventId" element={<Gallery />} />
           <Route path="/about" element={<About />} />
           <Route path="/events/:eventType" element={<EventDetail />} />
+          <Route path="/events/wedding" element={<WeddingEvents />} />
+          <Route path="/events/corporate" element={<CorporateEvents />} />
+          <Route path="/events/birthday" element={<BirthdayParties />} />
+          <Route path="/events/equipment-rental" element={<EquipmentRental />} />
           <Route path="/ecommerce" element={<Ecommerce />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={

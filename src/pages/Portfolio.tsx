@@ -13,20 +13,7 @@ const Portfolio = () => {
   const { data: portfolio, isLoading: loadingPortfolio } = usePortfolio();
   const [selectedTag, setSelectedTag] = useState<string>("all");
 
-  if (loadingEvents || loadingPortfolio) {
-    return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading portfolio...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Get unique tags from portfolio
+  // Calculate derived values before early returns
   const uniqueTags = Array.from(new Set(portfolio?.map(item => item.tag).filter(Boolean))) as string[];
   
   // Filter portfolio by selected tag
@@ -40,6 +27,19 @@ const Portfolio = () => {
   const eventsWithPortfolio = events?.filter(event => 
     portfolio?.some(item => item.event_id === event.id)
   ) || [];
+
+  if (loadingEvents || loadingPortfolio) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading portfolio...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

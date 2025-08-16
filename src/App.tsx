@@ -18,6 +18,7 @@ import WeddingEvents from "./pages/events/WeddingEvents";
 import CorporateEvents from "./pages/events/CorporateEvents";
 import BirthdayParties from "./pages/events/BirthdayParties";
 import EquipmentRental from "./pages/events/EquipmentRental";
+import GovernmentEvents from "./pages/events/GovernmentEvents";
 import Team from "./pages/Team";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/events/corporate" element={<CorporateEvents />} />
           <Route path="/events/birthday" element={<BirthdayParties />} />
           <Route path="/events/equipment-rental" element={<EquipmentRental />} />
+          <Route path="/events/government" element={<GovernmentEvents />} />
           <Route path="/ecommerce" element={<Ecommerce />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={

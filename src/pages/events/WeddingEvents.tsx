@@ -1,13 +1,21 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
-import { useEvent } from "@/hooks/useData";
-import { Heart, ArrowRight, Calendar, Clock, CheckCircle } from "lucide-react";
+import { useEvent, usePortfolio } from "@/hooks/useData";
+import { Heart, ArrowRight, Camera, ExternalLink, Crown, Flower, Diamond } from "lucide-react";
+import weddingHero from "@/assets/wedding-events-hero.jpg";
 
 const WeddingEvents = () => {
   const { data: event, isLoading } = useEvent("wedding");
+  const { data: portfolio } = usePortfolio();
+
+  const weddingPortfolio = portfolio?.filter(item => 
+    item.tag?.toLowerCase().includes('wedding') || 
+    item.tag?.toLowerCase().includes('bride')
+  )?.slice(0, 6);
 
   if (isLoading) {
     return (
@@ -22,108 +30,137 @@ const WeddingEvents = () => {
     );
   }
 
-  const processSteps = [
-    "Initial consultation to understand your vision",
-    "Venue selection and booking assistance",
-    "Vendor coordination and management",
-    "Timeline creation and event planning",
-    "Day-of coordination and execution",
-    "Post-event follow-up and documentation"
+  const features = [
+    {
+      icon: Crown,
+      title: "Luxury Planning",
+      description: "Premium wedding planning with attention to every detail"
+    },
+    {
+      icon: Flower,
+      title: "Floral Design",
+      description: "Stunning floral arrangements and decorations"
+    },
+    {
+      icon: Diamond,
+      title: "Memorable Moments",
+      description: "Creating once-in-a-lifetime experiences"
+    }
   ];
 
   return (
     <Layout>
       {/* Hero Banner */}
-      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 to-pink-500/20"></div>
-        {event?.hero_image_url && (
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${event.hero_image_url})` }}
-          >
-            <div className="absolute inset-0 bg-black/40"></div>
-          </div>
-        )}
-        
-        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <Badge variant="secondary" className="mb-4 bg-white/20 text-white border-white/30">
-            <Heart className="mr-2 h-4 w-4" />
-            Wedding Events
-          </Badge>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            {event?.title || "Dream Wedding Events"}
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto">
-            {event?.description || "Creating magical moments for your special day with elegant planning and flawless execution"}
-          </p>
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${event?.hero_image_url || weddingHero})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-transparent"></div>
         </div>
-      </section>
-
-      {/* Event Description */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">
-              Your Perfect Wedding Awaits
-            </h2>
-            <div className="prose prose-lg max-w-none">
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                {event?.description || "Every wedding is a unique love story waiting to be told. Our comprehensive wedding planning services ensure that your special day reflects your personality, style, and dreams. From intimate ceremonies to grand celebrations, we handle every detail with care and precision."}
-              </p>
+        
+        <div className="relative z-10 container mx-auto px-4">
+          <div className="max-w-2xl">
+            <Badge variant="secondary" className="mb-6 bg-primary/10 text-primary border-primary/20">
+              <Heart className="mr-2 h-4 w-4" />
+              Wedding Events
+            </Badge>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              {event?.title || "Dream Wedding Events"}
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 text-muted-foreground max-w-xl">
+              {event?.description || "Creating magical moments for your special day with elegant planning and flawless execution"}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                Plan My Wedding <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/portfolio">
+                  View Weddings <Camera className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="py-20 bg-muted/50">
+      {/* Features Grid */}
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Your Perfect Wedding Journey
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Every wedding is unique, and we make yours unforgettable
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 bg-background/50 backdrop-blur-sm">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <feature.icon className="h-8 w-8 text-primary-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-4">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Portfolio Showcase */}
+      {weddingPortfolio && weddingPortfolio.length > 0 && (
+        <section className="py-20">
+          <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <Badge variant="outline" className="mb-4">
-                <Clock className="mr-2 h-4 w-4" />
-                Our Process
-              </Badge>
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                How We Plan Your Perfect Wedding
+                Wedding Gallery
               </h2>
               <p className="text-xl text-muted-foreground">
-                Our systematic approach ensures every detail is perfectly orchestrated
+                Beautiful moments from weddings we've planned
               </p>
             </div>
 
-            {event?.process_description ? (
-              <div className="bg-background p-8 rounded-2xl shadow-lg">
-                <div className="prose prose-lg max-w-none">
-                  {event.process_description.split('\n').map((paragraph, index) => (
-                    <p key={index} className="text-muted-foreground leading-relaxed mb-4">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="grid gap-6">
-                {processSteps.map((step, index) => (
-                  <div key={index} className="flex items-start space-x-4 bg-background p-6 rounded-xl shadow-sm">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-lg font-medium mb-2">Step {index + 1}</p>
-                      <p className="text-muted-foreground">{step}</p>
-                    </div>
-                    <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {weddingPortfolio.map((item) => (
+                <Card key={item.id} className="group overflow-hidden hover:shadow-xl transition-all duration-500">
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2 line-clamp-2">{item.title}</h3>
+                    {item.tag && (
+                      <Badge variant="secondary" className="text-xs">
+                        {item.tag}
+                      </Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-      {/* Enquire Now */}
-      <section className="py-20 bg-gradient-to-br from-rose-50 to-pink-50">
+            <div className="text-center">
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/portfolio">
+                  View All Weddings <ExternalLink className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">

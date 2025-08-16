@@ -5,16 +5,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
-import { Gift, ArrowRight, Cake, Camera, ExternalLink, Sparkles, Heart } from "lucide-react";
-import birthdayHero from "@/assets/birthday-parties-hero.jpg";
+import { Building, ArrowRight, Camera, ExternalLink, Shield, Users, Award } from "lucide-react";
+import governmentHero from "@/assets/government-events-hero.jpg";
 
-const BirthdayParties = () => {
-  const { data: event, isLoading } = useEvent("birthday");
+const GovernmentEvents = () => {
+  const { data: event, isLoading } = useEvent("government");
   const { data: portfolio } = usePortfolio();
 
-  const birthdayPortfolio = portfolio?.filter(item => 
-    item.tag?.toLowerCase().includes('birthday') || 
-    item.tag?.toLowerCase().includes('party')
+  const governmentPortfolio = portfolio?.filter(item => 
+    item.tag?.toLowerCase().includes('government') || 
+    item.tag?.toLowerCase().includes('official') ||
+    item.tag?.toLowerCase().includes('ceremony')
   )?.slice(0, 6);
 
   if (isLoading) {
@@ -23,7 +24,7 @@ const BirthdayParties = () => {
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading birthday services...</p>
+            <p className="text-muted-foreground">Loading government services...</p>
           </div>
         </div>
       </Layout>
@@ -32,19 +33,19 @@ const BirthdayParties = () => {
 
   const features = [
     {
-      icon: Cake,
-      title: "Custom Themes",
-      description: "Personalized decorations matching any theme or style"
+      icon: Shield,
+      title: "Security Protocols",
+      description: "Comprehensive security planning for official events"
     },
     {
-      icon: Sparkles,
-      title: "Entertainment",
-      description: "Engaging activities and entertainment for all ages"
+      icon: Users,
+      title: "Protocol Management",
+      description: "Expert handling of diplomatic and ceremonial protocols"
     },
     {
-      icon: Heart,
-      title: "Memory Making",
-      description: "Professional photography to capture special moments"
+      icon: Award,
+      title: "Official Standards",
+      description: "Meeting the highest standards for government events"
     }
   ];
 
@@ -54,7 +55,7 @@ const BirthdayParties = () => {
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${event?.hero_image_url || birthdayHero})` }}
+          style={{ backgroundImage: `url(${event?.hero_image_url || governmentHero})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-transparent"></div>
         </div>
@@ -62,22 +63,22 @@ const BirthdayParties = () => {
         <div className="relative z-10 container mx-auto px-4">
           <div className="max-w-2xl">
             <Badge variant="secondary" className="mb-6 bg-primary/10 text-primary border-primary/20">
-              <Gift className="mr-2 h-4 w-4" />
-              Birthday Parties
+              <Building className="mr-2 h-4 w-4" />
+              Government Events
             </Badge>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              {event?.title || "Magical Birthday Celebrations"}
+              {event?.title || "Official Government Events"}
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-muted-foreground max-w-xl">
-              {event?.description || "Creating unforgettable birthday memories with personalized themes and joyful celebrations"}
+              {event?.description || "Professional event planning for government ceremonies, diplomatic functions, and official occasions"}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
-                Plan My Party <ArrowRight className="ml-2 h-5 w-5" />
+                Plan Official Event <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <Link to="/portfolio">
-                  See Our Parties <Camera className="ml-2 h-5 w-5" />
+                  View Our Work <Camera className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
@@ -90,10 +91,10 @@ const BirthdayParties = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Making Every Birthday Special
+              Government Event Expertise
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              From intimate gatherings to grand celebrations, we create personalized experiences
+              Specialized knowledge in planning and executing official government events
             </p>
           </div>
 
@@ -113,21 +114,52 @@ const BirthdayParties = () => {
         </div>
       </section>
 
+      {/* Services Overview */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">
+              Government Event Services
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Ceremonial Events</h3>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• State ceremonies and inaugurations</li>
+                  <li>• Award presentations and honors</li>
+                  <li>• Memorial and commemoration events</li>
+                  <li>• Flag ceremonies and dedications</li>
+                </ul>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Official Functions</h3>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Diplomatic receptions and summits</li>
+                  <li>• Government conferences and meetings</li>
+                  <li>• Public hearings and town halls</li>
+                  <li>• Press conferences and media events</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Portfolio Showcase */}
-      {birthdayPortfolio && birthdayPortfolio.length > 0 && (
-        <section className="py-20">
+      {governmentPortfolio && governmentPortfolio.length > 0 && (
+        <section className="py-20 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Birthday Party Gallery
+                Government Event Portfolio
               </h2>
               <p className="text-xl text-muted-foreground">
-                See the joy we've created for birthday celebrations
+                Professional execution of official government events
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {birthdayPortfolio.map((item) => (
+              {governmentPortfolio.map((item) => (
                 <Card key={item.id} className="group overflow-hidden hover:shadow-xl transition-all duration-500">
                   <div className="aspect-[4/3] overflow-hidden">
                     <img 
@@ -151,7 +183,7 @@ const BirthdayParties = () => {
             <div className="text-center">
               <Button variant="outline" size="lg" asChild>
                 <Link to="/portfolio">
-                  View All Parties <ExternalLink className="ml-2 h-5 w-5" />
+                  View All Events <ExternalLink className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
@@ -165,10 +197,10 @@ const BirthdayParties = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Ready to Plan an Amazing Birthday Party?
+                Ready to Plan Your Government Event?
               </h2>
               <p className="text-xl text-muted-foreground">
-                Let's create unforgettable memories for your special celebration
+                Contact us to discuss your official event requirements and protocols
               </p>
             </div>
 
@@ -176,8 +208,8 @@ const BirthdayParties = () => {
               <div className="w-full max-w-2xl">
                 <InquiryForm 
                   formType="inquiry"
-                  eventType="birthday"
-                  title="Birthday Party Inquiry"
+                  eventType="government"
+                  title="Government Event Inquiry"
                 />
               </div>
             </div>
@@ -188,4 +220,4 @@ const BirthdayParties = () => {
   );
 };
 
-export default BirthdayParties;
+export default GovernmentEvents;

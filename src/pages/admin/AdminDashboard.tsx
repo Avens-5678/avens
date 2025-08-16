@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import CrudInterface from "@/components/admin/CrudInterface";
 import AdminDataTable from "@/components/admin/AdminDataTable";
-import { useServices, useRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions, useNewsAchievements, useAwards } from "@/hooks/useData";
+import { useAllServices, useAllRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions, useNewsAchievements, useAwards } from "@/hooks/useData";
 import { 
   LogOut, 
   Home, 
@@ -33,8 +33,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const { toast } = useToast();
   
   // Data hooks
-  const { data: services } = useServices();
-  const { data: rentals } = useRentals();
+  const { data: services } = useAllServices();
+  const { data: rentals } = useAllRentals();
   const { data: banners } = useHeroBanners();
   const { data: events } = useEvents();
   const { data: portfolio } = usePortfolio();

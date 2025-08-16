@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
-import { useServices, useRentals, useAwards } from "@/hooks/useData";
+import { useAllServices, useAllRentals, useAwards } from "@/hooks/useData";
 import { ArrowRight, Sparkles, Award, Package } from "lucide-react";
 
 const Services = () => {
-  const { data: services, isLoading: loadingServices } = useServices();
-  const { data: rentals, isLoading: loadingRentals } = useRentals();
+  const { data: services, isLoading: loadingServices } = useAllServices();
+  const { data: rentals, isLoading: loadingRentals } = useAllRentals();
   const { data: awards, isLoading: loadingAwards } = useAwards();
 
   if (loadingServices || loadingRentals || loadingAwards) {

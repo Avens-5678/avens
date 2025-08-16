@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
-import { useRentals } from "@/hooks/useData";
+import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import CartModal from "@/components/Cart/CartModal";
 import { Package, ShoppingCart, Plus, Check } from "lucide-react";
@@ -11,7 +11,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const Ecommerce = () => {
-  const { data: rentals, isLoading } = useRentals();
+  const { data: rentals, isLoading } = useAllRentals();
   const { items, addItem, isInCart } = useCart();
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [selectedRental, setSelectedRental] = useState<any>(null);

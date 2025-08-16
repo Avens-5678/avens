@@ -4,14 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
-import { useRentals, usePortfolio } from "@/hooks/useData";
+import { useAllRentals, usePortfolio } from "@/hooks/useData";
 import { Package, ArrowRight, Camera, ExternalLink, Settings, Truck, Shield, Monitor, Volume2, Zap } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 import equipmentHero from "@/assets/equipment-rental-hero.jpg";
 
 const EquipmentRental = () => {
-  const { data: rentals, isLoading } = useRentals();
+  const { data: rentals, isLoading } = useAllRentals();
   const { data: portfolio } = usePortfolio();
   const [selectedRental, setSelectedRental] = useState<string | null>(null);
 

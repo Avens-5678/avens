@@ -25,6 +25,7 @@ export const useServices = () => {
         .from("services")
         .select("*")
         .eq("is_active", true)
+        .eq("show_on_home", true)
         .order("display_order", { ascending: true });
 
       if (error) throw error;
@@ -41,6 +42,7 @@ export const useRentals = () => {
         .from("rentals")
         .select("*")
         .eq("is_active", true)
+        .eq("show_on_home", true)
         .order("display_order", { ascending: true });
 
       if (error) throw error;
@@ -189,6 +191,39 @@ export const useTeamMembers = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("team_members")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+// Admin hooks - fetch all items regardless of show_on_home setting
+export const useAllServices = () => {
+  return useQuery({
+    queryKey: ["all-services"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("services")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+export const useAllRentals = () => {
+  return useQuery({
+    queryKey: ["all-rentals"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rentals")
         .select("*")
         .eq("is_active", true)
         .order("display_order", { ascending: true });

@@ -395,6 +395,7 @@ export type Database = {
           is_active: boolean | null
           price_range: string | null
           short_description: string
+          show_on_home: boolean | null
           title: string
           updated_at: string
         }
@@ -407,6 +408,7 @@ export type Database = {
           is_active?: boolean | null
           price_range?: string | null
           short_description: string
+          show_on_home?: boolean | null
           title: string
           updated_at?: string
         }
@@ -419,6 +421,7 @@ export type Database = {
           is_active?: boolean | null
           price_range?: string | null
           short_description?: string
+          show_on_home?: boolean | null
           title?: string
           updated_at?: string
         }
@@ -433,6 +436,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           short_description: string
+          show_on_home: boolean | null
           title: string
           updated_at: string
         }
@@ -444,6 +448,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           short_description: string
+          show_on_home?: boolean | null
           title: string
           updated_at?: string
         }
@@ -455,6 +460,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           short_description?: string
+          show_on_home?: boolean | null
           title?: string
           updated_at?: string
         }

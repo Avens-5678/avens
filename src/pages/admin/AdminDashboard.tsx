@@ -119,8 +119,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
               <span className="hidden sm:inline">Forms</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">
-              <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">Settings</span>
+              <Award className="h-4 w-4" />
+              <span className="hidden sm:inline">News & Awards</span>
             </TabsTrigger>
           </TabsList>
 
@@ -280,6 +280,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   ]
                 },
                 { name: "display_order", label: "Display Order", type: "number" },
+                { name: "show_on_home", label: "Show on Home Page", type: "boolean" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}
             />
@@ -328,9 +329,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 { name: "price_range", label: "Price Range", type: "text" },
                 { name: "image_url", label: "Image URL", type: "image" },
                 { name: "display_order", label: "Display Order", type: "number" },
+                { name: "show_on_home", label: "Show on Home Page", type: "boolean" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}
-              defaultValues={{ is_active: true, display_order: 0 }}
+              defaultValues={{ is_active: true, display_order: 0, show_on_home: true }}
             />
           </TabsContent>
 

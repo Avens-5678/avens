@@ -305,6 +305,36 @@ const Index = () => {
           </div>
         </section>
       )}
+
+      {/* Contact Us Section */}
+      <section id="contact" className="py-20 bg-gradient-to-r from-primary/10 to-accent/10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Get In Touch
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Ready to create your perfect event? Let's start planning together.
+            </p>
+          </div>
+          
+          <div className="flex justify-center">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-4 text-lg">
+                  Contact Us
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <InquiryForm 
+                  formType="contact"
+                  title="Contact Us"
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 };

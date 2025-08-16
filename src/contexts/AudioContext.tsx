@@ -1,68 +1,29 @@
-// src/contexts/AudioContext.tsx
+// src/components/Audio/AudioControls.tsx
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useRef,
-  useState,
-  useEffect,
-} from "react";
+import React from "react";
+import { useAudio } from "@/contexts/AudioContext";
 
-interface AudioContextType {
-  isPlaying: boolean;
-  toggleAudio: () => void;
-}
-
-const AudioContext = createContext<AudioContextType | undefined>(undefined);
-
-export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    const audioEl = audioRef.current;
-    if (!audioEl) return;
-
-    // ✅ safe to set volume now
-    audioEl.volume = 0.5;
-    audioEl.loop = true;
-
-    return () => {
-      if (audioEl) {
-        audioEl.pause();
-      }
-    };
-  }, []);
-
-  const toggleAudio = () => {
-    const audioEl = audioRef.current;
-    if (!audioEl) return;
-
-    if (isPlaying) {
-      audioEl.pause();
-      setIsPlaying(false);
-    } else {
-      audioEl.play().catch((err) =>
-        console.error("Failed to play audio:", err)
-      );
-      setIsPlaying(true);
-    }
-  };
+const AudioControls: React.FC = () => {
+  const { isPlaying, mute, togglePlay, setMute } = useAudio();
 
   return (
-    <AudioContext.Provider value={{ isPlaying, toggleAudio }}>
-      {children}
-      {/* ✅ keep audio element mounted */}
-      <audio ref={audioRef} src="/background.mp3" preload="auto" />
-    </AudioContext.Provider>
+    <div className="flex gap-2">
+      <button
+        onClick={togglePlay}
+        className="px-3 py-1 rounded bg-blue-500 text-white"
+      >
+        {isPlaying ? "Pause" : "Play"}
+      </button>
+
+      <button
+        onClick={() => setMute(!mute)}
+        className="px-3 py-1 rounded bg-gray-500 text-white"
+      >
+        {mute ? "Unmute" : "Mute"}
+      </button>
+    </div>
   );
 };
 
-export const useAudio = () => {
-  const context = useContext(AudioContext);
-  if (!context) {
-    throw new Error("useAudio must be used within an AudioProvider");
-  }
-  return context;
-};
+export default AudioControls;

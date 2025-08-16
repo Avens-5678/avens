@@ -59,6 +59,9 @@ const Footer = () => {
               <Link to="/events/birthday" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
                 Birthday Parties
               </Link>
+              <Link to="/events/government" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
+                Government Events
+              </Link>
               <Link to="/ecommerce" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
                 Equipment Rental
               </Link>

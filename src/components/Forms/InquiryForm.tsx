@@ -165,6 +165,7 @@ const InquiryForm = ({
                         <SelectItem value="wedding">Wedding</SelectItem>
                         <SelectItem value="corporate">Corporate Event</SelectItem>
                         <SelectItem value="birthday">Birthday Party</SelectItem>
+                        <SelectItem value="government">Government Event</SelectItem>
                         <SelectItem value="anniversary">Anniversary</SelectItem>
                         <SelectItem value="social">Social Event</SelectItem>
                         <SelectItem value="other">Other</SelectItem>

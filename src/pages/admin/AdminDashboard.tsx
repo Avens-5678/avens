@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import CrudInterface from "@/components/admin/CrudInterface";
+import { useServices, useRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions } from "@/hooks/useData";
 import { 
   LogOut, 
   Home, 
@@ -24,6 +26,15 @@ interface AdminDashboardProps {
 const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
+  
+  // Data hooks
+  const { data: services } = useServices();
+  const { data: rentals } = useRentals();
+  const { data: banners } = useHeroBanners();
+  const { data: events } = useEvents();
+  const { data: portfolio } = usePortfolio();
+  const { data: clients } = useTrustedClients();
+  const { data: formSubmissions } = useFormSubmissions();
 
   const handleLogout = async () => {
     try {
@@ -65,7 +76,7 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -81,6 +92,10 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
             <TabsTrigger value="events" className="flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Events</span>
+            </TabsTrigger>
+            <TabsTrigger value="rentals" className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Rentals</span>
             </TabsTrigger>
             <TabsTrigger value="portfolio" className="flex items-center space-x-2">
               <Image className="h-4 w-4" />
@@ -203,26 +218,195 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
             </div>
           </TabsContent>
 
-          {/* Placeholder tabs - will be implemented in next phase */}
-          {["banners", "services", "events", "portfolio", "clients", "forms", "settings"].map(tab => (
-            <TabsContent key={tab} value={tab}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="capitalize">{tab} Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground mb-4">
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)} management interface coming soon.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      This feature will allow you to manage {tab} content dynamically.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
+          {/* Hero Banners Management */}
+          <TabsContent value="banners">
+            <CrudInterface
+              title="Hero Banners"
+              data={banners || []}
+              tableName="hero_banners"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "subtitle", label: "Subtitle", type: "text" },
+                { name: "image_url", label: "Image URL", type: "image", required: true },
+                { name: "button_text", label: "Button Text", type: "text" },
+                { 
+                  name: "event_type", 
+                  label: "Event Type", 
+                  type: "select", 
+                  required: true,
+                  options: [
+                    { value: "wedding", label: "Wedding" },
+                    { value: "corporate", label: "Corporate" },
+                    { value: "birthday", label: "Birthday" },
+                    { value: "government", label: "Government" },
+                  ]
+                },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Services Management */}
+          <TabsContent value="services">
+            <CrudInterface
+              title="Services"
+              data={services || []}
+              tableName="services"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "short_description", label: "Short Description", type: "text", required: true },
+                { name: "description", label: "Description", type: "textarea", required: true },
+                { 
+                  name: "event_type", 
+                  label: "Event Type", 
+                  type: "select", 
+                  required: true,
+                  options: [
+                    { value: "wedding", label: "Wedding" },
+                    { value: "corporate", label: "Corporate" },
+                    { value: "birthday", label: "Birthday" },
+                    { value: "government", label: "Government" },
+                  ]
+                },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Events Management */}
+          <TabsContent value="events">
+            <CrudInterface
+              title="Events"
+              data={events || []}
+              tableName="events"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "description", label: "Description", type: "textarea", required: true },
+                { name: "process_description", label: "Process Description", type: "textarea", required: true },
+                { 
+                  name: "event_type", 
+                  label: "Event Type", 
+                  type: "select", 
+                  required: true,
+                  options: [
+                    { value: "wedding", label: "Wedding" },
+                    { value: "corporate", label: "Corporate" },
+                    { value: "birthday", label: "Birthday" },
+                    { value: "government", label: "Government" },
+                  ]
+                },
+                { name: "hero_image_url", label: "Hero Image URL", type: "image" },
+                { name: "location", label: "Location", type: "text" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Rentals Management */}
+          <TabsContent value="rentals">
+            <CrudInterface
+              title="Rentals"
+              data={rentals || []}
+              tableName="rentals"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "short_description", label: "Short Description", type: "text", required: true },
+                { name: "description", label: "Description", type: "textarea", required: true },
+                { name: "price_range", label: "Price Range", type: "text" },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Portfolio Management */}
+          <TabsContent value="portfolio">
+            <CrudInterface
+              title="Portfolio"
+              data={portfolio || []}
+              tableName="portfolio"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "image_url", label: "Image URL", type: "image", required: true },
+                { name: "tag", label: "Tag", type: "text" },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_before_after", label: "Before/After", type: "boolean" },
+                { name: "is_before", label: "Is Before Image", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Trusted Clients Management */}
+          <TabsContent value="clients">
+            <CrudInterface
+              title="Trusted Clients"
+              data={clients || []}
+              tableName="trusted_clients"
+              fields={[
+                { name: "name", label: "Client Name", type: "text", required: true },
+                { name: "logo_url", label: "Logo URL", type: "image", required: true },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Form Submissions */}
+          <TabsContent value="forms">
+            <Card>
+              <CardHeader>
+                <CardTitle>Form Submissions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {formSubmissions?.length > 0 ? (
+                    formSubmissions.map((submission) => (
+                      <Card key={submission.id}>
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">{submission.name}</CardTitle>
+                            <Badge variant={submission.status === 'new' ? 'default' : 'secondary'}>
+                              {submission.status}
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid gap-2 text-sm">
+                            <div><span className="font-medium">Email:</span> {submission.email}</div>
+                            <div><span className="font-medium">Phone:</span> {submission.phone || 'N/A'}</div>
+                            <div><span className="font-medium">Event Type:</span> {submission.event_type || 'N/A'}</div>
+                            <div><span className="font-medium">Form Type:</span> {submission.form_type}</div>
+                            <div><span className="font-medium">Message:</span> {submission.message}</div>
+                            <div><span className="font-medium">Submitted:</span> {new Date(submission.created_at).toLocaleDateString()}</div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-center py-8">No form submissions yet.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings placeholder */}
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground mb-4">
+                    Settings management interface coming soon.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

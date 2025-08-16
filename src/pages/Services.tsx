@@ -72,7 +72,7 @@ const Services = () => {
                     asChild
                     className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300"
                   >
-                    <Link to={`/events/${service.event_type}`}>
+                    <Link to={`/events/${service.event_type.replace('_', '-')}`}>
                       View Details <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
-import { useRentals } from "@/hooks/useData";
+import { useRentals, usePortfolio } from "@/hooks/useData";
 import { Package, ArrowRight, Camera, ExternalLink, Settings, Truck, Shield, Monitor, Volume2, Zap } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -12,7 +12,15 @@ import equipmentHero from "@/assets/equipment-rental-hero.jpg";
 
 const EquipmentRental = () => {
   const { data: rentals, isLoading } = useRentals();
+  const { data: portfolio } = usePortfolio();
   const [selectedRental, setSelectedRental] = useState<string | null>(null);
+
+  const equipmentPortfolio = portfolio?.filter(item => 
+    item.tag?.toLowerCase().includes('equipment') || 
+    item.tag?.toLowerCase().includes('rental') ||
+    item.tag?.toLowerCase().includes('audio') ||
+    item.tag?.toLowerCase().includes('lighting')
+  )?.slice(0, 3);
 
   if (isLoading) {
     return (
@@ -231,8 +239,54 @@ const EquipmentRental = () => {
         </div>
       </section>
 
+      {/* Portfolio Showcase */}
+      {equipmentPortfolio && equipmentPortfolio.length > 0 && (
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Equipment Gallery
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                See our professional equipment in action at events
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              {equipmentPortfolio.map((item) => (
+                <Card key={item.id} className="group overflow-hidden hover:shadow-xl transition-all duration-500">
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2 line-clamp-2">{item.title}</h3>
+                    {item.tag && (
+                      <Badge variant="secondary" className="text-xs">
+                        {item.tag}
+                      </Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="text-center">
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/portfolio">
+                  View All Equipment Setups <ExternalLink className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Equipment Catalog Preview */}
-      <section className="py-20">
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">

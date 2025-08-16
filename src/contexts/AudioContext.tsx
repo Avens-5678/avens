@@ -1,98 +1,60 @@
+// src/contexts/AudioContext.tsx
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import React, {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 
-type AudioContextType = {
+interface AudioContextType {
   isPlaying: boolean;
-  togglePlay: () => void;
-  mute: boolean;
-  setMute: (value: boolean) => void;
-  volume: number;
-  setVolume: (value: number) => void;
-};
+  toggleAudio: () => void;
+}
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
-export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
-  const supabase = createClientComponentClient();
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [mute, setMute] = useState(false);
-  const [volume, setVolume] = useState(1);
 
-  // Load settings from Supabase
   useEffect(() => {
-    const fetchSettings = async () => {
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("background_audio_url, background_audio_enabled")
-        .eq("id", 1)
-        .single();
+    const audioEl = audioRef.current;
+    if (!audioEl) return;
 
-      if (!error && data?.background_audio_enabled && data.background_audio_url) {
-        const newAudio = new Audio(data.background_audio_url);
-        newAudio.loop = true; // 🔁 LOOP ENABLED
-        newAudio.volume = volume;
-        newAudio.muted = mute;
-        setAudio(newAudio);
-      }
-    };
-
-    fetchSettings();
-
-    // Live updates (so toggle works without refresh)
-    const channel = supabase
-      .channel("site_settings-changes")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "site_settings" },
-        (payload) => {
-          const newSettings = payload.new as any;
-          if (newSettings.background_audio_enabled && newSettings.background_audio_url) {
-            const newAudio = new Audio(newSettings.background_audio_url);
-            newAudio.loop = true;
-            newAudio.volume = volume;
-            newAudio.muted = mute;
-            setAudio(newAudio);
-          } else {
-            audio?.pause();
-            setAudio(null);
-            setIsPlaying(false);
-          }
-        }
-      )
-      .subscribe();
+    // ✅ safe to set volume now
+    audioEl.volume = 0.5;
+    audioEl.loop = true;
 
     return () => {
-      channel.unsubscribe();
-      audio?.pause();
+      if (audioEl) {
+        audioEl.pause();
+      }
     };
-  }, [supabase, mute, volume]);
+  }, []);
 
-  const togglePlay = () => {
-    if (!audio) return;
+  const toggleAudio = () => {
+    const audioEl = audioRef.current;
+    if (!audioEl) return;
+
     if (isPlaying) {
-      audio.pause();
+      audioEl.pause();
       setIsPlaying(false);
     } else {
-      audio.play().catch(() => {});
+      audioEl.play().catch((err) =>
+        console.error("Failed to play audio:", err)
+      );
       setIsPlaying(true);
     }
   };
 
   return (
-    <AudioContext.Provider
-      value={{
-        isPlaying,
-        togglePlay,
-        mute,
-        setMute,
-        volume,
-        setVolume,
-      }}
-    >
+    <AudioContext.Provider value={{ isPlaying, toggleAudio }}>
       {children}
+      {/* ✅ keep audio element mounted */}
+      <audio ref={audioRef} src="/background.mp3" preload="auto" />
     </AudioContext.Provider>
   );
 };

@@ -1,3 +1,4 @@
+// src/context/AudioProvider.tsx
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -44,34 +45,28 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
   // Fetch audio settings from Supabase
   useEffect(() => {
     const fetchAudioSettings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('site_settings')
-          .select('background_audio_url, background_audio_enabled')
-          .single();
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('background_audio_url, background_audio_enabled')
+        .single();
 
-        if (error) {
-          console.error('Error fetching audio settings:', error);
-          return;
-        }
-
-        setAudioSettings(data);
-      } catch (error) {
+      if (error) {
         console.error('Error fetching audio settings:', error);
+        return;
       }
+
+      setAudioSettings(data);
     };
 
     fetchAudioSettings();
   }, []);
 
   useEffect(() => {
-    // Only proceed if we have audio settings and audio is enabled
     if (!audioSettings?.background_audio_enabled || !audioSettings?.background_audio_url) {
       setIsLoaded(false);
       return;
     }
 
-    // Create audio element with the URL from database
     const newAudio = new Audio(audioSettings.background_audio_url);
     audioRef.current = newAudio;
 
@@ -88,48 +83,41 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     newAudio.preload = 'auto';
     newAudio.volume = isMuted ? 0 : volume;
 
-    // Audio event listeners
     const handleCanPlay = () => setIsLoaded(true);
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
 
     newAudio.addEventListener('canplaythrough', handleCanPlay);
     newAudio.addEventListener('play', handlePlay);
     newAudio.addEventListener('pause', handlePause);
-    newAudio.addEventListener('ended', handleEnded);
 
     return () => {
       newAudio.removeEventListener('canplaythrough', handleCanPlay);
       newAudio.removeEventListener('play', handlePlay);
       newAudio.removeEventListener('pause', handlePause);
-      newAudio.removeEventListener('ended', handleEnded);
       newAudio.pause();
       newAudio.src = '';
       audioRef.current = null;
     };
   }, [audioSettings]);
 
-  // Update volume & mute state safely
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
     }
   }, [volume, isMuted]);
 
-  // Save preferences
   useEffect(() => {
     localStorage.setItem('audioPreferences', JSON.stringify({ volume, isMuted }));
   }, [volume, isMuted]);
 
   const initializeAudio = async () => {
     if (isInitialized || !audioRef.current) return;
-
     try {
       await audioRef.current.play();
       setIsInitialized(true);
-    } catch (error) {
-      console.log('Autoplay blocked, waiting for user interaction');
+    } catch {
+      console.log('Autoplay blocked until user interaction');
       setIsInitialized(true);
     }
   };
@@ -140,14 +128,10 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     }
     if (!audioRef.current) return;
 
-    try {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        await audioRef.current.play();
-      }
-    } catch (error) {
-      console.error('Audio play error:', error);
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      await audioRef.current.play();
     }
   };
 
@@ -161,16 +145,7 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
 
   return (
     <AudioContext.Provider
-      value={{
-        isPlaying,
-        isMuted,
-        volume,
-        isLoaded,
-        togglePlay,
-        toggleMute,
-        setVolume,
-        initializeAudio,
-      }}
+      value={{ isPlaying, isMuted, volume, isLoaded, togglePlay, toggleMute, setVolume, initializeAudio }}
     >
       {children}
     </AudioContext.Provider>

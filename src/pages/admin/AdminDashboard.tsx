@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import CrudInterface from "@/components/admin/CrudInterface";
+import AdminDataTable from "@/components/admin/AdminDataTable";
 import { useServices, useRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions } from "@/hooks/useData";
 import { 
   LogOut, 
@@ -306,9 +307,10 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
 
           {/* Rentals Management */}
           <TabsContent value="rentals">
-            <CrudInterface
+            <AdminDataTable
               title="Rentals"
               data={rentals || []}
+              queryKey="rentals"
               tableName="rentals"
               fields={[
                 { name: "title", label: "Title", type: "text", required: true },
@@ -319,6 +321,7 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}
+              defaultValues={{ is_active: true, display_order: 0 }}
             />
           </TabsContent>
 

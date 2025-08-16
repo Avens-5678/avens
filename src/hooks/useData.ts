@@ -141,6 +141,7 @@ export const usePortfolio = (eventId?: string) => {
         .from("portfolio")
         .select(`
           id,
+          event_id,
           title,
           image_url,
           is_before_after,
@@ -163,6 +164,7 @@ export const usePortfolio = (eventId?: string) => {
     },
   });
 };
+
 
 export const useAwards = () => {
   return useQuery({

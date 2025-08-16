@@ -83,6 +83,7 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
       
       // Refresh data
       await queryClient.invalidateQueries({ queryKey: ['portfolio'] });
+      await queryClient.refetchQueries({ queryKey: ['portfolio'] });
       
       // Reset form
       setEditingItem(null);

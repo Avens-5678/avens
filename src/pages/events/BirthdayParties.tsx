@@ -302,8 +302,8 @@ const BirthdayParties = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
-                  <DialogTitle className="sr-only">Start Planning Your Birthday Party</DialogTitle>
-                  <DialogDescription className="sr-only">Fill out this form to begin planning your birthday celebration</DialogDescription>
+                  <DialogTitle>Start Planning Your Birthday Party</DialogTitle>
+                  <DialogDescription>Fill out this form to begin planning your birthday celebration</DialogDescription>
                   <InquiryForm 
                     formType="inquiry"
                     eventType="birthday"

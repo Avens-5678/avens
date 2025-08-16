@@ -302,8 +302,8 @@ const WeddingEvents = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
-                  <DialogTitle className="sr-only">Start Planning Your Dream Wedding</DialogTitle>
-                  <DialogDescription className="sr-only">Fill out this form to begin planning your perfect wedding</DialogDescription>
+                  <DialogTitle>Start Planning Your Dream Wedding</DialogTitle>
+                  <DialogDescription>Fill out this form to begin planning your perfect wedding</DialogDescription>
                   <InquiryForm 
                     formType="inquiry"
                     eventType="wedding"

@@ -329,8 +329,8 @@ const Index = () => {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
-                <DialogTitle className="sr-only">Contact Us</DialogTitle>
-                <DialogDescription className="sr-only">Get in touch with us for your event planning needs</DialogDescription>
+                <DialogTitle>Contact Us</DialogTitle>
+                <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
                 <InquiryForm 
                   formType="contact"
                   title="Contact Us"

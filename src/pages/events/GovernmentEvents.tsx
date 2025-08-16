@@ -303,8 +303,8 @@ const GovernmentEvents = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
-                  <DialogTitle className="sr-only">Schedule Official Consultation</DialogTitle>
-                  <DialogDescription className="sr-only">Request a consultation for your government event</DialogDescription>
+                  <DialogTitle>Schedule Official Consultation</DialogTitle>
+                  <DialogDescription>Request a consultation for your government event</DialogDescription>
                   <InquiryForm 
                     formType="inquiry"
                     eventType="government"

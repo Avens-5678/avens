@@ -18,10 +18,14 @@ const AudioControls = () => {
     togglePlay();
   };
 
-  // Show controls even if audio isn't loaded, but with different state
+  // Shown when no audio is configured
   if (!isLoaded) {
     return (
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-full px-4 py-2 shadow-lg">
+      <div className="fixed top-1/2 left-4 -translate-y-1/2 
+                      z-50 flex flex-col items-center gap-2 
+                      bg-background/80 backdrop-blur-sm border 
+                      rounded-2xl px-3 py-3 shadow-lg
+                      opacity-20 hover:opacity-100 transition-opacity duration-300">
         <Music className="h-4 w-4 text-muted-foreground" />
         <Button
           variant="ghost"
@@ -31,15 +35,23 @@ const AudioControls = () => {
         >
           <Play className="h-4 w-4" />
         </Button>
-        <span className="text-xs text-muted-foreground">No audio configured</span>
+        <span className="text-xs text-muted-foreground">No audio</span>
       </div>
     );
   }
 
+  // Main controls
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-full px-4 py-2 shadow-lg">
+    <div className="fixed top-1/2 left-4 -translate-y-1/2 
+                    z-50 flex flex-col items-center gap-2 
+                    bg-background/80 backdrop-blur-sm border 
+                    rounded-2xl px-3 py-3 shadow-lg
+                    opacity-20 hover:opacity-100 transition-opacity duration-300">
+      
+      {/* Music Icon */}
       <Music className="h-4 w-4 text-muted-foreground" />
       
+      {/* Play / Pause */}
       <Button
         variant="ghost"
         size="sm"
@@ -53,6 +65,7 @@ const AudioControls = () => {
         )}
       </Button>
 
+      {/* Volume Control */}
       <Popover open={showVolumeSlider} onOpenChange={setShowVolumeSlider}>
         <PopoverTrigger asChild>
           <Button
@@ -71,7 +84,7 @@ const AudioControls = () => {
         </PopoverTrigger>
         <PopoverContent 
           className="w-32 p-2" 
-          side="top"
+          side="right"
           onMouseLeave={() => setShowVolumeSlider(false)}
         >
           <div className="flex items-center gap-2">
@@ -93,6 +106,7 @@ const AudioControls = () => {
         </PopoverContent>
       </Popover>
 
+      {/* Playing indicator */}
       {isPlaying && (
         <div className="flex items-center gap-1">
           <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>

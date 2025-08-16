@@ -139,7 +139,17 @@ export const usePortfolio = (eventId?: string) => {
     queryFn: async () => {
       let query = supabase
         .from("portfolio")
-        .select("*, events(event_type, title)")
+        .select(`
+          id,
+          title,
+          image_url,
+          is_before_after,
+          is_before,
+          display_order,
+          tag,
+          album_url,
+          events ( id, event_type, title )
+        `)
         .order("display_order", { ascending: true });
 
       if (eventId) {

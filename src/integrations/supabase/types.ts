@@ -441,6 +441,45 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          full_bio: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          photo_url: string | null
+          role: string
+          short_bio: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          full_bio?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          photo_url?: string | null
+          role: string
+          short_bio: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          full_bio?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          photo_url?: string | null
+          role?: string
+          short_bio?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trusted_clients: {
         Row: {
           created_at: string

@@ -29,7 +29,8 @@ import {
   useAwards,
   useNewsAchievements,
   usePortfolio,
-  useAboutContent
+  useAboutContent,
+  useTeamMembers
 } from "@/hooks/useData";
 import AdminDataTable from "@/components/admin/AdminDataTable";
 
@@ -50,6 +51,7 @@ const AdminDashboard = () => {
   const { data: newsAchievements } = useNewsAchievements();
   const { data: portfolio } = usePortfolio();
   const { data: aboutContent } = useAboutContent();
+  const { data: teamMembers } = useTeamMembers();
 
   const handleLogout = async () => {
     try {
@@ -118,7 +120,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -142,6 +144,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="clients" className="flex items-center space-x-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Clients</span>
+            </TabsTrigger>
+            <TabsTrigger value="team" className="flex items-center space-x-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Team</span>
             </TabsTrigger>
             <TabsTrigger value="forms" className="flex items-center space-x-2">
               <MessageSquare className="h-4 w-4" />
@@ -410,6 +416,25 @@ const AdminDashboard = () => {
               fields={[
                 { name: "name", label: "Client Name", type: "text", required: true },
                 { name: "logo_url", label: "Logo URL", type: "text", required: true },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Team Management */}
+          <TabsContent value="team">
+            <AdminDataTable
+              title="Team Members"
+              data={teamMembers || []}
+              queryKey="teamMembers"
+              tableName="team_members"
+              fields={[
+                { name: "name", label: "Name", type: "text", required: true },
+                { name: "role", label: "Role", type: "text", required: true },
+                { name: "short_bio", label: "Short Bio", type: "textarea", required: true },
+                { name: "full_bio", label: "Full Bio", type: "textarea" },
+                { name: "photo_url", label: "Photo", type: "image" },
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}

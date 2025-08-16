@@ -17,7 +17,7 @@ interface AdminDataTableProps {
   title: string;
   data: any[] | undefined;
   queryKey: string;
-  tableName: "hero_banners" | "services" | "rentals" | "trusted_clients" | "news_achievements" | "events" | "portfolio" | "awards" | "about_content";
+  tableName: "hero_banners" | "services" | "rentals" | "trusted_clients" | "news_achievements" | "events" | "portfolio" | "awards" | "about_content" | "team_members";
   fields: {
     name: string;
     label: string;

@@ -182,3 +182,19 @@ export const useFormSubmissions = () => {
     },
   });
 };
+
+export const useTeamMembers = () => {
+  return useQuery({
+    queryKey: ["team-members"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("team_members")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};

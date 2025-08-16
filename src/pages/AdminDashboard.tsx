@@ -360,20 +360,35 @@ const AdminDashboard = () => {
 
           {/* Portfolio Management */}
           <TabsContent value="portfolio">
-            <AdminDataTable
-              title="Portfolio"
-              data={portfolio || []}
-              queryKey="portfolio"
-              tableName="portfolio"
-              fields={[
-                { name: "title", label: "Title", type: "text", required: true },
-                { name: "image_url", label: "Image URL", type: "text", required: true },
-                { name: "event_id", label: "Event ID", type: "text", required: true },
-                { name: "display_order", label: "Display Order", type: "number" },
-                { name: "is_before_after", label: "Before/After Image", type: "boolean" },
-                { name: "is_before", label: "Is Before Image", type: "boolean" }
-              ]}
-            />
+            <div className="space-y-6">
+              <div className="bg-card p-6 rounded-lg border">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Portfolio Management Guide</h3>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p><strong>Creating Event Galleries:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>First create an Event in the Events tab with hero image, title, and location</li>
+                    <li>Then add individual gallery images here using the Event ID</li>
+                    <li>Use Google Drive links, direct image URLs, or any image hosting service</li>
+                    <li>For Google Drive: Share the image → Copy link → Paste here</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <AdminDataTable
+                title="Portfolio Gallery Images"
+                data={portfolio || []}
+                queryKey="portfolio"
+                tableName="portfolio"
+                fields={[
+                  { name: "title", label: "Image Title/Description", type: "text", required: true },
+                  { name: "image_url", label: "Gallery Image", type: "image", required: true },
+                  { name: "event_id", label: "Event ID", type: "text", required: true },
+                  { name: "display_order", label: "Display Order", type: "number" },
+                  { name: "is_before_after", label: "Before/After Image", type: "boolean" },
+                  { name: "is_before", label: "Is Before Image", type: "boolean" }
+                ]}
+              />
+            </div>
           </TabsContent>
 
           {/* Clients Management */}

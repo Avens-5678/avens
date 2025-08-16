@@ -1,9 +1,5 @@
-// src/contexts/AudioContext.tsx
-
-"use client";
-
-import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'; // Use the same client for consistency
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SiteSettings {
   background_audio_url: string | null;
@@ -15,10 +11,10 @@ interface AudioContextType {
   isMuted: boolean;
   volume: number;
   isLoaded: boolean;
-  isAudioEnabled: boolean; // FIX: Expose enabled status
   togglePlay: () => void;
   toggleMute: () => void;
   setVolume: (volume: number) => void;
+  initializeAudio: () => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -36,121 +32,129 @@ interface AudioProviderProps {
 }
 
 export const AudioProvider = ({ children }: AudioProviderProps) => {
-  const supabase = createClientComponentClient();
-  const audioRef = useRef<HTMLAudioElement | null>(null); // Use a ref for the audio element
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolumeState] = useState(0.3);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false); // To handle initial user interaction
+  const [isInitialized, setIsInitialized] = useState(false);
   const [audioSettings, setAudioSettings] = useState<SiteSettings | null>(null);
 
-  // 1. Fetch audio settings once
+  // Fetch audio settings from database
   useEffect(() => {
     const fetchAudioSettings = async () => {
-      const { data, error } = await supabase
-        .from('site_settings')
-        .select('background_audio_url, background_audio_enabled')
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('background_audio_url, background_audio_enabled')
+          .single();
 
-      if (error) {
-        console.error('Error fetching audio settings:', error.message);
-        return;
+        if (error) {
+          console.error('Error fetching audio settings:', error);
+          return;
+        }
+
+        setAudioSettings(data);
+      } catch (error) {
+        console.error('Error fetching audio settings:', error);
       }
-      setAudioSettings(data);
     };
 
     fetchAudioSettings();
-  }, [supabase]);
-  
-  // 2. Create or destroy the audio element when settings change
+  }, []);
+
   useEffect(() => {
-    // If audio is disabled or has no URL, tear down the existing audio element
-    if (!audioSettings?.background_audio_enabled || !audioSettings.background_audio_url) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+    // Only proceed if we have audio settings and audio is enabled
+    if (!audioSettings?.background_audio_enabled || !audioSettings?.background_audio_url) {
       setIsLoaded(false);
-      setIsPlaying(false);
       return;
     }
-    
-    // If an audio element already exists for the current URL, do nothing
-    if (audioRef.current && audioRef.current.src === audioSettings.background_audio_url) {
-        return;
-    }
 
-    // Create a new audio element
-    const audio = new Audio(audioSettings.background_audio_url);
-    audio.loop = true;
-    audio.preload = 'auto';
-    audioRef.current = audio;
-
-    const handleCanPlay = () => setIsLoaded(true);
-    audio.addEventListener('canplaythrough', handleCanPlay);
-    
-    // Load user preferences from localStorage
+    // Create audio element with the URL from database
+    const newAudio = new Audio(audioSettings.background_audio_url);
+    setAudio(newAudio);
+    // Load user preferences
     const savedPreferences = localStorage.getItem('audioPreferences');
     if (savedPreferences) {
       const { volume: savedVolume, isMuted: savedMuted } = JSON.parse(savedPreferences);
       setVolumeState(savedVolume);
       setIsMuted(savedMuted);
     }
-    
-    // Cleanup function
-    return () => {
-      audio.removeEventListener('canplaythrough', handleCanPlay);
-      audio.pause();
-      audioRef.current = null;
-    };
-  // FIX: This effect should ONLY run when settings change, not when volume changes.
-  }, [audioSettings]);
 
-  // 3. Update volume and mute status when they change
+    if (!newAudio) return;
+
+    // Configure audio
+    newAudio.loop = true;
+    newAudio.preload = 'auto';
+    newAudio.volume = volume;
+
+    // Audio event listeners
+    const handleCanPlay = () => setIsLoaded(true);
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+
+    newAudio.addEventListener('canplaythrough', handleCanPlay);
+    newAudio.addEventListener('play', handlePlay);
+    newAudio.addEventListener('pause', handlePause);
+    newAudio.addEventListener('ended', handleEnded);
+
+    return () => {
+      newAudio.removeEventListener('canplaythrough', handleCanPlay);
+      newAudio.removeEventListener('play', handlePlay);
+      newAudio.removeEventListener('pause', handlePause);
+      newAudio.removeEventListener('ended', handleEnded);
+      newAudio.pause();
+      newAudio.src = '';
+    };
+  }, [audioSettings, volume]);
+
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
-    // Save preferences whenever volume or mute status changes
+    audio.volume = isMuted ? 0 : volume;
+  }, [audio, volume, isMuted]);
+
+  useEffect(() => {
+    // Save preferences
     localStorage.setItem('audioPreferences', JSON.stringify({ volume, isMuted }));
   }, [volume, isMuted]);
-  
-  // 4. Player controls
-  const togglePlay = async () => {
-    if (!audioRef.current || !isLoaded) return;
-    
-    // First interaction handler
-    if (!isInitialized) {
-        try {
-            await audioRef.current.play();
-            setIsPlaying(true);
-            setIsInitialized(true);
-        } catch (error) {
-            console.log('Autoplay was blocked. Waiting for another user interaction.');
-        }
-        return; // Exit after first attempt
-    }
 
-    // Subsequent play/pause toggles
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      try {
-        await audioRef.current.play();
-        setIsPlaying(true);
-      } catch (error) {
-        console.error('Error trying to play audio:', error);
-      }
+  const initializeAudio = async () => {
+    if (isInitialized) return;
+    
+    try {
+      // Try to play (will fail if autoplay is blocked)
+      await audio.play();
+      setIsInitialized(true);
+    } catch (error) {
+      // Autoplay was blocked, user needs to interact first
+      console.log('Autoplay blocked, waiting for user interaction');
+      setIsInitialized(true);
     }
   };
 
-  const toggleMute = () => setIsMuted(prev => !prev);
-  const setVolume = (newVolume: number) => setVolumeState(Math.max(0, Math.min(1, newVolume)));
-  
-  // FIX: Create a boolean to easily check if audio is active
-  const isAudioEnabled = !!audioSettings?.background_audio_enabled && !!audioSettings?.background_audio_url;
+  const togglePlay = async () => {
+    if (!isInitialized) {
+      await initializeAudio();
+    }
+
+    try {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        await audio.play();
+      }
+    } catch (error) {
+      console.error('Audio play error:', error);
+    }
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+
+  const setVolume = (newVolume: number) => {
+    setVolumeState(Math.max(0, Math.min(1, newVolume)));
+  };
 
   return (
     <AudioContext.Provider
@@ -159,10 +163,10 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
         isMuted,
         volume,
         isLoaded,
-        isAudioEnabled, // FIX: Pass this down to the context
         togglePlay,
         toggleMute,
         setVolume,
+        initializeAudio,
       }}
     >
       {children}

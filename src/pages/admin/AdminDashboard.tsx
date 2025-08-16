@@ -40,8 +40,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const { data: portfolio } = usePortfolio();
   const { data: clients } = useTrustedClients();
   const { data: formSubmissions } = useFormSubmissions();
-  const { data: newsAchievements } = useNewsAchievements();
-  const { data: awards } = useAwards();
+  const { data: newsAchievements = [] } = useNewsAchievements();
+  const { data: awards = [] } = useAwards();
 
   const handleLogout = async () => {
     try {

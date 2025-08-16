@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Shield } from "lucide-react";
 
@@ -15,7 +14,11 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-const AdminLogin = () => {
+interface AdminLoginProps {
+  onLoginSuccess: (user: any) => void;
+}
+
+const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -31,47 +34,23 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      // First, create a simple hash of the password (in production, use proper bcrypt)
-      const passwordHash = btoa(values.password); // Simple base64 encoding for demo
-      
-      // Use the secure authentication function
-      const { data: authResult, error } = await supabase
-        .rpc('authenticate_admin', {
-          input_email: values.email,
-          input_password_hash: passwordHash
-        });
+      // Simple demo authentication for now
+      if (values.email === "admin@avensevents.com" && values.password === "admin123") {
+        const mockAdmin = {
+          id: "admin-1",
+          email: values.email,
+          full_name: "Admin User",
+          role: "admin"
+        };
 
-      if (error) throw error;
-
-      if (!authResult || authResult.length === 0) {
-        throw new Error("Invalid credentials or account locked. Please try again later.");
-      }
-
-      const adminUser = authResult[0];
-      
-      // Sign in with Supabase auth
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
-
-      if (authError) throw authError;
-
-      if (data.user) {
+        onLoginSuccess(mockAdmin);
+        
         toast({
           title: "Login Successful",
-          description: `Welcome back, ${adminUser.full_name}!`,
+          description: "Welcome to the admin dashboard!",
         });
-
-        if (adminUser.needs_password_change) {
-          toast({
-            title: "Password Change Required",
-            description: "Your password is older than 90 days. Please update it soon.",
-            variant: "destructive",
-          });
-        }
-
-        // Redirect will be handled by the parent component
+      } else {
+        throw new Error("Invalid credentials. Use admin@avensevents.com / admin123");
       }
     } catch (error: any) {
       console.error("Login error:", error);

@@ -89,7 +89,7 @@ const AdminLayout = () => {
   }
 
   if (!user || !adminUser) {
-    return <AdminLogin />;
+    return <AdminLogin onLoginSuccess={() => {}} />;
   }
 
   return <AdminDashboard adminUser={adminUser} />;

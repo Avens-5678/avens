@@ -25,9 +25,10 @@ import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboar
 
 interface AdminDashboardProps {
   adminUser: any;
+  onLogout?: () => void;
 }
 
-const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
+const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
   
@@ -42,7 +43,9 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      if (onLogout) {
+        onLogout();
+      }
       toast({
         title: "Logged Out",
         description: "Successfully logged out of admin dashboard.",

@@ -44,11 +44,7 @@ const App = () => (
           <Route path="/events/government" element={<GovernmentEvents />} />
           <Route path="/ecommerce" element={<Ecommerce />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

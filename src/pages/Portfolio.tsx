@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
-import { ArrowRight, Camera, Calendar } from "lucide-react";
+import { ArrowRight, Camera, Calendar, MapPin } from "lucide-react";
 
 const Portfolio = () => {
   const { data: events, isLoading: loadingEvents } = useEvents();
@@ -23,11 +23,10 @@ const Portfolio = () => {
     );
   }
 
-  // Group portfolio items by event
-  const eventPortfolios = events?.map(event => ({
-    event,
-    portfolioItems: portfolio?.filter(item => item.event_id === event.id) || []
-  })) || [];
+  // Filter events that have portfolio items to create event cards
+  const eventsWithPortfolio = events?.filter(event => 
+    portfolio?.some(item => item.event_id === event.id)
+  ) || [];
 
   return (
     <Layout>
@@ -47,66 +46,63 @@ const Portfolio = () => {
         </div>
       </section>
 
-      {/* Portfolio Grid */}
+      {/* Event Cards Grid */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {eventPortfolios.length > 0 ? (
-            <div className="space-y-20">
-              {eventPortfolios.map(({ event, portfolioItems }) => (
-                <div key={event.id} className="space-y-8">
-                  <div className="text-center">
-                    <Badge variant="outline" className="mb-4">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)} Events
-                    </Badge>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                      {event.title}
-                    </h2>
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                      {event.description.substring(0, 200)}...
-                    </p>
-                  </div>
-
-                  {portfolioItems.length > 0 ? (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {portfolioItems.slice(0, 6).map((item) => (
-                          <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-                            <div className="aspect-video overflow-hidden">
-                              <img 
-                                src={item.image_url} 
-                                alt={item.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                            </div>
-                            <CardHeader>
-                              <CardTitle className="text-lg font-semibold line-clamp-2">
-                                {item.title}
-                              </CardTitle>
-                            </CardHeader>
-                          </Card>
-                        ))}
-                      </div>
-
-                      <div className="text-center">
-                        <Button asChild variant="outline" size="lg">
-                          <Link to={`/portfolio/${event.id}`}>
-                            View Full Gallery <ArrowRight className="ml-2 h-5 w-5" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Camera className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <p className="text-muted-foreground">
-                        Gallery coming soon for {event.title}
-                      </p>
+          {eventsWithPortfolio.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {eventsWithPortfolio.map((event) => (
+                <Card key={event.id} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 bg-gradient-to-br from-card via-card to-card/50">
+                  {/* Hero Image */}
+                  <div className="aspect-[4/3] overflow-hidden relative">
+                    <img 
+                      src={event.hero_image_url || '/placeholder.svg'} 
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                    {/* Category Badge Overlay */}
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-background/90 text-foreground hover:bg-background/80 backdrop-blur-sm">
+                        <Calendar className="mr-1 h-3 w-3" />
+                        {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
+                      </Badge>
                     </div>
-                  )}
-                </div>
+                  </div>
+                  
+                  {/* Event Information */}
+                  <CardContent className="p-6 space-y-4">
+                    <div className="space-y-2">
+                      <CardTitle className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
+                        {event.title}
+                      </CardTitle>
+                      
+                      {/* Location */}
+                      {event.location && (
+                        <div className="flex items-center text-muted-foreground">
+                          <MapPin className="mr-2 h-4 w-4" />
+                          <span className="text-sm">{event.location}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Description */}
+                    <p className="text-muted-foreground text-sm line-clamp-3">
+                      {event.description}
+                    </p>
+                    
+                    {/* View Gallery Button */}
+                    <div className="pt-2">
+                      <Button 
+                        asChild 
+                        className="w-full group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-accent transition-all duration-300"
+                      >
+                        <Link to={`/portfolio/${event.id}`}>
+                          View Gallery <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           ) : (

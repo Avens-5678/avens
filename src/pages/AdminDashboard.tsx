@@ -342,9 +342,10 @@ const AdminDashboard = () => {
               tableName="events"
               fields={[
                 { name: "title", label: "Title", type: "text", required: true },
+                { name: "location", label: "Location", type: "text" },
                 { name: "description", label: "Description", type: "textarea", required: true },
                 { name: "process_description", label: "Process Description", type: "textarea", required: true },
-                { name: "hero_image_url", label: "Hero Image URL", type: "text" },
+                { name: "hero_image_url", label: "Hero Image URL", type: "image" },
                 { 
                   name: "event_type", 
                   label: "Event Type", 

@@ -133,6 +133,7 @@ export type Database = {
           hero_image_url: string | null
           id: string
           is_active: boolean | null
+          location: string | null
           process_description: string
           title: string
           updated_at: string
@@ -144,6 +145,7 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           is_active?: boolean | null
+          location?: string | null
           process_description: string
           title: string
           updated_at?: string
@@ -155,6 +157,7 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           is_active?: boolean | null
+          location?: string | null
           process_description?: string
           title?: string
           updated_at?: string

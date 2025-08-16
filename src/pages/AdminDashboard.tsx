@@ -31,7 +31,7 @@ import {
   usePortfolio,
   useAboutContent
 } from "@/hooks/useData";
-import CrudInterface from "@/components/admin/CrudInterface";
+import AdminDataTable from "@/components/admin/AdminDataTable";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -284,26 +284,162 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Placeholder tabs - will be implemented as full CRUD later */}
-          {["banners", "services", "events", "portfolio", "clients", "settings"].map(tab => (
-            <TabsContent key={tab} value={tab}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="capitalize">{tab} Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground mb-4">
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)} management interface coming soon.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      This feature will allow you to manage {tab} content dynamically.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
+          {/* Banners Management */}
+          <TabsContent value="banners">
+            <AdminDataTable
+              title="Hero Banners"
+              data={heroBanners || []}
+              queryKey="heroBanners"
+              tableName="hero_banners"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "subtitle", label: "Subtitle", type: "text" },
+                { name: "image_url", label: "Image URL", type: "text", required: true },
+                { name: "button_text", label: "Button Text", type: "text" },
+                { 
+                  name: "event_type", 
+                  label: "Event Type", 
+                  type: "select", 
+                  required: true,
+                  options: ["wedding", "birthday", "corporate", "equipment_rental"]
+                },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Services Management */}
+          <TabsContent value="services">
+            <AdminDataTable
+              title="Services"
+              data={services || []}
+              queryKey="services"
+              tableName="services"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "short_description", label: "Short Description", type: "textarea", required: true },
+                { name: "description", label: "Description", type: "textarea", required: true },
+                { 
+                  name: "event_type", 
+                  label: "Event Type", 
+                  type: "select", 
+                  required: true,
+                  options: ["wedding", "birthday", "corporate", "equipment_rental"]
+                },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Events Management */}
+          <TabsContent value="events">
+            <AdminDataTable
+              title="Events"
+              data={events || []}
+              queryKey="events"
+              tableName="events"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "description", label: "Description", type: "textarea", required: true },
+                { name: "process_description", label: "Process Description", type: "textarea", required: true },
+                { name: "hero_image_url", label: "Hero Image URL", type: "text" },
+                { 
+                  name: "event_type", 
+                  label: "Event Type", 
+                  type: "select", 
+                  required: true,
+                  options: ["wedding", "birthday", "corporate", "equipment_rental"]
+                },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Portfolio Management */}
+          <TabsContent value="portfolio">
+            <AdminDataTable
+              title="Portfolio"
+              data={portfolio || []}
+              queryKey="portfolio"
+              tableName="portfolio"
+              fields={[
+                { name: "title", label: "Title", type: "text", required: true },
+                { name: "image_url", label: "Image URL", type: "text", required: true },
+                { name: "event_id", label: "Event ID", type: "text", required: true },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_before_after", label: "Before/After Image", type: "boolean" },
+                { name: "is_before", label: "Is Before Image", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Clients Management */}
+          <TabsContent value="clients">
+            <AdminDataTable
+              title="Trusted Clients"
+              data={trustedClients || []}
+              queryKey="trustedClients"
+              tableName="trusted_clients"
+              fields={[
+                { name: "name", label: "Client Name", type: "text", required: true },
+                { name: "logo_url", label: "Logo URL", type: "text", required: true },
+                { name: "display_order", label: "Display Order", type: "number" },
+                { name: "is_active", label: "Active", type: "boolean" }
+              ]}
+            />
+          </TabsContent>
+
+          {/* Settings Management */}
+          <TabsContent value="settings">
+            <div className="space-y-6">
+              <AdminDataTable
+                title="Awards"
+                data={awards || []}
+                queryKey="awards"
+                tableName="awards"
+                fields={[
+                  { name: "title", label: "Award Title", type: "text", required: true },
+                  { name: "description", label: "Description", type: "textarea", required: true },
+                  { name: "year", label: "Year", type: "number" },
+                  { name: "logo_url", label: "Logo URL", type: "text" },
+                  { name: "display_order", label: "Display Order", type: "number" },
+                  { name: "is_active", label: "Active", type: "boolean" }
+                ]}
+              />
+              
+              <AdminDataTable
+                title="News & Achievements"
+                data={newsAchievements || []}
+                queryKey="newsAchievements"
+                tableName="news_achievements"
+                fields={[
+                  { name: "title", label: "Title", type: "text", required: true },
+                  { name: "short_content", label: "Short Content", type: "textarea", required: true },
+                  { name: "content", label: "Content", type: "textarea", required: true },
+                  { name: "image_url", label: "Image URL", type: "text" },
+                  { name: "display_order", label: "Display Order", type: "number" },
+                  { name: "is_active", label: "Active", type: "boolean" }
+                ]}
+              />
+
+              <AdminDataTable
+                title="Equipment Rentals"
+                data={rentals || []}
+                queryKey="rentals"
+                tableName="rentals"
+                fields={[
+                  { name: "title", label: "Title", type: "text", required: true },
+                  { name: "short_description", label: "Short Description", type: "textarea", required: true },
+                  { name: "description", label: "Description", type: "textarea", required: true },
+                  { name: "price_range", label: "Price Range", type: "text" },
+                  { name: "display_order", label: "Display Order", type: "number" },
+                  { name: "is_active", label: "Active", type: "boolean" }
+                ]}
+              />
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

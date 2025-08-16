@@ -225,15 +225,7 @@ export type Database = {
           status?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "form_submissions_rental_id_fkey"
-            columns: ["rental_id"]
-            isOneToOne: false
-            referencedRelation: "rentals"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       hero_banners: {
         Row: {

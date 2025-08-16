@@ -181,9 +181,10 @@ const AdminDataTable = ({ title, data, queryKey, tableName, fields, defaultValue
         return (
           <div className="space-y-2">
             <Input
+              type="url"
               value={value}
               onChange={(e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
-              placeholder="Enter image URL, Google Drive link, or upload link"
+              placeholder="Enter image URL (Google Drive, direct links, etc.)"
             />
             <p className="text-xs text-muted-foreground">
               You can paste Google Drive links, direct image URLs, or any image hosting service link

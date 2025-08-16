@@ -364,8 +364,8 @@ const AdminDashboard = ({ adminUser }: AdminDashboardProps) => {
                 <CardTitle>Form Submissions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {formSubmissions?.length > 0 ? (
+                 <div className="space-y-4">
+                   {formSubmissions?.length > 0 ? (
                     formSubmissions.map((submission) => (
                       <Card key={submission.id}>
                         <CardHeader>

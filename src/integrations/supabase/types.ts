@@ -148,7 +148,7 @@ export type Database = {
           created_at: string
           default_portfolio_tags: string[] | null
           description: string
-          event_type: Database["public"]["Enums"]["event_type"]
+          event_type: string
           hero_cta_text: string | null
           hero_image_url: string | null
           hero_subtitle: string | null
@@ -170,7 +170,7 @@ export type Database = {
           created_at?: string
           default_portfolio_tags?: string[] | null
           description: string
-          event_type: Database["public"]["Enums"]["event_type"]
+          event_type: string
           hero_cta_text?: string | null
           hero_image_url?: string | null
           hero_subtitle?: string | null
@@ -192,7 +192,7 @@ export type Database = {
           created_at?: string
           default_portfolio_tags?: string[] | null
           description?: string
-          event_type?: Database["public"]["Enums"]["event_type"]
+          event_type?: string
           hero_cta_text?: string | null
           hero_image_url?: string | null
           hero_subtitle?: string | null
@@ -216,7 +216,7 @@ export type Database = {
         Row: {
           created_at: string
           email: string
-          event_type: Database["public"]["Enums"]["event_type"] | null
+          event_type: string | null
           form_type: string
           id: string
           message: string
@@ -230,7 +230,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email: string
-          event_type?: Database["public"]["Enums"]["event_type"] | null
+          event_type?: string | null
           form_type: string
           id?: string
           message: string
@@ -244,7 +244,7 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string
-          event_type?: Database["public"]["Enums"]["event_type"] | null
+          event_type?: string | null
           form_type?: string
           id?: string
           message?: string
@@ -262,7 +262,7 @@ export type Database = {
           button_text: string | null
           created_at: string
           display_order: number | null
-          event_type: Database["public"]["Enums"]["event_type"]
+          event_type: string
           id: string
           image_url: string
           is_active: boolean | null
@@ -274,7 +274,7 @@ export type Database = {
           button_text?: string | null
           created_at?: string
           display_order?: number | null
-          event_type: Database["public"]["Enums"]["event_type"]
+          event_type: string
           id?: string
           image_url: string
           is_active?: boolean | null
@@ -286,7 +286,7 @@ export type Database = {
           button_text?: string | null
           created_at?: string
           display_order?: number | null
-          event_type?: Database["public"]["Enums"]["event_type"]
+          event_type?: string
           id?: string
           image_url?: string
           is_active?: boolean | null
@@ -469,7 +469,7 @@ export type Database = {
           created_at: string
           description: string
           display_order: number | null
-          event_type: Database["public"]["Enums"]["event_type"]
+          event_type: string
           id: string
           is_active: boolean | null
           short_description: string
@@ -481,7 +481,7 @@ export type Database = {
           created_at?: string
           description: string
           display_order?: number | null
-          event_type: Database["public"]["Enums"]["event_type"]
+          event_type: string
           id?: string
           is_active?: boolean | null
           short_description: string
@@ -493,7 +493,7 @@ export type Database = {
           created_at?: string
           description?: string
           display_order?: number | null
-          event_type?: Database["public"]["Enums"]["event_type"]
+          event_type?: string
           id?: string
           is_active?: boolean | null
           short_description?: string
@@ -605,7 +605,7 @@ export type Database = {
           display_order: number | null
           event_id: string | null
           event_title: string | null
-          event_type: Database["public"]["Enums"]["event_type"] | null
+          event_type: string | null
           id: string | null
           image_url: string | null
           is_before: boolean | null
@@ -689,14 +689,7 @@ export type Database = {
       }
     }
     Enums: {
-      event_type:
-        | "wedding"
-        | "corporate"
-        | "birthday"
-        | "anniversary"
-        | "social"
-        | "other"
-        | "government"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -823,16 +816,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      event_type: [
-        "wedding",
-        "corporate",
-        "birthday",
-        "anniversary",
-        "social",
-        "other",
-        "government",
-      ],
-    },
+    Enums: {},
   },
 } as const

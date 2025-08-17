@@ -59,7 +59,7 @@ const InquiryForm = ({
     setIsLoading(true);
 
     try {
-      const { data: submission, error } = await supabase
+      const { error } = await supabase
         .from("form_submissions")
         .insert({
           name: values.name,
@@ -70,21 +70,13 @@ const InquiryForm = ({
           event_type: (values.eventType as any) || null,
           rental_id: rentalId || null,
           rental_title: rentalTitle || null,
-        })
-        .select()
-        .single();
+        });
 
       if (error) throw error;
 
-      // Trigger notification
-      try {
-        await supabase.functions.invoke('notify-form-submission', {
-          body: { submissionId: submission.id }
-        });
-      } catch (notificationError) {
-        console.warn('Notification failed:', notificationError);
-        // Don't fail the form submission if notification fails
-      }
+      // Note: We don't trigger notifications here since we can't read the submission ID
+      // due to RLS policies. The notification will be handled via database triggers
+      // or the admin panel when the submission is processed.
 
 
       toast({

@@ -247,6 +247,35 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         );
       
       case 'select':
+        // Special handling for event_type field to allow custom input when creating new events
+        if (field.name === 'event_type' && !editingItem) {
+          return (
+            <div className="space-y-2">
+              <Select value={value} onValueChange={handleChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select or create event type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {field.options?.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                value={value}
+                onChange={(e) => {
+                  const inputValue = e.target.value.toLowerCase().replace(/\s+/g, '-');
+                  handleChange(inputValue);
+                }}
+                placeholder="Or enter custom event type (e.g., national-state-functions)"
+                className="text-sm"
+              />
+            </div>
+          );
+        }
+        
         return (
           <Select value={value} onValueChange={handleChange}>
             <SelectTrigger>

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import CrudInterface from "@/components/admin/CrudInterface";
 import AdminDataTable from "@/components/admin/AdminDataTable";
 import { useAllServices, useAllRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions, useNewsAchievements, useAwards } from "@/hooks/useData";
+import { useEventTypes } from "@/hooks/useEventTypes";
 import { 
   LogOut, 
   Home, 
@@ -48,6 +49,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const { data: formSubmissions } = useFormSubmissions();
   const { data: newsAchievements = [] } = useNewsAchievements();
   const { data: awards = [] } = useAwards();
+  const { eventTypes } = useEventTypes();
 
   const handleLogout = async () => {
     try {
@@ -264,12 +266,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   label: "Event Type", 
                   type: "select", 
                   required: true,
-                  options: [
-                    { value: "wedding", label: "Wedding" },
-                    { value: "corporate", label: "Corporate" },
-                    { value: "birthday", label: "Birthday" },
-                    { value: "government", label: "Government" },
-                  ]
+                  options: eventTypes
                 },
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "is_active", label: "Active", type: "boolean" }
@@ -292,12 +289,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   label: "Event Type", 
                   type: "select", 
                   required: true,
-                  options: [
-                    { value: "wedding", label: "Wedding" },
-                    { value: "corporate", label: "Corporate" },
-                    { value: "birthday", label: "Birthday" },
-                    { value: "government", label: "Government" },
-                  ]
+                  options: eventTypes
                 },
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "show_on_home", label: "Show on Home Page", type: "boolean" },
@@ -321,12 +313,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   label: "Event Type", 
                   type: "select", 
                   required: true,
-                  options: [
-                    { value: "wedding", label: "Wedding" },
-                    { value: "corporate", label: "Corporate" },
-                    { value: "birthday", label: "Birthday" },
-                    { value: "government", label: "Government" },
-                  ]
+                  options: eventTypes
                 },
                 { name: "hero_image_url", label: "Hero Image", type: "file" },
                 { name: "location", label: "Location", type: "text" },

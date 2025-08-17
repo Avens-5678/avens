@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
-import { useEvent, usePortfolio } from "@/hooks/useData";
+import { useEvents, usePortfolio } from "@/hooks/useData";
 import { ArrowLeft, Camera } from "lucide-react";
 
 const Gallery = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const { data: portfolio, isLoading } = usePortfolio(eventId);
-  const { data: event } = useEvent(portfolio?.[0]?.events?.event_type || "");
+  const { data: events } = useEvents();
+  
+  // Find the event associated with this portfolio
+  const event = events?.find(e => e.id === eventId);
 
   if (isLoading) {
     return (

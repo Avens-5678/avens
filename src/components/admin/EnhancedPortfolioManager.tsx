@@ -272,7 +272,7 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
 
       {/* Portfolio Items Grid */}
       <div className="grid gap-4">
-        {portfolio?.map((item) => (
+        {portfolio && portfolio.length > 0 ? portfolio.map((item) => (
           <Card key={item.id}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
@@ -336,8 +336,10 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
               </div>
             </CardContent>
           </Card>
-        )) || (
-          <p className="text-center text-muted-foreground py-8">No portfolio items found</p>
+        )) : (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No portfolio items found</p>
+          </div>
         )}
       </div>
     </div>

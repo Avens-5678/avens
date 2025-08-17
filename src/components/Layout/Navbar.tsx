@@ -29,7 +29,7 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+    <nav className="bg-white/70 backdrop-blur-2xl border-b border-white/10 sticky top-0 z-50 shadow-lg shadow-black/5">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -88,7 +88,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border bg-background/95 backdrop-blur-sm">
+          <div className="md:hidden py-4 border-t border-white/10 bg-white/80 backdrop-blur-2xl">
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
                 <Link

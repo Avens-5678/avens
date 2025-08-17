@@ -7,7 +7,7 @@ import Layout from "@/components/Layout/Layout";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useNewsAchievements } from "@/hooks/useData";
 import { ArrowRight, Sparkles, Clock, Users, Award, CheckCircle, Star, Trophy, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import Autoplay from "embla-carousel-autoplay";
@@ -21,6 +21,18 @@ const Index = () => {
   const { data: trustedClients, isLoading: loadingClients } = useTrustedClients();
   const { data: newsAchievements, isLoading: loadingNews } = useNewsAchievements();
   const [selectedRental, setSelectedRental] = useState<string | null>(null);
+
+  // Auto-hide arrows after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const arrows = document.querySelectorAll('.hero-arrow');
+      arrows.forEach(arrow => {
+        arrow.classList.add('opacity-0', 'pointer-events-none');
+      });
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loadingBanners || loadingServices || loadingRentals || loadingClients || loadingNews) {
     return (
@@ -85,9 +97,9 @@ const Index = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            {/* Mobile-friendly transparent arrows */}
-            <CarouselPrevious className="left-4 bg-white/20 hover:bg-white/30 border-white/30 text-white backdrop-blur-sm md:bg-white md:hover:bg-muted md:text-foreground md:border-border" />
-            <CarouselNext className="right-4 bg-white/20 hover:bg-white/30 border-white/30 text-white backdrop-blur-sm md:bg-white md:hover:bg-muted md:text-foreground md:border-border" />
+            {/* Auto-hiding transparent arrows */}
+            <CarouselPrevious className="hero-arrow left-4 bg-white/10 hover:bg-white/20 border-white/20 text-white backdrop-blur-md transition-all duration-300 opacity-100 animate-fade-in-delay" />
+            <CarouselNext className="hero-arrow right-4 bg-white/10 hover:bg-white/20 border-white/20 text-white backdrop-blur-md transition-all duration-300 opacity-100 animate-fade-in-delay" />
           </Carousel>
         ) : (
           <div className="text-center max-w-4xl mx-auto px-4">
@@ -111,6 +123,50 @@ const Index = () => {
           </div>
         )}
       </HeroSection>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+            <AnimatedText delay={200} className="text-center group">
+              <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-foreground">100+</div>
+                <div className="text-sm text-muted-foreground">Happy Clients</div>
+              </div>
+            </AnimatedText>
+            <AnimatedText delay={300} className="text-center">
+              <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-secondary/10 hover:border-secondary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-3">
+                  <CheckCircle className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-foreground">500+</div>
+                <div className="text-sm text-muted-foreground">Events Completed</div>
+              </div>
+            </AnimatedText>
+            <AnimatedText delay={400} className="text-center">
+              <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
+                  <Star className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-foreground">4.9</div>
+                <div className="text-sm text-muted-foreground">Rating Average</div>
+              </div>
+            </AnimatedText>
+            <AnimatedText delay={500} className="text-center">
+              <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-secondary/10 hover:border-secondary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-3">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-foreground">15+</div>
+                <div className="text-sm text-muted-foreground">Years Experience</div>
+              </div>
+            </AnimatedText>
+          </div>
+        </div>
+      </section>
 
       {/* Services Section */}
       <section className="py-20 bg-gradient-to-br from-background to-muted/30 relative overflow-hidden">
@@ -138,49 +194,9 @@ const Index = () => {
             </AnimatedText>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-            <AnimatedText delay={600} className="text-center group">
-              <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-6 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
-                  <Users className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-foreground">100+</div>
-                <div className="text-sm text-muted-foreground">Happy Clients</div>
-              </div>
-            </AnimatedText>
-            <AnimatedText delay={700} className="text-center">
-              <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-6 border border-secondary/10 hover:border-secondary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-3">
-                  <CheckCircle className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-foreground">500+</div>
-                <div className="text-sm text-muted-foreground">Events Completed</div>
-              </div>
-            </AnimatedText>
-            <AnimatedText delay={800} className="text-center">
-              <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-6 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
-                  <Star className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-foreground">4.9</div>
-                <div className="text-sm text-muted-foreground">Rating Average</div>
-              </div>
-            </AnimatedText>
-            <AnimatedText delay={900} className="text-center">
-              <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-6 border border-secondary/10 hover:border-secondary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-3">
-                  <Trophy className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-foreground">15+</div>
-                <div className="text-sm text-muted-foreground">Years Experience</div>
-              </div>
-            </AnimatedText>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services?.map((service, index) => (
-              <AnimatedText key={service.id} delay={1000 + index * 100}>
+              <AnimatedText key={service.id} delay={600 + index * 100}>
                 <Card className="group hover:shadow-xl transition-all duration-500 border-0 bg-white/70 backdrop-blur-sm hover:-translate-y-2 rounded-3xl overflow-hidden">
                   <div className="h-2 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
                   <CardHeader className="pb-4">

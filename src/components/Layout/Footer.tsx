@@ -10,7 +10,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Avens Events
+              Avens
             </div>
             <p className="text-muted-foreground text-sm">
               Creating unforgettable experiences with exceptional event management and premium rental services.

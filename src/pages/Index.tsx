@@ -175,8 +175,8 @@ const Index = () => {
                     {rental.title}
                   </CardTitle>
                   {rental.price_range && (
-                    <p className="text-sm text-primary font-semibold">
-                      {rental.price_range}
+                    <p className="text-sm text-secondary font-semibold">
+                      $100-500 per event
                     </p>
                   )}
                 </CardHeader>

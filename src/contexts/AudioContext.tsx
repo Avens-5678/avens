@@ -43,14 +43,16 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
 
   const isAdminPage = location.pathname.startsWith('/admin');
 
-  // Fetch site settings safely
+  // Fetch the enabled audio setting with a valid URL
   useEffect(() => {
     const fetchAudioSettings = async () => {
       try {
         const { data, error } = await supabase
           .from('site_settings')
           .select('background_audio_url, background_audio_enabled')
-          .maybeSingle(); // Safe for empty table
+          .eq('background_audio_enabled', true)
+          .not('background_audio_url', 'is', null)
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching audio settings:', error);
@@ -58,7 +60,7 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
           return;
         }
 
-        if (!data || !data.background_audio_enabled || !data.background_audio_url) {
+        if (!data) {
           console.warn('No valid audio settings found, using defaults');
           setAudioSettings({ background_audio_url: null, background_audio_enabled: false });
           return;

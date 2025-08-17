@@ -10,6 +10,7 @@ import { Plus, Trash2, Upload, Star, Users, Calendar, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadEventHeroImage } from "@/utils/storageUtils";
+import { useEventTypes } from "@/hooks/useEventTypes";
 
 interface Specialty {
   title: string;
@@ -64,15 +65,6 @@ const iconOptions = [
   { value: 'zap', label: 'Zap', icon: Zap },
 ];
 
-const eventTypeOptions = [
-  { value: 'wedding', label: 'Wedding' },
-  { value: 'corporate', label: 'Corporate' },
-  { value: 'birthday', label: 'Birthday' },
-  { value: 'government', label: 'Government' },
-  { value: 'anniversary', label: 'Anniversary' },
-  { value: 'social', label: 'Social Event' },
-];
-
 export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
   isOpen,
   onClose,
@@ -80,6 +72,7 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
   initialData,
   mode
 }) => {
+  const { eventTypes, loading: eventTypesLoading } = useEventTypes();
   const [formData, setFormData] = useState<EventFormData>({
     title: '',
     description: '',
@@ -220,12 +213,12 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
                       placeholder="e.g., anniversary, social-gathering, etc."
                     />
                   ) : (
-                    <Select value={formData.event_type} onValueChange={(value) => handleInputChange('event_type', value)}>
+                    <Select value={formData.event_type} onValueChange={(value) => handleInputChange('event_type', value)} disabled={eventTypesLoading}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select event type" />
+                        <SelectValue placeholder={eventTypesLoading ? "Loading..." : "Select event type"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {eventTypeOptions.map(option => (
+                        {eventTypes.map(option => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>

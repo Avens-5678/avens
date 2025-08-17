@@ -1,64 +1,74 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
-import { Upload, Play, Pause, Trash2, Volume2, Download } from "lucide-react";
+import { Loader2, LogIn, ArrowLeft } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { useEffect } from "react";
 
-interface SiteSettings {
-  id: string;
-  background_audio_url: string | null;
-  background_audio_enabled: boolean;
-}
+const signInSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
-const AudioManager = () => {
-  const { user, loading: authLoading } = useAuth();
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+const Auth = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Check if logged-in user is super_admin
-  const checkAdmin = async () => {
-    if (!user) return false;
+  const signInForm = useForm<z.infer<typeof signInSchema>>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    const { data: adminData, error } = await supabase
-      .from("admin_users")
-      .select("*")
-      .eq("email", user.email)
-      .eq("role", "super_admin")
-      .eq("is_active", true)
-      .maybeSingle();
+  useEffect(() => {
+    if (user) {
+      navigate("/admin");
+    }
+  }, [user, navigate]);
 
-    if (error || !adminData) return false;
-    return true;
-  };
+  const onSignIn = async (values: z.infer<typeof signInSchema>) => {
+    setIsLoading(true);
 
-  const fetchSettings = async () => {
     try {
-      const isAdmin = await checkAdmin();
-      if (!isAdmin) throw new Error("Access denied. You must be a super admin.");
+      const { error } = await signIn(values.email, values.password);
 
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("*")
-        .single();
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast({
+            title: "Sign In Failed",
+            description: "Invalid email or password. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+        return;
+      }
 
-      if (error) throw error;
-      setSettings(data);
-    } catch (err: any) {
-      console.error("Error fetching settings:", err);
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in to the admin portal.",
+      });
+    } catch (error) {
+      console.error("Error signing in:", error);
       toast({
         title: "Error",
-        description: err.message || "Failed to load audio settings.",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -66,75 +76,70 @@ const AudioManager = () => {
     }
   };
 
-  useEffect(() => {
-    if (!authLoading) {
-      fetchSettings();
-    }
-
-    return () => {
-      if (audio) {
-        audio.pause();
-        audio.src = "";
-      }
-    };
-  }, [user, authLoading]);
-
-  // … Include the same handleFileUpload, handleToggleEnabled, handlePlayPause, handleDelete functions 
-  // from your previous AudioContext.tsx, just keep them as is, because RLS check is now in fetchSettings
-  // and only super_admins will reach those functions.
-
-  if (isLoading || authLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5" />
-            Background Audio Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center p-8">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!settings) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5" />
-            Background Audio Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            You do not have permission to view or edit audio settings.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Volume2 className="h-5 w-5" />
-          Background Audio Management
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Include your Switch, Upload, Play/Pause, Delete UI here as before */}
-      </CardContent>
-    </Card>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Link
+              to="/"
+              className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Website
+            </Link>
+          </div>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Avens Events
+          </CardTitle>
+          <p className="text-muted-foreground">Admin Portal - Sign In</p>
+        </CardHeader>
+        <CardContent>
+          <Form {...signInForm}>
+            <form onSubmit={signInForm.handleSubmit(onSignIn)} className="space-y-4">
+              <FormField
+                control={signInForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="Enter your admin email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={signInForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Enter your password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-primary to-accent"
+                disabled={isLoading}
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In to Admin
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
-export default AudioManager;
+export default Auth;

@@ -68,8 +68,6 @@ export type Database = {
           login_attempts: number | null
           password_changed_at: string | null
           password_hash: string
-          reset_token: string | null
-          reset_token_expires: string | null
           role: string | null
           updated_at: string
         }
@@ -87,8 +85,6 @@ export type Database = {
           login_attempts?: number | null
           password_changed_at?: string | null
           password_hash: string
-          reset_token?: string | null
-          reset_token_expires?: string | null
           role?: string | null
           updated_at?: string
         }
@@ -106,8 +102,6 @@ export type Database = {
           login_attempts?: number | null
           password_changed_at?: string | null
           password_hash?: string
-          reset_token?: string | null
-          reset_token_expires?: string | null
           role?: string | null
           updated_at?: string
         }
@@ -679,10 +673,6 @@ export type Database = {
       }
       is_admin: {
         Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_admin_by_email: {
-        Args: { user_email: string }
         Returns: boolean
       }
       is_current_user_admin: {

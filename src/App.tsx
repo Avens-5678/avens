@@ -23,7 +23,6 @@ import GovernmentEvents from "./pages/events/GovernmentEvents";
 import DynamicEventPage from "./pages/events/DynamicEventPage";
 import Team from "./pages/Team";
 
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -56,4 +55,5 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
+
 export default App;

@@ -412,19 +412,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
 
           {/* Audio Management */}
           <TabsContent value="audio">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold">Audio Management</h2>
-                <p className="text-muted-foreground mt-1">
-                  Manage background audio for the website
-                </p>
-              </div>
-              <div className="bg-muted/30 p-6 rounded-lg">
-                <p className="text-center text-muted-foreground">
-                  Audio management feature coming soon. Background audio controls are available on the frontend.
-                </p>
-              </div>
-            </div>
+            <AudioManager />
           </TabsContent>
         </Tabs>
       </div>

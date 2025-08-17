@@ -32,14 +32,15 @@ const AudioManager = () => {
         audio.src = '';
       }
     };
-  }, [audio]);
+  }, []);
 
   const fetchSettings = async () => {
     try {
+      // FIX: Use .maybeSingle() to prevent errors on an empty table
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       setSettings(data);
@@ -56,26 +57,26 @@ const AudioManager = () => {
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('audio/')) {
+    // FIX: Add a guard clause to ensure settings are loaded
+    if (!settings) {
       toast({
-        title: "Invalid File",
-        description: "Please select an audio file.",
+        title: "Error",
+        description: "Settings not loaded. Please refresh and try again.",
         variant: "destructive",
       });
       return;
     }
+    
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    // Validate file size (max 10MB)
+    if (!file.type.startsWith('audio/')) {
+      toast({ title: "Invalid File", description: "Please select an audio file.", variant: "destructive" });
+      return;
+    }
+
     if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "File Too Large",
-        description: "Audio file must be smaller than 10MB.",
-        variant: "destructive",
-      });
+      toast({ title: "File Too Large", description: "Audio file must be smaller than 10MB.", variant: "destructive" });
       return;
     }
 
@@ -83,63 +84,37 @@ const AudioManager = () => {
     setUploadProgress(0);
 
     try {
-      // Delete existing audio file if it exists
-      if (settings?.background_audio_url) {
+      if (settings.background_audio_url) {
         const existingPath = settings.background_audio_url.split('/').pop();
         if (existingPath) {
-          await supabase.storage
-            .from('audio')
-            .remove([existingPath]);
+          await supabase.storage.from('audio').remove([existingPath]);
         }
       }
 
-      // Upload new file
       const fileExt = file.name.split('.').pop();
       const fileName = `background-audio-${Date.now()}.${fileExt}`;
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('audio')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('audio')
-        .getPublicUrl(fileName);
+      const { data: { publicUrl } } = supabase.storage.from('audio').getPublicUrl(fileName);
 
-      // Update settings
       const { error: updateError } = await supabase
         .from('site_settings')
-        .update({ 
-          background_audio_url: publicUrl,
-          background_audio_enabled: true 
-        })
-        .eq('id', settings?.id);
+        .update({ background_audio_url: publicUrl, background_audio_enabled: true })
+        .eq('id', settings.id);
 
       if (updateError) throw updateError;
 
-      setSettings(prev => prev ? {
-        ...prev,
-        background_audio_url: publicUrl,
-        background_audio_enabled: true
-      } : null);
-
-      toast({
-        title: "Success",
-        description: "Background audio uploaded successfully!",
-      });
+      setSettings(prev => prev ? { ...prev, background_audio_url: publicUrl, background_audio_enabled: true } : null);
+      toast({ title: "Success", description: "Background audio uploaded successfully!" });
 
     } catch (error: any) {
       console.error('Error uploading file:', error);
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload audio file.",
-        variant: "destructive",
-      });
+      toast({ title: "Upload Failed", description: error.message || "Failed to upload audio file.", variant: "destructive" });
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -147,7 +122,11 @@ const AudioManager = () => {
   };
 
   const handleToggleEnabled = async (enabled: boolean) => {
-    if (!settings) return;
+    // FIX: Add a guard clause
+    if (!settings) {
+        toast({ title: "Error", description: "Settings not loaded.", variant: "destructive" });
+        return;
+    }
 
     try {
       const { error } = await supabase
@@ -158,18 +137,10 @@ const AudioManager = () => {
       if (error) throw error;
 
       setSettings(prev => prev ? { ...prev, background_audio_enabled: enabled } : null);
-      
-      toast({
-        title: "Updated",
-        description: `Background audio ${enabled ? 'enabled' : 'disabled'}.`,
-      });
+      toast({ title: "Updated", description: `Background audio ${enabled ? 'enabled' : 'disabled'}.` });
     } catch (error) {
       console.error('Error updating settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update settings.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update settings.", variant: "destructive" });
     }
   };
 
@@ -180,11 +151,7 @@ const AudioManager = () => {
       const newAudio = new Audio(settings.background_audio_url);
       newAudio.addEventListener('ended', () => setIsPlaying(false));
       newAudio.addEventListener('error', () => {
-        toast({
-          title: "Error",
-          description: "Failed to play audio file.",
-          variant: "destructive",
-        });
+        toast({ title: "Error", description: "Failed to play audio file.", variant: "destructive" });
         setIsPlaying(false);
       });
       setAudio(newAudio);
@@ -202,66 +169,44 @@ const AudioManager = () => {
   };
 
   const handleDelete = async () => {
-    if (!settings?.background_audio_url) return;
+    // FIX: Add a guard clause
+    if (!settings || !settings.background_audio_url) {
+        toast({ title: "Error", description: "No audio file to delete or settings not loaded.", variant: "destructive" });
+        return;
+    }
 
     try {
-      // Stop audio if playing
       if (audio && isPlaying) {
         audio.pause();
         setIsPlaying(false);
       }
 
-      // Delete file from storage
       const fileName = settings.background_audio_url.split('/').pop();
       if (fileName) {
-        await supabase.storage
-          .from('audio')
-          .remove([fileName]);
+        await supabase.storage.from('audio').remove([fileName]);
       }
 
-      // Update settings
       const { error } = await supabase
         .from('site_settings')
-        .update({ 
-          background_audio_url: null,
-          background_audio_enabled: false 
-        })
+        .update({ background_audio_url: null, background_audio_enabled: false })
         .eq('id', settings.id);
 
       if (error) throw error;
 
-      setSettings(prev => prev ? {
-        ...prev,
-        background_audio_url: null,
-        background_audio_enabled: false
-      } : null);
-
+      setSettings(prev => prev ? { ...prev, background_audio_url: null, background_audio_enabled: false } : null);
       setAudio(null);
-
-      toast({
-        title: "Deleted",
-        description: "Background audio removed successfully.",
-      });
+      toast({ title: "Deleted", description: "Background audio removed successfully." });
 
     } catch (error) {
       console.error('Error deleting audio:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete audio file.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to delete audio file.", variant: "destructive" });
     }
   };
 
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5" />
-            Background Audio Management
-          </CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2"><Volume2 className="h-5 w-5" /> Background Audio Management</CardTitle></CardHeader>
         <CardContent>
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
@@ -276,97 +221,44 @@ const AudioManager = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Volume2 className="h-5 w-5" />
-          Background Audio Management
-        </CardTitle>
-      </CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Volume2 className="h-5 w-5" /> Background Audio Management</CardTitle></CardHeader>
       <CardContent className="space-y-6">
-        {/* Enable/Disable Toggle */}
         <div className="flex items-center justify-between">
           <div>
             <Label htmlFor="audio-enabled">Enable Background Audio</Label>
-            <p className="text-sm text-muted-foreground">
-              Toggle background audio for the website
-            </p>
+            <p className="text-sm text-muted-foreground">Toggle background audio for the website</p>
           </div>
-          <Switch
-            id="audio-enabled"
-            checked={settings?.background_audio_enabled || false}
-            onCheckedChange={handleToggleEnabled}
-          />
+          <Switch id="audio-enabled" checked={settings?.background_audio_enabled || false} onCheckedChange={handleToggleEnabled} />
         </div>
-
-        {/* Current Audio File */}
         {settings?.background_audio_url && (
           <div className="space-y-4">
             <div>
               <Label>Current Audio File</Label>
               <div className="flex items-center gap-2 mt-2 p-3 bg-muted rounded-lg">
                 <Volume2 className="h-4 w-4 text-muted-foreground" />
-                <span className="flex-1 text-sm">
-                  {settings.background_audio_url.split('/').pop()?.replace(/^background-audio-\d+-/, '') || 'Audio file'}
-                </span>
+                <span className="flex-1 text-sm">{settings.background_audio_url.split('/').pop()?.replace(/^background-audio-\d+-/, '') || 'Audio file'}</span>
                 <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handlePlayPause}
-                  >
-                    {isPlaying ? (
-                      <Pause className="h-4 w-4" />
-                    ) : (
-                      <Play className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(settings.background_audio_url!, '_blank')}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={handleDelete}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <Button size="sm" variant="outline" onClick={handlePlayPause}>{isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}</Button>
+                  <Button size="sm" variant="outline" onClick={() => window.open(settings.background_audio_url!, '_blank')}><Download className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="destructive" onClick={handleDelete}><Trash2 className="h-4 w-4" /></Button>
                 </div>
               </div>
             </div>
           </div>
         )}
-
-        {/* Upload New File */}
         <div className="space-y-4">
           <Label>Upload New Audio File</Label>
           <div className="space-y-2">
-            <Input
-              type="file"
-              accept="audio/*"
-              onChange={handleFileUpload}
-              disabled={uploading}
-            />
-            <p className="text-xs text-muted-foreground">
-              Supported formats: MP3, WAV, OGG. Maximum size: 10MB
-            </p>
+            <Input type="file" accept="audio/*" onChange={handleFileUpload} disabled={uploading} />
+            <p className="text-xs text-muted-foreground">Supported formats: MP3, WAV, OGG. Maximum size: 10MB</p>
           </div>
-
           {uploading && (
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Upload className="h-4 w-4 animate-pulse" />
-                <span className="text-sm">Uploading...</span>
-              </div>
+              <div className="flex items-center gap-2"><Upload className="h-4 w-4 animate-pulse" /><span className="text-sm">Uploading...</span></div>
               <Progress value={uploadProgress} className="w-full" />
             </div>
           )}
         </div>
-
-        {/* Instructions */}
         <div className="p-4 bg-muted/50 rounded-lg">
           <h4 className="text-sm font-medium mb-2">How it works:</h4>
           <ul className="text-xs text-muted-foreground space-y-1">

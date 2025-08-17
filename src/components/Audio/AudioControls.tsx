@@ -12,19 +12,15 @@ import {
 const AudioControls = () => {
   const { isPlaying, isMuted, volume, isLoaded, togglePlay, toggleMute, setVolume, initializeAudio } = useAudio();
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [expanded, setExpanded] = useState(false); // collapsed/expanded state
+  const [expanded, setExpanded] = useState(false);
 
   const handleFirstInteraction = async () => {
-    // Force initialize audio with user interaction (required for mobile)
     await initializeAudio();
-    // Then toggle play
     await togglePlay();
   };
 
-  // Wrapper: bottom-left, collapsible
   return (
     <div className="fixed bottom-6 left-6 z-50">
-      {/* Collapsed button */}
       {!expanded && (
         <Button
           variant="outline"
@@ -36,13 +32,8 @@ const AudioControls = () => {
         </Button>
       )}
 
-      {/* Expanded controls */}
       {expanded && (
-        <div
-          className="flex items-center gap-2 bg-background/80 backdrop-blur-sm 
-                     border rounded-full px-4 py-2 shadow-lg"
-        >
-          {/* Collapse back */}
+        <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-full px-4 py-2 shadow-lg">
           <Button
             variant="ghost"
             size="sm"
@@ -52,7 +43,6 @@ const AudioControls = () => {
             <Music className="h-4 w-4 text-muted-foreground" />
           </Button>
 
-          {/* Play / Pause */}
           {isLoaded ? (
             <Button
               variant="ghost"
@@ -61,17 +51,12 @@ const AudioControls = () => {
               disabled={!isLoaded}
               className="h-8 w-8 p-0"
             >
-              {isPlaying ? (
-                <Pause className="h-4 w-4" />
-              ) : (
-                <Play className="h-4 w-4" />
-              )}
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
           ) : (
             <span className="text-xs text-muted-foreground">No audio</span>
           )}
 
-          {/* Volume Control */}
           {isLoaded && (
             <Popover open={showVolumeSlider} onOpenChange={setShowVolumeSlider}>
               <PopoverTrigger asChild>
@@ -82,11 +67,7 @@ const AudioControls = () => {
                   onMouseEnter={() => setShowVolumeSlider(true)}
                   className="h-8 w-8 p-0"
                 >
-                  {isMuted || volume === 0 ? (
-                    <VolumeX className="h-4 w-4" />
-                  ) : (
-                    <Volume2 className="h-4 w-4" />
-                  )}
+                  {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </Button>
               </PopoverTrigger>
               <PopoverContent
@@ -114,7 +95,6 @@ const AudioControls = () => {
             </Popover>
           )}
 
-          {/* Playing indicator */}
           {isPlaying && (
             <div className="flex items-center gap-1">
               <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>

@@ -87,46 +87,47 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10">
-            <TabsTrigger value="overview" className="flex items-center space-x-2">
-              <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Overview</span>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-10 h-auto p-1 gap-1 overflow-x-auto"
+                     style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
+            <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <BarChart3 className="h-3 w-3" />
+              <span>Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="banners" className="flex items-center space-x-2">
-              <Home className="h-4 w-4" />
-              <span className="hidden sm:inline">Banners</span>
+            <TabsTrigger value="banners" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Home className="h-3 w-3" />
+              <span>Banners</span>
             </TabsTrigger>
-            <TabsTrigger value="services" className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Services</span>
+            <TabsTrigger value="services" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Calendar className="h-3 w-3" />
+              <span>Services</span>
             </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Events</span>
+            <TabsTrigger value="events" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Calendar className="h-3 w-3" />
+              <span>Events</span>
             </TabsTrigger>
-            <TabsTrigger value="rentals" className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Rentals</span>
+            <TabsTrigger value="rentals" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Calendar className="h-3 w-3" />
+              <span>Rentals</span>
             </TabsTrigger>
-            <TabsTrigger value="portfolio" className="flex items-center space-x-2">
-              <Image className="h-4 w-4" />
-              <span className="hidden sm:inline">Portfolio</span>
+            <TabsTrigger value="portfolio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Image className="h-3 w-3" />
+              <span>Portfolio</span>
             </TabsTrigger>
-            <TabsTrigger value="clients" className="flex items-center space-x-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Clients</span>
+            <TabsTrigger value="clients" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Users className="h-3 w-3" />
+              <span>Clients</span>
             </TabsTrigger>
-            <TabsTrigger value="forms" className="flex items-center space-x-2">
-              <MessageSquare className="h-4 w-4" />
-              <span className="hidden sm:inline">Forms</span>
+            <TabsTrigger value="forms" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <MessageSquare className="h-3 w-3" />
+              <span>Forms</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center space-x-2">
-              <Award className="h-4 w-4" />
-              <span className="hidden sm:inline">News & Awards</span>
+            <TabsTrigger value="settings" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Award className="h-3 w-3" />
+              <span>Awards</span>
             </TabsTrigger>
-            <TabsTrigger value="audio" className="flex items-center space-x-2">
-              <Volume2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Audio</span>
+            <TabsTrigger value="audio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Volume2 className="h-3 w-3" />
+              <span>Audio</span>
             </TabsTrigger>
           </TabsList>
 
@@ -411,7 +412,19 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
 
           {/* Audio Management */}
           <TabsContent value="audio">
-            <AudioManager />
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold">Audio Management</h2>
+                <p className="text-muted-foreground mt-1">
+                  Manage background audio for the website
+                </p>
+              </div>
+              <div className="bg-muted/30 p-6 rounded-lg">
+                <p className="text-center text-muted-foreground">
+                  Audio management feature coming soon. Background audio controls are available on the frontend.
+                </p>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

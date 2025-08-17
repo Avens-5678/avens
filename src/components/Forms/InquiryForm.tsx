@@ -106,15 +106,15 @@ const InquiryForm = ({
   };
 
   return (
-    <Card className="w-full max-w-lg">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+    <Card className="w-full max-w-lg border-0 shadow-none">
+      <CardHeader className="px-0 pt-0">
+        <CardTitle className="text-xl lg:text-2xl font-bold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0 pb-0">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 lg:space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -211,7 +211,7 @@ const InquiryForm = ({
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={5}>
                       <Calendar
                         mode="single"
                         selected={field.value}

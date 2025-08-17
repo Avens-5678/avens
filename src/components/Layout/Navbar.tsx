@@ -60,13 +60,17 @@ const Navbar = () => {
                   Contact Us
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogTitle>Contact Us</DialogTitle>
-                <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
-                <InquiryForm 
-                  formType="contact"
-                  title="Contact Us"
-                />
+              <DialogContent className="max-w-[90vw] lg:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+                <div className="p-6">
+                  <DialogTitle>Contact Us</DialogTitle>
+                  <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
+                  <div className="mt-4">
+                    <InquiryForm 
+                      formType="contact"
+                      title="Contact Us"
+                    />
+                  </div>
+                </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -84,7 +88,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="md:hidden py-4 border-t border-border bg-background/95 backdrop-blur-sm">
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
                 <Link
@@ -109,13 +113,17 @@ const Navbar = () => {
                     Contact Us
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogTitle>Contact Us</DialogTitle>
-                  <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
-                  <InquiryForm 
-                    formType="contact"
-                    title="Contact Us"
-                  />
+                <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto p-0">
+                  <div className="p-6">
+                    <DialogTitle>Contact Us</DialogTitle>
+                    <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
+                    <div className="mt-4">
+                      <InquiryForm 
+                        formType="contact"
+                        title="Contact Us"
+                      />
+                    </div>
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>

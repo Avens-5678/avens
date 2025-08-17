@@ -149,7 +149,7 @@ export const usePortfolio = (eventId?: string) => {
           display_order,
           tag,
           album_url,
-          events ( id, event_type, title )
+          events!inner ( id, event_type, title )
         `)
         .order("display_order", { ascending: true });
 

@@ -132,6 +132,11 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       }
       
       queryClient.invalidateQueries({ queryKey: [tableName] });
+      
+      // If this is an event, also invalidate event types cache
+      if (tableName === 'events') {
+        queryClient.invalidateQueries({ queryKey: ['eventTypes'] });
+      }
       handleCancel();
     } catch (error) {
       console.error('Error saving:', error);
@@ -166,6 +171,11 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       if (error) throw error;
       
       queryClient.invalidateQueries({ queryKey: [tableName] });
+      
+      // If this is an event, also invalidate event types cache
+      if (tableName === 'events') {
+        queryClient.invalidateQueries({ queryKey: ['eventTypes'] });
+      }
       toast({
         title: "Deleted",
         description: `${title.slice(0, -1)} and associated pages deleted successfully.`,

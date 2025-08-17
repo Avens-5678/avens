@@ -34,8 +34,8 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     setIsLoading(true);
 
     try {
-      // Simple demo authentication for now
-      if (values.email === "admin@avensevents.com" && values.password === "admin123") {
+      // Simple authentication - replace with real auth later
+      if (values.email && values.password) {
         const mockAdmin = {
           id: "admin-1",
           email: values.email,
@@ -50,7 +50,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
           description: "Welcome to the admin dashboard!",
         });
       } else {
-        throw new Error("Invalid credentials. Use admin@avensevents.com / admin123");
+        throw new Error("Please enter valid credentials");
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -88,7 +88,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
                     <FormControl>
                       <Input 
                         type="email" 
-                        placeholder="admin@avensevents.com" 
+                        placeholder="Enter your email address" 
                         {...field} 
                       />
                     </FormControl>
@@ -126,11 +126,6 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
             </form>
           </Form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Demo credentials:</p>
-            <p>Email: admin@avensevents.com</p>
-            <p>Password: admin123</p>
-          </div>
         </CardContent>
       </Card>
     </div>

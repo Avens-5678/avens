@@ -18,12 +18,15 @@ import {
   Award,
   Settings,
   BarChart3,
-  Volume2
+  Volume2,
+  UserCircle
 } from "lucide-react";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
 import EnhancedPortfolioManager from "@/components/admin/EnhancedPortfolioManager";
 import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboard";
 import AudioManager from "@/components/admin/AudioManager";
+import ProfileManager from "@/components/admin/ProfileManager";
+import Logo from "@/components/ui/logo";
 
 interface AdminDashboardProps {
   adminUser: any;
@@ -32,6 +35,7 @@ interface AdminDashboardProps {
 
 const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [currentAdminUser, setCurrentAdminUser] = useState(adminUser);
   const { toast } = useToast();
   
   // Data hooks
@@ -59,22 +63,27 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
     }
   };
 
+  const handleProfileUpdate = (updatedUser: any) => {
+    setCurrentAdminUser(updatedUser);
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
       <header className="bg-background border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
+            <Logo className="scale-75" />
             <div className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Avens Events Admin
+              Admin Dashboard
             </div>
             <Badge variant="secondary">Dashboard</Badge>
           </div>
           
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <p className="text-sm font-medium">{adminUser.full_name}</p>
-              <p className="text-xs text-muted-foreground capitalize">{adminUser.role}</p>
+              <p className="text-sm font-medium">{currentAdminUser.full_name}</p>
+              <p className="text-xs text-muted-foreground capitalize">{currentAdminUser.role}</p>
             </div>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
@@ -87,7 +96,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-10 h-auto p-1 gap-1 overflow-x-auto"
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-11 h-auto p-1 gap-1 overflow-x-auto"
                      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
             <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
               <BarChart3 className="h-3 w-3" />
@@ -128,6 +137,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <TabsTrigger value="audio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
               <Volume2 className="h-3 w-3" />
               <span>Audio</span>
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <UserCircle className="h-3 w-3" />
+              <span>Profile</span>
             </TabsTrigger>
           </TabsList>
 
@@ -413,6 +426,14 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
           {/* Audio Management */}
           <TabsContent value="audio">
             <AudioManager />
+          </TabsContent>
+
+          {/* Profile Management */}
+          <TabsContent value="profile">
+            <ProfileManager 
+              adminUser={currentAdminUser} 
+              onProfileUpdate={handleProfileUpdate}
+            />
           </TabsContent>
         </Tabs>
       </div>

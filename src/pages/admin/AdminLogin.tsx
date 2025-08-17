@@ -47,29 +47,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     setIsLoading(true);
 
     try {
-      // Check if user is admin first
-      console.log('Checking admin status for email:', values.email);
-      
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('email, full_name, is_active, role')
-        .eq('email', values.email)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      console.log('Admin query result:', { adminData, adminError });
-
-      if (adminError) {
-        console.error('Admin query error:', adminError);
-        throw new Error('Database error. Please try again.');
-      }
-
-      if (!adminData) {
-        console.log('No admin found for email:', values.email);
-        throw new Error('Access denied. Admin privileges required.');
-      }
-
-      // Send OTP to email
+      // Send OTP to email directly - we'll check admin status when they verify
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: values.email,
         options: {
@@ -85,14 +63,14 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
       setStep('otp');
       
       toast({
-        title: "OTP Sent",
-        description: "Please check your email for the verification code.",
+        title: "Verification Code Sent",
+        description: "Please check your email for the 6-digit verification code.",
       });
     } catch (error: any) {
       console.error("Email submission error:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to send OTP. Please try again.",
+        title: "Error", 
+        description: error.message || "Failed to send verification code. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -15,8 +15,10 @@ const AudioControls = () => {
   const [expanded, setExpanded] = useState(false); // collapsed/expanded state
 
   const handleFirstInteraction = async () => {
+    // Force initialize audio with user interaction (required for mobile)
     await initializeAudio();
-    togglePlay();
+    // Then toggle play
+    await togglePlay();
   };
 
   // Wrapper: bottom-left, collapsible
@@ -56,6 +58,7 @@ const AudioControls = () => {
               variant="ghost"
               size="sm"
               onClick={isPlaying ? togglePlay : handleFirstInteraction}
+              disabled={!isLoaded}
               className="h-8 w-8 p-0"
             >
               {isPlaying ? (

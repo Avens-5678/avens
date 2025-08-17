@@ -126,28 +126,39 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     if (isInitialized || !audioRef.current) return;
 
     try {
-      await audioRef.current.play();
+      // For mobile: attempt to play after user interaction
+      const playPromise = audioRef.current.play();
+      await playPromise;
       setIsInitialized(true);
     } catch (error) {
-      console.log('Autoplay blocked, waiting for user interaction');
+      // If autoplay fails, mark as initialized but not playing
+      console.log('Autoplay blocked, audio ready for user interaction');
       setIsInitialized(true);
+      // Don't set isPlaying to true if play failed
+      setIsPlaying(false);
     }
   };
 
   const togglePlay = async () => {
+    if (!audioRef.current) return;
+
+    // Initialize audio if not done yet (mobile needs user interaction)
     if (!isInitialized) {
       await initializeAudio();
+      return; // initializeAudio handles the play attempt
     }
-    if (!audioRef.current) return;
 
     try {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        await audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        await playPromise;
       }
     } catch (error) {
       console.error('Audio play error:', error);
+      // Reset playing state if play fails
+      setIsPlaying(false);
     }
   };
 

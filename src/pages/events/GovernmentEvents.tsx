@@ -74,9 +74,22 @@ const GovernmentEvents = () => {
                 </p>
               </div>
 
-              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
-                Plan Official Event <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
+                    Plan Official Event <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogTitle>Plan Your Official Event</DialogTitle>
+                  <DialogDescription>Fill out this form to request a consultation for your official event</DialogDescription>
+                  <InquiryForm 
+                    formType="inquiry"
+                    eventType="government"
+                    title="Plan Your Official Event"
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
 
             {/* Image Side */}

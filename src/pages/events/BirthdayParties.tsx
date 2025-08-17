@@ -73,9 +73,22 @@ const BirthdayParties = () => {
                 </p>
               </div>
 
-              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
-                Plan My Party <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
+                    Plan My Party <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogTitle>Plan Your Birthday Party</DialogTitle>
+                  <DialogDescription>Fill out this form to start planning your birthday celebration</DialogDescription>
+                  <InquiryForm 
+                    formType="inquiry"
+                    eventType="birthday"
+                    title="Plan Your Birthday Party"
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
 
             {/* Image Side */}

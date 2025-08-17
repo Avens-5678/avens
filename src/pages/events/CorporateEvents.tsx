@@ -124,8 +124,8 @@ const CorporateEvents = () => {
 
       {/* Highlighted Services */}
       <section className="py-20 bg-background relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-start gap-16">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3">
             {/* Curved Text Title */}
             <div className="lg:w-1/3">
               <div className="relative">

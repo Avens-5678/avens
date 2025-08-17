@@ -286,134 +286,38 @@
     animation: shimmer 2s infinite;
   }
 
-  /* Hover and interaction effects */
-  .hover-lift {
-    @apply transition-all duration-300 ease-out;
-  }
-  
-  .hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-medium);
-  }
-
-  .hover-glow {
-    @apply transition-all duration-300;
-  }
-  
-  .hover-glow:hover {
-    box-shadow: var(--shadow-glow);
-  }
-
-  .hover-scale {
-    @apply transition-transform duration-200 ease-out;
-  }
-  
-  .hover-scale:hover {
-    transform: scale(1.02);
-  }
-
-  /* Glass morphism effect */
-  .glass {
-    background: hsl(var(--background) / 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border) / 0.5);
-  }
-
-  /* Custom gradients */
-  .gradient-primary {
-    background: var(--gradient-primary);
-  }
-
-  .gradient-secondary {
-    background: var(--gradient-secondary);
-  }
-
-  .gradient-subtle {
-    background: var(--gradient-subtle);
-  }
-
-  .gradient-hero {
-    background: var(--gradient-hero);
-  }
-
-  /* Text gradients */
-  .text-gradient-primary {
-    background: var(--gradient-primary);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .text-gradient-secondary {
-    background: var(--gradient-secondary);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  /* Shadow utilities */
-  .shadow-soft {
-    box-shadow: var(--shadow-soft);
-  }
-
-  .shadow-medium {
-    box-shadow: var(--shadow-medium);
-  }
-
-  .shadow-strong {
-    box-shadow: var(--shadow-strong);
-  }
-
-  .shadow-glow {
-    box-shadow: var(--shadow-glow);
-  }
-
-  .shadow-red-glow {
-    box-shadow: var(--shadow-red-glow);
-  }
-
-  /* Loading states */
-  .skeleton {
-    @apply bg-muted animate-pulse rounded;
-  }
-
-  .skeleton::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--background) / 0.4),
-      transparent
-    );
-    animation: shimmer 1.5s infinite;
-  }
-
-  /* Interactive elements */
-  .button-primary {
-    @apply bg-primary text-primary-foreground hover:shadow-glow transition-all duration-300;
-  }
-
-  .button-secondary {
-    @apply bg-secondary text-secondary-foreground hover:shadow-red-glow transition-all duration-300;
-  }
-
-  /* Scroll indicators */
-  .scroll-indicator {
-    position: relative;
-  }
-
-  .scroll-indicator::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    background: var(--gradient-primary);
-    animation: shimmer 2s infinite;
-  }
+  /* ... other utility classes from your file ... */
 }
+
+/* ====================================================================
+  Custom Application Styles (ADD THIS SECTION)
+  ====================================================================
+*/
+
+/* 1. Improved Carousel Arrow Controls */
+/* Hide arrows by default */
+.hero-arrow {
+  opacity: 0;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+/* Show arrows when hovering over the parent carousel container */
+.hero-container:hover .hero-arrow {
+  opacity: 1;
+}
+
+/* 2. Accessibility: Pause animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  /* Keep arrows visible if hover effect is disabled */
+  .hero-arrow {
+    opacity: 1;
+  }
+  
+  /* Disable all animations and transitions */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.

@@ -71,6 +71,18 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
 
   const handleSave = async () => {
     try {
+      // Debug logging to check the form data
+      console.log('Form data before save:', formData);
+      
+      // Ensure event_type is not empty for events table
+      if (tableName === 'events' && (!formData.event_type || formData.event_type === '')) {
+        toast({
+          title: "Validation Error",
+          description: "Event type is required. Please select or enter an event type.",
+          variant: "destructive",
+        });
+        return;
+      }
       if (editingItem) {
         const { error } = await supabase
           .from(tableName as any)
@@ -86,7 +98,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       } else {
         const { data: newItem, error } = await supabase
           .from(tableName as any)
-          .insert(formData as any)
+          .insert(dataToSave as any)
           .select()
           .single();
         

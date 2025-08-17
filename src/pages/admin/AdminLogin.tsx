@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Shield, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -16,12 +17,18 @@ const loginSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
 interface AdminLoginProps {
   onLoginSuccess: (user: any) => void;
 }
 
 const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -29,6 +36,13 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     defaultValues: {
       email: "",
       password: "",
+    },
+  });
+
+  const forgotPasswordForm = useForm<z.infer<typeof forgotPasswordSchema>>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
     },
   });
 
@@ -75,6 +89,37 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const onForgotPasswordSubmit = async (values: z.infer<typeof forgotPasswordSchema>) => {
+    setIsForgotPasswordLoading(true);
+
+    try {
+      const response = await supabase.functions.invoke('admin-password-reset', {
+        body: { email: values.email }
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      toast({
+        title: "Reset Email Sent",
+        description: "If the email exists, a password reset link has been sent.",
+      });
+
+      setForgotPasswordOpen(false);
+      forgotPasswordForm.reset();
+    } catch (error: any) {
+      console.error("Forgot password error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send reset email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsForgotPasswordLoading(false);
     }
   };
 
@@ -146,6 +191,63 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
+
+              <div className="text-center">
+                <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="link" className="text-sm text-muted-foreground hover:text-foreground">
+                      Forgot your password?
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Reset Password</DialogTitle>
+                      <DialogDescription>
+                        Enter your email address and we'll send you a link to reset your password.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...forgotPasswordForm}>
+                      <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPasswordSubmit)} className="space-y-4">
+                        <FormField
+                          control={forgotPasswordForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="email" 
+                                  placeholder="Enter your email address" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="flex gap-2">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => setForgotPasswordOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            className="flex-1"
+                            disabled={isForgotPasswordLoading}
+                          >
+                            {isForgotPasswordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Send Reset Email
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </form>
           </Form>
 

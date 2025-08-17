@@ -344,6 +344,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_portfolio_event"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "portfolio_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
@@ -561,7 +568,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      portfolio_view: {
+        Row: {
+          album_url: string | null
+          description: string | null
+          display_order: number | null
+          event_id: string | null
+          event_title: string | null
+          event_type: Database["public"]["Enums"]["event_type"] | null
+          id: string | null
+          image_url: string | null
+          is_before: boolean | null
+          is_before_after: boolean | null
+          location: string | null
+          tag: string | null
+          title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_portfolio_event"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       authenticate_admin: {

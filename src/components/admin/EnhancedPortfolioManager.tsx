@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Save, X, ExternalLink, ImageIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, ExternalLink, ImageIcon, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { uploadPortfolioImage } from "@/utils/storageUtils";
 
 interface EnhancedPortfolioManagerProps {
   portfolio: any[];
@@ -24,6 +25,8 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleEdit = (item: any) => {
     setEditingItem(item);
@@ -37,8 +40,40 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
       is_before_after: false, 
       is_before: false,
       tag: '',
-      album_url: ''
+      album_url: '',
+      image_url: ''
     });
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!file || !formData.event_id) {
+      toast({
+        title: "Error",
+        description: "Please select an event first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const imageUrl = await uploadPortfolioImage(file, formData.event_id);
+      setFormData(prev => ({ ...prev, image_url: imageUrl }));
+      
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully",
+      });
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload image",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -194,13 +229,33 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image_url">Cover Image URL <span className="text-red-500">*</span></Label>
-              <div className="space-y-2">
+              <Label htmlFor="image_upload">Cover Image Upload <span className="text-red-500">*</span></Label>
+              <div className="space-y-3">
                 <Input
-                  value={formData.image_url || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                  placeholder="Direct image URL for the portfolio tile/cover"
+                  id="image_upload"
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleImageUpload(file);
+                    }
+                  }}
+                  disabled={!formData.event_id || uploading}
                 />
+                {!formData.event_id && (
+                  <p className="text-sm text-muted-foreground">Please select an event first to enable image upload</p>
+                )}
+                {formData.image_url && (
+                  <div className="mt-3">
+                    <img 
+                      src={formData.image_url} 
+                      alt="Preview" 
+                      className="w-32 h-32 object-cover rounded border"
+                    />
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground flex items-center space-x-1">
                   <ImageIcon className="h-3 w-3" />
                   <span>This image will be used as the cover/tile for this portfolio item</span>
@@ -261,9 +316,13 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
             )}
             
             <div className="flex space-x-2 pt-4">
-              <Button onClick={handleSave} className="flex-1">
+              <Button 
+                onClick={handleSave} 
+                className="flex-1" 
+                disabled={uploading || (!formData.image_url && !editingItem)}
+              >
                 <Save className="mr-2 h-4 w-4" />
-                Save
+                {uploading ? "Uploading..." : "Save"}
               </Button>
               <Button onClick={handleCancel} variant="outline" className="flex-1">
                 <X className="mr-2 h-4 w-4" />

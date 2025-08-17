@@ -4,12 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
-import { ArrowLeft, Camera, ExternalLink } from "lucide-react";
+import { ArrowLeft, Camera } from "lucide-react";
+import { useState } from "react";
+import Lightbox from "@/components/Portfolio/Lightbox";
 
 const Gallery = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const { data: portfolio, isLoading } = usePortfolio(eventId);
   const { data: events } = useEvents();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   
   // Find the event associated with this portfolio
   const event = events?.find(e => e.id === eventId);
@@ -26,6 +30,11 @@ const Gallery = () => {
 
   const regularImages = portfolio?.filter(item => !item.is_before_after) || [];
   const beforeAfterImages = portfolio?.filter(item => item.is_before_after) || [];
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   return (
     <Layout>
@@ -52,41 +61,31 @@ const Gallery = () => {
         <div className="container mx-auto px-4">
           {regularImages.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {regularImages.map((item) => (
-                <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300">
-                  <div className="aspect-video overflow-hidden">
+              {regularImages.map((item, index) => (
+                <Card 
+                  key={item.id} 
+                  className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                  onClick={() => openLightbox(index)}
+                >
+                  <div className="aspect-video overflow-hidden relative">
                     <img 
                       src={item.image_url} 
                       alt={item.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
+                    <div className="absolute inset-0 bg-background/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="bg-background/90 text-foreground px-3 py-1 rounded-full text-sm font-medium">
+                        Click to view
+                      </div>
+                    </div>
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-sm line-clamp-2">{item.title}</h3>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {item.tag && (
+                    {item.tag && (
+                      <div className="mt-2">
                         <Badge variant="outline" className="text-xs">
                           {item.tag}
                         </Badge>
-                      )}
-                      {item.album_url && (
-                        <Badge variant="secondary" className="text-xs">
-                          <Camera className="mr-1 h-3 w-3" />
-                          Album
-                        </Badge>
-                      )}
-                    </div>
-                    {item.album_url && (
-                      <div className="mt-2">
-                        <a 
-                          href={item.album_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-500 hover:underline flex items-center"
-                        >
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          View Full Album
-                        </a>
                       </div>
                     )}
                   </CardContent>
@@ -107,14 +106,23 @@ const Gallery = () => {
             <div className="mt-20">
               <h2 className="text-3xl font-bold text-center mb-12">Before & After</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {beforeAfterImages.map((item) => (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
-                    <div className="aspect-video overflow-hidden">
+                {beforeAfterImages.map((item, index) => (
+                  <Card 
+                    key={item.id} 
+                    className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                    onClick={() => openLightbox(regularImages.length + index)}
+                  >
+                    <div className="aspect-video overflow-hidden relative">
                       <img 
                         src={item.image_url} 
                         alt={item.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
+                      <div className="absolute inset-0 bg-background/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="bg-background/90 text-foreground px-3 py-1 rounded-full text-sm font-medium">
+                          Click to view
+                        </div>
+                      </div>
                     </div>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -123,25 +131,20 @@ const Gallery = () => {
                           {item.is_before ? "Before" : "After"}
                         </Badge>
                       </div>
-                      {item.album_url && (
-                        <div className="mt-2">
-                          <a 
-                            href={item.album_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs text-blue-500 hover:underline flex items-center"
-                          >
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            View Full Album
-                          </a>
-                        </div>
-                      )}
                     </CardContent>
                   </Card>
                 ))}
               </div>
             </div>
           )}
+
+          {/* Lightbox */}
+          <Lightbox
+            images={[...regularImages, ...beforeAfterImages]}
+            currentIndex={lightboxIndex}
+            isOpen={lightboxOpen}
+            onClose={() => setLightboxOpen(false)}
+          />
         </div>
       </section>
     </Layout>

@@ -1,38 +1,29 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Layout from "@/components/Layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
-import { ArrowRight, Camera, Calendar, MapPin, Filter } from "lucide-react";
+import { Camera, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import FilterButtons from "@/components/Portfolio/FilterButtons";
+import EventCard from "@/components/Portfolio/EventCard";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Portfolio = () => {
   const { data: events, isLoading: loadingEvents } = useEvents();
   const { data: portfolio, isLoading: loadingPortfolio } = usePortfolio();
-  const [selectedTag, setSelectedTag] = useState<string>("all");
+  const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  // Calculate derived values before early returns
-  const uniqueTags = Array.from(new Set(portfolio?.map(item => item.tag).filter(Boolean))) as string[];
-  
-  // Filter portfolio by selected tag
-  const getFilteredPortfolio = (eventId: string) => {
-    const eventPortfolio = portfolio?.filter(item => item.event_id === eventId) || [];
-    if (selectedTag === "all") return eventPortfolio;
-    return eventPortfolio.filter(item => item.tag === selectedTag);
-  };
-
-  // Filter events that have portfolio items to create event cards
+  // Filter events that have portfolio items
   const eventsWithPortfolio = events?.filter(event => {
     const hasPortfolio = portfolio?.some(item => item.event_id === event.id);
-    console.log(`Event ${event.title} (${event.id}) has portfolio:`, hasPortfolio);
     return hasPortfolio;
   }) || [];
-  
-  console.log('All events:', events?.length || 0);
-  console.log('All portfolio items:', portfolio?.length || 0);
-  console.log('Events with portfolio:', eventsWithPortfolio.length);
+
+  // Filter events by selected filter
+  const filteredEvents = eventsWithPortfolio.filter(event => {
+    if (activeFilter === "all") return true;
+    return event.event_type === activeFilter;
+  });
 
   if (loadingEvents || loadingPortfolio) {
     return (
@@ -66,102 +57,45 @@ const Portfolio = () => {
       </section>
 
       {/* Filter Section */}
-      <section className="py-12 bg-muted/30">
+      <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h2 className="text-2xl font-bold">Browse by Category</h2>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={selectedTag} onValueChange={setSelectedTag}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Filter by tag" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {uniqueTags.map((tag) => (
-                    <SelectItem key={tag} value={tag}>
-                      {tag.charAt(0).toUpperCase() + tag.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <FilterButtons 
+            activeFilter={activeFilter} 
+            onFilterChange={setActiveFilter} 
+          />
         </div>
       </section>
 
       {/* Event Cards Grid */}
-      <section className="py-20">
+      <section className="pb-20">
         <div className="container mx-auto px-4">
-          {eventsWithPortfolio.length > 0 ? (
+          {filteredEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {eventsWithPortfolio.map((event) => {
-                const filteredPortfolio = getFilteredPortfolio(event.id);
-                if (selectedTag !== "all" && filteredPortfolio.length === 0) return null;
-                
-                return (
-                <Card key={event.id} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 bg-gradient-to-br from-card via-card to-card/50">
-                  {/* Hero Image */}
-                  <div className="aspect-[4/3] overflow-hidden relative">
-                    <img 
-                      src={event.hero_image_url || '/placeholder.svg'} 
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    {/* Category Badge Overlay */}
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-background/90 text-foreground hover:bg-background/80 backdrop-blur-sm">
-                        <Calendar className="mr-1 h-3 w-3" />
-                        {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {/* Event Information */}
-                  <CardContent className="p-6 space-y-4">
-                    <div className="space-y-2">
-                      <CardTitle className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
-                        {event.title}
-                      </CardTitle>
-                      
-                      {/* Location */}
-                      {event.location && (
-                        <div className="flex items-center text-muted-foreground">
-                          <MapPin className="mr-2 h-4 w-4" />
-                          <span className="text-sm">{event.location}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Description */}
-                    <p className="text-muted-foreground text-sm line-clamp-3">
-                      {event.description}
-                    </p>
-                    
-                    {/* View Gallery Button */}
-                    <div className="pt-2">
-                      <Button 
-                        asChild 
-                        className="w-full group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-accent transition-all duration-300"
-                      >
-                        <Link to={`/portfolio/${event.id}`}>
-                          View Gallery <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-                );
-              })}
+              {filteredEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  id={event.id}
+                  title={event.title}
+                  eventType={event.event_type}
+                  location={event.location}
+                  heroImage={event.hero_image_url || '/placeholder.svg'}
+                  description={event.description}
+                />
+              ))}
             </div>
           ) : (
             <div className="text-center py-20">
               <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
                 <Camera className="h-12 w-12 text-muted-foreground" />
               </div>
-              <h3 className="text-2xl font-semibold mb-4">Portfolio Coming Soon</h3>
+              <h3 className="text-2xl font-semibold mb-4">
+                {activeFilter === "all" ? "Portfolio Coming Soon" : "No Events Found"}
+              </h3>
               <p className="text-xl text-muted-foreground max-w-md mx-auto">
-                We're currently building our portfolio gallery. Check back soon to see our amazing work!
+                {activeFilter === "all" 
+                  ? "We're currently building our portfolio gallery. Check back soon to see our amazing work!"
+                  : "No events found for the selected category. Try selecting a different filter."
+                }
               </p>
             </div>
           )}

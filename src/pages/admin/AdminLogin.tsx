@@ -36,48 +36,31 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     setIsLoading(true);
 
     try {
-      // Authenticate directly with the admin_users table using the RPC function
-      const { data: adminData, error } = await supabase
-        .rpc('authenticate_admin', {
-          input_email: values.email,
-          input_password_hash: values.password
-        });
-
-      if (error || !adminData || adminData.length === 0) {
-        throw new Error("Invalid credentials. Please check your email and password.");
-      }
-
-      const admin = adminData[0];
-
-      // Sign up the admin user in Supabase auth if they don't exist
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      // Direct Supabase Auth login
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
-          data: {
-            full_name: admin.full_name,
-            role: admin.role
-          }
-        }
       });
 
-      // If signup fails because user exists, try to sign in
-      if (signUpError && signUpError.message.includes('already registered')) {
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: values.email,
-          password: values.password
-        });
-
-        if (signInError) {
-          throw new Error("Authentication failed. Please try again.");
-        }
-      } else if (signUpError) {
-        // If it's a different error, handle it
-        console.log("Auth signup error (proceeding anyway):", signUpError.message);
+      if (signInError) {
+        throw new Error('Invalid credentials. Please check your email and password.');
       }
 
-      onLoginSuccess(admin);
+      // Check if user is admin in admin_users table
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('id', authData.user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (adminError || !adminData) {
+        // Sign out the user if they're not an admin
+        await supabase.auth.signOut();
+        throw new Error('Access denied. Admin privileges required.');
+      }
+
+      onLoginSuccess(adminData);
       
       toast({
         title: "Login Successful",

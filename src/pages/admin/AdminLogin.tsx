@@ -6,19 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Shield, ArrowLeft } from "lucide-react";
+import { Loader2, Shield, ArrowLeft, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
-const loginSchema = z.object({
+const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+const otpSchema = z.object({
+  otp: z.string().min(6, "OTP must be 6 digits").max(6, "OTP must be 6 digits"),
 });
 
 interface AdminLoginProps {
@@ -27,46 +25,93 @@ interface AdminLoginProps {
 
 const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
-  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [step, setStep] = useState<'email' | 'otp'>('email');
+  const [email, setEmail] = useState('');
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const forgotPasswordForm = useForm<z.infer<typeof forgotPasswordSchema>>({
-    resolver: zodResolver(forgotPasswordSchema),
+  const emailForm = useForm<z.infer<typeof emailSchema>>({
+    resolver: zodResolver(emailSchema),
     defaultValues: {
       email: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+  const otpForm = useForm<z.infer<typeof otpSchema>>({
+    resolver: zodResolver(otpSchema),
+    defaultValues: {
+      otp: "",
+    },
+  });
+
+  const onEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
 
     try {
-      // Direct Supabase Auth login
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
+      // Check if user is admin first
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('email, full_name, is_active')
+        .eq('email', values.email)
+        .eq('is_active', true)
+        .maybeSingle();
 
-      if (signInError) {
-        throw new Error('Invalid credentials. Please check your email and password.');
+      if (adminError || !adminData) {
+        throw new Error('Access denied. Admin privileges required.');
       }
 
-      // Check if user is admin in admin_users table
+      // Send OTP to email
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: values.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
+        }
+      });
+
+      if (otpError) {
+        throw otpError;
+      }
+
+      setEmail(values.email);
+      setStep('otp');
+      
+      toast({
+        title: "OTP Sent",
+        description: "Please check your email for the verification code.",
+      });
+    } catch (error: any) {
+      console.error("Email submission error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send OTP. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onOtpSubmit = async (values: z.infer<typeof otpSchema>) => {
+    setIsLoading(true);
+
+    try {
+      // Verify OTP
+      const { data: authData, error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token: values.otp,
+        type: 'email'
+      });
+
+      if (verifyError || !authData.user) {
+        throw new Error('Invalid OTP. Please check the code and try again.');
+      }
+
+      // Get admin data
       const { data: adminData, error: adminError } = await supabase
         .from('admin_users')
         .select('*')
-        .eq('id', authData.user.id)
+        .eq('email', email)
         .eq('is_active', true)
-        .maybeSingle();
+        .single();
 
       if (adminError || !adminData) {
         // Sign out the user if they're not an admin
@@ -81,10 +126,10 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
         description: "Welcome to the admin dashboard!",
       });
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("OTP verification error:", error);
       toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials. Please try again.",
+        title: "Verification Failed",
+        description: error.message || "Invalid OTP. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -92,34 +137,38 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     }
   };
 
-  const onForgotPasswordSubmit = async (values: z.infer<typeof forgotPasswordSchema>) => {
-    setIsForgotPasswordLoading(true);
+  const handleBackToEmail = () => {
+    setStep('email');
+    setEmail('');
+    otpForm.reset();
+  };
 
+  const handleResendOTP = async () => {
+    if (!email) return;
+
+    setIsLoading(true);
     try {
-      const response = await supabase.functions.invoke('admin-password-reset', {
-        body: { email: values.email }
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
+        }
       });
 
-      if (response.error) {
-        throw response.error;
-      }
+      if (error) throw error;
 
       toast({
-        title: "Reset Email Sent",
-        description: "If the email exists, a password reset link has been sent.",
+        title: "OTP Resent",
+        description: "A new verification code has been sent to your email.",
       });
-
-      setForgotPasswordOpen(false);
-      forgotPasswordForm.reset();
     } catch (error: any) {
-      console.error("Forgot password error:", error);
       toast({
         title: "Error",
-        description: "Failed to send reset email. Please try again.",
+        description: "Failed to resend OTP. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsForgotPasswordLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -137,120 +186,109 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
             </Link>
           </div>
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-            <Shield className="h-6 w-6 text-primary" />
+            {step === 'email' ? (
+              <Shield className="h-6 w-6 text-primary" />
+            ) : (
+              <Mail className="h-6 w-6 text-primary" />
+            )}
           </div>
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {step === 'email' ? 'Admin Login' : 'Enter Verification Code'}
+          </CardTitle>
           <p className="text-muted-foreground">
-            Access the Avens Events admin dashboard
+            {step === 'email' 
+              ? 'Enter your admin email to receive a verification code'
+              : `We sent a 6-digit code to ${email}`
+            }
           </p>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="email" 
-                        placeholder="Enter your email address" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="Enter your password" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-primary to-accent"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
-              </Button>
-
-              <div className="text-center">
-                <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="link" className="text-sm text-muted-foreground hover:text-foreground">
-                      Forgot your password?
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Reset Password</DialogTitle>
-                      <DialogDescription>
-                        Enter your email address and we'll send you a link to reset your password.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <Form {...forgotPasswordForm}>
-                      <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPasswordSubmit)} className="space-y-4">
-                        <FormField
-                          control={forgotPasswordForm.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="email" 
-                                  placeholder="Enter your email address" 
-                                  {...field} 
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+          {step === 'email' ? (
+            <Form {...emailForm}>
+              <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-6">
+                <FormField
+                  control={emailForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Admin Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="email" 
+                          placeholder="Enter your admin email address" 
+                          {...field} 
                         />
-                        <div className="flex gap-2">
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            className="flex-1"
-                            onClick={() => setForgotPasswordOpen(false)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            className="flex-1"
-                            disabled={isForgotPasswordLoading}
-                          >
-                            {isForgotPasswordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Send Reset Email
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </form>
-          </Form>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-primary to-accent"
+                  disabled={isLoading}
+                >
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Send Verification Code
+                </Button>
+              </form>
+            </Form>
+          ) : (
+            <Form {...otpForm}>
+              <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-6">
+                <FormField
+                  control={otpForm.control}
+                  name="otp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Verification Code</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="text" 
+                          placeholder="Enter 6-digit code" 
+                          maxLength={6}
+                          className="text-center text-lg tracking-widest"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-primary to-accent"
+                  disabled={isLoading}
+                >
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Verify & Sign In
+                </Button>
+
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handleResendOTP}
+                    disabled={isLoading}
+                  >
+                    Resend Code
+                  </Button>
+                  
+                  <Button 
+                    type="button"
+                    variant="link" 
+                    className="w-full text-sm text-muted-foreground"
+                    onClick={handleBackToEmail}
+                  >
+                    Back to Email
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
         </CardContent>
       </Card>
     </div>

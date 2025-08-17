@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Shield, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -35,35 +36,53 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     setIsLoading(true);
 
     try {
-      // Enhanced security check
-      const validAdmins = [
-        { email: "admin@avensevents.com", password: "SecureAdmin2024!", role: "admin" },
-        { email: "manager@avensevents.com", password: "Manager2024!", role: "manager" }
-      ];
-      
-      const adminUser = validAdmins.find(admin => 
-        admin.email === values.email && admin.password === values.password
-      );
-      
-      if (adminUser) {
-        const mockAdmin = {
-          id: `admin-${Date.now()}`,
-          email: adminUser.email,
-          full_name: adminUser.role === "admin" ? "Admin User" : "Manager User",
-          role: adminUser.role
-        };
-
-        onLoginSuccess(mockAdmin);
-        
-        toast({
-          title: "Login Successful",
-          description: "Welcome to the admin dashboard!",
+      // Authenticate directly with the admin_users table using the RPC function
+      const { data: adminData, error } = await supabase
+        .rpc('authenticate_admin', {
+          input_email: values.email,
+          input_password_hash: values.password
         });
-      } else {
-        // Add delay to prevent brute force attacks
-        await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (error || !adminData || adminData.length === 0) {
         throw new Error("Invalid credentials. Please check your email and password.");
       }
+
+      const admin = adminData[0];
+
+      // Sign up the admin user in Supabase auth if they don't exist
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
+          data: {
+            full_name: admin.full_name,
+            role: admin.role
+          }
+        }
+      });
+
+      // If signup fails because user exists, try to sign in
+      if (signUpError && signUpError.message.includes('already registered')) {
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password
+        });
+
+        if (signInError) {
+          throw new Error("Authentication failed. Please try again.");
+        }
+      } else if (signUpError) {
+        // If it's a different error, handle it
+        console.log("Auth signup error (proceeding anyway):", signUpError.message);
+      }
+
+      onLoginSuccess(admin);
+      
+      toast({
+        title: "Login Successful",
+        description: "Welcome to the admin dashboard!",
+      });
     } catch (error: any) {
       console.error("Login error:", error);
       toast({

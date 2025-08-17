@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -7,16 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Shield, ArrowLeft, Mail } from "lucide-react";
+import { Loader2, Shield, ArrowLeft, Mail, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-});
-
-const otpSchema = z.object({
-  otp: z.string().min(6, "OTP must be 6 digits").max(6, "OTP must be 6 digits"),
 });
 
 interface AdminLoginProps {
@@ -25,7 +21,7 @@ interface AdminLoginProps {
 
 const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<'email' | 'otp'>('email');
+  const [emailSent, setEmailSent] = useState(false);
   const [email, setEmail] = useState('');
   const { toast } = useToast();
 
@@ -36,41 +32,72 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     },
   });
 
-  const otpForm = useForm<z.infer<typeof otpSchema>>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: {
-      otp: "",
-    },
-  });
+  // Handle auth state changes (for magic link)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        console.log('User signed in:', session.user.email);
+        
+        // Check if user is admin
+        const { data: adminData, error: adminError } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('email', session.user.email)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (adminError || !adminData) {
+          // Sign out if not admin
+          await supabase.auth.signOut();
+          toast({
+            title: "Access Denied",
+            description: "Admin privileges required.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Success! Login complete
+        onLoginSuccess(adminData);
+        toast({
+          title: "Login Successful",
+          description: "Welcome to the admin dashboard!",
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [onLoginSuccess, toast]);
 
   const onEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
 
     try {
-      // Send OTP to email directly - we'll check admin status when they verify
-      const { error: otpError } = await supabase.auth.signInWithOtp({
+      // Send magic link (simpler than OTP)
+      const { error } = await supabase.auth.signInWithOtp({
         email: values.email,
         options: {
           emailRedirectTo: `${window.location.origin}/admin`,
+          shouldCreateUser: false,
         }
       });
 
-      if (otpError) {
-        throw otpError;
+      if (error) {
+        throw error;
       }
 
       setEmail(values.email);
-      setStep('otp');
+      setEmailSent(true);
       
       toast({
-        title: "Verification Code Sent",
-        description: "Please check your email for the 6-digit verification code.",
+        title: "Magic Link Sent",
+        description: "Please check your email and click the link to sign in.",
       });
     } catch (error: any) {
       console.error("Email submission error:", error);
       toast({
         title: "Error", 
-        description: error.message || "Failed to send verification code. Please try again.",
+        description: error.message || "Failed to send magic link. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -78,60 +105,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     }
   };
 
-  const onOtpSubmit = async (values: z.infer<typeof otpSchema>) => {
-    setIsLoading(true);
-
-    try {
-      // Verify OTP
-      const { data: authData, error: verifyError } = await supabase.auth.verifyOtp({
-        email,
-        token: values.otp,
-        type: 'email'
-      });
-
-      if (verifyError || !authData.user) {
-        throw new Error('Invalid OTP. Please check the code and try again.');
-      }
-
-      // Get admin data
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('email', email)
-        .eq('is_active', true)
-        .single();
-
-      if (adminError || !adminData) {
-        // Sign out the user if they're not an admin
-        await supabase.auth.signOut();
-        throw new Error('Access denied. Admin privileges required.');
-      }
-
-      onLoginSuccess(adminData);
-      
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin dashboard!",
-      });
-    } catch (error: any) {
-      console.error("OTP verification error:", error);
-      toast({
-        title: "Verification Failed",
-        description: error.message || "Invalid OTP. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleBackToEmail = () => {
-    setStep('email');
-    setEmail('');
-    otpForm.reset();
-  };
-
-  const handleResendOTP = async () => {
+  const handleResendEmail = async () => {
     if (!email) return;
 
     setIsLoading(true);
@@ -140,24 +114,31 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/admin`,
+          shouldCreateUser: false,
         }
       });
 
       if (error) throw error;
 
       toast({
-        title: "OTP Resent",
-        description: "A new verification code has been sent to your email.",
+        title: "Magic Link Resent",
+        description: "A new magic link has been sent to your email.",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to resend OTP. Please try again.",
+        description: "Failed to resend magic link. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleBackToEmail = () => {
+    setEmailSent(false);
+    setEmail('');
+    emailForm.reset();
   };
 
   return (
@@ -174,24 +155,24 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
             </Link>
           </div>
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-            {step === 'email' ? (
+            {!emailSent ? (
               <Shield className="h-6 w-6 text-primary" />
             ) : (
-              <Mail className="h-6 w-6 text-primary" />
+              <CheckCircle className="h-6 w-6 text-green-600" />
             )}
           </div>
           <CardTitle className="text-2xl font-bold">
-            {step === 'email' ? 'Admin Login' : 'Enter Verification Code'}
+            {!emailSent ? 'Admin Login' : 'Check Your Email'}
           </CardTitle>
           <p className="text-muted-foreground">
-            {step === 'email' 
-              ? 'Enter your admin email to receive a verification code'
-              : `We sent a 6-digit code to ${email}`
+            {!emailSent 
+              ? 'Enter your admin email to receive a magic link'
+              : `We sent a magic link to ${email}. Click the link in your email to sign in.`
             }
           </p>
         </CardHeader>
         <CardContent>
-          {step === 'email' ? (
+          {!emailSent ? (
             <Form {...emailForm}>
               <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-6">
                 <FormField
@@ -218,64 +199,42 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
                   disabled={isLoading}
                 >
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Send Verification Code
+                  Send Magic Link
                 </Button>
               </form>
             </Form>
           ) : (
-            <Form {...otpForm}>
-              <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-6">
-                <FormField
-                  control={otpForm.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Verification Code</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="text" 
-                          placeholder="Enter 6-digit code" 
-                          maxLength={6}
-                          className="text-center text-lg tracking-widest"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <div className="space-y-6">
+              <div className="text-center p-6 border-2 border-dashed border-muted rounded-lg">
+                <Mail className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="font-semibold mb-2">Magic Link Sent!</h3>
+                <p className="text-sm text-muted-foreground">
+                  Check your email inbox and click the login link to access the admin dashboard.
+                </p>
+              </div>
 
+              <div className="flex flex-col gap-2">
                 <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-primary to-accent"
+                  type="button"
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleResendEmail}
                   disabled={isLoading}
                 >
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Verify & Sign In
+                  Resend Magic Link
                 </Button>
-
-                <div className="flex flex-col gap-2">
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    className="w-full"
-                    onClick={handleResendOTP}
-                    disabled={isLoading}
-                  >
-                    Resend Code
-                  </Button>
-                  
-                  <Button 
-                    type="button"
-                    variant="link" 
-                    className="w-full text-sm text-muted-foreground"
-                    onClick={handleBackToEmail}
-                  >
-                    Back to Email
-                  </Button>
-                </div>
-              </form>
-            </Form>
+                
+                <Button 
+                  type="button"
+                  variant="link" 
+                  className="w-full text-sm text-muted-foreground"
+                  onClick={handleBackToEmail}
+                >
+                  Use Different Email
+                </Button>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

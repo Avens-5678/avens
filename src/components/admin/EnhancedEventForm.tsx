@@ -212,18 +212,27 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
                 </div>
                 <div>
                   <Label htmlFor="event_type">Event Type *</Label>
-                  <Select value={formData.event_type} onValueChange={(value) => handleInputChange('event_type', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select event type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {eventTypeOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {mode === 'create' ? (
+                    <Input
+                      id="event_type"
+                      value={formData.event_type}
+                      onChange={(e) => handleInputChange('event_type', e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                      placeholder="e.g., anniversary, social-gathering, etc."
+                    />
+                  ) : (
+                    <Select value={formData.event_type} onValueChange={(value) => handleInputChange('event_type', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select event type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {eventTypeOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </div>
 

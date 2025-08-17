@@ -29,6 +29,9 @@ All colors MUST be HSL.
     --accent: 210 85% 45%;
     --accent-foreground: 0 0% 98%;
 
+    --hover: 0 84% 60%;
+    --hover-foreground: 0 0% 98%;
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
@@ -81,6 +84,9 @@ All colors MUST be HSL.
     --accent: 210 85% 45%;
     --accent-foreground: 0 0% 98%;
 
+    --hover: 0 84% 60%;
+    --hover-foreground: 0 0% 98%;
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
@@ -119,5 +125,26 @@ All colors MUST be HSL.
 
   .animate-scroll {
     animation: scroll 30s linear infinite;
+  }
+
+  /* Red hover effects using logo color */
+  .hover\\:bg-hover:hover {
+    background-color: hsl(var(--hover));
+  }
+
+  .hover\\:text-hover:hover {
+    color: hsl(var(--hover));
+  }
+
+  .hover\\:border-hover:hover {
+    border-color: hsl(var(--hover));
+  }
+
+  .group:hover .group-hover\\:text-hover {
+    color: hsl(var(--hover));
+  }
+
+  .group:hover .group-hover\\:bg-hover {
+    background-color: hsl(var(--hover));
   }
 }

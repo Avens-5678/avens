@@ -33,7 +33,7 @@ const EventCard = ({ id, title, eventType, location, heroImage, description }: E
         
         <CardContent className="p-6 space-y-4">
           <div className="space-y-2">
-            <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors duration-300">
+            <h3 className="text-xl font-bold line-clamp-2 group-hover:text-hover transition-colors duration-300">
               {title}
             </h3>
             

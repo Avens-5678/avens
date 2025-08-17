@@ -127,7 +127,7 @@ const Index = () => {
             {services?.map((service) => (
               <Card key={service.id} className="group hover:shadow-lg transition-all duration-300 border-0 bg-background">
                 <CardHeader>
-                  <CardTitle className="text-xl font-semibold group-hover:text-primary transition-colors">
+                  <CardTitle className="text-xl font-semibold group-hover:text-hover transition-colors">
                     {service.title}
                   </CardTitle>
                 </CardHeader>
@@ -138,7 +138,7 @@ const Index = () => {
                   <Button 
                     asChild
                     variant="outline"
-                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300"
+                    className="w-full group-hover:bg-hover group-hover:text-hover-foreground transition-all duration-300"
                   >
                     <Link to={`/events/${service.event_type}`}>
                       View Details <ArrowRight className="ml-2 h-4 w-4" />
@@ -291,7 +291,7 @@ const Index = () => {
                     </div>
                   )}
                   <CardContent className="p-8">
-                    <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors duration-300">
+                    <h3 className="text-2xl font-bold mb-4 group-hover:text-hover transition-colors duration-300">
                       {news.title}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed mb-6">

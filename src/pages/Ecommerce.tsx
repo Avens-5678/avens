@@ -49,7 +49,7 @@ const Ecommerce = () => {
             {rentals?.map((rental) => (
               <Card key={rental.id} className="group hover:shadow-xl transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
+                  <CardTitle className="text-lg font-semibold group-hover:text-hover transition-colors">
             <div className="aspect-[4/3] mb-4 overflow-hidden rounded-lg">
               {rental.image_url ? (
                 <img 

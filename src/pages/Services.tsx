@@ -60,7 +60,7 @@ const Services = () => {
               <Card key={service.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-background relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <CardHeader className="relative z-10">
-                  <CardTitle className="text-xl font-semibold group-hover:text-primary transition-colors">
+                  <CardTitle className="text-xl font-semibold group-hover:text-hover transition-colors">
                     {service.title}
                   </CardTitle>
                 </CardHeader>

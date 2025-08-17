@@ -69,13 +69,16 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     setFormData(initialData);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (eventFormData?: any) => {
     try {
+      // Use eventFormData if provided (from EnhancedEventForm), otherwise use formData state
+      const dataToSave = eventFormData || formData;
+      
       // Debug logging to check the form data
-      console.log('Form data before save:', formData);
+      console.log('Form data before save:', dataToSave);
       
       // Ensure event_type is not empty for events table
-      if (tableName === 'events' && (!formData.event_type || formData.event_type === '')) {
+      if (tableName === 'events' && (!dataToSave.event_type || dataToSave.event_type === '')) {
         toast({
           title: "Validation Error",
           description: "Event type is required. Please select or enter an event type.",
@@ -86,7 +89,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       if (editingItem) {
         const { error } = await supabase
           .from(tableName as any)
-          .update(formData)
+          .update(dataToSave)
           .eq('id', editingItem.id);
         
         if (error) throw error;

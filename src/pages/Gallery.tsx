@@ -28,8 +28,37 @@ const Gallery = () => {
     );
   }
 
-  const regularImages = portfolio?.filter(item => !item.is_before_after) || [];
+  // Get individual portfolio items and bulk album images
+  const portfolioItems = portfolio?.filter(item => !item.is_before_after) || [];
   const beforeAfterImages = portfolio?.filter(item => item.is_before_after) || [];
+  
+  // Get all images including bulk uploaded ones
+  const getAllImages = () => {
+    const images: any[] = [];
+    
+    // Add individual portfolio items
+    portfolioItems.forEach(item => {
+      images.push({ ...item, type: 'cover' });
+      
+      // Add bulk album images if they exist
+      if (item.album_url) {
+        const albumUrls = item.album_url.split(',').map((url: string) => url.trim()).filter(Boolean);
+        albumUrls.forEach((url, index) => {
+          images.push({
+            id: `${item.id}_album_${index}`,
+            title: `${item.title} - Image ${index + 1}`,
+            image_url: url,
+            tag: item.tag,
+            type: 'album'
+          });
+        });
+      }
+    });
+    
+    return images;
+  };
+  
+  const allImages = getAllImages();
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
@@ -59,9 +88,9 @@ const Gallery = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {regularImages.length > 0 ? (
+          {allImages.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {regularImages.map((item, index) => (
+              {allImages.map((item, index) => (
                 <Card 
                   key={item.id} 
                   className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
@@ -80,7 +109,12 @@ const Gallery = () => {
                     </div>
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-sm line-clamp-2">{item.title}</h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-sm line-clamp-2">{item.title}</h3>
+                      {item.type === 'cover' && (
+                        <Badge variant="secondary" className="text-xs">Cover</Badge>
+                      )}
+                    </div>
                     {item.tag && (
                       <div className="mt-2">
                         <Badge variant="outline" className="text-xs">
@@ -110,7 +144,7 @@ const Gallery = () => {
                   <Card 
                     key={item.id} 
                     className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
-                    onClick={() => openLightbox(regularImages.length + index)}
+                    onClick={() => openLightbox(allImages.length + index)}
                   >
                     <div className="aspect-video overflow-hidden relative">
                       <img 
@@ -140,7 +174,7 @@ const Gallery = () => {
 
           {/* Lightbox */}
           <Lightbox
-            images={[...regularImages, ...beforeAfterImages]}
+            images={[...allImages, ...beforeAfterImages]}
             currentIndex={lightboxIndex}
             isOpen={lightboxOpen}
             onClose={() => setLightboxOpen(false)}

@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Save, X, ExternalLink, ImageIcon, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { uploadPortfolioImage } from "@/utils/storageUtils";
+import { uploadPortfolioImage, uploadBulkPortfolioImages } from "@/utils/storageUtils";
 
 interface EnhancedPortfolioManagerProps {
   portfolio: any[];
@@ -26,7 +26,9 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [uploading, setUploading] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleEdit = (item: any) => {
     setEditingItem(item);
@@ -73,6 +75,38 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
       });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleBulkImageUpload = async (files: FileList) => {
+    if (!files || files.length === 0 || !formData.event_id) {
+      toast({
+        title: "Error",
+        description: "Please select an event and files first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setBulkUploading(true);
+    try {
+      const imageUrls = await uploadBulkPortfolioImages(files, formData.event_id);
+      const albumUrl = imageUrls.join(','); // Store as comma-separated string
+      setFormData(prev => ({ ...prev, album_url: albumUrl }));
+      
+      toast({
+        title: "Success",
+        description: `${files.length} images uploaded successfully`,
+      });
+    } catch (error: any) {
+      console.error('Error uploading bulk images:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload images",
+        variant: "destructive",
+      });
+    } finally {
+      setBulkUploading(false);
     }
   };
 
@@ -264,16 +298,35 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="album_url">Album/Drive URL (Bulk Upload)</Label>
-              <div className="space-y-2">
+              <Label htmlFor="bulk_upload">Bulk Image Upload</Label>
+              <div className="space-y-3">
                 <Input
-                  value={formData.album_url || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, album_url: e.target.value }))}
-                  placeholder="Google Drive folder, Dropbox album, or other bulk photo link"
+                  id="bulk_upload"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={bulkFileInputRef}
+                  onChange={(e) => {
+                    const files = e.target.files;
+                    if (files && files.length > 0) {
+                      handleBulkImageUpload(files);
+                    }
+                  }}
+                  disabled={!formData.event_id || bulkUploading}
                 />
+                {!formData.event_id && (
+                  <p className="text-sm text-muted-foreground">Please select an event first to enable bulk upload</p>
+                )}
+                {formData.album_url && (
+                  <div className="mt-3">
+                    <p className="text-sm text-muted-foreground">
+                      {formData.album_url.split(',').length} images uploaded to gallery
+                    </p>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground flex items-center space-x-1">
-                  <ExternalLink className="h-3 w-3" />
-                  <span>Use this for bulk photo uploads (Google Drive folders, etc.)</span>
+                  <Upload className="h-3 w-3" />
+                  <span>Upload multiple images for the gallery. These will be displayed in the event lightbox.</span>
                 </p>
               </div>
             </div>
@@ -319,10 +372,10 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
               <Button 
                 onClick={handleSave} 
                 className="flex-1" 
-                disabled={uploading || (!formData.image_url && !editingItem)}
+                disabled={uploading || bulkUploading || (!formData.image_url && !editingItem)}
               >
                 <Save className="mr-2 h-4 w-4" />
-                {uploading ? "Uploading..." : "Save"}
+                {uploading || bulkUploading ? "Uploading..." : "Save"}
               </Button>
               <Button onClick={handleCancel} variant="outline" className="flex-1">
                 <X className="mr-2 h-4 w-4" />
@@ -360,15 +413,12 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
                         <span>Individual image URL provided</span>
                       </p>
                     )}
-                  {item.album_url && (
-                    <div className="text-xs text-muted-foreground flex items-center space-x-1">
-                      <ExternalLink className="h-3 w-3" />
-                      <span>Album/bulk URL: </span>
-                      <a href={item.album_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate max-w-xs">
-                        {item.album_url}
-                      </a>
-                    </div>
-                  )}
+                   {item.album_url && (
+                     <div className="text-xs text-muted-foreground flex items-center space-x-1">
+                       <Upload className="h-3 w-3" />
+                       <span>Gallery images: {item.album_url.split(',').length} images uploaded</span>
+                     </div>
+                   )}
                   </div>
 
                   <div className="flex gap-2 flex-wrap">

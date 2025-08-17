@@ -130,7 +130,7 @@ const CorporateEvents = () => {
             <div className="lg:w-1/3">
               <div className="relative">
                 <div className="transform -rotate-0 origin-center">
-                  <h2 className="text-4xl lg:text-5xl font-bold text-primary leading-tight text-center">       Highlighted          Services</h2>
+                  <h2 className="text-4xl lg:text-5xl font-bold text-primary leading-tight text-center">    Services        </h2>
                 </div>
               </div>
             </div>

@@ -47,27 +47,28 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
       console.log("Auth result:", { authData, signInError });
 
       if (signInError) throw new Error(signInError.message);
-
       if (!authData.user) throw new Error("Login failed. Please try again.");
 
-      // 2️⃣ Check admin privileges
+      // 2️⃣ Normalize email for admin check
+      const userEmail = authData.user.email?.trim().toLowerCase();
+
+      // 3️⃣ Check admin privileges
       const { data: adminData, error: adminError } = await supabase
         .from("admin_users")
         .select("*")
-        .eq("email", authData.user.email)
+        .eq("email", userEmail)
         .eq("is_active", true)
         .maybeSingle();
 
       console.log("Admin check result:", { adminData, adminError });
 
       if (adminError) throw new Error("Failed to verify admin privileges.");
-
       if (!adminData) {
         await supabase.auth.signOut();
         throw new Error("Access denied. Admin privileges required.");
       }
 
-      // 3️⃣ Successful login
+      // 4️⃣ Successful login
       onLoginSuccess(adminData);
       toast({
         title: "Login Successful",

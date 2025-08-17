@@ -8,49 +8,39 @@ import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
 import { Briefcase, ArrowRight, Camera, ExternalLink, Users, Target, Trophy, Lightbulb, Zap, Award } from "lucide-react";
 import corporateHero from "@/assets/corporate-events-hero.jpg";
-
 const CorporateEvents = () => {
-  const { data: event, isLoading } = useEvent("corporate");
-  const { data: portfolio } = usePortfolio();
-
-  const corporatePortfolio = portfolio?.filter(item => 
-    item.tag?.toLowerCase().includes('corporate') || 
-    item.tag?.toLowerCase().includes('business')
-  )?.slice(0, 3);
-
+  const {
+    data: event,
+    isLoading
+  } = useEvent("corporate");
+  const {
+    data: portfolio
+  } = usePortfolio();
+  const corporatePortfolio = portfolio?.filter(item => item.tag?.toLowerCase().includes('corporate') || item.tag?.toLowerCase().includes('business'))?.slice(0, 3);
   if (isLoading) {
-    return (
-      <Layout>
+    return <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading corporate services...</p>
           </div>
         </div>
-      </Layout>
-    );
+      </Layout>;
   }
-
-  const eventSpecialties = [
-    {
-      title: "Team Building",
-      image: corporateHero,
-      description: "Strengthen bonds through strategic experiences"
-    },
-    {
-      title: "Product Launches", 
-      image: corporateHero,
-      description: "Memorable reveals that drive market impact"
-    },
-    {
-      title: "Executive Retreats",
-      image: corporateHero, 
-      description: "Strategic gatherings for leadership alignment"
-    }
-  ];
-
-  return (
-    <Layout>
+  const eventSpecialties = [{
+    title: "Team Building",
+    image: corporateHero,
+    description: "Strengthen bonds through strategic experiences"
+  }, {
+    title: "Product Launches",
+    image: corporateHero,
+    description: "Memorable reveals that drive market impact"
+  }, {
+    title: "Executive Retreats",
+    image: corporateHero,
+    description: "Strategic gatherings for leadership alignment"
+  }];
+  return <Layout>
       {/* Lifestyle Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="container mx-auto px-4">
@@ -83,11 +73,7 @@ const CorporateEvents = () => {
                   <DialogHeader>
                     <DialogTitle>Book Corporate Event Consultation</DialogTitle>
                   </DialogHeader>
-                  <InquiryForm 
-                    formType="inquiry"
-                    eventType="corporate"
-                    title="Book Consultation"
-                  />
+                  <InquiryForm formType="inquiry" eventType="corporate" title="Book Consultation" />
                 </DialogContent>
               </Dialog>
             </div>
@@ -95,11 +81,7 @@ const CorporateEvents = () => {
             {/* Image Side */}
             <div className="lg:w-1/2">
               <div className="relative">
-                <img 
-                  src={corporateHero}
-                  alt="Corporate meeting with coffee and planning"
-                  className="w-full h-[500px] object-cover rounded-2xl shadow-2xl"
-                />
+                <img src={corporateHero} alt="Corporate meeting with coffee and planning" className="w-full h-[500px] object-cover rounded-2xl shadow-2xl" />
                 <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-primary to-accent rounded-full opacity-20"></div>
                 <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-accent to-primary rounded-full opacity-30"></div>
               </div>
@@ -126,21 +108,15 @@ const CorporateEvents = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {eventSpecialties.map((specialty, index) => (
-                <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500">
+              {eventSpecialties.map((specialty, index) => <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500">
                   <div className="aspect-[4/3] overflow-hidden">
-                    <img 
-                      src={specialty.image}
-                      alt={specialty.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
+                    <img src={specialty.image} alt={specialty.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   </div>
                   <CardContent className="p-6 text-center bg-background">
                     <h4 className="text-xl font-semibold mb-3">{specialty.title}</h4>
                     <p className="text-muted-foreground text-sm">{specialty.description}</p>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
         </div>
@@ -154,7 +130,7 @@ const CorporateEvents = () => {
             <div className="lg:w-1/3">
               <div className="relative">
                 <div className="transform -rotate-12 origin-left">
-                  <h2 className="text-4xl lg:text-5xl font-bold text-primary leading-tight">
+                  <h2 className="text-4xl lg:text-5xl font-bold text-primary leading-tight text-center">
                     Highlighted
                     <br />
                     Services
@@ -250,8 +226,7 @@ const CorporateEvents = () => {
       </section>
 
       {/* Portfolio Showcase */}
-      {corporatePortfolio && corporatePortfolio.length > 0 && (
-        <section className="py-20">
+      {corporatePortfolio && corporatePortfolio.length > 0 && <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -263,25 +238,17 @@ const CorporateEvents = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              {corporatePortfolio.map((item) => (
-                <Card key={item.id} className="group overflow-hidden hover:shadow-xl transition-all duration-500">
+              {corporatePortfolio.map(item => <Card key={item.id} className="group overflow-hidden hover:shadow-xl transition-all duration-500">
                   <div className="aspect-[4/3] overflow-hidden">
-                    <img 
-                      src={item.image_url} 
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
+                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-2 line-clamp-2">{item.title}</h3>
-                    {item.tag && (
-                      <Badge variant="secondary" className="text-xs">
+                    {item.tag && <Badge variant="secondary" className="text-xs">
                         {item.tag}
-                      </Badge>
-                    )}
+                      </Badge>}
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
 
             <div className="text-center">
@@ -292,8 +259,7 @@ const CorporateEvents = () => {
               </Button>
             </div>
           </div>
-        </section>
-      )}
+        </section>}
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
@@ -319,19 +285,13 @@ const CorporateEvents = () => {
                   <DialogHeader>
                     <DialogTitle>Book Corporate Event Consultation</DialogTitle>
                   </DialogHeader>
-                  <InquiryForm 
-                    formType="inquiry"
-                    eventType="corporate"
-                    title="Book Consultation"
-                  />
+                  <InquiryForm formType="inquiry" eventType="corporate" title="Book Consultation" />
                 </DialogContent>
               </Dialog>
             </div>
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default CorporateEvents;

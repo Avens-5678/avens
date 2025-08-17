@@ -1,5 +1,25 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export const uploadSpecialtyImage = async (file: File, specialtyId: string): Promise<string> => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${specialtyId}-${Date.now()}.${fileExt}`;
+  const filePath = `specialties/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('specialty-images')
+    .upload(filePath, file);
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const { data } = supabase.storage
+    .from('specialty-images')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+};
+
 export const uploadPortfolioImage = async (file: File, eventId: string): Promise<string> => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${eventId}/${Date.now()}.${fileExt}`;

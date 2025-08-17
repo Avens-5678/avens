@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Upload, Star, Users, Calendar, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadEventHeroImage } from "@/utils/storageUtils";
+import { uploadEventHeroImage, uploadSpecialtyImage } from "@/utils/storageUtils";
 import { useEventTypes } from "@/hooks/useEventTypes";
 
 interface Specialty {
@@ -116,10 +116,28 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
     }
   };
 
+  const handleSpecialtyImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const specialtyId = `specialty-${index}-${Date.now()}`;
+      const imageUrl = await uploadSpecialtyImage(file, specialtyId);
+      updateSpecialty(index, 'image_url', imageUrl);
+      toast.success('Specialty image uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading specialty image:', error);
+      toast.error('Failed to upload specialty image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const addSpecialty = () => {
     setFormData(prev => ({
       ...prev,
-      specialties: [...prev.specialties, { title: '', description: '' }]
+      specialties: [...prev.specialties, { title: '', description: '', image_url: '' }]
     }));
   };
 
@@ -302,19 +320,38 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
-                  <div className="space-y-3">
-                    <Input
-                      placeholder="Specialty title"
-                      value={specialty.title}
-                      onChange={(e) => updateSpecialty(index, 'title', e.target.value)}
-                    />
-                    <Textarea
-                      placeholder="Specialty description"
-                      value={specialty.description}
-                      onChange={(e) => updateSpecialty(index, 'description', e.target.value)}
-                      rows={2}
-                    />
-                  </div>
+                   <div className="space-y-3">
+                     <Input
+                       placeholder="Specialty title"
+                       value={specialty.title}
+                       onChange={(e) => updateSpecialty(index, 'title', e.target.value)}
+                     />
+                     <Textarea
+                       placeholder="Specialty description"
+                       value={specialty.description}
+                       onChange={(e) => updateSpecialty(index, 'description', e.target.value)}
+                       rows={2}
+                     />
+                     <div>
+                       <Label htmlFor={`specialty-image-${index}`}>Specialty Image</Label>
+                       <div className="space-y-2">
+                         <Input
+                           id={`specialty-image-${index}`}
+                           type="file"
+                           accept="image/*"
+                           onChange={(e) => handleSpecialtyImageUpload(e, index)}
+                           disabled={uploading}
+                         />
+                         {specialty.image_url && (
+                           <img 
+                             src={specialty.image_url} 
+                             alt={specialty.title || `Specialty ${index + 1}`} 
+                             className="w-32 h-20 object-cover rounded" 
+                           />
+                         )}
+                       </div>
+                     </div>
+                   </div>
                 </div>
               ))}
             </CardContent>

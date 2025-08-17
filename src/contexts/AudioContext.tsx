@@ -99,17 +99,33 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     newAudio.addEventListener('pause', handlePause);
     newAudio.addEventListener('ended', handleEnded);
 
-    // Auto-play when audio is ready
+    // Auto-play when audio is ready (mobile-friendly)
     const handleAutoPlay = async () => {
       try {
-        await newAudio.play();
-        setIsInitialized(true);
+        // Check if user has interacted with the page (required for mobile)
+        if (document.visibilityState === 'visible' && !document.hidden) {
+          await newAudio.play();
+          setIsInitialized(true);
+        } else {
+          setIsInitialized(false);
+        }
       } catch (error) {
         console.log('Autoplay blocked by browser, user interaction required');
         setIsInitialized(false);
       }
     };
 
+    // Add mobile-specific event listeners for user interaction
+    const tryAutoPlay = () => {
+      if (!isInitialized && audioRef.current) {
+        handleAutoPlay();
+      }
+    };
+
+    // Listen for user interactions that enable audio on mobile
+    document.addEventListener('touchstart', tryAutoPlay, { once: true });
+    document.addEventListener('click', tryAutoPlay, { once: true });
+    
     newAudio.addEventListener('canplaythrough', handleAutoPlay, { once: true });
 
     return () => {
@@ -117,6 +133,8 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
       newAudio.removeEventListener('play', handlePlay);
       newAudio.removeEventListener('pause', handlePause);
       newAudio.removeEventListener('ended', handleEnded);
+      document.removeEventListener('touchstart', tryAutoPlay);
+      document.removeEventListener('click', tryAutoPlay);
       newAudio.pause();
       newAudio.src = '';
       audioRef.current = null;

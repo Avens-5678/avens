@@ -1,17 +1,19 @@
 import { useAudio } from "@/contexts/AudioContext";
 
 const AudioControls = () => {
-  const { settings, isLoading, isPlaying, togglePlay } = useAudio();
-
-  if (isLoading) return <p>Loading audio settings...</p>;
-  if (!settings) return <p>No audio configured</p>;
+  const { settings, isPlaying, togglePlay, toggleEnabled, uploadAudio, deleteAudio } = useAudio();
 
   return (
     <div>
-      <p>Current Audio: {settings.background_audio_url?.split("/").pop()}</p>
-      <button onClick={togglePlay}>
-        {isPlaying ? "Pause" : "Play"}
-      </button>
+      <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
+      <label>
+        Enabled
+        <input
+          type="checkbox"
+          checked={settings?.background_audio_enabled || false}
+          onChange={e => toggleEnabled(e.target.checked)}
+        />
+      </label>
     </div>
   );
 };

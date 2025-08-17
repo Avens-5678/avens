@@ -15,16 +15,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   phone: z.string().optional(),
   eventType: z.string().optional(),
   eventDate: z.date().optional(),
-  message: z.string().min(10, "Message must be at least 10 characters"),
+  message: z.string().min(10, "Message must be at least 10 characters")
 });
-
 interface InquiryFormProps {
   formType?: "inquiry" | "contact" | "rental";
   eventType?: string;
@@ -32,17 +30,17 @@ interface InquiryFormProps {
   rentalTitle?: string;
   title?: string;
 }
-
-const InquiryForm = ({ 
-  formType = "inquiry", 
-  eventType, 
-  rentalId, 
+const InquiryForm = ({
+  formType = "inquiry",
+  eventType,
+  rentalId,
   rentalTitle,
-  title = "Get In Touch" 
+  title = "Get In Touch"
 }: InquiryFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,110 +49,88 @@ const InquiryForm = ({
       phone: "",
       eventType: eventType || "",
       eventDate: undefined,
-      message: "",
-    },
+      message: ""
+    }
   });
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-
     try {
-      const { error } = await supabase
-        .from("form_submissions")
-        .insert({
-          name: values.name,
-          email: values.email,
-          phone: values.phone || null,
-          message: values.message,
-          form_type: formType,
-          event_type: (values.eventType as any) || null,
-          rental_id: rentalId || null,
-          rental_title: rentalTitle || null,
-        });
-
+      const {
+        error
+      } = await supabase.from("form_submissions").insert({
+        name: values.name,
+        email: values.email,
+        phone: values.phone || null,
+        message: values.message,
+        form_type: formType,
+        event_type: values.eventType as any || null,
+        rental_id: rentalId || null,
+        rental_title: rentalTitle || null
+      });
       if (error) throw error;
 
       // Note: We don't trigger notifications here since we can't read the submission ID
       // due to RLS policies. The notification will be handled via database triggers
       // or the admin panel when the submission is processed.
 
-
       toast({
         title: "Message Sent!",
-        description: "We'll get back to you within 24 hours.",
+        description: "We'll get back to you within 24 hours."
       });
-
       form.reset();
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  return (
-    <Card className="w-full max-w-lg border-0 shadow-none">
-      <CardHeader className="px-0 pt-0">
+  return <Card className="w-full max-w-lg border-0 shadow-none bg-blue-50">
+      <CardHeader className="px-0 pt-0 bg-blue-50">
         <CardTitle className="text-xl lg:text-2xl font-bold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent className="px-0 pb-0">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 lg:space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 lg:space-y-6 bg-blue-50">
+            <FormField control={form.control} name="name" render={({
+            field
+          }) => <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter your full name" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
+            <FormField control={form.control} name="email" render={({
+            field
+          }) => <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="Enter your email" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
+            <FormField control={form.control} name="phone" render={({
+            field
+          }) => <FormItem>
                   <FormLabel>Phone Number (Optional)</FormLabel>
                   <FormControl>
                     <Input type="tel" placeholder="Enter your phone number" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
-            {!eventType && (
-              <FormField
-                control={form.control}
-                name="eventType"
-                render={({ field }) => (
-                  <FormItem>
+            {!eventType && <FormField control={form.control} name="eventType" render={({
+            field
+          }) => <FormItem>
                     <FormLabel>Event Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
@@ -173,85 +149,45 @@ const InquiryForm = ({
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+                  </FormItem>} />}
 
-            <FormField
-              control={form.control}
-              name="eventDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
+            <FormField control={form.control} name="eventDate" render={({
+            field
+          }) => <FormItem className="flex flex-col">
                   <FormLabel>Event Date (Optional)</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick your event date</span>
-                          )}
+                        <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                          {field.value ? format(field.value, "PPP") : <span>Pick your event date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={5}>
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date(new Date().setHours(0, 0, 0, 0))
-                        }
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
+                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className={cn("p-3 pointer-events-auto")} />
                     </PopoverContent>
                   </Popover>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
+            <FormField control={form.control} name="message" render={({
+            field
+          }) => <FormItem>
                   <FormLabel>Message</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Tell us about your event requirements..."
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
+                    <Textarea placeholder="Tell us about your event requirements..." className="min-h-[120px]" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Send Message
             </Button>
           </form>
         </Form>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default InquiryForm;

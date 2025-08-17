@@ -6,27 +6,30 @@ import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAllServices, useAllRentals, useAwards } from "@/hooks/useData";
 import { ArrowRight, Sparkles, Award, Package } from "lucide-react";
-
 const Services = () => {
-  const { data: services, isLoading: loadingServices } = useAllServices();
-  const { data: rentals, isLoading: loadingRentals } = useAllRentals();
-  const { data: awards, isLoading: loadingAwards } = useAwards();
-
+  const {
+    data: services,
+    isLoading: loadingServices
+  } = useAllServices();
+  const {
+    data: rentals,
+    isLoading: loadingRentals
+  } = useAllRentals();
+  const {
+    data: awards,
+    isLoading: loadingAwards
+  } = useAwards();
   if (loadingServices || loadingRentals || loadingAwards) {
-    return (
-      <Layout>
+    return <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading services...</p>
           </div>
         </div>
-      </Layout>
-    );
+      </Layout>;
   }
-
-  return (
-    <Layout>
+  return <Layout>
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
         <div className="container mx-auto px-4 text-center">
@@ -56,8 +59,7 @@ const Services = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services?.map((service) => (
-              <Card key={service.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-background relative overflow-hidden">
+            {services?.map(service => <Card key={service.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-background relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <CardHeader className="relative z-10">
                   <CardTitle className="text-xl font-semibold group-hover:text-hover transition-colors">
@@ -68,17 +70,13 @@ const Services = () => {
                   <p className="text-muted-foreground mb-6">
                     {service.short_description}
                   </p>
-                  <Button 
-                    asChild
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300"
-                  >
+                  <Button asChild className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300">
                     <Link to={`/events/${service.event_type.replace('_', '-')}`}>
                       View Details <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -100,25 +98,21 @@ const Services = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {rentals?.slice(0, 6).map((rental) => (
-              <Card key={rental.id} className="hover:shadow-lg transition-all duration-300">
+            {rentals?.slice(0, 6).map(rental => <Card key={rental.id} className="hover:shadow-lg transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold">
                     {rental.title}
                   </CardTitle>
-                  {rental.price_range && (
-                    <p className="text-sm text-primary font-semibold">
+                  {rental.price_range && <p className="text-sm text-primary font-semibold">
                       {rental.price_range}
-                    </p>
-                  )}
+                    </p>}
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
                     {rental.short_description}
                   </p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
 
           <div className="text-center">
@@ -132,8 +126,7 @@ const Services = () => {
       </section>
 
       {/* Awards Section */}
-      {awards && awards.length > 0 && (
-        <section className="py-20">
+      {awards && awards.length > 0 && <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <Badge variant="secondary" className="mb-4">
@@ -149,38 +142,27 @@ const Services = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {awards.map((award) => (
-                <Card key={award.id} className="text-center hover:shadow-lg transition-all duration-300">
-                  {award.logo_url && (
-                    <div className="p-6">
-                      <img 
-                        src={award.logo_url} 
-                        alt={award.title}
-                        className="h-16 w-16 mx-auto object-contain"
-                      />
-                    </div>
-                  )}
+              {awards.map(award => <Card key={award.id} className="text-center hover:shadow-lg transition-all duration-300">
+                  {award.logo_url && <div className="p-6">
+                      <img src={award.logo_url} alt={award.title} className="h-16 w-16 mx-auto object-contain" />
+                    </div>}
                   <CardHeader>
                     <CardTitle className="text-lg font-semibold">
                       {award.title}
                     </CardTitle>
-                    {award.year && (
-                      <p className="text-sm text-primary font-semibold">
+                    {award.year && <p className="text-sm text-primary font-semibold">
                         {award.year}
-                      </p>
-                    )}
+                      </p>}
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
                       {award.description}
                     </p>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
-        </section>
-      )}
+        </section>}
 
       {/* Contact Form Section */}
       <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
@@ -195,17 +177,12 @@ const Services = () => {
               </p>
             </div>
 
-            <div className="flex justify-center">
-              <InquiryForm 
-                formType="contact"
-                title="Contact Our Team"
-              />
+            <div className="flex justify-center bg-transparent">
+              <InquiryForm formType="contact" title="Contact Our Team" />
             </div>
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Services;

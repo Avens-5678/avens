@@ -35,7 +35,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Avens Pvt.Ltd
+              Avens
             </div>
           </Link>
 

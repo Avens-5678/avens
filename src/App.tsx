@@ -22,6 +22,8 @@ import EquipmentRental from "./pages/events/EquipmentRental";
 import GovernmentEvents from "./pages/events/GovernmentEvents";
 import DynamicEventPage from "./pages/events/DynamicEventPage";
 import Team from "./pages/Team";
+import { AudioProvider } from "@/contexts/AudioContext";
+
 
 const queryClient = new QueryClient();
 

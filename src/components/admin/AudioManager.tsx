@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Upload, Play, Pause, Trash2, Volume2 } from "lucide-react";
+import { useAudio } from "@/contexts/AudioContext";
 
 interface SiteSettings {
   id: string;
@@ -16,74 +16,37 @@ interface SiteSettings {
 
 const AudioManager = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { setSettings: updateContextSettings } = useAudio();
+
+  useEffect(() => {
+    fetchSettings();
+    return () => {
+      if (audio) audio.pause();
+    };
+  }, []);
 
   const fetchSettings = async () => {
     try {
       const { data, error } = await supabase.from("site_settings").select("*").single();
       if (error) throw error;
       setSettings(data);
+      updateContextSettings({
+        background_audio_url: data.background_audio_url,
+        background_audio_enabled: data.background_audio_enabled,
+      });
     } catch (err: any) {
-      toast({ title: "Error", description: "Failed to load settings.", variant: "destructive" });
+      console.error(err);
+      toast({ title: "Error", description: "Failed to load audio settings.", variant: "destructive" });
     }
   };
 
-  useEffect(() => {
-    fetchSettings();
-    return () => { if (audio) audio.pause(); };
-  }, []);
-
-  const handleToggle = async (enabled: boolean) => {
-    if (!settings) return;
-    const { data, error } = await supabase
-      .from("site_settings")
-      .upsert({ id: settings.id, background_audio_enabled: enabled, background_audio_url: settings.background_audio_url }, { onConflict: "id" })
-      .select()
-      .single();
-    if (error) return toast({ title: "Error", description: error.message, variant: "destructive" });
-    setSettings(data);
-  };
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `background-audio-${Date.now()}.${fileExt}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("audio")
-        .upload(fileName, file, { cacheControl: "3600", upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage.from("audio").getPublicUrl(fileName);
-
-      const { data: updatedData, error: updateError } = await supabase
-        .from("site_settings")
-        .upsert({ id: settings?.id, background_audio_url: publicUrl, background_audio_enabled: true }, { onConflict: "id" })
-        .select()
-        .single();
-
-      if (updateError) throw updateError;
-      setSettings(updatedData);
-      toast({ title: "Success", description: "Audio uploaded!" });
-
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handlePlayPause = () => {
+  const togglePlay = () => {
     if (!settings?.background_audio_url) return;
+
     if (!audio) {
       const newAudio = new Audio(settings.background_audio_url);
       newAudio.loop = true;
@@ -101,44 +64,41 @@ const AudioManager = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!settings?.background_audio_url) return;
-    const fileName = settings.background_audio_url.split("/").pop();
-    if (fileName) {
-      await supabase.storage.from("audio").remove([fileName]);
+  const handleToggleEnabled = async (enabled: boolean) => {
+    if (!settings) return;
+    try {
+      const { data, error } = await supabase.from("site_settings")
+        .upsert({ id: settings.id, background_audio_enabled: enabled, background_audio_url: settings.background_audio_url }, { onConflict: "id" })
+        .select()
+        .single();
+      if (error) throw error;
+      setSettings(data);
+      updateContextSettings({ background_audio_url: data.background_audio_url, background_audio_enabled: data.background_audio_enabled });
+      toast({ title: "Updated", description: `Background audio ${enabled ? "enabled" : "disabled"}` });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     }
-
-    const { data, error } = await supabase
-      .from("site_settings")
-      .upsert({ id: settings.id, background_audio_url: null, background_audio_enabled: false }, { onConflict: "id" })
-      .select()
-      .single();
-
-    if (error) return toast({ title: "Error", description: error.message, variant: "destructive" });
-    setSettings(data);
-    setAudio(null);
-    setIsPlaying(false);
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Volume2 className="h-5 w-5"/> Background Audio</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Volume2 /> Background Audio Manager
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
+      <CardContent>
+        <div className="flex items-center justify-between mb-4">
           <span>Enable Background Audio</span>
-          <Switch checked={settings?.background_audio_enabled || false} onCheckedChange={handleToggle} />
+          <Switch checked={settings?.background_audio_enabled || false} onCheckedChange={handleToggleEnabled} />
         </div>
         {settings?.background_audio_url && (
-          <div className="flex items-center gap-2">
-            <Button size="sm" onClick={handlePlayPause}>{isPlaying ? <Pause /> : <Play />}</Button>
-            <span>{settings.background_audio_url.split("/").pop()}</span>
-            <Button size="sm" variant="destructive" onClick={handleDelete}><Trash2 /></Button>
+          <div className="flex gap-2 mb-4">
+            <Button onClick={togglePlay}>{isPlaying ? <Pause /> : <Play />}</Button>
+            <Button onClick={() => window.open(settings.background_audio_url!, "_blank")}>Download</Button>
           </div>
         )}
-        <Input type="file" accept="audio/*" onChange={handleUpload} disabled={uploading} />
-        {uploading && <Progress value={uploadProgress} />}
+        <Input type="file" accept="audio/*" disabled={uploading} />
       </CardContent>
     </Card>
   );

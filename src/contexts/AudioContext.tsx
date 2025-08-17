@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SiteSettings {
   background_audio_url: string | null;
@@ -22,7 +23,7 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 export const useAudio = () => {
   const context = useContext(AudioContext);
-  if (!context) throw new Error('useAudio must be used within an AudioProvider');
+  if (!context) throw new Error('useAudio must be used within AudioProvider');
   return context;
 };
 
@@ -33,6 +34,7 @@ interface AudioProviderProps {
 export const AudioProvider = ({ children }: AudioProviderProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const location = useLocation();
+  const { toast } = useToast();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -43,52 +45,54 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
 
   const isAdminPage = location.pathname.startsWith('/admin');
 
-  // Fetch audio settings
+  // Fetch audio settings only if user is logged in
   useEffect(() => {
     const fetchAudioSettings = async () => {
       try {
+        if (!supabase.auth.getUser) return;
+
         const { data, error } = await supabase
           .from('site_settings')
           .select('background_audio_url, background_audio_enabled')
-          .eq('background_audio_enabled', true)
-          .not('background_audio_url', 'is', null)
-          .limit(1);
+          .single();
 
         if (error) {
-          console.error('Error fetching audio settings:', error);
+          if (error.code === 'PGRST116') {
+            console.warn('No site_settings row for this user or not admin.');
+          } else {
+            console.error('Error fetching audio settings:', error);
+            toast({
+              title: 'Error',
+              description: 'Failed to load audio settings. Are you an admin?',
+              variant: 'destructive',
+            });
+          }
           return;
         }
 
-        if (data && data.length > 0) {
-          setAudioSettings(data[0]);
-        } else {
-          console.warn('No audio settings available');
-          setAudioSettings(null);
-        }
+        setAudioSettings(data);
       } catch (err) {
-        console.error('Error fetching audio settings:', err);
+        console.error('Unexpected error fetching audio settings:', err);
       }
     };
 
     fetchAudioSettings();
-  }, []);
+  }, [toast]);
 
-  // Initialize audio element
+  // Initialize and play audio
   useEffect(() => {
-    if (!audioSettings?.background_audio_url || isAdminPage) {
+    if (!audioSettings?.background_audio_enabled || !audioSettings?.background_audio_url || isAdminPage) {
+      setIsLoaded(false);
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.src = '';
+        setIsPlaying(false);
       }
-      setIsPlaying(false);
-      setIsLoaded(false);
       return;
     }
 
     const newAudio = new Audio(audioSettings.background_audio_url);
     audioRef.current = newAudio;
 
-    // Load saved preferences
     const savedPrefs = localStorage.getItem('audioPreferences');
     if (savedPrefs) {
       const { volume: savedVolume, isMuted: savedMuted } = JSON.parse(savedPrefs);
@@ -110,15 +114,14 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     newAudio.addEventListener('pause', handlePause);
     newAudio.addEventListener('ended', handleEnded);
 
-    // Mobile autoplay on first user interaction
+    // Mobile autoplay after user interaction
     const tryAutoPlay = async () => {
       if (!isInitialized) {
         try {
           await newAudio.play();
-        } catch (e) {
-          console.log('Autoplay blocked, user interaction needed');
-        } finally {
           setIsInitialized(true);
+        } catch {
+          console.log('Autoplay blocked, user interaction required.');
         }
       }
     };
@@ -137,29 +140,24 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
       newAudio.src = '';
       audioRef.current = null;
     };
-  }, [audioSettings, isAdminPage, volume, isMuted, isInitialized]);
+  }, [audioSettings, isAdminPage, isMuted, volume, isInitialized]);
 
-  // Update volume & mute
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
+    if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
 
-  // Save preferences
   useEffect(() => {
     localStorage.setItem('audioPreferences', JSON.stringify({ volume, isMuted }));
   }, [volume, isMuted]);
 
   const initializeAudio = async () => {
-    if (isInitialized || !audioRef.current) return;
-
+    if (!audioRef.current || isInitialized) return;
     try {
       await audioRef.current.play();
       setIsInitialized(true);
     } catch {
+      console.log('Autoplay blocked, ready for user interaction.');
       setIsInitialized(true);
-      setIsPlaying(false);
     }
   };
 
@@ -169,7 +167,6 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
       await initializeAudio();
       return;
     }
-
     try {
       if (isPlaying) audioRef.current.pause();
       else await audioRef.current.play();
@@ -178,7 +175,7 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     }
   };
 
-  const toggleMute = () => setIsMuted(prev => !prev);
+  const toggleMute = () => setIsMuted((prev) => !prev);
   const setVolume = (newVolume: number) => setVolumeState(Math.max(0, Math.min(1, newVolume)));
 
   return (

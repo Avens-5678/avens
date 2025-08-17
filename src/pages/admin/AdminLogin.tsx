@@ -52,12 +52,13 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
       // 2️⃣ Normalize email for admin check
       const userEmail = authData.user.email?.trim().toLowerCase();
 
-      // 3️⃣ Check admin privileges (case-insensitive)
+      // 3️⃣ Check super_admin privileges
       const { data: adminData, error: adminError } = await supabase
         .from("admin_users")
         .select("*")
         .eq("is_active", true)
-        .ilike("email", userEmail) // case-insensitive match
+        .eq("role", "super_admin") // Only super admins allowed
+        .ilike("email", userEmail)
         .maybeSingle();
 
       console.log("Admin check result:", { adminData, adminError });
@@ -65,7 +66,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
       if (adminError) throw new Error("Failed to verify admin privileges.");
       if (!adminData) {
         await supabase.auth.signOut();
-        throw new Error("Access denied. Admin privileges required.");
+        throw new Error("Access denied. Super admin privileges required.");
       }
 
       // 4️⃣ Successful login

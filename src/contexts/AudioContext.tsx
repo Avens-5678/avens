@@ -22,9 +22,7 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 export const useAudio = () => {
   const context = useContext(AudioContext);
-  if (!context) {
-    throw new Error('useAudio must be used within an AudioProvider');
-  }
+  if (!context) throw new Error('useAudio must be used within an AudioProvider');
   return context;
 };
 
@@ -43,34 +41,41 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [audioSettings, setAudioSettings] = useState<SiteSettings | null>(null);
 
-  // Check if we're on admin page
   const isAdminPage = location.pathname.startsWith('/admin');
 
-  // Fetch audio settings from Supabase
+  // Fetch site settings safely
   useEffect(() => {
     const fetchAudioSettings = async () => {
       try {
         const { data, error } = await supabase
           .from('site_settings')
           .select('background_audio_url, background_audio_enabled')
-          .single();
+          .maybeSingle(); // Safe for empty table
 
         if (error) {
           console.error('Error fetching audio settings:', error);
+          setAudioSettings({ background_audio_url: null, background_audio_enabled: false });
+          return;
+        }
+
+        if (!data || !data.background_audio_enabled || !data.background_audio_url) {
+          console.warn('No valid audio settings found, using defaults');
+          setAudioSettings({ background_audio_url: null, background_audio_enabled: false });
           return;
         }
 
         setAudioSettings(data);
-      } catch (error) {
-        console.error('Error fetching audio settings:', error);
+      } catch (err) {
+        console.error('Error fetching audio settings:', err);
+        setAudioSettings({ background_audio_url: null, background_audio_enabled: false });
       }
     };
 
     fetchAudioSettings();
   }, []);
 
+  // Initialize audio element
   useEffect(() => {
-    // Don't play audio on admin pages or if audio is disabled
     if (isAdminPage || !audioSettings?.background_audio_enabled || !audioSettings?.background_audio_url) {
       setIsLoaded(false);
       if (audioRef.current) {
@@ -80,24 +85,21 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
       return;
     }
 
-    // Create audio element with the URL from database
     const newAudio = new Audio(audioSettings.background_audio_url);
     audioRef.current = newAudio;
 
     // Load saved preferences
-    const savedPreferences = localStorage.getItem('audioPreferences');
-    if (savedPreferences) {
-      const { volume: savedVolume, isMuted: savedMuted } = JSON.parse(savedPreferences);
+    const savedPrefs = localStorage.getItem('audioPreferences');
+    if (savedPrefs) {
+      const { volume: savedVolume, isMuted: savedMuted } = JSON.parse(savedPrefs);
       setVolumeState(savedVolume ?? 0.4);
       setIsMuted(savedMuted ?? false);
     }
 
-    // Configure audio
     newAudio.loop = true;
     newAudio.preload = 'auto';
     newAudio.volume = isMuted ? 0 : volume;
 
-    // Audio event listeners
     const handleCanPlay = () => setIsLoaded(true);
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
@@ -108,34 +110,21 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     newAudio.addEventListener('pause', handlePause);
     newAudio.addEventListener('ended', handleEnded);
 
-    // Auto-play when audio is ready (mobile-friendly)
-    const handleAutoPlay = async () => {
+    // Attempt autoplay (mobile-friendly)
+    const tryAutoPlay = async () => {
       try {
-        // Check if user has interacted with the page (required for mobile)
-        if (document.visibilityState === 'visible' && !document.hidden) {
+        if (!isInitialized && document.visibilityState === 'visible') {
           await newAudio.play();
           setIsInitialized(true);
-        } else {
-          setIsInitialized(false);
         }
-      } catch (error) {
-        console.log('Autoplay blocked by browser, user interaction required');
-        setIsInitialized(false);
+      } catch {
+        setIsInitialized(true);
       }
     };
 
-    // Add mobile-specific event listeners for user interaction
-    const tryAutoPlay = () => {
-      if (!isInitialized && audioRef.current) {
-        handleAutoPlay();
-      }
-    };
-
-    // Listen for user interactions that enable audio on mobile
     document.addEventListener('touchstart', tryAutoPlay, { once: true });
     document.addEventListener('click', tryAutoPlay, { once: true });
-    
-    newAudio.addEventListener('canplaythrough', handleAutoPlay, { once: true });
+    newAudio.addEventListener('canplaythrough', tryAutoPlay, { once: true });
 
     return () => {
       newAudio.removeEventListener('canplaythrough', handleCanPlay);
@@ -150,65 +139,41 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     };
   }, [audioSettings, isAdminPage]);
 
-  // Update volume & mute state safely
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
+    if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
 
-  // Save preferences
   useEffect(() => {
     localStorage.setItem('audioPreferences', JSON.stringify({ volume, isMuted }));
   }, [volume, isMuted]);
 
   const initializeAudio = async () => {
     if (isInitialized || !audioRef.current) return;
-
     try {
-      // For mobile: attempt to play after user interaction
-      const playPromise = audioRef.current.play();
-      await playPromise;
+      await audioRef.current.play();
       setIsInitialized(true);
-    } catch (error) {
-      // If autoplay fails, mark as initialized but not playing
-      console.log('Autoplay blocked, audio ready for user interaction');
+    } catch {
       setIsInitialized(true);
-      // Don't set isPlaying to true if play failed
       setIsPlaying(false);
     }
   };
 
   const togglePlay = async () => {
     if (!audioRef.current) return;
-
-    // Initialize audio if not done yet (mobile needs user interaction)
     if (!isInitialized) {
       await initializeAudio();
-      return; // initializeAudio handles the play attempt
+      return;
     }
-
     try {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        const playPromise = audioRef.current.play();
-        await playPromise;
-      }
-    } catch (error) {
-      console.error('Audio play error:', error);
-      // Reset playing state if play fails
+      if (isPlaying) audioRef.current.pause();
+      else await audioRef.current.play();
+    } catch {
       setIsPlaying(false);
     }
   };
 
-  const toggleMute = () => {
-    setIsMuted((prev) => !prev);
-  };
-
-  const setVolume = (newVolume: number) => {
-    setVolumeState(Math.max(0, Math.min(1, newVolume)));
-  };
+  const toggleMute = () => setIsMuted((prev) => !prev);
+  const setVolume = (v: number) => setVolumeState(Math.max(0, Math.min(1, v)));
 
   return (
     <AudioContext.Provider

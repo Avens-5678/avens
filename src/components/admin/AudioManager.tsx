@@ -36,30 +36,6 @@ const AudioManager = () => {
 
   const fetchSettings = async () => {
     try {
-      // Check if user is authenticated with Supabase
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user) {
-        throw new Error('Please log in to access admin features');
-      }
-
-      // Verify admin privileges using the secure function
-      const { data: adminUsers, error: adminError } = await supabase
-        .rpc('get_admin_users_secure');
-
-      if (adminError) {
-        console.error('Error checking admin privileges:', adminError);
-        throw new Error('Failed to verify admin privileges');
-      }
-
-      const currentAdmin = adminUsers?.find((admin: any) => 
-        admin.email === session.user.email && admin.is_active
-      );
-
-      if (!currentAdmin) {
-        throw new Error('Admin privileges required');
-      }
-
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
@@ -71,7 +47,7 @@ const AudioManager = () => {
       console.error('Error fetching settings:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load audio settings.",
+        description: "Failed to load audio settings. Please ensure you're logged in as an admin.",
         variant: "destructive",
       });
     } finally {
@@ -83,16 +59,6 @@ const AudioManager = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Check admin authentication
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in as an admin to upload audio files.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     // Validate file type
     if (!file.type.startsWith('audio/')) {
@@ -193,16 +159,6 @@ const AudioManager = () => {
   const handleToggleEnabled = async (enabled: boolean) => {
     if (!settings) return;
 
-    // Check admin authentication
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in as an admin to modify audio settings.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     try {
       const { data: updatedData, error } = await supabase
@@ -269,16 +225,6 @@ const AudioManager = () => {
   const handleDelete = async () => {
     if (!settings?.background_audio_url) return;
 
-    // Check admin authentication
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in as an admin to delete audio files.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     try {
       // Stop audio if playing

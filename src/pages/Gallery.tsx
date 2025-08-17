@@ -1,10 +1,10 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
-import { ArrowLeft, Camera } from "lucide-react";
+import { ArrowLeft, Camera, ExternalLink } from "lucide-react";
 
 const Gallery = () => {
   const { eventId } = useParams<{ eventId: string }>();
@@ -50,34 +50,93 @@ const Gallery = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {regularImages.map((item) => (
-              <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300">
-                <img 
-                  src={item.image_url} 
-                  alt={item.title}
-                  className="w-full aspect-video object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </Card>
-            ))}
-          </div>
+          {regularImages.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {regularImages.map((item) => (
+                <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-all duration-300">
+                  <div className="aspect-video overflow-hidden">
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold text-sm line-clamp-2">{item.title}</h3>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {item.tag && (
+                        <Badge variant="outline" className="text-xs">
+                          {item.tag}
+                        </Badge>
+                      )}
+                      {item.album_url && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Camera className="mr-1 h-3 w-3" />
+                          Album
+                        </Badge>
+                      )}
+                    </div>
+                    {item.album_url && (
+                      <div className="mt-2">
+                        <a 
+                          href={item.album_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-500 hover:underline flex items-center"
+                        >
+                          <ExternalLink className="mr-1 h-3 w-3" />
+                          View Full Album
+                        </a>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Camera className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No Gallery Images</h3>
+              <p className="text-muted-foreground">
+                Portfolio items for this event will appear here once they're added.
+              </p>
+            </div>
+          )}
 
           {beforeAfterImages.length > 0 && (
             <div className="mt-20">
               <h2 className="text-3xl font-bold text-center mb-12">Before & After</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {beforeAfterImages.map((item) => (
-                  <Card key={item.id} className="overflow-hidden">
-                    <img 
-                      src={item.image_url} 
-                      alt={item.title}
-                      className="w-full aspect-video object-cover"
-                    />
-                    <div className="p-4">
-                      <Badge variant={item.is_before ? "secondary" : "default"}>
-                        {item.is_before ? "Before" : "After"}
-                      </Badge>
+                  <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                    <div className="aspect-video overflow-hidden">
+                      <img 
+                        src={item.image_url} 
+                        alt={item.title}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold">{item.title}</h3>
+                        <Badge variant={item.is_before ? "secondary" : "default"}>
+                          {item.is_before ? "Before" : "After"}
+                        </Badge>
+                      </div>
+                      {item.album_url && (
+                        <div className="mt-2">
+                          <a 
+                            href={item.album_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-500 hover:underline flex items-center"
+                          >
+                            <ExternalLink className="mr-1 h-3 w-3" />
+                            View Full Album
+                          </a>
+                        </div>
+                      )}
+                    </CardContent>
                   </Card>
                 ))}
               </div>

@@ -58,9 +58,13 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
         });
       } else {
         // Create new item - ensure required fields are present
+        if (!formData.title || !formData.event_id || !formData.image_url) {
+          throw new Error('Title, Event, and Cover Image URL are required');
+        }
+        
         const portfolioData = {
           title: formData.title,
-          image_url: formData.image_url || '',
+          image_url: formData.image_url,
           event_id: formData.event_id,
           album_url: formData.album_url || null,
           tag: formData.tag || null,
@@ -190,16 +194,16 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image_url">Individual Image URL</Label>
+              <Label htmlFor="image_url">Cover Image URL <span className="text-red-500">*</span></Label>
               <div className="space-y-2">
                 <Input
                   value={formData.image_url || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                  placeholder="Direct image URL (individual photo)"
+                  placeholder="Direct image URL for the portfolio tile/cover"
                 />
                 <p className="text-xs text-muted-foreground flex items-center space-x-1">
                   <ImageIcon className="h-3 w-3" />
-                  <span>Use this for single image uploads</span>
+                  <span>This image will be used as the cover/tile for this portfolio item</span>
                 </p>
               </div>
             </div>
@@ -297,12 +301,15 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
                         <span>Individual image URL provided</span>
                       </p>
                     )}
-                    {item.album_url && (
-                      <p className="text-xs text-muted-foreground flex items-center space-x-1">
-                        <ExternalLink className="h-3 w-3" />
-                        <span>Album/bulk URL provided</span>
-                      </p>
-                    )}
+                  {item.album_url && (
+                    <div className="text-xs text-muted-foreground flex items-center space-x-1">
+                      <ExternalLink className="h-3 w-3" />
+                      <span>Album/bulk URL: </span>
+                      <a href={item.album_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate max-w-xs">
+                        {item.album_url}
+                      </a>
+                    </div>
+                  )}
                   </div>
 
                   <div className="flex gap-2 flex-wrap">

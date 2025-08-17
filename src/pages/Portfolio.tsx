@@ -24,9 +24,15 @@ const Portfolio = () => {
   };
 
   // Filter events that have portfolio items to create event cards
-  const eventsWithPortfolio = events?.filter(event => 
-    portfolio?.some(item => item.event_id === event.id)
-  ) || [];
+  const eventsWithPortfolio = events?.filter(event => {
+    const hasPortfolio = portfolio?.some(item => item.event_id === event.id);
+    console.log(`Event ${event.title} (${event.id}) has portfolio:`, hasPortfolio);
+    return hasPortfolio;
+  }) || [];
+  
+  console.log('All events:', events?.length || 0);
+  console.log('All portfolio items:', portfolio?.length || 0);
+  console.log('Events with portfolio:', eventsWithPortfolio.length);
 
   if (loadingEvents || loadingPortfolio) {
     return (

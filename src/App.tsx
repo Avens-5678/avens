@@ -57,4 +57,6 @@ const App = () => (
   </QueryClientProvider>
 );
 
+export default AudioControls;
+
 export default App;

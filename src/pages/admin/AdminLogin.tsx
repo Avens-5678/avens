@@ -52,12 +52,12 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
       // 2️⃣ Normalize email for admin check
       const userEmail = authData.user.email?.trim().toLowerCase();
 
-      // 3️⃣ Check admin privileges
+      // 3️⃣ Check admin privileges (case-insensitive)
       const { data: adminData, error: adminError } = await supabase
         .from("admin_users")
         .select("*")
-        .eq("email", userEmail)
         .eq("is_active", true)
+        .ilike("email", userEmail) // case-insensitive match
         .maybeSingle();
 
       console.log("Admin check result:", { adminData, adminError });

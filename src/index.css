@@ -17,10 +17,10 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
 
-    --primary: 0 84% 60%;
+    --primary: 200 100% 60%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 200 100% 60%;
+    --secondary: 0 84% 60%;
     --secondary-foreground: 0 0% 98%;
 
     --muted: 60 4.8% 95.9%;
@@ -70,10 +70,10 @@ All colors MUST be HSL.
     --popover: 24 9.8% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 0 84% 60%;
+    --primary: 200 100% 60%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 200 100% 60%;
+    --secondary: 0 84% 60%;
     --secondary-foreground: 0 0% 98%;
 
     --muted: 12 6.5% 15.1%;

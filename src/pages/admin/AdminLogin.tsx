@@ -35,10 +35,15 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   // Handle auth state changes (for magic link)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.email);
+      
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('User signed in:', session.user.email);
+        console.log('User ID:', session.user.id);
         
         // Check if user is admin
+        console.log('Checking admin status for:', session.user.email);
+        
         const { data: adminData, error: adminError } = await supabase
           .from('admin_users')
           .select('*')
@@ -46,8 +51,21 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
           .eq('is_active', true)
           .maybeSingle();
 
-        if (adminError || !adminData) {
-          // Sign out if not admin
+        console.log('Admin query result:', { adminData, adminError });
+
+        if (adminError) {
+          console.error('Admin query error:', adminError);
+          await supabase.auth.signOut();
+          toast({
+            title: "Database Error",
+            description: "Failed to verify admin status. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!adminData) {
+          console.log('No admin found for email:', session.user.email);
           await supabase.auth.signOut();
           toast({
             title: "Access Denied",
@@ -57,6 +75,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
           return;
         }
 
+        console.log('Admin found:', adminData);
         // Success! Login complete
         onLoginSuccess(adminData);
         toast({

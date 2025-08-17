@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Shield } from "lucide-react";
+import { Loader2, Shield, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 interface AdminLoginProps {
@@ -34,13 +35,22 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     setIsLoading(true);
 
     try {
-      // Simple authentication - replace with real auth later
-      if (values.email && values.password) {
+      // Enhanced security check
+      const validAdmins = [
+        { email: "admin@avensevents.com", password: "SecureAdmin2024!", role: "admin" },
+        { email: "manager@avensevents.com", password: "Manager2024!", role: "manager" }
+      ];
+      
+      const adminUser = validAdmins.find(admin => 
+        admin.email === values.email && admin.password === values.password
+      );
+      
+      if (adminUser) {
         const mockAdmin = {
-          id: "admin-1",
-          email: values.email,
-          full_name: "Admin User",
-          role: "admin"
+          id: `admin-${Date.now()}`,
+          email: adminUser.email,
+          full_name: adminUser.role === "admin" ? "Admin User" : "Manager User",
+          role: adminUser.role
         };
 
         onLoginSuccess(mockAdmin);
@@ -50,7 +60,9 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
           description: "Welcome to the admin dashboard!",
         });
       } else {
-        throw new Error("Please enter valid credentials");
+        // Add delay to prevent brute force attacks
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        throw new Error("Invalid credentials. Please check your email and password.");
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -68,6 +80,15 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Link
+              to="/"
+              className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Website
+            </Link>
+          </div>
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
             <Shield className="h-6 w-6 text-primary" />
           </div>

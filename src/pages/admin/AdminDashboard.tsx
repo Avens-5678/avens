@@ -20,8 +20,10 @@ import {
   Settings,
   BarChart3,
   Volume2,
-  UserCircle
+  UserCircle,
+  ArrowLeft
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
 import EnhancedPortfolioManager from "@/components/admin/EnhancedPortfolioManager";
 import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboard";
@@ -83,6 +85,13 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
           </div>
           
           <div className="flex items-center space-x-4">
+            <Link
+              to="/"
+              className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Website
+            </Link>
             <div className="text-right">
               <p className="text-sm font-medium">{currentAdminUser.full_name}</p>
               <p className="text-xs text-muted-foreground capitalize">{currentAdminUser.role}</p>

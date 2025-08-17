@@ -27,7 +27,7 @@ const FilterButtons = ({ activeFilter, onFilterChange }: FilterButtonsProps) => 
             px-6 py-2 font-medium transition-all duration-300
             ${activeFilter === filter.key 
               ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-elegant" 
-              : "border-border hover:border-primary/50 hover:bg-primary/5"
+              : "border-border hover:border-hover hover:bg-hover/10 hover:text-hover"
             }
           `}
         >

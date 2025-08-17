@@ -48,7 +48,7 @@ const Navbar = () => {
                 className={`text-sm font-medium transition-colors ${
                   isActive(link.href)
                     ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-hover"
                 }`}
               >
                 {link.label}
@@ -97,7 +97,7 @@ const Navbar = () => {
                   className={`text-sm font-medium transition-colors ${
                     isActive(link.href)
                       ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:text-hover"
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >

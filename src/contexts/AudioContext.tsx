@@ -1,104 +1,112 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+// src/contexts/AudioContext.tsx
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-export interface SiteSettings {
+interface SiteSettings {
   id: string;
   background_audio_url: string | null;
   background_audio_enabled: boolean;
 }
 
 interface AudioContextType {
-  audioUrl: string | null;
-  isPlaying: boolean;
-  playAudio: (url: string) => void;
-  pauseAudio: () => void;
-  togglePlay: () => void;
   settings: SiteSettings | null;
-  setSettings: React.Dispatch<React.SetStateAction<SiteSettings | null>>;
+  isLoading: boolean;
+  isPlaying: boolean;
+  togglePlay: () => void;
+  refreshSettings: () => Promise<void>;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
-export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+export const AudioProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const { toast } = useToast();
 
-  // Fetch settings from Supabase
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("site_settings")
-          .select("*")
-          .single();
-        if (error) throw error;
-        setSettings(data);
-        if (data?.background_audio_enabled && data.background_audio_url) {
-          setAudioUrl(data.background_audio_url);
-        }
-      } catch (err) {
-        console.error("Failed to fetch audio settings:", err);
+    fetchSettings();
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.src = "";
       }
     };
-
-    fetchSettings();
   }, []);
 
-  // Handle audio element
-  useEffect(() => {
-    if (!audioUrl) return;
+  const fetchSettings = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("*")
+        .limit(1);
 
-    const newAudio = new Audio(audioUrl);
-    newAudio.loop = true;
-    setAudio(newAudio);
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("No audio settings found");
 
-    return () => {
-      newAudio.pause();
-      newAudio.src = "";
-    };
-  }, [audioUrl]);
-
-  const playAudio = (url: string) => {
-    if (!audio) return;
-    audio.src = url;
-    audio.play();
-    setIsPlaying(true);
+      setSettings(data[0]);
+    } catch (error: any) {
+      console.error("Error fetching audio settings:", error);
+      toast({
+        title: "Error",
+        description:
+          "Failed to load audio settings. Please ensure you're logged in as an admin.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const pauseAudio = () => {
-    if (!audio) return;
-    audio.pause();
-    setIsPlaying(false);
+  const refreshSettings = async () => {
+    await fetchSettings();
   };
 
   const togglePlay = () => {
-    if (!audio) return;
-    if (isPlaying) pauseAudio();
-    else playAudio(audioUrl!);
+    if (!settings?.background_audio_url) return;
+
+    if (!audio) {
+      const newAudio = new Audio(settings.background_audio_url);
+      newAudio.addEventListener("ended", () => setIsPlaying(false));
+      newAudio.addEventListener("error", () => {
+        toast({
+          title: "Error",
+          description: "Failed to play audio file.",
+          variant: "destructive",
+        });
+        setIsPlaying(false);
+      });
+      setAudio(newAudio);
+      newAudio.play();
+      setIsPlaying(true);
+    } else {
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        audio.play();
+        setIsPlaying(true);
+      }
+    }
   };
 
   return (
     <AudioContext.Provider
-      value={{
-        audioUrl,
-        isPlaying,
-        playAudio,
-        pauseAudio,
-        togglePlay,
-        settings,
-        setSettings,
-      }}
+      value={{ settings, isLoading, isPlaying, togglePlay, refreshSettings }}
     >
       {children}
     </AudioContext.Provider>
   );
 };
 
-// Hook to use in components
+// Hook to use AudioContext
 export const useAudio = () => {
   const context = useContext(AudioContext);
-  if (!context) throw new Error("useAudio must be used within an AudioProvider");
+  if (!context) {
+    throw new Error("useAudio must be used within an AudioProvider");
+  }
   return context;
 };

@@ -111,24 +111,34 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
   };
 
   const handleSave = async () => {
+    console.log('Save button clicked, formData:', formData);
     try {
       if (editingItem) {
+        console.log('Updating existing item:', editingItem.id);
         // Update existing item
         const { error } = await supabase
           .from('portfolio')
           .update(formData)
           .eq('id', editingItem.id);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
         
         toast({
           title: "Success",
           description: "Portfolio item updated successfully",
         });
       } else {
+        console.log('Creating new item with data:', formData);
         // Create new item - ensure required fields are present
         if (!formData.title || !formData.event_id || !formData.image_url) {
-          throw new Error('Title, Event, and Cover Image URL are required');
+          const missingFields = [];
+          if (!formData.title) missingFields.push('Title');
+          if (!formData.event_id) missingFields.push('Event');
+          if (!formData.image_url) missingFields.push('Cover Image');
+          throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
         }
         
         const portfolioData = {
@@ -142,11 +152,15 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
           is_before: formData.is_before || false
         };
         
+        console.log('Inserting portfolio data:', portfolioData);
         const { error } = await supabase
           .from('portfolio')
           .insert(portfolioData);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
         
         toast({
           title: "Success",

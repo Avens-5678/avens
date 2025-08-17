@@ -27,32 +27,32 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AudioProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/gallery/:portfolioId" element={<Gallery />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/events/:eventType" element={<DynamicEventPage />} />
-          <Route path="/events/wedding" element={<WeddingEvents />} />
-          <Route path="/events/corporate" element={<CorporateEvents />} />
-          <Route path="/events/birthday" element={<BirthdayParties />} />
-          <Route path="/events/equipment-rental" element={<EquipmentRental />} />
-          <Route path="/events/government" element={<GovernmentEvents />} />
-          <Route path="/ecommerce" element={<Ecommerce />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AudioProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/gallery/:portfolioId" element={<Gallery />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/events/:eventType" element={<DynamicEventPage />} />
+            <Route path="/events/wedding" element={<WeddingEvents />} />
+            <Route path="/events/corporate" element={<CorporateEvents />} />
+            <Route path="/events/birthday" element={<BirthdayParties />} />
+            <Route path="/events/equipment-rental" element={<EquipmentRental />} />
+            <Route path="/events/government" element={<GovernmentEvents />} />
+            <Route path="/ecommerce" element={<Ecommerce />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AudioProvider>
       </BrowserRouter>
     </TooltipProvider>
-    </AudioProvider>
   </QueryClientProvider>
 );
 

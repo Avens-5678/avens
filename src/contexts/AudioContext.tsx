@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SiteSettings {
@@ -33,6 +34,7 @@ interface AudioProviderProps {
 
 export const AudioProvider = ({ children }: AudioProviderProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const location = useLocation();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -40,6 +42,9 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [audioSettings, setAudioSettings] = useState<SiteSettings | null>(null);
+
+  // Check if we're on admin page
+  const isAdminPage = location.pathname.startsWith('/admin');
 
   // Fetch audio settings from Supabase
   useEffect(() => {
@@ -65,9 +70,13 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
   }, []);
 
   useEffect(() => {
-    // Only proceed if we have audio settings and audio is enabled
-    if (!audioSettings?.background_audio_enabled || !audioSettings?.background_audio_url) {
+    // Don't play audio on admin pages or if audio is disabled
+    if (isAdminPage || !audioSettings?.background_audio_enabled || !audioSettings?.background_audio_url) {
       setIsLoaded(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
       return;
     }
 
@@ -139,7 +148,7 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
       newAudio.src = '';
       audioRef.current = null;
     };
-  }, [audioSettings]);
+  }, [audioSettings, isAdminPage]);
 
   // Update volume & mute state safely
   useEffect(() => {

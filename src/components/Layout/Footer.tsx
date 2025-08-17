@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
+import { useEvents } from "@/hooks/useData";
 const Footer = () => {
+  const { data: events } = useEvents();
+  
   return <footer className="bg-muted/50 border-t border-border">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -48,18 +51,15 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="font-semibold text-foreground">Services</h4>
             <div className="space-y-2">
-              <Link to="/events/wedding" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
-                Wedding Events
-              </Link>
-              <Link to="/events/corporate" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
-                Corporate Events
-              </Link>
-              <Link to="/events/birthday" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
-                Birthday Parties
-              </Link>
-              <Link to="/events/government" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
-                Government Events
-              </Link>
+              {events?.map((event) => (
+                <Link 
+                  key={event.id} 
+                  to={`/events/${event.event_type}`} 
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {event.title}
+                </Link>
+              ))}
               <Link to="/ecommerce" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
                 Equipment Rental
               </Link>

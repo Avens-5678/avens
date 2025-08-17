@@ -328,7 +328,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                     { value: "government", label: "Government" },
                   ]
                 },
-                { name: "hero_image_url", label: "Hero Image URL", type: "image" },
+                { name: "hero_image_url", label: "Hero Image", type: "file" },
                 { name: "location", label: "Location", type: "text" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}

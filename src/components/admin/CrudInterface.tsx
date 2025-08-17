@@ -11,11 +11,13 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { createEventPage, deleteEventPage } from "@/utils/eventPageUtils";
+import { uploadEventHeroImage } from "@/utils/storageUtils";
 
 interface Field {
   name: string;
   label: string;
-  type: "text" | "textarea" | "boolean" | "select" | "number" | "image";
+  type: "text" | "textarea" | "boolean" | "select" | "number" | "image" | "file";
   required?: boolean;
   options?: { value: string; label: string }[];
 }
@@ -31,6 +33,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -69,16 +72,36 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
           description: `${title.slice(0, -1)} updated successfully.`,
         });
       } else {
-        const { error } = await supabase
+        const { data: newItem, error } = await supabase
           .from(tableName as any)
-          .insert(formData as any);
+          .insert(formData as any)
+          .select()
+          .single();
         
         if (error) throw error;
         
-        toast({
-          title: "Created",
-          description: `${title.slice(0, -1)} created successfully.`,
-        });
+        // If this is an event, create the event page automatically
+        if (tableName === 'events' && newItem) {
+          try {
+            await createEventPage(newItem);
+            toast({
+              title: "Created",
+              description: `${title.slice(0, -1)} and event page created successfully.`,
+            });
+          } catch (pageError) {
+            console.error('Error creating event page:', pageError);
+            toast({
+              title: "Partially Created",
+              description: `${title.slice(0, -1)} created but event page creation failed.`,
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Created",
+            description: `${title.slice(0, -1)} created successfully.`,
+          });
+        }
       }
       
       queryClient.invalidateQueries({ queryKey: [tableName] });
@@ -99,6 +122,15 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     }
     
     try {
+      // If this is an event, delete the event page first
+      if (tableName === 'events') {
+        try {
+          await deleteEventPage(item.id);
+        } catch (pageError) {
+          console.error('Error deleting event page:', pageError);
+        }
+      }
+
       const { error } = await supabase
         .from(tableName as any)
         .delete()
@@ -109,7 +141,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       queryClient.invalidateQueries({ queryKey: [tableName] });
       toast({
         title: "Deleted",
-        description: `${title.slice(0, -1)} deleted successfully.`,
+        description: `${title.slice(0, -1)} and associated pages deleted successfully.`,
       });
     } catch (error) {
       console.error('Error deleting:', error);
@@ -125,6 +157,53 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     setEditingItem(null);
     setIsCreating(false);
     setFormData({});
+  };
+
+  const handleFileUpload = async (file: File, fieldName: string) => {
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      let imageUrl;
+      if (fieldName === 'hero_image_url' && tableName === 'events') {
+        imageUrl = await uploadEventHeroImage(file, formData.event_type || 'default');
+      } else {
+        // Handle other image uploads
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        
+        const { data, error } = await supabase.storage
+          .from('portfolio-images')
+          .upload(fileName, file);
+
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('portfolio-images')
+          .getPublicUrl(data.path);
+
+        imageUrl = publicUrl;
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: imageUrl
+      }));
+      
+      toast({
+        title: "Upload Successful",
+        description: "Image uploaded successfully.",
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const renderField = (field: Field) => {
@@ -189,6 +268,29 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
             onChange={(e) => handleChange(e.target.value)}
             placeholder={`Enter ${field.label.toLowerCase()} URL`}
           />
+        );
+      
+      case 'file':
+        return (
+          <div className="space-y-2">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  handleFileUpload(file, field.name);
+                }
+              }}
+              disabled={uploading}
+            />
+            {value && (
+              <div className="text-sm text-muted-foreground">
+                Current: <a href={value} target="_blank" rel="noopener noreferrer" className="text-primary underline">View Image</a>
+              </div>
+            )}
+            {uploading && <div className="text-sm text-muted-foreground">Uploading...</div>}
+          </div>
         );
       
       default:

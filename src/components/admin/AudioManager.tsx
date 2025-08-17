@@ -36,54 +36,28 @@ const AudioManager = () => {
 
   const fetchSettings = async () => {
     try {
-      // First ensure we have an admin session
-      const currentAdmin = localStorage.getItem('adminUser');
-      if (!currentAdmin) {
-        throw new Error('Admin authentication required');
-      }
-
-      const adminData = JSON.parse(currentAdmin);
+      // Check if user is authenticated with Supabase
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Create or get admin user in admin_users table for RLS policies
-      const { data: existingAdmin, error: checkError } = await supabase
-        .from('admin_users')
-        .select('id')
-        .eq('email', adminData.email)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking admin:', checkError);
+      if (!session?.user) {
+        throw new Error('Please log in to access admin features');
       }
 
-      // If admin doesn't exist in admin_users table, create them
-      if (!existingAdmin) {
-        const { data: newAdmin, error: createError } = await supabase
-          .from('admin_users')
-          .insert({
-            email: adminData.email,
-            full_name: adminData.full_name,
-            role: adminData.role,
-            password_hash: 'temp_hash', // This is just for the database requirement
-            is_active: true
-          })
-          .select()
-          .single();
+      // Verify admin privileges using the secure function
+      const { data: adminUsers, error: adminError } = await supabase
+        .rpc('get_admin_users_secure');
 
-        if (createError) {
-          console.error('Error creating admin user:', createError);
-          throw new Error('Failed to authenticate admin');
-        }
+      if (adminError) {
+        console.error('Error checking admin privileges:', adminError);
+        throw new Error('Failed to verify admin privileges');
+      }
 
-        // Sign in this admin user to Supabase auth for RLS
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: adminData.email,
-          password: 'temp_password'
-        });
+      const currentAdmin = adminUsers?.find((admin: any) => 
+        admin.email === session.user.email && admin.is_active
+      );
 
-        if (signInError) {
-          // For demo purposes, we'll work around this by using the service role
-          console.log('Auth sign-in failed, proceeding with localStorage auth check');
-        }
+      if (!currentAdmin) {
+        throw new Error('Admin privileges required');
       }
 
       const { data, error } = await supabase
@@ -97,7 +71,7 @@ const AudioManager = () => {
       console.error('Error fetching settings:', error);
       toast({
         title: "Error",
-        description: "Failed to load audio settings. Please ensure you're logged in as an admin.",
+        description: error instanceof Error ? error.message : "Failed to load audio settings.",
         variant: "destructive",
       });
     } finally {
@@ -110,8 +84,8 @@ const AudioManager = () => {
     if (!file) return;
 
     // Check admin authentication
-    const currentAdmin = localStorage.getItem('adminUser');
-    if (!currentAdmin) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
       toast({
         title: "Authentication Required",
         description: "Please log in as an admin to upload audio files.",
@@ -220,8 +194,8 @@ const AudioManager = () => {
     if (!settings) return;
 
     // Check admin authentication
-    const currentAdmin = localStorage.getItem('adminUser');
-    if (!currentAdmin) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
       toast({
         title: "Authentication Required",
         description: "Please log in as an admin to modify audio settings.",
@@ -296,8 +270,8 @@ const AudioManager = () => {
     if (!settings?.background_audio_url) return;
 
     // Check admin authentication
-    const currentAdmin = localStorage.getItem('adminUser');
-    if (!currentAdmin) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
       toast({
         title: "Authentication Required",
         description: "Please log in as an admin to delete audio files.",

@@ -14,7 +14,7 @@ interface EventCardProps {
 
 const EventCard = ({ id, title, eventType, location, heroImage, description }: EventCardProps) => {
   return (
-    <Link to={`/portfolio/${id}`} className="block group">
+    <Link to={`/gallery/${id}`} className="block group">
       <Card className="overflow-hidden border-0 bg-card shadow-lg hover:shadow-elegant transition-all duration-500 group-hover:scale-[1.02]">
         <div className="relative aspect-[4/3] overflow-hidden">
           <img 

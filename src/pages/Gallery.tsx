@@ -9,14 +9,15 @@ import { useState } from "react";
 import Lightbox from "@/components/Portfolio/Lightbox";
 
 const Gallery = () => {
-  const { eventId } = useParams<{ eventId: string }>();
-  const { data: portfolio, isLoading } = usePortfolio(eventId);
+  const { portfolioId } = useParams<{ portfolioId: string }>();
+  const { data: allPortfolio, isLoading } = usePortfolio();
   const { data: events } = useEvents();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   
-  // Find the event associated with this portfolio
-  const event = events?.find(e => e.id === eventId);
+  // Find the specific portfolio item
+  const portfolioItem = allPortfolio?.find(item => item.id === portfolioId);
+  const event = events?.find(e => e.id === portfolioItem?.event_id);
 
   if (isLoading) {
     return (
@@ -28,32 +29,32 @@ const Gallery = () => {
     );
   }
 
-  // Get individual portfolio items and bulk album images
-  const portfolioItems = portfolio?.filter(item => !item.is_before_after) || [];
-  const beforeAfterImages = portfolio?.filter(item => item.is_before_after) || [];
+  // Get images for this specific portfolio item only
+  const portfolioImages = portfolioItem && !portfolioItem.is_before_after ? [portfolioItem] : [];
+  const beforeAfterImages = portfolioItem && portfolioItem.is_before_after ? [portfolioItem] : [];
   
   // Get all images including bulk uploaded ones
   const getAllImages = () => {
     const images: any[] = [];
     
-    // Add individual portfolio items
-    portfolioItems.forEach(item => {
-      images.push({ ...item, type: 'cover' });
+    // Add the portfolio item cover image
+    if (portfolioItem) {
+      images.push({ ...portfolioItem, type: 'cover' });
       
       // Add bulk album images if they exist
-      if (item.album_url) {
-        const albumUrls = item.album_url.split(',').map((url: string) => url.trim()).filter(Boolean);
+      if (portfolioItem.album_url) {
+        const albumUrls = portfolioItem.album_url.split(',').map((url: string) => url.trim()).filter(Boolean);
         albumUrls.forEach((url, index) => {
           images.push({
-            id: `${item.id}_album_${index}`,
-            title: `${item.title} - Image ${index + 1}`,
+            id: `${portfolioItem.id}_album_${index}`,
+            title: `${portfolioItem.title} - Image ${index + 1}`,
             image_url: url,
-            tag: item.tag,
+            tag: portfolioItem.tag,
             type: 'album'
           });
         });
       }
-    });
+    }
     
     return images;
   };
@@ -75,7 +76,7 @@ const Gallery = () => {
               Gallery
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {event?.title || "Event Gallery"}
+              {portfolioItem?.title || "Project Gallery"}
             </h1>
             <Button asChild variant="outline" className="mb-8">
               <Link to="/portfolio">
@@ -131,7 +132,7 @@ const Gallery = () => {
               <Camera className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">No Gallery Images</h3>
               <p className="text-muted-foreground">
-                Portfolio items for this event will appear here once they're added.
+                Images for this portfolio project will appear here once they're added.
               </p>
             </div>
           )}

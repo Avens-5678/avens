@@ -13,17 +13,13 @@ const Portfolio = () => {
   const { data: portfolio, isLoading: loadingPortfolio } = usePortfolio();
   const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  // Filter events that have portfolio items
-  const eventsWithPortfolio = events?.filter(event => {
-    const hasPortfolio = portfolio?.some(item => item.event_id === event.id);
-    return hasPortfolio;
-  }) || [];
-
-  // Filter events by selected filter
-  const filteredEvents = eventsWithPortfolio.filter(event => {
+  // Filter portfolio items by selected filter
+  const filteredPortfolio = portfolio?.filter(item => {
     if (activeFilter === "all") return true;
-    return event.event_type === activeFilter;
-  });
+    // Find the associated event and check its type
+    const associatedEvent = events?.find(event => event.id === item.event_id);
+    return associatedEvent?.event_type === activeFilter;
+  }) || [];
 
   if (loadingEvents || loadingPortfolio) {
     return (
@@ -69,19 +65,22 @@ const Portfolio = () => {
       {/* Event Cards Grid */}
       <section className="pb-20">
         <div className="container mx-auto px-4">
-          {filteredEvents.length > 0 ? (
+          {filteredPortfolio.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  id={event.id}
-                  title={event.title}
-                  eventType={event.event_type}
-                  location={event.location}
-                  heroImage={event.hero_image_url || '/placeholder.svg'}
-                  description={event.description}
-                />
-              ))}
+              {filteredPortfolio.map((portfolioItem) => {
+                const associatedEvent = events?.find(event => event.id === portfolioItem.event_id);
+                return (
+                  <EventCard
+                    key={portfolioItem.id}
+                    id={portfolioItem.id}
+                    title={portfolioItem.title}
+                    eventType={associatedEvent?.event_type || 'custom'}
+                    location={associatedEvent?.location}
+                    heroImage={portfolioItem.image_url}
+                    description={associatedEvent?.description || ''}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-20">

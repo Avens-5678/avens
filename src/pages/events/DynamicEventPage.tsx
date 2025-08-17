@@ -7,7 +7,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
-import { Briefcase, ArrowRight, Camera, ExternalLink, Lightbulb, Zap, Award } from "lucide-react";
+import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap } from "lucide-react";
+
+const iconMap = {
+  star: Star,
+  users: Users,
+  calendar: Calendar,
+  zap: Zap,
+};
 
 const DynamicEventPage = () => {
   const { eventType } = useParams<{ eventType: string }>();
@@ -18,6 +25,10 @@ const DynamicEventPage = () => {
     item.event_id === event?.id || 
     item.tag?.toLowerCase().includes(eventType?.toLowerCase() || '')
   )?.slice(0, 3);
+
+  const specialties = (event?.specialties as any[]) || [];
+  const services = (event?.services as any[]) || [];
+  const processSteps = (event?.process_steps as any[]) || [];
 
   if (isLoading) {
     return (
@@ -62,22 +73,28 @@ const DynamicEventPage = () => {
               </Badge>
               
               <div className="space-y-6">
-                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                  {event.title}
-                  <span className="block text-primary">Excellence</span>
-                </h1>
-                
-                <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
-                  {event.description}
-                </p>
+                 <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                   {event.title}
+                   {!event.hero_subtitle && <span className="block text-primary">Excellence</span>}
+                 </h1>
+                 
+                 {event.hero_subtitle && (
+                   <p className="text-2xl font-medium text-primary mb-4">
+                     {event.hero_subtitle}
+                   </p>
+                 )}
+                 
+                 <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                   {event.description}
+                 </p>
               </div>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="bg-primary text-primary-foreground px-8">
-                    Book a Consultation <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </DialogTrigger>
+               <Dialog>
+                 <DialogTrigger asChild>
+                   <Button size="lg" className="bg-primary text-primary-foreground px-8">
+                     {event.hero_cta_text || 'Book a Consultation'} <ArrowRight className="ml-2 h-5 w-5" />
+                   </Button>
+                 </DialogTrigger>
                 <DialogContent className="max-w-lg">
                   <DialogHeader>
                     <DialogTitle>Book {event.title} Consultation</DialogTitle>
@@ -111,7 +128,7 @@ const DynamicEventPage = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto space-y-6">
-            <h2 className="text-4xl font-bold">What We Do</h2>
+            <h2 className="text-4xl font-bold">{event.what_we_do_title || 'What We Do'}</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               {event.process_description || "Our expert team provides comprehensive event planning and management services tailored to your unique needs."}
             </p>
@@ -119,46 +136,86 @@ const DynamicEventPage = () => {
         </div>
       </section>
 
+      {/* Specialties Section */}
+      {specialties.length > 0 && (
+        <section className="py-20 bg-background">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-bold text-center mb-16">Our Specialties</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {specialties.map((specialty, index) => (
+                <Card key={index} className="overflow-hidden">
+                  {specialty.image_url && (
+                    <div className="aspect-video relative">
+                      <img 
+                        src={specialty.image_url} 
+                        alt={specialty.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-3">{specialty.title}</h3>
+                    <p className="text-muted-foreground">{specialty.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Services Section */}
+      {services.length > 0 && (
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-bold text-center mb-16">
+              {event.services_section_title || 'Our Services'}
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {services.map((service, index) => {
+                const IconComponent = iconMap[service.icon as keyof typeof iconMap] || Star;
+                return (
+                  <div key={index} className="text-center">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <IconComponent className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-4">{service.title}</h3>
+                    <p className="text-muted-foreground">{service.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Our Process */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-6">Our Process</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <Lightbulb className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">Step 1: Consultation</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                We begin with a detailed consultation to understand your vision, requirements, and budget for the perfect event.
-              </p>
+      {processSteps.length > 0 && (
+        <section className="py-20 bg-secondary/50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold mb-6">Our Process</h2>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <Zap className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">Step 2: Planning</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Our team creates a comprehensive plan with timelines, vendor coordination, and detailed logistics management.
-              </p>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <Award className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">Step 3: Execution</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                We handle every detail on event day, ensuring flawless execution while you enjoy your special occasion.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {processSteps.sort((a, b) => a.order - b.order).map((step, index) => {
+                const IconComponent = iconMap[step.icon as keyof typeof iconMap] || Star;
+                return (
+                  <div key={index} className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                      <IconComponent className="h-8 w-8 text-primary-foreground" />
+                    </div>
+                    <h3 className="text-xl font-semibold">{step.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Portfolio Showcase */}
       {eventPortfolio && eventPortfolio.length > 0 && (

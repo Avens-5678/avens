@@ -146,39 +146,69 @@ export type Database = {
       events: {
         Row: {
           created_at: string
+          default_portfolio_tags: string[] | null
           description: string
           event_type: Database["public"]["Enums"]["event_type"]
+          hero_cta_text: string | null
           hero_image_url: string | null
+          hero_subtitle: string | null
           id: string
           is_active: boolean | null
           location: string | null
+          meta_description: string | null
           process_description: string
+          process_steps: Json | null
+          services: Json | null
+          services_section_title: string | null
+          specialties: Json | null
           title: string
           updated_at: string
+          url_slug: string | null
+          what_we_do_title: string | null
         }
         Insert: {
           created_at?: string
+          default_portfolio_tags?: string[] | null
           description: string
           event_type: Database["public"]["Enums"]["event_type"]
+          hero_cta_text?: string | null
           hero_image_url?: string | null
+          hero_subtitle?: string | null
           id?: string
           is_active?: boolean | null
           location?: string | null
+          meta_description?: string | null
           process_description: string
+          process_steps?: Json | null
+          services?: Json | null
+          services_section_title?: string | null
+          specialties?: Json | null
           title: string
           updated_at?: string
+          url_slug?: string | null
+          what_we_do_title?: string | null
         }
         Update: {
           created_at?: string
+          default_portfolio_tags?: string[] | null
           description?: string
           event_type?: Database["public"]["Enums"]["event_type"]
+          hero_cta_text?: string | null
           hero_image_url?: string | null
+          hero_subtitle?: string | null
           id?: string
           is_active?: boolean | null
           location?: string | null
+          meta_description?: string | null
           process_description?: string
+          process_steps?: Json | null
+          services?: Json | null
+          services_section_title?: string | null
+          specialties?: Json | null
           title?: string
           updated_at?: string
+          url_slug?: string | null
+          what_we_do_title?: string | null
         }
         Relationships: []
       }

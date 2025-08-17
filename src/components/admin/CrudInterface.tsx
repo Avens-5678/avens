@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { createEventPage, deleteEventPage } from "@/utils/eventPageUtils";
 import { uploadEventHeroImage } from "@/utils/storageUtils";
+import { EnhancedEventForm } from "./EnhancedEventForm";
 
 interface Field {
   name: string;
@@ -34,15 +35,26 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [uploading, setUploading] = useState(false);
+  const [isEnhancedEventFormOpen, setIsEnhancedEventFormOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleEdit = (item: any) => {
+    if (tableName === 'events') {
+      setFormData(item);
+      setEditingItem(item);
+      setIsEnhancedEventFormOpen(true);
+      return;
+    }
     setEditingItem(item);
     setFormData(item);
   };
 
   const handleCreate = () => {
+    if (tableName === 'events') {
+      setIsEnhancedEventFormOpen(true);
+      return;
+    }
     setIsCreating(true);
     const initialData: Record<string, any> = {};
     fields.forEach(field => {
@@ -415,6 +427,19 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
           </Card>
         )}
       </div>
+
+      {/* Enhanced Event Form */}
+      <EnhancedEventForm
+        isOpen={isEnhancedEventFormOpen}
+        onClose={() => {
+          setIsEnhancedEventFormOpen(false);
+          setFormData({});
+          setEditingItem(null);
+        }}
+        onSave={handleSave}
+        initialData={editingItem || {}}
+        mode={editingItem ? 'edit' : 'create'}
+      />
     </div>
   );
 };

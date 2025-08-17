@@ -131,9 +131,7 @@ const CorporateEvents = () => {
               <div className="relative">
                 <div className="transform -rotate-0 origin-center">
                   <h2 className="text-4xl lg:text-5xl font-bold text-primary leading-tight text-center">
-                    Highlighted
-                    <br />
-                    Services
+                    Highlighted Services
                   </h2>
                 </div>
               </div>

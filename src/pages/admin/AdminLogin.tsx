@@ -27,7 +27,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "raghuram2087@gmail.com", // Pre-fill for convenience
+      email: "raghuram2087@gmail.com",
       password: "",
     },
   });
@@ -36,60 +36,44 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     setIsLoading(true);
 
     try {
-      console.log('Attempting login with:', values.email);
+      console.log("Attempting login with:", values.email);
 
-      // Try direct Supabase Auth login
+      // 1️⃣ Supabase Auth login
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
-      console.log('Auth result:', { authData, signInError });
+      console.log("Auth result:", { authData, signInError });
 
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        throw new Error('Invalid credentials. Please check your email and password.');
-      }
+      if (signInError) throw new Error(signInError.message);
 
-      if (!authData.user) {
-        throw new Error('Login failed. Please try again.');
-      }
+      if (!authData.user) throw new Error("Login failed. Please try again.");
 
-      console.log('User signed in successfully:', authData.user.email);
-
-      // Check if user is admin
-      console.log('Checking admin privileges for:', authData.user.email);
-      
+      // 2️⃣ Check admin privileges
       const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('email', authData.user.email)
-        .eq('is_active', true)
+        .from("admin_users")
+        .select("*")
+        .eq("email", authData.user.email)
+        .eq("is_active", true)
         .maybeSingle();
 
-      console.log('Admin check result:', { adminData, adminError });
+      console.log("Admin check result:", { adminData, adminError });
 
-      if (adminError) {
-        console.error('Admin query error:', adminError);
-        await supabase.auth.signOut();
-        throw new Error('Failed to verify admin privileges. Please try again.');
-      }
+      if (adminError) throw new Error("Failed to verify admin privileges.");
 
       if (!adminData) {
-        console.log('No admin privileges found for:', authData.user.email);
         await supabase.auth.signOut();
-        throw new Error('Access denied. Admin privileges required.');
+        throw new Error("Access denied. Admin privileges required.");
       }
 
-      console.log('Admin login successful:', adminData);
-      
+      // 3️⃣ Successful login
       onLoginSuccess(adminData);
-      
       toast({
         title: "Login Successful",
         description: `Welcome back, ${adminData.full_name}!`,
       });
-      
+
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
@@ -133,11 +117,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="email" 
-                        placeholder="Enter your email address" 
-                        {...field} 
-                      />
+                      <Input type="email" placeholder="Enter your email address" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -151,22 +131,15 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="Enter your password" 
-                        {...field} 
-                      />
+                      <Input type="password" placeholder="Enter your password" {...field} />
                     </FormControl>
                     <FormMessage />
-                    <p className="text-xs text-muted-foreground">
-                      Try: password123
-                    </p>
                   </FormItem>
                 )}
               />
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-gradient-to-r from-primary to-accent"
                 disabled={isLoading}
               >

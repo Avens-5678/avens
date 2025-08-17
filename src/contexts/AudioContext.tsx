@@ -36,7 +36,7 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolumeState] = useState(0.3);
+  const [volume, setVolumeState] = useState(0.4);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [audioSettings, setAudioSettings] = useState<SiteSettings | null>(null);
@@ -79,7 +79,7 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     const savedPreferences = localStorage.getItem('audioPreferences');
     if (savedPreferences) {
       const { volume: savedVolume, isMuted: savedMuted } = JSON.parse(savedPreferences);
-      setVolumeState(savedVolume ?? 0.3);
+      setVolumeState(savedVolume ?? 0.4);
       setIsMuted(savedMuted ?? false);
     }
 
@@ -98,6 +98,19 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     newAudio.addEventListener('play', handlePlay);
     newAudio.addEventListener('pause', handlePause);
     newAudio.addEventListener('ended', handleEnded);
+
+    // Auto-play when audio is ready
+    const handleAutoPlay = async () => {
+      try {
+        await newAudio.play();
+        setIsInitialized(true);
+      } catch (error) {
+        console.log('Autoplay blocked by browser, user interaction required');
+        setIsInitialized(false);
+      }
+    };
+
+    newAudio.addEventListener('canplaythrough', handleAutoPlay, { once: true });
 
     return () => {
       newAudio.removeEventListener('canplaythrough', handleCanPlay);

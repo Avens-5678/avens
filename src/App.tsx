@@ -56,7 +56,4 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
-export default AudioControls;
-
 export default App;

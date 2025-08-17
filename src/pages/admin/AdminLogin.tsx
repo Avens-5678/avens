@@ -48,14 +48,24 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
 
     try {
       // Check if user is admin first
+      console.log('Checking admin status for email:', values.email);
+      
       const { data: adminData, error: adminError } = await supabase
         .from('admin_users')
-        .select('email, full_name, is_active')
+        .select('email, full_name, is_active, role')
         .eq('email', values.email)
         .eq('is_active', true)
         .maybeSingle();
 
-      if (adminError || !adminData) {
+      console.log('Admin query result:', { adminData, adminError });
+
+      if (adminError) {
+        console.error('Admin query error:', adminError);
+        throw new Error('Database error. Please try again.');
+      }
+
+      if (!adminData) {
+        console.log('No admin found for email:', values.email);
         throw new Error('Access denied. Admin privileges required.');
       }
 

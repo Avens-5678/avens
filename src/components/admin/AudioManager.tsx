@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, Play, Pause, Trash2, Volume2, Download } from 'lucide-react';
@@ -19,9 +18,25 @@ const AudioManager = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthReady, setIsAuthReady] = useState(false); // State to track auth readiness
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const { toast } = useToast();
+
+  // FIX: Wait for Supabase to confirm auth state before fetching data
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        // This listener fires once on initial load, confirming the session is checked.
+        setIsAuthReady(true);
+      }
+    );
+
+    return () => {
+      // Cleanup the listener when the component unmounts
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const fetchSettings = async () => {
     setIsLoading(true);
@@ -45,12 +60,16 @@ const AudioManager = () => {
     }
   };
 
+  // FIX: This effect now depends on isAuthReady
   useEffect(() => {
-    fetchSettings();
+    // Only fetch settings after the auth state has been confirmed
+    if (isAuthReady) {
+      fetchSettings();
+    }
     return () => {
       audio?.pause();
     };
-  }, []);
+  }, [isAuthReady]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!settings) {
@@ -149,7 +168,7 @@ const AudioManager = () => {
       if (error) throw error;
       await fetchSettings();
     } catch (error: any) {
-      toast({ title: "Error", description: "Could not initialize settings.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not initialize settings: " + error.message, variant: "destructive" });
     }
   };
 
@@ -169,7 +188,8 @@ const AudioManager = () => {
     audioInstance.play();
   };
 
-  if (isLoading) {
+  // FIX: The loading state now waits for both auth and data fetching
+  if (isLoading || !isAuthReady) {
     return (
       <Card>
         <CardHeader><CardTitle>Background Audio Management</CardTitle></CardHeader>
@@ -204,7 +224,6 @@ const AudioManager = () => {
             <Label htmlFor="audio-enabled">Enable Background Audio</Label>
             <p className="text-sm text-muted-foreground">Toggle background audio for the website</p>
           </div>
-          {/* FIX: Disable switch while loading */}
           <Switch 
             id="audio-enabled" 
             checked={settings.background_audio_enabled} 
@@ -225,7 +244,6 @@ const AudioManager = () => {
         )}
         <div className="space-y-2">
           <Label htmlFor="upload-input">Upload New Audio File</Label>
-          {/* FIX: Disable input while loading or uploading */}
           <Input 
             id="upload-input"
             type="file" 

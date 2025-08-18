@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Github } from "lucide-react";
 import { useEvents } from "@/hooks/useData";
 
 const Footer = () => {
@@ -103,7 +103,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 Avens. All rights reserved.
+            © 2024 Avens Events. All rights reserved.
           </p>
         </div>
       </div>

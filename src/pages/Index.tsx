@@ -107,6 +107,39 @@ const AnimatedStat = ({ finalValue, suffix, isDecimal }) => {
     );
 };
 
+// --- NEW ELEGANT ICONS ---
+const IconHappyClients = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 18C17 15.7909 14.7614 14 12 14C9.23858 14 7 15.7909 7 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M12 11C13.6569 11 15 9.65685 15 8C15 6.34315 13.6569 5 12 5C10.3431 5 9 6.34315 9 8C9 9.65685 10.3431 11 12 11Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M20.664 17.5C20.875 16.446 21 15.245 21 14C21 10.134 17.866 7 14 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2 2"/>
+    <path d="M3.336 17.5C3.125 16.446 3 15.245 3 14C3 10.134 6.134 7 10 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2 2"/>
+  </svg>
+);
+
+const IconEventsCompleted = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 7V3M16 7V3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M3 12.5L5.5 15L8 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M3 10H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const IconRatingAverage = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 2V17.77" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const IconYearsExperience = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 
 const Index = () => {
   const [selectedPost, setSelectedPost] = useState < any > (null);
@@ -209,8 +242,8 @@ const Index = () => {
               <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
                 <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-4 shadow-lg shadow-primary/20">
-                    <Users className="h-7 w-7 text-white" />
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl mb-4 border border-primary/20">
+                    <IconHappyClients className="h-7 w-7 text-primary" />
                   </div>
                   <AnimatedStat finalValue={100} suffix="+" />
                   <div className="text-sm text-muted-foreground mt-1">Happy Clients</div>
@@ -220,8 +253,8 @@ const Index = () => {
               <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10">
                 <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-secondary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-4 shadow-lg shadow-secondary/20">
-                    <CheckCircle className="h-7 w-7 text-white" />
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-secondary/20 to-transparent rounded-2xl mb-4 border border-secondary/20">
+                    <IconEventsCompleted className="h-7 w-7 text-secondary" />
                   </div>
                   <AnimatedStat finalValue={500} suffix="+" />
                   <div className="text-sm text-muted-foreground mt-1">Events Completed</div>
@@ -231,8 +264,8 @@ const Index = () => {
               <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
                 <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-4 shadow-lg shadow-primary/20">
-                    <Star className="h-7 w-7 text-white" />
+                   <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl mb-4 border border-primary/20">
+                    <IconRatingAverage className="h-7 w-7 text-primary" />
                   </div>
                   <AnimatedStat finalValue={4.9} isDecimal={true} />
                   <div className="text-sm text-muted-foreground mt-1">Rating Average</div>
@@ -242,8 +275,8 @@ const Index = () => {
               <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10">
                 <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-secondary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-4 shadow-lg shadow-secondary/20">
-                    <Trophy className="h-7 w-7 text-white" />
+                   <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-secondary/20 to-transparent rounded-2xl mb-4 border border-secondary/20">
+                    <IconYearsExperience className="h-7 w-7 text-secondary" />
                   </div>
                   <AnimatedStat finalValue={15} suffix="+" />
                   <div className="text-sm text-muted-foreground mt-1">Years Experience</div>

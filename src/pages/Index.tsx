@@ -105,10 +105,10 @@ const Index = () => {
             </div>}
         </div>
 
-        {/* Stats Section */}
-        <section className="relative overflow-hidden py-[40px]">
+        {/* Stats Section - Desktop Optimized */}
+        <section className="relative overflow-hidden py-16 lg:py-24">
           <div className="container mx-auto px-4 relative z-10">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8 max-w-6xl mx-auto mb-8">
               <AnimatedText delay={200} className="text-center group">
                 <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
@@ -149,10 +149,10 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Services Section */}
-        <section className="relative overflow-hidden py-0">
-          <div className="container mx-auto relative z-10 px-0 py-[20px]">
-            <div className="text-center mb-12">
+        {/* Services Section - Desktop Optimized */}
+        <section className="relative overflow-hidden py-16 lg:py-24">
+          <div className="container mx-auto relative z-10 px-4">
+            <div className="text-center mb-16 lg:mb-20">
               <AnimatedText>
                 <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                   <Sparkles className="mr-2 h-4 w-4" />
@@ -171,7 +171,7 @@ const Index = () => {
               </AnimatedText>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
               {services?.map((service, index) => <AnimatedText key={service.id} delay={600 + index * 100}>
                   <Card className="group hover:shadow-xl transition-all duration-500 border-0 glassmorphism-card hover:-translate-y-2 rounded-2xl overflow-hidden">
                     <div className="h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
@@ -197,10 +197,10 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Rentals Section */}
-        <section className="relative py-0">
-          <div className="container mx-auto relative z-10 px-0 py-[20px]">
-            <div className="text-center mb-12">
+        {/* Rentals Section - Desktop Optimized */}
+        <section className="relative py-16 lg:py-24">
+          <div className="container mx-auto relative z-10 px-4">
+            <div className="text-center mb-16 lg:mb-20">
               <AnimatedText>
                 <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                   <Clock className="mr-2 h-4 w-4" />
@@ -219,7 +219,7 @@ const Index = () => {
               </AnimatedText>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
               {rentals?.map((rental, index) => <AnimatedText key={rental.id} delay={600 + index * 100}>
                   <Card className="group hover:shadow-xl transition-all duration-500 glassmorphism-card border-0 rounded-3xl overflow-hidden hover:-translate-y-2">
                     <div className="h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
@@ -268,9 +268,9 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Trusted Clients */}
-        {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-0">
-            <div className="container mx-auto relative z-10 px-0 py-[20px]">
+        {/* Trusted Clients - Desktop Optimized */}
+        {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-16 lg:py-24">
+            <div className="container mx-auto relative z-10 px-4">
               <div className="text-center mb-12">
                 <AnimatedText>
                   <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
@@ -286,21 +286,21 @@ const Index = () => {
               </div>
 
               <AnimatedText delay={400}>
-                <div className="overflow-hidden rounded-2xl glassmorphism-card py-6">
-                  <div className="flex animate-scroll space-x-12">
-                    {[...trustedClients, ...trustedClients].map((client, index) => <div key={`${client.id}-${index}`} className="flex-shrink-0 h-16 w-32 flex items-center justify-center group">
-                        <img src={client.logo_url} alt={client.name} className="max-h-full max-w-full object-contain opacity-60 group-hover:opacity-100 transition-all duration-300 filter grayscale group-hover:grayscale-0" />
-                      </div>)}
-                  </div>
-                </div>
+                  <div className="overflow-hidden rounded-2xl glassmorphism-card py-8 lg:py-12">
+                   <div className="flex animate-scroll space-x-16 lg:space-x-20">
+                     {[...trustedClients, ...trustedClients].map((client, index) => <div key={`${client.id}-${index}`} className="flex-shrink-0 h-20 lg:h-24 w-40 lg:w-48 flex items-center justify-center group">
+                         <img src={client.logo_url} alt={client.name} className="max-h-full max-w-full object-contain opacity-60 group-hover:opacity-100 transition-all duration-300 filter grayscale group-hover:grayscale-0" />
+                       </div>)}
+                   </div>
+                 </div>
               </AnimatedText>
             </div>
           </section>}
 
-        {/* Awards & Achievements - Redesigned */}
-        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-12">
+        {/* Awards & Achievements - Desktop Optimized */}
+        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-16 lg:py-24">
             <div className="container mx-auto relative z-10 px-4">
-              <div className="text-center mb-12">
+              <div className="text-center mb-16 lg:mb-20">
                 <AnimatedText>
                   <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                     <Award className="mr-2 h-4 w-4" />
@@ -319,8 +319,8 @@ const Index = () => {
                 </AnimatedText>
               </div>
 
-              {/* Compact awards grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {/* Desktop optimized awards grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
                 {newsAchievements.slice(0, 3).map((news, index) => <AnimatedText key={news.id} delay={600 + index * 100}>
                     <Card className="group hover:shadow-lg transition-all duration-500 glassmorphism-card border-0 rounded-2xl overflow-hidden hover:-translate-y-2 h-full relative">
                       {/* Compact image */}

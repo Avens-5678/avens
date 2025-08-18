@@ -21,7 +21,8 @@ import {
   BarChart3,
   Volume2,
   UserCircle,
-  ArrowLeft
+  ArrowLeft,
+  Star
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -29,6 +30,7 @@ import EnhancedPortfolioManager from "@/components/admin/EnhancedPortfolioManage
 import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboard";
 import AudioManager from "@/components/admin/AudioManager";
 import ProfileManager from "@/components/admin/ProfileManager";
+import TestimonialManager from "@/components/admin/TestimonialManager";
 import Logo from "@/components/ui/logo";
 
 interface AdminDashboardProps {
@@ -107,7 +109,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-11 h-auto p-1 gap-1 overflow-x-auto"
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-12 h-auto p-1 gap-1 overflow-x-auto"
                      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
             <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
               <BarChart3 className="h-3 w-3" />
@@ -136,6 +138,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <TabsTrigger value="clients" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
               <Users className="h-3 w-3" />
               <span>Clients</span>
+            </TabsTrigger>
+            <TabsTrigger value="testimonials" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+              <Star className="h-3 w-3" />
+              <span>Reviews</span>
             </TabsTrigger>
             <TabsTrigger value="forms" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
               <MessageSquare className="h-3 w-3" />
@@ -373,6 +379,11 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}
             />
+          </TabsContent>
+
+          {/* Testimonials Management */}
+          <TabsContent value="testimonials">
+            <TestimonialManager />
           </TabsContent>
 
           {/* Form Submissions */}

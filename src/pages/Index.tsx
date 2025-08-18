@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } 
 import InquiryForm from "@/components/Forms/InquiryForm";
 import Autoplay from "embla-carousel-autoplay";
 import { HeroSection } from "@/components/ui/hero-section";
-import { AnimatedText } from "@/components/ui/animated-text";
+import { AnimatedText, GradientText } from "@/components/ui/animated-text";
+import TestimonialsSection from "@/components/TestimonialsSection";
 const Index = () => {
   const {
     data: heroBanners,
@@ -74,13 +75,13 @@ const Index = () => {
               }}>
                       <div className="absolute inset-0 bg-black/40"></div>
                       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-                        <AnimatedText className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
-                          {banner.title}
+                        <AnimatedText variant="fade-in-up" className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                          <GradientText variant="primary">{banner.title}</GradientText>
                         </AnimatedText>
-                        {banner.subtitle && <AnimatedText delay={300} className="text-lg md:text-xl mb-6 text-white/90">
+                        {banner.subtitle && <AnimatedText variant="fade-in-up" delay={300} className="text-lg md:text-xl mb-6 text-white/90">
                             {banner.subtitle}
                           </AnimatedText>}
-                        <AnimatedText delay={600}>
+                        <AnimatedText variant="scale-in" delay={600}>
                           <Button asChild size="lg" className="glassmorphism-btn text-lg px-8 py-3 rounded-2xl">
                             <Link to={`/events/${banner.event_type}`}>
                               {banner.button_text} <ArrowRight className="ml-2 h-5 w-5" />
@@ -96,13 +97,14 @@ const Index = () => {
               <CarouselNext className="hero-arrow right-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 opacity-100 animate-fade-in-delay hidden md:flex" />
             </Carousel> : <div className="h-screen flex items-center justify-center text-center max-w-4xl mx-auto px-4">
               <div>
-                <AnimatedText className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Creating Unforgettable Moments
+                <AnimatedText variant="fade-in-up" className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                  <GradientText>Creating Unforgettable</GradientText><br />
+                  <GradientText variant="secondary">Moments</GradientText>
                 </AnimatedText>
-                <AnimatedText delay={300} className="text-lg md:text-xl mb-6 text-muted-foreground">
+                <AnimatedText variant="fade-in-up" delay={300} className="text-lg md:text-xl mb-6 text-muted-foreground">
                   Premium event management and rental services for your special occasions
                 </AnimatedText>
-                <AnimatedText delay={600}>
+                <AnimatedText variant="scale-in" delay={600}>
                   <Button asChild size="lg" className="glassmorphism-btn text-lg px-8 py-3 rounded-2xl">
                     <Link to="/services">
                       Explore Services <ArrowRight className="ml-2 h-5 w-5" />
@@ -275,6 +277,9 @@ const Index = () => {
             </AnimatedText>
           </div>
         </section>
+
+        {/* Testimonials Section */}
+        <TestimonialsSection />
 
         {/* Trusted Clients */}
         {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-0">

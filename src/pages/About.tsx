@@ -145,53 +145,6 @@ const About = () => {
         </section>
       )}
 
-      {/* News & Achievements */}
-      {newsAchievements && newsAchievements.length > 0 && (
-        <section className="py-20 bg-muted/50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <Badge variant="secondary" className="mb-4">
-                <Award className="mr-2 h-4 w-4" />
-                Latest Updates
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                News & Achievements
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Stay updated with our latest milestones and accomplishments
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {newsAchievements.map((news) => (
-                <Card key={news.id} className="hover:shadow-lg transition-all duration-300 border-0 bg-background">
-                  {news.image_url && (
-                    <div className="aspect-video overflow-hidden rounded-t-lg">
-                      <img 
-                        src={news.image_url} 
-                        alt={news.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold line-clamp-2">
-                      {news.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <p className="text-muted-foreground">
-                        {news.content}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </Layout>
   );
 };

@@ -139,12 +139,12 @@ const Team = () => {
         <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
           <DialogContent className="max-w-3xl glassmorphism-card border-0">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-6 mb-4">
+              <DialogTitle className="flex flex-col items-center text-center gap-4 mb-4">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full p-1">
-                    <Avatar className="w-20 h-20 bg-background">
+                    <Avatar className="w-24 h-24 bg-background">
                       <AvatarImage src={selectedMember?.photo_url} alt={selectedMember?.name} className="object-cover" />
-                      <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-primary/10 to-secondary/10 text-primary">
+                      <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/10 to-secondary/10 text-primary">
                         {selectedMember?.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>

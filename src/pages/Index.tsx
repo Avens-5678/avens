@@ -37,16 +37,6 @@ const Index = () => {
   } = useNewsAchievements();
   const [selectedRental, setSelectedRental] = useState<string | null>(null);
 
-  // Auto-hide arrows after 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const arrows = document.querySelectorAll('.hero-arrow');
-      arrows.forEach(arrow => {
-        arrow.classList.add('opacity-0', 'pointer-events-none');
-      });
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, []);
   if (loadingBanners || loadingServices || loadingRentals || loadingClients || loadingNews) {
     return <Layout>
         <div className="min-h-screen flex items-center justify-center">
@@ -92,9 +82,9 @@ const Index = () => {
                     </div>
                   </CarouselItem>)}
               </CarouselContent>
-              {/* Auto-hiding transparent arrows */}
-              <CarouselPrevious className="hero-arrow left-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 opacity-100 animate-fade-in-delay hidden md:flex" />
-              <CarouselNext className="hero-arrow right-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 opacity-100 animate-fade-in-delay hidden md:flex" />
+              {/* Persistent carousel navigation */}
+              <CarouselPrevious className="hero-arrow left-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 hidden md:flex" />
+              <CarouselNext className="hero-arrow right-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 hidden md:flex" />
             </Carousel> : <div className="h-screen flex items-center justify-center text-center max-w-4xl mx-auto px-4">
               <div>
                 <AnimatedText variant="fade-in-up" className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
@@ -307,128 +297,90 @@ const Index = () => {
             </div>
           </section>}
 
-        {/* News & Achievements */}
-        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-16">
+        {/* Awards & Achievements - Redesigned */}
+        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-12">
             <div className="container mx-auto relative z-10 px-4">
-              <div className="text-center mb-16">
+              <div className="text-center mb-12">
                 <AnimatedText>
-                  <Badge variant="secondary" className="mb-6 rounded-full px-8 py-3 text-base">
-                    <Award className="mr-3 h-5 w-5" />
-                    Latest News & Achievements
+                  <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
+                    <Award className="mr-2 h-4 w-4" />
+                    Awards & Achievements
                   </Badge>
                 </AnimatedText>
                 <AnimatedText delay={200}>
-                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
-                    Celebrating Success
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
+                    Our Success Stories
                   </h2>
                 </AnimatedText>
                 <AnimatedText delay={400}>
-                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                    Discover our latest achievements, awards, and news that showcase our commitment to excellence in event planning and execution.
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                    Celebrating milestones and recognition that reflect our commitment to excellence
                   </p>
                 </AnimatedText>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {newsAchievements.slice(0, 6).map((news, index) => <AnimatedText key={news.id} delay={600 + index * 150}>
-                    <Card className="group hover:shadow-2xl transition-all duration-700 glassmorphism-card border-0 rounded-3xl overflow-hidden hover:-translate-y-4 hover:scale-105 h-full relative">
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      
-                      {/* Hero image placeholder or actual image */}
-                      <div className="relative h-48 bg-gradient-to-br from-primary/20 via-primary-glow/10 to-secondary/20 overflow-hidden">
+              {/* Compact awards grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {newsAchievements.slice(0, 3).map((news, index) => <AnimatedText key={news.id} delay={600 + index * 100}>
+                    <Card className="group hover:shadow-lg transition-all duration-500 glassmorphism-card border-0 rounded-2xl overflow-hidden hover:-translate-y-2 h-full relative">
+                      {/* Compact image */}
+                      <div className="relative h-32 bg-gradient-to-br from-primary/10 via-primary-glow/5 to-secondary/10 overflow-hidden">
                         {news.image_url ? (
                           <img 
                             src={news.image_url} 
                             alt={news.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 via-primary-glow/5 to-secondary/10">
-                            <div className="text-center">
-                              <Award className="h-12 w-12 text-primary/40 mx-auto mb-2" />
-                              <p className="text-xs text-muted-foreground/60 font-medium">Achievement</p>
-                            </div>
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Award className="h-8 w-8 text-primary/40" />
                           </div>
                         )}
                         
-                        {/* Floating date badge */}
-                        <div className="absolute top-4 right-4">
-                          <Badge variant="secondary" className="backdrop-blur-md bg-white/20 border-white/30 text-white rounded-full px-3 py-1 text-xs font-semibold">
-                            {new Date(news.created_at).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
+                        <div className="absolute top-2 right-2">
+                          <Badge variant="secondary" className="backdrop-blur-md bg-white/20 border-white/30 text-white rounded-full px-2 py-1 text-xs">
+                            {new Date(news.created_at).getFullYear()}
                           </Badge>
                         </div>
-
-                        {/* Decorative corner element */}
-                        <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br from-primary/30 to-transparent rounded-tr-full"></div>
                       </div>
 
-                      <CardHeader className="relative z-10 pb-4 pt-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
-                              <Star className="h-4 w-4 text-primary" />
-                            </div>
-                            <span className="text-xs font-semibold text-primary/80 uppercase tracking-wider">Featured</span>
-                          </div>
-                          
-                          {/* Achievement type indicator */}
-                          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20">
-                            <span className="text-xs font-medium text-primary">News</span>
-                          </div>
-                        </div>
-                        
-                        <CardTitle className="text-xl md:text-2xl font-bold leading-tight group-hover:text-primary transition-colors duration-300 line-clamp-2">
+                      <CardContent className="p-4">
+                        <h3 className="text-lg font-bold leading-tight group-hover:text-primary transition-colors duration-300 line-clamp-2 mb-2">
                           {news.title}
-                        </CardTitle>
-                      </CardHeader>
-
-                      <CardContent className="relative z-10 pt-0 pb-6">
-                        <p className="text-muted-foreground leading-relaxed line-clamp-4 text-base mb-6">
+                        </h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 mb-3">
                           {news.content}
                         </p>
                         
-                        {/* Read more button */}
-                        <div className="flex items-center justify-between">
-                          <Button 
-                            asChild
-                            variant="ghost" 
-                            size="sm" 
-                            className="px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300 group/btn"
-                          >
-                            <Link to={`/blog/${news.id}`}>
-                              Read More 
-                              <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                            </Link>
-                          </Button>
-                          
-                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                            <Heart className="h-3 w-3" />
-                            <span>{Math.floor(Math.random() * 50) + 10}</span>
-                          </div>
-                        </div>
+                        <Button 
+                          asChild
+                          variant="ghost" 
+                          size="sm" 
+                          className="px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300 group/btn h-8"
+                        >
+                          <Link to={`/blog/${news.id}`}>
+                            Read More 
+                            <ArrowRight className="ml-1 h-3 w-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                          </Link>
+                        </Button>
                       </CardContent>
 
-                      {/* Bottom gradient accent */}
                       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
                     </Card>
                   </AnimatedText>)}
               </div>
 
               {/* Call to action */}
-              <AnimatedText delay={1200} className="text-center mt-16">
+              <AnimatedText delay={1000} className="text-center mt-8">
                 <Button 
                   asChild 
-                  size="lg" 
-                  className="px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300"
+                  variant="outline"
+                  size="sm" 
+                  className="px-4 py-2 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300"
                 >
                   <Link to="/blog">
-                    View All News & Updates
-                    <ArrowRight className="ml-3 h-5 w-5" />
+                    View All Updates
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </AnimatedText>

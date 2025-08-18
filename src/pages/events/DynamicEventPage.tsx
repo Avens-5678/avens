@@ -72,14 +72,14 @@ const DynamicEventPage = () => {
                 {event.title}
               </Badge>
               
-              <div className="space-y-6">
-                 <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+               <div className="space-y-6">
+                 <h1 className="text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
                    {event.title}
-                   {!event.hero_subtitle && <span className="block text-primary">Excellence</span>}
+                   {!event.hero_subtitle && <span className="block bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">Excellence</span>}
                  </h1>
                  
                  {event.hero_subtitle && (
-                   <p className="text-2xl font-medium text-primary mb-4">
+                   <p className="text-2xl font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
                      {event.hero_subtitle}
                    </p>
                  )}
@@ -87,7 +87,7 @@ const DynamicEventPage = () => {
                  <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
                    {event.description}
                  </p>
-              </div>
+               </div>
 
                <Dialog>
                  <DialogTrigger asChild>

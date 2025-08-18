@@ -1,20 +1,21 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Badge } from "@/components/ui/badge";
-import Layout from "@/components/Layout/Layout";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useNewsAchievements } from "@/hooks/useData";
-import { ArrowRight, Sparkles, Clock, Users, Award, CheckCircle, Star, Trophy, Heart } from "lucide-react";
+import { ArrowRight, Sparkles, Clock, Users, Award, CheckCircle, Star, Trophy, Heart, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import Autoplay from "embla-carousel-autoplay";
 import { HeroSection } from "@/components/ui/hero-section";
 import { AnimatedText, GradientText } from "@/components/ui/animated-text";
+import Layout from "@/components/Layout/Layout";
 import TestimonialsSection from "@/components/TestimonialsSection";
 const Index = () => {
+  const [selectedPost, setSelectedPost] = useState<any>(null);
   const {
     data: heroBanners,
     isLoading: loadingBanners
@@ -465,14 +466,12 @@ const Index = () => {
                         </p>
                         
                         <Button 
-                          asChild
                           variant="ghost" 
                           className="group/btn p-0 h-auto font-medium hover:text-primary"
+                          onClick={() => setSelectedPost(news)}
                         >
-                          <Link to={`/blog/${news.id}`}>
-                            Read More 
-                            <ArrowRight className="ml-1 h-3 w-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                          </Link>
+                          Read More 
+                          <ArrowRight className="ml-1 h-3 w-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
                         </Button>
                       </CardContent>
 
@@ -546,7 +545,43 @@ const Index = () => {
             </div>
           </div>
         </section>
-      </div>
+      {/* Blog Post Modal */}
+      <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glassmorphism-card border-0">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              {selectedPost?.title}
+            </DialogTitle>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
+              <Calendar className="h-4 w-4" />
+              <span>{selectedPost && new Date(selectedPost.created_at).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}</span>
+            </div>
+          </DialogHeader>
+          
+          {selectedPost?.image_url && (
+            <div className="aspect-video overflow-hidden rounded-lg mt-6">
+              <img 
+                src={selectedPost.image_url} 
+                alt={selectedPost.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          
+          <div className="mt-6">
+            <div className="prose prose-lg max-w-none">
+              <div className="text-lg leading-relaxed text-foreground whitespace-pre-wrap">
+                {selectedPost?.content}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
     </Layout>;
 };
 export default Index;

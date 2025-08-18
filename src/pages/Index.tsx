@@ -54,6 +54,59 @@ const ScrollAnimated = ({ children, className }) => {
   );
 };
 
+// Helper component for animating numbers
+const AnimatedStat = ({ finalValue, suffix, isDecimal }) => {
+    const [count, setCount] = useState(isDecimal ? 0.0 : 0);
+    const ref = useRef(null);
+    const duration = 2000; // 2 seconds
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    let start = 0;
+                    const startTime = performance.now();
+
+                    const animate = (currentTime) => {
+                        const elapsedTime = currentTime - startTime;
+                        const progress = Math.min(elapsedTime / duration, 1);
+                        const currentCount = progress * finalValue;
+
+                        if (isDecimal) {
+                            setCount(parseFloat(currentCount.toFixed(1)));
+                        } else {
+                            setCount(Math.floor(currentCount));
+                        }
+
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        }
+                    };
+                    requestAnimationFrame(animate);
+                    observer.unobserve(entry.target);
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        if (ref.current) {
+            observer.observe(ref.current);
+        }
+
+        return () => {
+            if (ref.current) {
+                observer.unobserve(ref.current);
+            }
+        };
+    }, [finalValue, isDecimal]);
+
+    return (
+        <div ref={ref} className="text-3xl lg:text-4xl font-bold text-foreground">
+            {count}{suffix}
+        </div>
+    );
+};
+
 
 const Index = () => {
   const [selectedPost, setSelectedPost] = useState < any > (null);
@@ -147,111 +200,55 @@ const Index = () => {
         </div>}
       </div>
 
-      {/* Stats Section - Desktop Optimized */}
+      {/* Stats Section - REDESIGNED */}
       <ScrollAnimated>
         <section className="relative overflow-hidden py-12 lg:py-16">
-          <div className="container mx-auto px-4 relative z-10 max-w-6xl">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 max-w-5xl mx-auto mb-6">
-              <AnimatedText delay={200} className="text-center group">
-                <div
-                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
-                  onMouseMove={(e) => {
-                    const card = e.currentTarget;
-                    const { left, top, width, height } = card.getBoundingClientRect();
-                    const x = e.clientX - left;
-                    const y = e.clientY - top;
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
-                  }}
-                >
-                  <div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
-                    }}
-                  />
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
-                    <Users className="h-6 w-6 text-white" />
+          <div className="container mx-auto px-4 relative z-10 max-w-7xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Stat Card 1 */}
+              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
+                <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="relative z-10">
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-4 shadow-lg shadow-primary/20">
+                    <Users className="h-7 w-7 text-white" />
                   </div>
-                  <div className="text-2xl font-bold text-foreground">100+</div>
-                  <div className="text-sm text-muted-foreground">Happy Clients</div>
+                  <AnimatedStat finalValue={100} suffix="+" />
+                  <div className="text-sm text-muted-foreground mt-1">Happy Clients</div>
                 </div>
-              </AnimatedText>
-              <AnimatedText delay={300} className="text-center group">
-                <div
-                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-secondary/10 hover:border-secondary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
-                  onMouseMove={(e) => {
-                    const card = e.currentTarget;
-                    const { left, top, width, height } = card.getBoundingClientRect();
-                    const x = e.clientX - left;
-                    const y = e.clientY - top;
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
-                  }}
-                >
-                  <div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
-                    }}
-                  />
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-3">
-                    <CheckCircle className="h-6 w-6 text-white" />
+              </div>
+              {/* Stat Card 2 */}
+              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10">
+                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-secondary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="relative z-10">
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-4 shadow-lg shadow-secondary/20">
+                    <CheckCircle className="h-7 w-7 text-white" />
                   </div>
-                  <div className="text-2xl font-bold text-foreground">500+</div>
-                  <div className="text-sm text-muted-foreground">Events Completed</div>
+                  <AnimatedStat finalValue={500} suffix="+" />
+                  <div className="text-sm text-muted-foreground mt-1">Events Completed</div>
                 </div>
-              </AnimatedText>
-              <AnimatedText delay={400} className="text-center group">
-                <div
-                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
-                  onMouseMove={(e) => {
-                    const card = e.currentTarget;
-                    const { left, top, width, height } = card.getBoundingClientRect();
-                    const x = e.clientX - left;
-                    const y = e.clientY - top;
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
-                  }}
-                >
-                  <div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
-                    }}
-                  />
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
-                    <Star className="h-6 w-6 text-white" />
+              </div>
+              {/* Stat Card 3 */}
+              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
+                <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="relative z-10">
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-4 shadow-lg shadow-primary/20">
+                    <Star className="h-7 w-7 text-white" />
                   </div>
-                  <div className="text-2xl font-bold text-foreground">4.9</div>
-                  <div className="text-sm text-muted-foreground">Rating Average</div>
+                  <AnimatedStat finalValue={4.9} isDecimal={true} />
+                  <div className="text-sm text-muted-foreground mt-1">Rating Average</div>
                 </div>
-              </AnimatedText>
-              <AnimatedText delay={500} className="text-center group">
-                <div
-                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-secondary/10 hover:border-secondary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
-                  onMouseMove={(e) => {
-                    const card = e.currentTarget;
-                    const { left, top, width, height } = card.getBoundingClientRect();
-                    const x = e.clientX - left;
-                    const y = e.clientY - top;
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
-                  }}
-                >
-                  <div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
-                    }}
-                  />
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-3">
-                    <Trophy className="h-6 w-6 text-white" />
+              </div>
+              {/* Stat Card 4 */}
+              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10">
+                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-secondary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                <div className="relative z-10">
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-4 shadow-lg shadow-secondary/20">
+                    <Trophy className="h-7 w-7 text-white" />
                   </div>
-                  <div className="text-2xl font-bold text-foreground">15+</div>
-                  <div className="text-sm text-muted-foreground">Years Experience</div>
+                  <AnimatedStat finalValue={15} suffix="+" />
+                  <div className="text-sm text-muted-foreground mt-1">Years Experience</div>
                 </div>
-              </AnimatedText>
+              </div>
             </div>
           </div>
         </section>

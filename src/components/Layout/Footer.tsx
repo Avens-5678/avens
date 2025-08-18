@@ -9,8 +9,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Avens
+            <div className="w-32 h-auto">
+              <img 
+                src="/lovable-uploads/84d68504-507a-4ad3-a788-cd4859bf9658.png" 
+                alt="Avens Expositions Logo" 
+                className="w-full h-auto"
+              />
             </div>
             <p className="text-muted-foreground text-sm">
               Creating unforgettable experiences with exceptional event management and premium rental services.

@@ -95,8 +95,9 @@ const Blog = () => {
                         {post.short_content}
                       </p>
                       <Button 
-                        variant="ghost" 
-                        className="group/btn p-0 h-auto font-medium hover:text-primary"
+                        variant="premium" 
+                        size="sm"
+                        className="rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 hover:shadow-glow hover:scale-105 transition-all duration-300 group/btn animate-pulse-glow"
                         onClick={() => setSelectedPost(post)}
                       >
                         Read More 

@@ -163,9 +163,9 @@ const TestimonialsSection = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="flex justify-center gap-3 mt-8">
-              <CarouselPrevious className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-10 w-10 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 static translate-x-0 translate-y-0" />
-              <CarouselNext className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-10 w-10 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 static translate-x-0 translate-y-0" />
+            <div className="flex justify-center gap-4 mt-8">
+              <CarouselPrevious className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-12 w-12 hover:scale-110 transition-all duration-500 hover:shadow-glow animate-pulse-glow static translate-x-0 translate-y-0" />
+              <CarouselNext className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-12 w-12 hover:scale-110 transition-all duration-500 hover:shadow-glow animate-pulse-glow static translate-x-0 translate-y-0" />
             </div>
           </Carousel>
         </div>

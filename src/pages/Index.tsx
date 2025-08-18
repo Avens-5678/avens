@@ -466,9 +466,9 @@ const Index = () => {
                         
                         <Button 
                           asChild
-                          variant="ghost" 
+                          variant="premium" 
                           size="sm" 
-                          className="px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300 group/btn h-8"
+                          className="px-3 py-1 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 hover:shadow-glow hover:scale-105 transition-all duration-300 group/btn h-8 animate-pulse-glow"
                         >
                           <Link to={`/blog/${news.id}`}>
                             Read More 

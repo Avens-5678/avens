@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client"; // Ensure this path is correct
 import { User } from "@supabase/supabase-js";
-// FIX: Corrected the import path to be absolute from the 'src' directory
-import AdminDashboard from "@/components/admin/AdminDashboard"; // Your main dashboard component
+// FIX: Corrected the import path to be a relative path
+import AdminDashboard from "./AdminDashboard"; // Your main dashboard component
 import { useToast } from "@/hooks/use-toast";
 
 // --- 1. Example AdminLogin Component ---

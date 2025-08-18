@@ -13,13 +13,27 @@ import InquiryForm from "@/components/Forms/InquiryForm";
 import Autoplay from "embla-carousel-autoplay";
 import { HeroSection } from "@/components/ui/hero-section";
 import { AnimatedText } from "@/components/ui/animated-text";
-
 const Index = () => {
-  const { data: heroBanners, isLoading: loadingBanners } = useHeroBanners();
-  const { data: services, isLoading: loadingServices } = useServices();
-  const { data: rentals, isLoading: loadingRentals } = useRentals();
-  const { data: trustedClients, isLoading: loadingClients } = useTrustedClients();
-  const { data: newsAchievements, isLoading: loadingNews } = useNewsAchievements();
+  const {
+    data: heroBanners,
+    isLoading: loadingBanners
+  } = useHeroBanners();
+  const {
+    data: services,
+    isLoading: loadingServices
+  } = useServices();
+  const {
+    data: rentals,
+    isLoading: loadingRentals
+  } = useRentals();
+  const {
+    data: trustedClients,
+    isLoading: loadingClients
+  } = useTrustedClients();
+  const {
+    data: newsAchievements,
+    isLoading: loadingNews
+  } = useNewsAchievements();
   const [selectedRental, setSelectedRental] = useState<string | null>(null);
 
   // Auto-hide arrows after 5 seconds
@@ -30,65 +44,44 @@ const Index = () => {
         arrow.classList.add('opacity-0', 'pointer-events-none');
       });
     }, 5000);
-
     return () => clearTimeout(timer);
   }, []);
-
   if (loadingBanners || loadingServices || loadingRentals || loadingClients || loadingNews) {
-    return (
-      <Layout>
+    return <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading amazing content...</p>
           </div>
         </div>
-      </Layout>
-    );
+      </Layout>;
   }
-
-  return (
-    <Layout>
+  return <Layout>
       {/* Unified gradient background for entire homepage */}
       <div className="bg-gradient-to-b from-background via-muted/10 via-background/80 to-primary/5 min-h-screen">
         {/* Hero Section with Carousel */}
         <div className="relative">
-          {heroBanners && heroBanners.length > 0 ? (
-            <Carousel 
-              className="w-full h-screen relative"
-              plugins={[
-                Autoplay({
-                  delay: 15000,
-                }),
-              ]}
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-            >
+          {heroBanners && heroBanners.length > 0 ? <Carousel className="w-full h-screen relative" plugins={[Autoplay({
+          delay: 15000
+        })]} opts={{
+          align: "start",
+          loop: true
+        }}>
               <CarouselContent>
-                {heroBanners.map((banner) => (
-                  <CarouselItem key={banner.id} className="relative">
-                    <div 
-                      className="h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center"
-                      style={{ backgroundImage: `url(${banner.image_url})` }}
-                    >
+                {heroBanners.map(banner => <CarouselItem key={banner.id} className="relative">
+                    <div className="h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{
+                backgroundImage: `url(${banner.image_url})`
+              }}>
                       <div className="absolute inset-0 bg-black/40"></div>
                       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
                         <AnimatedText className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
                           {banner.title}
                         </AnimatedText>
-                        {banner.subtitle && (
-                          <AnimatedText delay={300} className="text-lg md:text-xl mb-6 text-white/90">
+                        {banner.subtitle && <AnimatedText delay={300} className="text-lg md:text-xl mb-6 text-white/90">
                             {banner.subtitle}
-                          </AnimatedText>
-                        )}
+                          </AnimatedText>}
                         <AnimatedText delay={600}>
-                          <Button 
-                            asChild
-                            size="lg"
-                            className="glassmorphism-btn text-lg px-8 py-3 rounded-2xl"
-                          >
+                          <Button asChild size="lg" className="glassmorphism-btn text-lg px-8 py-3 rounded-2xl">
                             <Link to={`/events/${banner.event_type}`}>
                               {banner.button_text} <ArrowRight className="ml-2 h-5 w-5" />
                             </Link>
@@ -96,15 +89,12 @@ const Index = () => {
                         </AnimatedText>
                       </div>
                     </div>
-                  </CarouselItem>
-                ))}
+                  </CarouselItem>)}
               </CarouselContent>
               {/* Auto-hiding transparent arrows */}
               <CarouselPrevious className="hero-arrow left-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 opacity-100 animate-fade-in-delay hidden md:flex" />
               <CarouselNext className="hero-arrow right-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 opacity-100 animate-fade-in-delay hidden md:flex" />
-            </Carousel>
-          ) : (
-            <div className="h-screen flex items-center justify-center text-center max-w-4xl mx-auto px-4">
+            </Carousel> : <div className="h-screen flex items-center justify-center text-center max-w-4xl mx-auto px-4">
               <div>
                 <AnimatedText className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Creating Unforgettable Moments
@@ -113,19 +103,14 @@ const Index = () => {
                   Premium event management and rental services for your special occasions
                 </AnimatedText>
                 <AnimatedText delay={600}>
-                  <Button 
-                    asChild
-                    size="lg"
-                    className="glassmorphism-btn text-lg px-8 py-3 rounded-2xl"
-                  >
+                  <Button asChild size="lg" className="glassmorphism-btn text-lg px-8 py-3 rounded-2xl">
                     <Link to="/services">
                       Explore Services <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
                 </AnimatedText>
               </div>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Stats Section */}
@@ -195,8 +180,7 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {services?.map((service, index) => (
-                <AnimatedText key={service.id} delay={600 + index * 100}>
+              {services?.map((service, index) => <AnimatedText key={service.id} delay={600 + index * 100}>
                   <Card className="group hover:shadow-xl transition-all duration-500 border-0 glassmorphism-card hover:-translate-y-2 rounded-2xl overflow-hidden">
                     <div className="h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
                     <CardHeader className="pb-3">
@@ -209,19 +193,14 @@ const Index = () => {
                       <p className="text-muted-foreground mb-4 line-clamp-3 leading-relaxed text-sm">
                         {service.short_description}
                       </p>
-                      <Button 
-                        asChild
-                        variant="ghost"
-                        className="glassmorphism-btn w-full rounded-xl"
-                      >
+                      <Button asChild variant="ghost" className="glassmorphism-btn w-full rounded-xl">
                         <Link to={`/events/${service.event_type}`}>
                           View Details <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                       </Button>
                     </CardContent>
                   </Card>
-                </AnimatedText>
-              ))}
+                </AnimatedText>)}
             </div>
           </div>
         </section>
@@ -249,8 +228,7 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rentals?.map((rental, index) => (
-                <AnimatedText key={rental.id} delay={600 + index * 100}>
+              {rentals?.map((rental, index) => <AnimatedText key={rental.id} delay={600 + index * 100}>
                   <Card className="group hover:shadow-xl transition-all duration-500 glassmorphism-card border-0 rounded-3xl overflow-hidden hover:-translate-y-2">
                     <div className="h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
                     
@@ -261,13 +239,11 @@ const Index = () => {
                       <CardTitle className="text-xl font-semibold pr-12">
                         {rental.title}
                       </CardTitle>
-                      {rental.price_range && (
-                        <div className="inline-flex items-center bg-gradient-to-r from-secondary/10 to-secondary/5 rounded-full px-3 py-1 w-fit">
+                      {rental.price_range && <div className="inline-flex items-center bg-gradient-to-r from-secondary/10 to-secondary/5 rounded-full px-3 py-1 w-fit">
                           <p className="text-sm text-secondary font-semibold">
                             $100-500 per event
                           </p>
-                        </div>
-                      )}
+                        </div>}
                     </CardHeader>
                     <CardContent>
                       <p className="text-muted-foreground mb-6 leading-relaxed">
@@ -275,28 +251,19 @@ const Index = () => {
                       </p>
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button 
-                            className="glassmorphism-btn w-full rounded-2xl"
-                            onClick={() => setSelectedRental(rental.id)}
-                          >
+                          <Button className="glassmorphism-btn w-full rounded-2xl" onClick={() => setSelectedRental(rental.id)}>
                             Enquire Now <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-md rounded-3xl">
                           <DialogTitle className="sr-only">Rental Inquiry</DialogTitle>
                           <DialogDescription className="sr-only">Submit an inquiry for equipment rental</DialogDescription>
-                          <InquiryForm 
-                            formType="rental"
-                            rentalId={rental.id}
-                            rentalTitle={rental.title}
-                            title="Rental Inquiry"
-                          />
+                          <InquiryForm formType="rental" rentalId={rental.id} rentalTitle={rental.title} title="Rental Inquiry" />
                         </DialogContent>
                       </Dialog>
                     </CardContent>
                   </Card>
-                </AnimatedText>
-              ))}
+                </AnimatedText>)}
             </div>
 
             <AnimatedText delay={1000} className="text-center mt-10">
@@ -310,8 +277,7 @@ const Index = () => {
         </section>
 
         {/* Trusted Clients */}
-        {trustedClients && trustedClients.length > 0 && (
-          <section className="py-16 relative overflow-hidden">
+        {trustedClients && trustedClients.length > 0 && <section className="py-16 relative overflow-hidden">
             <div className="container mx-auto px-4 relative z-10">
               <div className="text-center mb-12">
                 <AnimatedText>
@@ -330,28 +296,17 @@ const Index = () => {
               <AnimatedText delay={400}>
                 <div className="overflow-hidden rounded-2xl glassmorphism-card py-6">
                   <div className="flex animate-scroll space-x-12">
-                    {[...trustedClients, ...trustedClients].map((client, index) => (
-                      <div 
-                        key={`${client.id}-${index}`}
-                        className="flex-shrink-0 h-16 w-32 flex items-center justify-center group"
-                      >
-                        <img 
-                          src={client.logo_url} 
-                          alt={client.name}
-                          className="max-h-full max-w-full object-contain opacity-60 group-hover:opacity-100 transition-all duration-300 filter grayscale group-hover:grayscale-0"
-                        />
-                      </div>
-                    ))}
+                    {[...trustedClients, ...trustedClients].map((client, index) => <div key={`${client.id}-${index}`} className="flex-shrink-0 h-16 w-32 flex items-center justify-center group">
+                        <img src={client.logo_url} alt={client.name} className="max-h-full max-w-full object-contain opacity-60 group-hover:opacity-100 transition-all duration-300 filter grayscale group-hover:grayscale-0" />
+                      </div>)}
                   </div>
                 </div>
               </AnimatedText>
             </div>
-          </section>
-        )}
+          </section>}
 
         {/* News & Achievements */}
-        {newsAchievements && newsAchievements.length > 0 && (
-          <section className="py-16 relative overflow-hidden">
+        {newsAchievements && newsAchievements.length > 0 && <section className="py-16 relative overflow-hidden">
             <div className="container mx-auto px-4 relative z-10">
               <div className="text-center mb-12">
                 <AnimatedText>
@@ -368,8 +323,7 @@ const Index = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {newsAchievements.slice(0, 6).map((news, index) => (
-                  <AnimatedText key={news.id} delay={400 + index * 100}>
+                {newsAchievements.slice(0, 6).map((news, index) => <AnimatedText key={news.id} delay={400 + index * 100}>
                     <Card className="group hover:shadow-xl transition-all duration-500 glassmorphism-card border-0 rounded-2xl overflow-hidden hover:-translate-y-2 h-full">
                       <div className="h-1 bg-gradient-to-r from-primary via-secondary to-primary-glow"></div>
                       <CardHeader className="pb-3">
@@ -391,12 +345,10 @@ const Index = () => {
                         </p>
                       </CardContent>
                     </Card>
-                  </AnimatedText>
-                ))}
+                  </AnimatedText>)}
               </div>
             </div>
-          </section>
-        )}
+          </section>}
 
         {/* Get in Touch CTA */}
         <section className="py-16 relative overflow-hidden">
@@ -422,7 +374,7 @@ const Index = () => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button size="xl" className="glassmorphism-btn hover:shadow-glow transition-all duration-300 group">
+                      <Button size="xl" className="glassmorphism-btn hover:shadow-glow transition-all duration-300 group text-gray-950">
                         Get Started Now 
                         <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                       </Button>
@@ -430,10 +382,7 @@ const Index = () => {
                     <DialogContent className="max-w-md rounded-3xl">
                       <DialogTitle className="sr-only">Contact Us</DialogTitle>
                       <DialogDescription className="sr-only">Get in touch with us for your event needs</DialogDescription>
-                      <InquiryForm 
-                        formType="contact"
-                        title="Let's Get Started!"
-                      />
+                      <InquiryForm formType="contact" title="Let's Get Started!" />
                     </DialogContent>
                   </Dialog>
                   <Button asChild variant="outline" size="xl" className="glassmorphism-btn rounded-2xl hover:bg-secondary hover:text-secondary-foreground transition-all duration-300">
@@ -447,8 +396,6 @@ const Index = () => {
           </div>
         </section>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Index;

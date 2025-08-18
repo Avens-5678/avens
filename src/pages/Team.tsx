@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedText, GradientText } from "@/components/ui/animated-text";
-import { Users, Phone, Mail } from "lucide-react";
+import { Users, Phone, Mail, Linkedin, Twitter, Dribbble } from "lucide-react";
 
 interface TeamMember {
   id: string;
@@ -169,11 +169,12 @@ const Team = () => {
 
         {/* Member Detail Modal */}
         <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) setSelectedMember(null); }}>
-          <DialogContent className="max-w-3xl glassmorphism-card border-0 transition-all duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+          <DialogContent className="max-w-4xl glassmorphism-card border-0 transition-all duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 p-0">
             <div className={`transition-opacity duration-500 ${isModalOpen ? 'opacity-100' : 'opacity-0'}`}>
-              <DialogHeader>
-                <DialogTitle className="flex flex-col items-center text-center gap-4">
-                  <div className="relative w-24 h-24">
+              <div className="grid grid-cols-1 md:grid-cols-3">
+                {/* Left Column: Profile Info */}
+                <div className="md:col-span-1 bg-white/5 p-8 flex flex-col items-center text-center rounded-l-lg">
+                   <div className="relative w-32 h-32 mb-4">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full p-1">
                       <Avatar className="w-full h-full bg-background">
                         <AvatarImage src={selectedMember?.photo_url} alt={selectedMember?.name} className="object-cover" />
@@ -183,19 +184,24 @@ const Team = () => {
                       </Avatar>
                     </div>
                   </div>
-                  <div>
-                    <h2 className="text-3xl font-bold mb-2">{selectedMember?.name}</h2>
-                    <Badge variant="secondary" className="px-4 py-1">
-                      {selectedMember?.role}
-                    </Badge>
+                  <h2 className="text-3xl font-bold mb-2">{selectedMember?.name}</h2>
+                  <Badge variant="secondary" className="px-4 py-1">
+                    {selectedMember?.role}
+                  </Badge>
+                  <div className="flex gap-4 mt-6">
+                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Linkedin size={20} /></a>
+                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Twitter size={20} /></a>
+                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Dribbble size={20} /></a>
                   </div>
-                </DialogTitle>
-              </DialogHeader>
-              <div className="mt-6">
-                <h4 className="text-lg font-semibold mb-4 text-primary">About</h4>
-                <p className="text-muted-foreground leading-relaxed text-lg">
-                  {selectedMember?.full_bio || selectedMember?.short_bio}
-                </p>
+                </div>
+
+                {/* Right Column: Bio */}
+                <div className="md:col-span-2 p-8">
+                  <h4 className="text-lg font-semibold mb-4 text-primary">About</h4>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    {selectedMember?.full_bio || selectedMember?.short_bio}
+                  </p>
+                </div>
               </div>
             </div>
           </DialogContent>

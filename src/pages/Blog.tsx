@@ -1,16 +1,14 @@
-import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useNewsAchievements } from "@/hooks/useData";
 import Layout from "@/components/Layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { AnimatedText, GradientText } from "@/components/ui/animated-text";
 
 const Blog = () => {
   const { data: newsAchievements, isLoading } = useNewsAchievements();
-  const [selectedPost, setSelectedPost] = useState<any>(null);
 
   if (isLoading) {
     return (
@@ -95,12 +93,14 @@ const Blog = () => {
                         {post.short_content}
                       </p>
                       <Button 
+                        asChild
                         variant="ghost" 
                         className="group/btn p-0 h-auto font-medium hover:text-primary"
-                        onClick={() => setSelectedPost(post)}
                       >
-                        Read More 
-                        <ArrowRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                        <Link to={`/blog/${post.id}`}>
+                          Read More 
+                          <ArrowRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                        </Link>
                       </Button>
                     </CardContent>
                   </Card>
@@ -122,41 +122,6 @@ const Blog = () => {
           )}
         </div>
       </section>
-
-      {/* Full Post Modal */}
-      <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold">{selectedPost?.title}</DialogTitle>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
-              <Clock className="h-4 w-4" />
-              <span>{selectedPost && new Date(selectedPost.created_at).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}</span>
-            </div>
-          </DialogHeader>
-          
-          {selectedPost?.image_url && (
-            <div className="aspect-video overflow-hidden rounded-lg mt-6">
-              <img 
-                src={selectedPost.image_url} 
-                alt={selectedPost.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-          
-          <div className="mt-6">
-            <div className="prose prose-lg max-w-none">
-              <div className="text-lg leading-relaxed text-foreground whitespace-pre-wrap">
-                {selectedPost?.content}
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </Layout>
   );
 };

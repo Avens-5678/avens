@@ -159,7 +159,7 @@ const Index = () => {
 
         {/* Services Section */}
         <section className="relative overflow-hidden py-0">
-          <div className="container mx-auto px-4 relative z-10">
+          <div className="container mx-auto relative z-10 px-0 py-[20px]">
             <div className="text-center mb-12">
               <AnimatedText>
                 <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
@@ -207,7 +207,7 @@ const Index = () => {
 
         {/* Rentals Section */}
         <section className="relative py-0">
-          <div className="container mx-auto px-4 relative z-10">
+          <div className="container mx-auto relative z-10 px-0 py-[20px]">
             <div className="text-center mb-12">
               <AnimatedText>
                 <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
@@ -278,7 +278,7 @@ const Index = () => {
 
         {/* Trusted Clients */}
         {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-0">
-            <div className="container mx-auto px-4 relative z-10">
+            <div className="container mx-auto relative z-10 px-0 py-[20px]">
               <div className="text-center mb-12">
                 <AnimatedText>
                   <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
@@ -307,7 +307,7 @@ const Index = () => {
 
         {/* News & Achievements */}
         {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-0">
-            <div className="container mx-auto px-4 relative z-10">
+            <div className="container mx-auto relative z-10 px-px py-[20px]">
               <div className="text-center mb-12">
                 <AnimatedText>
                   <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">

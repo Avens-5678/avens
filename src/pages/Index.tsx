@@ -124,7 +124,7 @@ const Index = () => {
                 }}
               >
                 <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{
                     background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
                   }}
@@ -149,7 +149,7 @@ const Index = () => {
                 }}
               >
                 <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{
                     background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
                   }}
@@ -174,7 +174,7 @@ const Index = () => {
                 }}
               >
                 <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{
                     background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
                   }}
@@ -199,7 +199,7 @@ const Index = () => {
                 }}
               >
                 <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{
                     background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
                   }}
@@ -555,25 +555,11 @@ const Index = () => {
       <Dialog open={selectedPost !== null} onOpenChange={(open) => {
       if (!open) setSelectedPost(null);
     }}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto glassmorphism-card">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto glassmorphism-card p-0">
           {selectedPost && (
             <>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-foreground">
-                  {selectedPost.title}
-                </DialogTitle>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(selectedPost.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}</span>
-                </div>
-              </DialogHeader>
-              
               {selectedPost.image_url && (
-                <div className="aspect-video overflow-hidden rounded-lg mt-4">
+                <div className="aspect-video overflow-hidden rounded-t-lg">
                   <img
                     src={selectedPost.image_url}
                     alt={selectedPost.title}
@@ -581,10 +567,25 @@ const Index = () => {
                   />
                 </div>
               )}
-              
-              <div className="mt-4">
-                <div className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
-                  {selectedPost.content}
+              <div className="p-6">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-foreground">
+                    {selectedPost.title}
+                  </DialogTitle>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(selectedPost.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}</span>
+                  </div>
+                </DialogHeader>
+                
+                <div className="mt-4 prose prose-invert max-w-none">
+                  <div className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
+                    {selectedPost.content}
+                  </div>
                 </div>
               </div>
             </>

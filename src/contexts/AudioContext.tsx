@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SiteSettings {
+  id: string;
   background_audio_url: string | null;
   background_audio_enabled: boolean;
 }
@@ -15,7 +16,6 @@ interface AudioContextType {
   togglePlay: () => void;
   toggleMute: () => void;
   setVolume: (volume: number) => void;
-  initializeAudio: () => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -40,169 +40,117 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolumeState] = useState(0.4);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
   const [audioSettings, setAudioSettings] = useState<SiteSettings | null>(null);
 
   const isAdminPage = location.pathname.startsWith('/admin');
 
+  // Fetch initial settings on load
   useEffect(() => {
     const fetchAudioSettings = async () => {
       try {
-        // FIX: Use .maybeSingle() to prevent silent errors on an empty table
         const { data, error } = await supabase
           .from('site_settings')
-          .select('background_audio_url, background_audio_enabled')
+          .select('*')
           .maybeSingle();
-
-        if (error) {
-          console.error('Error fetching audio settings:', error);
-          return;
-        }
-
-        setAudioSettings(data);
+        if (error) throw error;
+        setAudioSettings(data as SiteSettings | null);
       } catch (error) {
-        console.error('Error fetching audio settings:', error);
+        console.error('Error fetching initial audio settings:', error);
       }
     };
-
     fetchAudioSettings();
   }, []);
 
+  // REALTIME SUBSCRIPTION: Listen for database changes
   useEffect(() => {
+    const channel = supabase
+      .channel('site_settings_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'site_settings' },
+        (payload) => {
+          console.log('Realtime update received!', payload);
+          setAudioSettings(payload.new as SiteSettings);
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on component unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+  
+  // Effect to manage the audio element based on settings
+  useEffect(() => {
+    // Stop and unload audio if disabled, on admin page, or no URL
     if (isAdminPage || !audioSettings?.background_audio_enabled || !audioSettings?.background_audio_url) {
-      setIsLoaded(false);
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
         setIsPlaying(false);
+        setIsLoaded(false);
       }
       return;
     }
 
-    const newAudio = new Audio(audioSettings.background_audio_url);
-    audioRef.current = newAudio;
+    // If audio should play but isn't loaded yet, create it
+    if (!audioRef.current) {
+      const newAudio = new Audio(audioSettings.background_audio_url);
+      newAudio.loop = true;
+      audioRef.current = newAudio;
 
-    const savedPreferences = localStorage.getItem('audioPreferences');
-    if (savedPreferences) {
-      const { volume: savedVolume, isMuted: savedMuted } = JSON.parse(savedPreferences);
-      setVolumeState(savedVolume ?? 0.4);
-      setIsMuted(savedMuted ?? false);
+      const savedPrefs = localStorage.getItem('audioPreferences');
+      if (savedPrefs) {
+        const { volume, isMuted } = JSON.parse(savedPrefs);
+        setVolumeState(volume ?? 0.4);
+        setIsMuted(isMuted ?? false);
+        newAudio.volume = isMuted ? 0 : volume;
+      }
+      
+      const playPromise = newAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+      }
+
+      newAudio.oncanplaythrough = () => setIsLoaded(true);
+      newAudio.onplay = () => setIsPlaying(true);
+      newAudio.onpause = () => setIsPlaying(false);
     }
-
-    newAudio.loop = true;
-    newAudio.preload = 'auto';
-    newAudio.volume = isMuted ? 0 : volume;
-
-    const handleCanPlay = () => setIsLoaded(true);
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
-
-    newAudio.addEventListener('canplaythrough', handleCanPlay);
-    newAudio.addEventListener('play', handlePlay);
-    newAudio.addEventListener('pause', handlePause);
-    newAudio.addEventListener('ended', handleEnded);
-
-    const handleAutoPlay = async () => {
-      try {
-        if (document.visibilityState === 'visible' && !document.hidden) {
-          await newAudio.play();
-          setIsInitialized(true);
-        } else {
-          setIsInitialized(false);
-        }
-      } catch (error) {
-        console.log('Autoplay blocked by browser, user interaction required');
-        setIsInitialized(false);
-      }
-    };
-
-    const tryAutoPlay = () => {
-      if (!isInitialized && audioRef.current) {
-        handleAutoPlay();
-      }
-    };
-
-    document.addEventListener('touchstart', tryAutoPlay, { once: true });
-    document.addEventListener('click', tryAutoPlay, { once: true });
-    newAudio.addEventListener('canplaythrough', handleAutoPlay, { once: true });
-
+    
+    // Cleanup function
     return () => {
-      newAudio.removeEventListener('canplaythrough', handleCanPlay);
-      newAudio.removeEventListener('play', handlePlay);
-      newAudio.removeEventListener('pause', handlePause);
-      newAudio.removeEventListener('ended', handleEnded);
-      document.removeEventListener('touchstart', tryAutoPlay);
-      document.removeEventListener('click', tryAutoPlay);
-      newAudio.pause();
-      newAudio.src = '';
-      audioRef.current = null;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, [audioSettings, isAdminPage]);
 
+  // Effect to sync volume and mute state
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
     }
-  }, [volume, isMuted]);
-
-  useEffect(() => {
     localStorage.setItem('audioPreferences', JSON.stringify({ volume, isMuted }));
   }, [volume, isMuted]);
 
-  const initializeAudio = async () => {
-    if (isInitialized || !audioRef.current) return;
-
-    try {
-      await audioRef.current.play();
-      setIsInitialized(true);
-    } catch (error) {
-      console.log('Autoplay blocked, audio ready for user interaction');
-      setIsInitialized(true);
-      setIsPlaying(false);
-    }
-  };
-
-  const togglePlay = async () => {
-    if (!audioRef.current) return;
-
-    if (!isInitialized) {
-      await initializeAudio();
-      return; 
-    }
-
-    try {
+  const togglePlay = () => {
+    if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        await audioRef.current.play();
+        audioRef.current.play();
       }
-    } catch (error) {
-      console.error('Audio play error:', error);
-      setIsPlaying(false);
     }
   };
 
-  const toggleMute = () => {
-    setIsMuted((prev) => !prev);
-  };
-
-  const setVolume = (newVolume: number) => {
-    setVolumeState(Math.max(0, Math.min(1, newVolume)));
-  };
+  const toggleMute = () => setIsMuted(prev => !prev);
+  const setVolume = (newVolume: number) => setVolumeState(Math.max(0, Math.min(1, newVolume)));
 
   return (
-    <AudioContext.Provider
-      value={{
-        isPlaying,
-        isMuted,
-        volume,
-        isLoaded,
-        togglePlay,
-        toggleMute,
-        setVolume,
-        initializeAudio,
-      }}
-    >
+    <AudioContext.Provider value={{ isPlaying, isMuted, volume, isLoaded, togglePlay, toggleMute, setVolume }}>
       {children}
     </AudioContext.Provider>
   );

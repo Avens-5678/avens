@@ -11,9 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { SuccessAnimation } from "@/components/ui/success-animation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CalendarIcon } from "lucide-react";
+import { Loader2, CalendarIcon, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -38,6 +39,7 @@ const InquiryForm = ({
   title = "Get In Touch"
 }: InquiryFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const {
     toast
   } = useToast();
@@ -73,10 +75,7 @@ const InquiryForm = ({
       // due to RLS policies. The notification will be handled via database triggers
       // or the admin panel when the submission is processed.
 
-      toast({
-        title: "Message Sent!",
-        description: "We'll get back to you within 24 hours."
-      });
+      setShowSuccess(true);
       form.reset();
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -89,52 +88,79 @@ const InquiryForm = ({
       setIsLoading(false);
     }
   };
-  return <Card className="w-full max-w-lg border-0 shadow-none bg-blue-50">
-      <CardHeader className="px-0 pt-0 bg-blue-50">
-        <CardTitle className="text-xl lg:text-2xl font-bold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-0 pb-0">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 lg:space-y-6 bg-blue-50">
+  return (
+    <>
+      <Card className="w-full max-w-lg border-0 shadow-2xl bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
+        <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        <CardHeader className="relative z-10 text-center space-y-4">
+          <div className="flex items-center justify-center space-x-2">
+            <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+            <CardTitle className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              {title}
+            </CardTitle>
+            <Sparkles className="w-6 h-6 text-accent animate-pulse" style={{ animationDelay: '0.5s' }} />
+          </div>
+          <p className="text-sm text-muted-foreground">Ready to create something amazing together?</p>
+        </CardHeader>
+        
+        <CardContent className="relative z-10">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 lg:space-y-6">
             <FormField control={form.control} name="name" render={({
             field
-          }) => <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+          }) => <FormItem className="space-y-2">
+                  <FormLabel className="text-foreground font-medium">Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your full name" {...field} />
+                    <Input 
+                      placeholder="Enter your full name" 
+                      {...field} 
+                      className="border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>} />
 
             <FormField control={form.control} name="email" render={({
             field
-          }) => <FormItem>
-                  <FormLabel>Email Address</FormLabel>
+          }) => <FormItem className="space-y-2">
+                  <FormLabel className="text-foreground font-medium">Email Address</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="Enter your email" {...field} />
+                    <Input 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      {...field} 
+                      className="border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>} />
 
             <FormField control={form.control} name="phone" render={({
             field
-          }) => <FormItem>
-                  <FormLabel>Phone Number (Optional)</FormLabel>
+          }) => <FormItem className="space-y-2">
+                  <FormLabel className="text-foreground font-medium">Phone Number (Optional)</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="Enter your phone number" {...field} />
+                    <Input 
+                      type="tel" 
+                      placeholder="Enter your phone number" 
+                      {...field} 
+                      className="border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>} />
 
             {!eventType && <FormField control={form.control} name="eventType" render={({
             field
-          }) => <FormItem>
-                    <FormLabel>Event Type</FormLabel>
+          }) => <FormItem className="space-y-2">
+                    <FormLabel className="text-foreground font-medium">Event Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm">
                           <SelectValue placeholder="Select event type" />
                         </SelectTrigger>
                       </FormControl>
@@ -153,12 +179,18 @@ const InquiryForm = ({
 
             <FormField control={form.control} name="eventDate" render={({
             field
-          }) => <FormItem className="flex flex-col">
-                  <FormLabel>Event Date (Optional)</FormLabel>
+          }) => <FormItem className="flex flex-col space-y-2">
+                  <FormLabel className="text-foreground font-medium">Event Date (Optional)</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
-                        <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                        <Button 
+                          variant={"outline"} 
+                          className={cn(
+                            "w-full pl-3 text-left font-normal border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm", 
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
                           {field.value ? format(field.value, "PPP") : <span>Pick your event date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -173,21 +205,50 @@ const InquiryForm = ({
 
             <FormField control={form.control} name="message" render={({
             field
-          }) => <FormItem>
-                  <FormLabel>Message</FormLabel>
+          }) => <FormItem className="space-y-2">
+                  <FormLabel className="text-foreground font-medium">Message</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Tell us about your event requirements..." className="min-h-[120px]" {...field} />
+                    <Textarea 
+                      placeholder="Tell us about your event requirements..." 
+                      className="min-h-[120px] border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm resize-none" 
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>} />
 
-            <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Send Message
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-xl hover:scale-105 transition-all duration-300 text-white font-semibold py-3 relative overflow-hidden group" 
+              disabled={isLoading}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10 flex items-center justify-center">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Send Message
+                  </>
+                )}
+              </div>
             </Button>
           </form>
         </Form>
       </CardContent>
-    </Card>;
+    </Card>
+    
+    <SuccessAnimation 
+      show={showSuccess} 
+      title="Message Sent!" 
+      message="We'll get back to you within 24 hours. Thank you for choosing us!"
+      onComplete={() => setShowSuccess(false)}
+    />
+  </>
+  );
 };
 export default InquiryForm;

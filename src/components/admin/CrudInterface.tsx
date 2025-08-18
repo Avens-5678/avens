@@ -74,11 +74,11 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       // Use eventFormData if provided (from EnhancedEventForm), otherwise use formData state
       const dataToSave = eventFormData || formData;
       
-      // Debug logging to check the form data
-      console.log('Form data before save:', dataToSave);
+      // Clean the data to avoid circular structure issues
+      const cleanData = JSON.parse(JSON.stringify(dataToSave));
       
       // Ensure event_type is not empty for events table
-      if (tableName === 'events' && (!dataToSave.event_type || dataToSave.event_type === '')) {
+      if (tableName === 'events' && (!cleanData.event_type || cleanData.event_type === '')) {
         toast({
           title: "Validation Error",
           description: "Event type is required. Please select or enter an event type.",
@@ -89,7 +89,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       if (editingItem) {
         const { error } = await supabase
           .from(tableName as any)
-          .update(dataToSave)
+          .update(cleanData)
           .eq('id', editingItem.id);
         
         if (error) throw error;
@@ -101,7 +101,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       } else {
         const { data: newItem, error } = await supabase
           .from(tableName as any)
-          .insert(dataToSave as any)
+          .insert(cleanData as any)
           .select()
           .single();
         
@@ -131,11 +131,14 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         }
       }
       
-      queryClient.invalidateQueries({ queryKey: [tableName] });
+      // Force refresh data by invalidating and refetching
+      await queryClient.invalidateQueries({ queryKey: [tableName] });
+      await queryClient.refetchQueries({ queryKey: [tableName] });
       
       // If this is an event, also invalidate event types cache
       if (tableName === 'events') {
-        queryClient.invalidateQueries({ queryKey: ['eventTypes'] });
+        await queryClient.invalidateQueries({ queryKey: ['eventTypes'] });
+        await queryClient.refetchQueries({ queryKey: ['eventTypes'] });
       }
       handleCancel();
     } catch (error) {
@@ -170,11 +173,14 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       
       if (error) throw error;
       
-      queryClient.invalidateQueries({ queryKey: [tableName] });
+      // Force refresh data by invalidating and refetching
+      await queryClient.invalidateQueries({ queryKey: [tableName] });
+      await queryClient.refetchQueries({ queryKey: [tableName] });
       
       // If this is an event, also invalidate event types cache
       if (tableName === 'events') {
-        queryClient.invalidateQueries({ queryKey: ['eventTypes'] });
+        await queryClient.invalidateQueries({ queryKey: ['eventTypes'] });
+        await queryClient.refetchQueries({ queryKey: ['eventTypes'] });
       }
       toast({
         title: "Deleted",
@@ -205,18 +211,25 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       if (fieldName === 'hero_image_url' && tableName === 'events') {
         imageUrl = await uploadEventHeroImage(file, formData.event_type || 'default');
       } else {
-        // Handle other image uploads
+        // Handle other image uploads - determine appropriate bucket
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
         
+        let bucket = 'portfolio-images'; // default
+        if (tableName === 'hero_banners' || tableName === 'trusted_clients') {
+          bucket = 'portfolio-images';
+        } else if (tableName === 'services') {
+          bucket = 'specialty-images';
+        }
+        
         const { data, error } = await supabase.storage
-          .from('portfolio-images')
+          .from(bucket)
           .upload(fileName, file);
 
         if (error) throw error;
 
         const { data: { publicUrl } } = supabase.storage
-          .from('portfolio-images')
+          .from(bucket)
           .getPublicUrl(data.path);
 
         imageUrl = publicUrl;
@@ -371,9 +384,9 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">{title}</h2>
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
         <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogTrigger asChild>
             <Button onClick={handleCreate}>
@@ -381,7 +394,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
               Add New
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingItem ? `Edit ${title.slice(0, -1)}` : `Create New ${title.slice(0, -1)}`}
@@ -410,8 +423,8 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         </Dialog>
       </div>
 
-      <Dialog open={!!editingItem} onOpenChange={(open) => !open && handleCancel()}>
-        <DialogContent className="max-w-2xl">
+        <Dialog open={!!editingItem} onOpenChange={(open) => !open && handleCancel()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit {title.slice(0, -1)}</DialogTitle>
           </DialogHeader>
@@ -437,16 +450,16 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         </DialogContent>
       </Dialog>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {data?.length > 0 ? (
           data.map((item) => (
-            <Card key={item.id}>
+            <Card key={item.id} className="animate-fade-in">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <CardTitle className="text-base md:text-lg break-words">
                     {item.title || item.name || item.email || `${title.slice(0, -1)} ${item.id?.slice(0, 8)}`}
                   </CardTitle>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 shrink-0">
                     <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
                       <Edit className="h-4 w-4" />
                     </Button>

@@ -19,8 +19,24 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Inter', 'system-ui', 'sans-serif'],
+				sans: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
 				display: ['Playfair Display', 'serif'],
+				body: ['Inter', 'system-ui', 'sans-serif'],
+			},
+			fontSize: {
+				'xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.05em' }],
+				'sm': ['0.875rem', { lineHeight: '1.5', letterSpacing: '0.025em' }],
+				'base': ['1rem', { lineHeight: '1.6', letterSpacing: '0' }],
+				'lg': ['1.125rem', { lineHeight: '1.6', letterSpacing: '-0.015em' }],
+				'xl': ['1.25rem', { lineHeight: '1.5', letterSpacing: '-0.02em' }],
+				'2xl': ['1.5rem', { lineHeight: '1.4', letterSpacing: '-0.025em' }],
+				'3xl': ['1.875rem', { lineHeight: '1.3', letterSpacing: '-0.03em' }],
+				'4xl': ['2.25rem', { lineHeight: '1.2', letterSpacing: '-0.035em' }],
+				'5xl': ['3rem', { lineHeight: '1.1', letterSpacing: '-0.04em' }],
+				'6xl': ['3.75rem', { lineHeight: '1', letterSpacing: '-0.045em' }],
+				'7xl': ['4.5rem', { lineHeight: '1', letterSpacing: '-0.05em' }],
+				'8xl': ['6rem', { lineHeight: '1', letterSpacing: '-0.055em' }],
+				'9xl': ['8rem', { lineHeight: '1', letterSpacing: '-0.06em' }],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

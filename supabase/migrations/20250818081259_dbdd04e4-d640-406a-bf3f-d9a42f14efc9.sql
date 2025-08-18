@@ -1,0 +1,7 @@
+-- Insert dummy testimonial data
+INSERT INTO public.client_testimonials (client_name, testimonial, rating, company, position, display_order) VALUES
+('Sarah Johnson', 'Avens Expositions transformed our corporate retreat into an extraordinary experience. Their attention to detail and professional execution exceeded all our expectations.', 5, 'TechCorp Solutions', 'Event Manager', 1),
+('Michael Chen', 'The wedding planning services were absolutely phenomenal. Every moment was perfectly orchestrated, creating memories that will last a lifetime.', 5, '', 'Groom', 2),
+('Emily Rodriguez', 'From concept to execution, the team delivered a flawless product launch event. Our guests were thoroughly impressed with the innovative setup and seamless flow.', 5, 'Innovation Labs', 'Marketing Director', 3),
+('David Thompson', 'Outstanding service for our annual conference. The logistics management and technical support were world-class. Highly recommend for any corporate event.', 4, 'Global Enterprises', 'Operations Head', 4),
+('Lisa Anderson', 'They made our birthday celebration magical! The creative decorations and entertainment kept everyone engaged throughout the event.', 5, '', 'Party Host', 5);

@@ -109,13 +109,15 @@ const Ecommerce = () => {
                           Enquire
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <InquiryForm 
-                          formType="rental"
-                          rentalId={selectedRental?.id}
-                          rentalTitle={selectedRental?.title}
-                          title="Rental Inquiry"
-                        />
+                      <DialogContent className="w-[95vw] max-w-md sm:max-w-lg max-h-[95vh] overflow-hidden flex flex-col p-0">
+                        <div className="overflow-y-auto flex-1 max-h-[90vh]">
+                          <InquiryForm 
+                            formType="rental"
+                            rentalId={selectedRental?.id}
+                            rentalTitle={selectedRental?.title}
+                            title="Equipment Inquiry"
+                          />
+                        </div>
                       </DialogContent>
                     </Dialog>
                   </div>

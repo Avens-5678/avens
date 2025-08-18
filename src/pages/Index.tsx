@@ -550,44 +550,41 @@ const Index = () => {
           </div>
         </section>
       {/* Blog Post Modal */}
-      <Dialog open={!!selectedPost} onOpenChange={(open) => {
-        console.log('Dialog open state changed:', open);
-        if (!open) setSelectedPost(null);
-      }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl z-50">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              {selectedPost?.title}
-            </DialogTitle>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
-              <Calendar className="h-4 w-4" />
-              <span>{selectedPost && new Date(selectedPost.created_at).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}</span>
-            </div>
-          </DialogHeader>
-          
-          {selectedPost?.image_url && (
-            <div className="aspect-video overflow-hidden rounded-lg mt-6">
-              <img 
-                src={selectedPost.image_url} 
-                alt={selectedPost.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-          
-          <div className="mt-6">
-            <div className="prose prose-lg max-w-none">
-              <div className="text-lg leading-relaxed text-foreground whitespace-pre-wrap">
-                {selectedPost?.content}
+      {selectedPost && (
+        <Dialog open={true} onOpenChange={() => setSelectedPost(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">
+                {selectedPost.title}
+              </DialogTitle>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                <Calendar className="h-4 w-4" />
+                <span>{new Date(selectedPost.created_at).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}</span>
+              </div>
+            </DialogHeader>
+            
+            {selectedPost.image_url && (
+              <div className="aspect-video overflow-hidden rounded-lg mt-4">
+                <img 
+                  src={selectedPost.image_url} 
+                  alt={selectedPost.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            
+            <div className="mt-4">
+              <div className="text-base leading-relaxed whitespace-pre-wrap">
+                {selectedPost.content}
               </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
     </Layout>;
 };

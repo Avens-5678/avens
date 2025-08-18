@@ -1,19 +1,24 @@
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Github } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
 import { useEvents } from "@/hooks/useData";
+
 const Footer = () => {
   const { data: events } = useEvents();
   
   return <footer className="bg-muted/50 border-t border-border">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Company Info */}
+          {/* Company Info with Video Logo */}
           <div className="space-y-4">
             <div className="w-32 h-auto">
-              <img 
-                src="/lovable-uploads/84d68504-507a-4ad3-a788-cd4859bf9658.png" 
-                alt="Avens Expositions Logo" 
+              <video
+                src="/lovable-uploads/Logo_Animation_Video_Generation.mp4"
+                alt="Avens Expositions Animated Logo"
                 className="w-full h-auto"
+                autoPlay
+                loop
+                muted
+                playsInline
               />
             </div>
             <p className="text-muted-foreground text-sm">
@@ -62,9 +67,9 @@ const Footer = () => {
             <h4 className="font-semibold text-foreground">Services</h4>
             <div className="space-y-2">
               {events?.map((event) => (
-                <Link 
-                  key={event.id} 
-                  to={`/events/${event.event_type}`} 
+                <Link
+                  key={event.id}
+                  to={`/events/${event.event_type}`}
                   className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   {event.title}
@@ -82,9 +87,7 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+91 9849085678
-
-              </span>
+                <span>+91 9849085678</span>
               </div>
               <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
@@ -100,7 +103,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 Avens Events. All rights reserved.
+            © 2024 Avens. All rights reserved.
           </p>
         </div>
       </div>

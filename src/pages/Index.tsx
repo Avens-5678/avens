@@ -547,7 +547,7 @@ const Index = () => {
         </section>
       {/* Blog Post Modal */}
       <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glassmorphism-card border-0">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {selectedPost?.title}

@@ -106,11 +106,27 @@ const Index = () => {
         </div>
 
         {/* Stats Section - Desktop Optimized */}
-        <section className="relative overflow-hidden py-16 lg:py-24">
+        <section className="relative overflow-hidden py-12 lg:py-16">
           <div className="container mx-auto px-4 relative z-10">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8 max-w-6xl mx-auto mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 max-w-5xl mx-auto mb-6">
               <AnimatedText delay={200} className="text-center group">
-                <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div 
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
+                  onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const { left, top, width, height } = card.getBoundingClientRect();
+                    const x = e.clientX - left;
+                    const y = e.clientY - top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
+                    }}
+                  />
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
                     <Users className="h-6 w-6 text-white" />
                   </div>
@@ -118,8 +134,24 @@ const Index = () => {
                   <div className="text-sm text-muted-foreground">Happy Clients</div>
                 </div>
               </AnimatedText>
-              <AnimatedText delay={300} className="text-center">
-                <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-secondary/10 hover:border-secondary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+              <AnimatedText delay={300} className="text-center group">
+                <div 
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-secondary/10 hover:border-secondary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
+                  onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const { left, top, width, height } = card.getBoundingClientRect();
+                    const x = e.clientX - left;
+                    const y = e.clientY - top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
+                    }}
+                  />
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-3">
                     <CheckCircle className="h-6 w-6 text-white" />
                   </div>
@@ -127,8 +159,24 @@ const Index = () => {
                   <div className="text-sm text-muted-foreground">Events Completed</div>
                 </div>
               </AnimatedText>
-              <AnimatedText delay={400} className="text-center">
-                <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+              <AnimatedText delay={400} className="text-center group">
+                <div 
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
+                  onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const { left, top, width, height } = card.getBoundingClientRect();
+                    const x = e.clientX - left;
+                    const y = e.clientY - top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
+                    }}
+                  />
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-3">
                     <Star className="h-6 w-6 text-white" />
                   </div>
@@ -136,8 +184,24 @@ const Index = () => {
                   <div className="text-sm text-muted-foreground">Rating Average</div>
                 </div>
               </AnimatedText>
-              <AnimatedText delay={500} className="text-center">
-                <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-secondary/10 hover:border-secondary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+              <AnimatedText delay={500} className="text-center group">
+                <div 
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 lg:p-5 border border-secondary/10 hover:border-secondary/30 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
+                  onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const { left, top, width, height } = card.getBoundingClientRect();
+                    const x = e.clientX - left;
+                    const y = e.clientY - top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `radial-gradient(250px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.08), transparent 70%)`,
+                    }}
+                  />
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-hover rounded-2xl mb-3">
                     <Trophy className="h-6 w-6 text-white" />
                   </div>
@@ -150,9 +214,9 @@ const Index = () => {
         </section>
 
         {/* Services Section - Desktop Optimized */}
-        <section className="relative overflow-hidden py-16 lg:py-24">
+        <section className="relative overflow-hidden py-12 lg:py-16">
           <div className="container mx-auto relative z-10 px-4">
-            <div className="text-center mb-16 lg:mb-20">
+            <div className="text-center mb-12 lg:mb-16">
               <AnimatedText>
                 <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                   <Sparkles className="mr-2 h-4 w-4" />
@@ -171,9 +235,25 @@ const Index = () => {
               </AnimatedText>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-6xl mx-auto">
               {services?.map((service, index) => <AnimatedText key={service.id} delay={600 + index * 100}>
-                  <Card className="group hover:shadow-xl transition-all duration-500 border-0 glassmorphism-card hover:-translate-y-2 rounded-2xl overflow-hidden">
+                  <Card 
+                    className="group hover:shadow-xl transition-all duration-500 border-0 glassmorphism-card hover:-translate-y-2 rounded-2xl overflow-hidden relative cursor-pointer"
+                    onMouseMove={(e) => {
+                      const card = e.currentTarget;
+                      const { left, top, width, height } = card.getBoundingClientRect();
+                      const x = e.clientX - left;
+                      const y = e.clientY - top;
+                      card.style.setProperty('--mouse-x', `${x}px`);
+                      card.style.setProperty('--mouse-y', `${y}px`);
+                    }}
+                  >
+                    <div
+                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: `radial-gradient(300px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.1), transparent 70%)`,
+                      }}
+                    />
                     <div className="h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors flex items-center">
@@ -198,9 +278,9 @@ const Index = () => {
         </section>
 
         {/* Rentals Section - Desktop Optimized */}
-        <section className="relative py-16 lg:py-24">
+        <section className="relative py-12 lg:py-16">
           <div className="container mx-auto relative z-10 px-4">
-            <div className="text-center mb-16 lg:mb-20">
+            <div className="text-center mb-12 lg:mb-16">
               <AnimatedText>
                 <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                   <Clock className="mr-2 h-4 w-4" />
@@ -219,9 +299,25 @@ const Index = () => {
               </AnimatedText>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-6xl mx-auto">
               {rentals?.map((rental, index) => <AnimatedText key={rental.id} delay={600 + index * 100}>
-                  <Card className="group hover:shadow-xl transition-all duration-500 glassmorphism-card border-0 rounded-3xl overflow-hidden hover:-translate-y-2">
+                  <Card 
+                    className="group hover:shadow-xl transition-all duration-500 glassmorphism-card border-0 rounded-2xl overflow-hidden hover:-translate-y-2 relative cursor-pointer"
+                    onMouseMove={(e) => {
+                      const card = e.currentTarget;
+                      const { left, top, width, height } = card.getBoundingClientRect();
+                      const x = e.clientX - left;
+                      const y = e.clientY - top;
+                      card.style.setProperty('--mouse-x', `${x}px`);
+                      card.style.setProperty('--mouse-y', `${y}px`);
+                    }}
+                  >
+                    <div
+                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: `radial-gradient(300px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.1), transparent 70%)`,
+                      }}
+                    />
                     <div className="h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
                     
                     <CardHeader className="relative">
@@ -269,7 +365,7 @@ const Index = () => {
         </section>
 
         {/* Trusted Clients - Desktop Optimized */}
-        {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-16 lg:py-24">
+        {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-12 lg:py-16">
             <div className="container mx-auto relative z-10 px-4">
               <div className="text-center mb-12">
                 <AnimatedText>
@@ -298,9 +394,9 @@ const Index = () => {
           </section>}
 
         {/* Awards & Achievements - Desktop Optimized */}
-        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-16 lg:py-24">
+        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-12 lg:py-16">
             <div className="container mx-auto relative z-10 px-4">
-              <div className="text-center mb-16 lg:mb-20">
+              <div className="text-center mb-12 lg:mb-16">
                 <AnimatedText>
                   <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                     <Award className="mr-2 h-4 w-4" />
@@ -320,9 +416,25 @@ const Index = () => {
               </div>
 
               {/* Desktop optimized awards grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 max-w-5xl mx-auto">
                 {newsAchievements.slice(0, 3).map((news, index) => <AnimatedText key={news.id} delay={600 + index * 100}>
-                    <Card className="group hover:shadow-lg transition-all duration-500 glassmorphism-card border-0 rounded-2xl overflow-hidden hover:-translate-y-2 h-full relative">
+                    <Card 
+                      className="group hover:shadow-lg transition-all duration-500 glassmorphism-card border-0 rounded-2xl overflow-hidden hover:-translate-y-2 h-full relative cursor-pointer"
+                      onMouseMove={(e) => {
+                        const card = e.currentTarget;
+                        const { left, top, width, height } = card.getBoundingClientRect();
+                        const x = e.clientX - left;
+                        const y = e.clientY - top;
+                        card.style.setProperty('--mouse-x', `${x}px`);
+                        card.style.setProperty('--mouse-y', `${y}px`);
+                      }}
+                    >
+                      <div
+                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        style={{
+                          background: `radial-gradient(300px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.1), transparent 70%)`,
+                        }}
+                      />
                       {/* Compact image */}
                       <div className="relative h-32 bg-gradient-to-br from-primary/10 via-primary-glow/5 to-secondary/10 overflow-hidden">
                         {news.image_url ? (

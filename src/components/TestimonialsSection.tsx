@@ -55,9 +55,9 @@ const TestimonialsSection = () => {
   };
 
   return (
-    <section className="py-16 lg:py-24 relative overflow-hidden">
+    <section className="py-12 lg:py-16 relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16 lg:mb-20">
+        <div className="text-center mb-10 lg:mb-12">
           <AnimatedText variant="fade-in-up">
             <Badge variant="secondary" className="mb-4 px-4 py-2">
               <Users className="mr-2 h-4 w-4" />
@@ -78,7 +78,7 @@ const TestimonialsSection = () => {
           </AnimatedText>
         </div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <Carousel
             opts={{
               align: "start",
@@ -86,15 +86,32 @@ const TestimonialsSection = () => {
             }}
             className="w-full"
           >
-            <CarouselContent className="-ml-3 lg:-ml-4">
+            <CarouselContent className="-ml-2 lg:-ml-3">
               {testimonials.slice(0, 3).map((testimonial, index) => (
-                <CarouselItem key={testimonial.id} className="pl-3 lg:pl-4 md:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={testimonial.id} className="pl-2 lg:pl-3 md:basis-1/2 lg:basis-1/3">
                   <AnimatedText 
                     variant="fade-in-up" 
                     delay={index * 100}
                     className="h-full"
                   >
-                    <Card className="glassmorphism-card hover:shadow-glow transition-all duration-300 h-full group">
+                    <Card 
+                      className="glassmorphism-card hover:shadow-glow transition-all duration-500 h-full group hover:-translate-y-1 border border-white/10 hover:border-primary/50 relative cursor-pointer overflow-hidden"
+                      onMouseMove={(e) => {
+                        const card = e.currentTarget;
+                        const { left, top, width, height } = card.getBoundingClientRect();
+                        const x = e.clientX - left;
+                        const y = e.clientY - top;
+                        card.style.setProperty('--mouse-x', `${x}px`);
+                        card.style.setProperty('--mouse-y', `${y}px`);
+                      }}
+                    >
+                      {/* Spotlight Effect */}
+                      <div
+                        className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        style={{
+                          background: `radial-gradient(300px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.1), transparent 70%)`,
+                        }}
+                      />
                       <CardContent className="p-6 h-full flex flex-col">
                         <div className="mb-4">
                           <Quote className="h-6 w-6 text-primary/60 mb-3" />
@@ -146,9 +163,9 @@ const TestimonialsSection = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="flex justify-center gap-4 mt-6">
-              <CarouselPrevious className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-8 w-8" />
-              <CarouselNext className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-8 w-8" />
+            <div className="flex justify-center gap-3 mt-6">
+              <CarouselPrevious className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-10 w-10 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" />
+              <CarouselNext className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-10 w-10 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" />
             </div>
           </Carousel>
         </div>

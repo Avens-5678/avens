@@ -24,8 +24,8 @@ const About = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
-        <div className="container mx-auto px-4 text-center">
+      <section className="py-16 lg:py-20 bg-gradient-to-br from-primary/10 to-accent/10">
+        <div className="container mx-auto px-4 text-center max-w-6xl">
           <Badge variant="secondary" className="mb-4">
             <User className="mr-2 h-4 w-4" />
             About Us
@@ -41,8 +41,8 @@ const About = () => {
 
       {/* Founder Section */}
       {aboutContent && (
-        <section className="py-20">
-          <div className="container mx-auto px-4">
+        <section className="py-16 lg:py-20">
+          <div className="container mx-auto px-4 max-w-6xl">
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div className="space-y-6">
@@ -87,8 +87,8 @@ const About = () => {
 
       {/* Mission & Vision */}
       {aboutContent && (
-        <section className="py-20 bg-muted/50">
-          <div className="container mx-auto px-4">
+        <section className="py-16 lg:py-20 bg-muted/50">
+          <div className="container mx-auto px-4 max-w-6xl">
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card className="border-0 bg-background hover:shadow-lg transition-all duration-300">
@@ -130,8 +130,8 @@ const About = () => {
 
       {/* Full About Text */}
       {aboutContent && (
-        <section className="py-20">
-          <div className="container mx-auto px-4">
+        <section className="py-16 lg:py-20">
+          <div className="container mx-auto px-4 max-w-6xl">
             <div className="max-w-4xl mx-auto">
               <div className="prose prose-lg max-w-none">
                 <div className="text-lg text-muted-foreground leading-relaxed space-y-6">

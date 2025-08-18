@@ -49,7 +49,7 @@ const Index = () => {
   }
   return <Layout>
       {/* Unified gradient background for entire homepage */}
-      <div className="bg-gradient-to-b from-background via-muted/10 via-background/80 to-primary/5 min-h-screen">
+      <div className="bg-gradient-to-b from-background via-muted/10 via-background/80 to-primary/5">
         {/* Hero Section with Carousel */}
         <div className="relative">
           {heroBanners && heroBanners.length > 0 ? <Carousel className="w-full h-screen relative" plugins={[Autoplay({
@@ -107,7 +107,7 @@ const Index = () => {
 
         {/* Stats Section - Desktop Optimized */}
         <section className="relative overflow-hidden py-12 lg:py-16">
-          <div className="container mx-auto px-4 relative z-10">
+          <div className="container mx-auto px-4 relative z-10 max-w-6xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 max-w-5xl mx-auto mb-6">
               <AnimatedText delay={200} className="text-center group">
                 <div 
@@ -214,9 +214,9 @@ const Index = () => {
         </section>
 
         {/* Services Section - Desktop Optimized */}
-        <section className="relative overflow-hidden py-12 lg:py-16">
-          <div className="container mx-auto relative z-10 px-4">
-            <div className="text-center mb-12 lg:mb-16">
+        <section className="relative overflow-hidden py-16 lg:py-20">
+          <div className="container mx-auto relative z-10 px-4 max-w-6xl">
+            <div className="text-center mb-12 lg:mb-14">
               <AnimatedText>
                 <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                   <Sparkles className="mr-2 h-4 w-4" />
@@ -278,9 +278,9 @@ const Index = () => {
         </section>
 
         {/* Rentals Section - Desktop Optimized */}
-        <section className="relative py-12 lg:py-16">
-          <div className="container mx-auto relative z-10 px-4">
-            <div className="text-center mb-12 lg:mb-16">
+        <section className="relative py-16 lg:py-20 bg-muted/20">
+          <div className="container mx-auto relative z-10 px-4 max-w-6xl">
+            <div className="text-center mb-12 lg:mb-14">
               <AnimatedText>
                 <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                   <Clock className="mr-2 h-4 w-4" />
@@ -365,9 +365,9 @@ const Index = () => {
         </section>
 
         {/* Trusted Clients - Desktop Optimized */}
-        {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-12 lg:py-16">
-            <div className="container mx-auto relative z-10 px-4">
-              <div className="text-center mb-12">
+        {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-16 lg:py-20">
+            <div className="container mx-auto relative z-10 px-4 max-w-6xl">
+              <div className="text-center mb-12 lg:mb-14">
                 <AnimatedText>
                   <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                     <Users className="mr-2 h-4 w-4" />
@@ -394,9 +394,9 @@ const Index = () => {
           </section>}
 
         {/* Awards & Achievements - Desktop Optimized */}
-        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-12 lg:py-16">
-            <div className="container mx-auto relative z-10 px-4">
-              <div className="text-center mb-12 lg:mb-16">
+        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-16 lg:py-20 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <div className="container mx-auto relative z-10 px-4 max-w-6xl">
+              <div className="text-center mb-12 lg:mb-14">
                 <AnimatedText>
                   <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
                     <Award className="mr-2 h-4 w-4" />

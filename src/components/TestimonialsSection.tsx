@@ -55,7 +55,7 @@ const TestimonialsSection = () => {
   };
 
   return (
-    <section className="py-12 lg:py-16 relative overflow-hidden">
+    <section className="py-16 lg:py-20 relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-10 lg:mb-12">
           <AnimatedText variant="fade-in-up">
@@ -78,7 +78,7 @@ const TestimonialsSection = () => {
           </AnimatedText>
         </div>
 
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <Carousel
             opts={{
               align: "start",
@@ -86,9 +86,9 @@ const TestimonialsSection = () => {
             }}
             className="w-full"
           >
-            <CarouselContent className="-ml-2 lg:-ml-3">
-              {testimonials.slice(0, 3).map((testimonial, index) => (
-                <CarouselItem key={testimonial.id} className="pl-2 lg:pl-3 md:basis-1/2 lg:basis-1/3">
+            <CarouselContent className="-ml-1 md:-ml-2 lg:-ml-3">
+              {testimonials.map((testimonial, index) => (
+                <CarouselItem key={testimonial.id} className="pl-1 md:pl-2 lg:pl-3 basis-full md:basis-1/2 lg:basis-1/3">
                   <AnimatedText 
                     variant="fade-in-up" 
                     delay={index * 100}
@@ -163,9 +163,9 @@ const TestimonialsSection = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="flex justify-center gap-3 mt-6">
-              <CarouselPrevious className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-10 w-10 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" />
-              <CarouselNext className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-10 w-10 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" />
+            <div className="flex justify-center gap-3 mt-8">
+              <CarouselPrevious className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-10 w-10 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 static translate-x-0 translate-y-0" />
+              <CarouselNext className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-10 w-10 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 static translate-x-0 translate-y-0" />
             </div>
           </Carousel>
         </div>

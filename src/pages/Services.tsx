@@ -31,8 +31,8 @@ const Services = () => {
   }
   return <Layout>
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
-        <div className="container mx-auto px-4 text-center">
+      <section className="py-16 lg:py-20 bg-gradient-to-br from-primary/10 to-accent/10">
+        <div className="container mx-auto px-4 text-center max-w-6xl">
           <Badge variant="secondary" className="mb-4">
             <Sparkles className="mr-2 h-4 w-4" />
             Our Services
@@ -47,8 +47,8 @@ const Services = () => {
       </section>
 
       {/* Services Grid */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="py-16 lg:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Event Management Services
@@ -82,8 +82,8 @@ const Services = () => {
       </section>
 
       {/* Rental Section */}
-      <section className="py-20 bg-muted/50">
-        <div className="container mx-auto px-4">
+      <section className="py-16 lg:py-20 bg-muted/50">
+        <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-16">
             <Badge variant="secondary" className="mb-4">
               <Package className="mr-2 h-4 w-4" />
@@ -126,8 +126,8 @@ const Services = () => {
       </section>
 
       {/* Awards Section */}
-      {awards && awards.length > 0 && <section className="py-20">
-          <div className="container mx-auto px-4">
+      {awards && awards.length > 0 && <section className="py-16 lg:py-20">
+          <div className="container mx-auto px-4 max-w-6xl">
             <div className="text-center mb-16">
               <Badge variant="secondary" className="mb-4">
                 <Award className="mr-2 h-4 w-4" />
@@ -165,8 +165,8 @@ const Services = () => {
         </section>}
 
       {/* Contact Form Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
-        <div className="container mx-auto px-4">
+      <section className="py-16 lg:py-20 bg-gradient-to-br from-primary/10 to-accent/10">
+        <div className="container mx-auto px-4 max-w-6xl">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">

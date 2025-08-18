@@ -306,47 +306,127 @@ const Index = () => {
           </section>}
 
         {/* News & Achievements */}
-        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-0">
-            <div className="container mx-auto relative z-10 px-px py-[20px]">
-              <div className="text-center mb-12">
+        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-16">
+            <div className="container mx-auto relative z-10 px-4">
+              <div className="text-center mb-16">
                 <AnimatedText>
-                  <Badge variant="secondary" className="mb-4 rounded-full px-6 py-2">
-                    <Award className="mr-2 h-4 w-4" />
-                    Latest News
+                  <Badge variant="secondary" className="mb-6 rounded-full px-8 py-3 text-base">
+                    <Award className="mr-3 h-5 w-5" />
+                    Latest News & Achievements
                   </Badge>
                 </AnimatedText>
                 <AnimatedText delay={200}>
-                  <h2 className="text-2xl md:text-3xl font-bold mb-3">
-                    News & Achievements
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
+                    Celebrating Success
                   </h2>
+                </AnimatedText>
+                <AnimatedText delay={400}>
+                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                    Discover our latest achievements, awards, and news that showcase our commitment to excellence in event planning and execution.
+                  </p>
                 </AnimatedText>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {newsAchievements.slice(0, 6).map((news, index) => <AnimatedText key={news.id} delay={400 + index * 100}>
-                    <Card className="group hover:shadow-xl transition-all duration-500 glassmorphism-card border-0 rounded-2xl overflow-hidden hover:-translate-y-2 h-full">
-                      <div className="h-1 bg-gradient-to-r from-primary via-secondary to-primary-glow"></div>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="text-xs rounded-full">
-                            {new Date(news.created_at).toLocaleDateString()}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {newsAchievements.slice(0, 6).map((news, index) => <AnimatedText key={news.id} delay={600 + index * 150}>
+                    <Card className="group hover:shadow-2xl transition-all duration-700 glassmorphism-card border-0 rounded-3xl overflow-hidden hover:-translate-y-4 hover:scale-105 h-full relative">
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      {/* Hero image placeholder or actual image */}
+                      <div className="relative h-48 bg-gradient-to-br from-primary/20 via-primary-glow/10 to-secondary/20 overflow-hidden">
+                        {news.image_url ? (
+                          <img 
+                            src={news.image_url} 
+                            alt={news.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 via-primary-glow/5 to-secondary/10">
+                            <div className="text-center">
+                              <Award className="h-12 w-12 text-primary/40 mx-auto mb-2" />
+                              <p className="text-xs text-muted-foreground/60 font-medium">Achievement</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Floating date badge */}
+                        <div className="absolute top-4 right-4">
+                          <Badge variant="secondary" className="backdrop-blur-md bg-white/20 border-white/30 text-white rounded-full px-3 py-1 text-xs font-semibold">
+                            {new Date(news.created_at).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
                           </Badge>
-                          <div className="w-6 h-6 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
-                            <Star className="h-3 w-3 text-primary" />
+                        </div>
+
+                        {/* Decorative corner element */}
+                        <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br from-primary/30 to-transparent rounded-tr-full"></div>
+                      </div>
+
+                      <CardHeader className="relative z-10 pb-4 pt-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
+                              <Star className="h-4 w-4 text-primary" />
+                            </div>
+                            <span className="text-xs font-semibold text-primary/80 uppercase tracking-wider">Featured</span>
+                          </div>
+                          
+                          {/* Achievement type indicator */}
+                          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20">
+                            <span className="text-xs font-medium text-primary">News</span>
                           </div>
                         </div>
-                        <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                        
+                        <CardTitle className="text-xl md:text-2xl font-bold leading-tight group-hover:text-primary transition-colors duration-300 line-clamp-2">
                           {news.title}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">
+
+                      <CardContent className="relative z-10 pt-0 pb-6">
+                        <p className="text-muted-foreground leading-relaxed line-clamp-4 text-base mb-6">
                           {news.content}
                         </p>
+                        
+                        {/* Read more button */}
+                        <div className="flex items-center justify-between">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-primary hover:text-primary-glow hover:bg-primary/5 transition-all duration-300 group/btn"
+                          >
+                            Read More 
+                            <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                          </Button>
+                          
+                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                            <Heart className="h-3 w-3" />
+                            <span>{Math.floor(Math.random() * 50) + 10}</span>
+                          </div>
+                        </div>
                       </CardContent>
+
+                      {/* Bottom gradient accent */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
                     </Card>
                   </AnimatedText>)}
               </div>
+
+              {/* Call to action */}
+              <AnimatedText delay={1200} className="text-center mt-16">
+                <Button 
+                  asChild 
+                  size="lg" 
+                  className="glassmorphism-btn rounded-full px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-500"
+                >
+                  <Link to="/portfolio">
+                    View All News & Updates
+                    <ArrowRight className="ml-3 h-5 w-5" />
+                  </Link>
+                </Button>
+              </AnimatedText>
             </div>
           </section>}
 

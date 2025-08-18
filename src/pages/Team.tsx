@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedText, GradientText } from "@/components/ui/animated-text";
-import { Users, MapPin, Phone, Mail } from "lucide-react";
+import { Users, Phone, Mail } from "lucide-react";
 
 interface TeamMember {
   id: string;
@@ -76,16 +76,11 @@ const Team = () => {
                   className="glassmorphism-card hover:shadow-glow transition-all duration-500 cursor-pointer group hover:-translate-y-2 border-0"
                   onClick={() => setSelectedMember(member)}
                 >
-                  <CardContent className="p-8 text-center">
-                    {/* Member Info */}
-                    <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
-                      {member.name}
-                    </h3>
-
-                    {/* Profile Image with Gradient Border */}
-                    <div className="relative mb-6">
+                  <CardContent className="p-8 text-center flex flex-col items-center">
+                    {/* FIXED: Profile Image Container */}
+                    <div className="relative w-32 h-32 mb-6">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full p-1 group-hover:scale-105 transition-transform duration-300">
-                        <Avatar className="w-32 h-32 mx-auto bg-background">
+                        <Avatar className="w-full h-full bg-background">
                           <AvatarImage src={member.photo_url} alt={member.name} className="object-cover" />
                           <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/10 to-secondary/10 text-primary">
                             {member.name.split(' ').map(n => n[0]).join('')}
@@ -94,11 +89,16 @@ const Team = () => {
                       </div>
                     </div>
                     
+                    {/* Member Info */}
+                    <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
+                      {member.name}
+                    </h3>
+                    
                     <Badge variant="outline" className="mb-4 px-4 py-1">
                       {member.role}
                     </Badge>
                     
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed min-h-[100px]">
                       {member.short_bio}
                     </p>
 

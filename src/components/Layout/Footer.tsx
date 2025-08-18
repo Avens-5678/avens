@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Github } from "lucide-react";
 import { useEvents } from "@/hooks/useData";
+// Import the video file directly from the assets folder
+import logoVideo from "@/assets/Logo_Animation_Video_Generation.mp4";
 
 const Footer = () => {
   const { data: events } = useEvents();
@@ -12,7 +14,7 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="w-32 h-auto">
               <video
-                src="/lovable-uploads/Logo_Animation_Video_Generation.mp4"
+                src={logoVideo} // Use the imported video variable here
                 title="Avens Expositions Animated Logo" // Using title for accessibility instead of alt
                 className="w-full h-auto"
                 autoPlay

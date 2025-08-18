@@ -76,9 +76,9 @@ const Team = () => {
                   className="glassmorphism-card hover:shadow-glow transition-all duration-500 cursor-pointer group hover:-translate-y-2 border-0"
                   onClick={() => setSelectedMember(member)}
                 >
-                  <CardContent className="p-8 text-center flex flex-col items-center">
-                    {/* FIXED: Profile Image Container */}
-                    <div className="relative w-32 h-32 mb-6">
+                  <CardContent className="p-8 text-center">
+                    {/* Profile Image with Gradient Border */}
+                    <div className="relative w-32 h-32 mx-auto mb-6">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full p-1 group-hover:scale-105 transition-transform duration-300">
                         <Avatar className="w-full h-full bg-background">
                           <AvatarImage src={member.photo_url} alt={member.name} className="object-cover" />
@@ -90,8 +90,8 @@ const Team = () => {
                     </div>
                     
                     {/* Member Info */}
-                    <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
-                      {member.name}
+                    <h3 className="text-2xl font-bold mb-2">
+                      <GradientText>{member.name}</GradientText>
                     </h3>
                     
                     <Badge variant="outline" className="mb-4 px-4 py-1">
@@ -139,10 +139,11 @@ const Team = () => {
         <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
           <DialogContent className="max-w-3xl glassmorphism-card border-0">
             <DialogHeader>
-              <DialogTitle className="flex flex-col items-center text-center gap-4 mb-4">
-                <div className="relative">
+              <DialogTitle className="flex flex-col items-center text-center gap-4">
+                {/* FIXED: Added fixed size to this container */}
+                <div className="relative w-24 h-24">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full p-1">
-                    <Avatar className="w-24 h-24 bg-background">
+                    <Avatar className="w-full h-full bg-background">
                       <AvatarImage src={selectedMember?.photo_url} alt={selectedMember?.name} className="object-cover" />
                       <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/10 to-secondary/10 text-primary">
                         {selectedMember?.name.split(' ').map(n => n[0]).join('')}

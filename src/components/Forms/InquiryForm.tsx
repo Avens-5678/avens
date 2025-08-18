@@ -90,81 +90,82 @@ const InquiryForm = ({
   };
   return (
     <>
-      <Card className="w-full max-w-lg border-0 shadow-2xl bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
-        <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <Card className="w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl mx-auto border-0 shadow-2xl bg-gradient-to-br from-background/95 via-background/90 to-primary/5 backdrop-blur-xl relative overflow-hidden animate-scale-in">
+        {/* Enhanced animated background elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/8 animate-pulse"></div>
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gradient-to-r from-primary/15 to-accent/15 rounded-full blur-xl animate-float"></div>
+        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-r from-accent/15 to-primary/15 rounded-full blur-xl animate-float-delayed"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl animate-slow-spin"></div>
         
-        <CardHeader className="relative z-10 text-center space-y-4">
+        <CardHeader className="relative z-10 text-center space-y-3 sm:space-y-4 p-4 sm:p-6">
           <div className="flex items-center justify-center space-x-2">
-            <Sparkles className="w-6 h-6 text-primary animate-pulse" />
-            <CardTitle className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary animate-twinkle" />
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient-text">
               {title}
             </CardTitle>
-            <Sparkles className="w-6 h-6 text-accent animate-pulse" style={{ animationDelay: '0.5s' }} />
+            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-accent animate-twinkle-delayed" />
           </div>
-          <p className="text-sm text-muted-foreground">Ready to create something amazing together?</p>
+          <p className="text-xs sm:text-sm text-muted-foreground font-medium">Ready to create something amazing together?</p>
         </CardHeader>
         
-        <CardContent className="relative z-10">
+        <CardContent className="relative z-10 p-4 sm:p-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 lg:space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 lg:space-y-5">
             <FormField control={form.control} name="name" render={({
             field
-          }) => <FormItem className="space-y-2">
-                  <FormLabel className="text-foreground font-medium">Full Name</FormLabel>
+          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in">
+                  <FormLabel className="text-foreground font-medium text-sm">Full Name</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Enter your full name" 
                       {...field} 
-                      className="border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm"
+                      className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>} />
 
             <FormField control={form.control} name="email" render={({
             field
-          }) => <FormItem className="space-y-2">
-                  <FormLabel className="text-foreground font-medium">Email Address</FormLabel>
+          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                  <FormLabel className="text-foreground font-medium text-sm">Email Address</FormLabel>
                   <FormControl>
                     <Input 
                       type="email" 
                       placeholder="Enter your email" 
                       {...field} 
-                      className="border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm"
+                      className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>} />
 
             <FormField control={form.control} name="phone" render={({
             field
-          }) => <FormItem className="space-y-2">
-                  <FormLabel className="text-foreground font-medium">Phone Number (Optional)</FormLabel>
+          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                  <FormLabel className="text-foreground font-medium text-sm">Phone Number (Optional)</FormLabel>
                   <FormControl>
                     <Input 
                       type="tel" 
                       placeholder="Enter your phone number" 
                       {...field} 
-                      className="border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm"
+                      className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>} />
 
             {!eventType && <FormField control={form.control} name="eventType" render={({
             field
-          }) => <FormItem className="space-y-2">
-                    <FormLabel className="text-foreground font-medium">Event Type</FormLabel>
+          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                    <FormLabel className="text-foreground font-medium text-sm">Event Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm">
+                        <SelectTrigger className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60">
                           <SelectValue placeholder="Select event type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="z-50 bg-background/95 backdrop-blur-xl border-2 border-border/50 rounded-lg">
                         <SelectItem value="wedding">Wedding</SelectItem>
                         <SelectItem value="corporate">Corporate Event</SelectItem>
                         <SelectItem value="birthday">Birthday Party</SelectItem>
@@ -174,65 +175,66 @@ const InquiryForm = ({
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage className="text-xs" />
                   </FormItem>} />}
 
             <FormField control={form.control} name="eventDate" render={({
             field
-          }) => <FormItem className="flex flex-col space-y-2">
-                  <FormLabel className="text-foreground font-medium">Event Date (Optional)</FormLabel>
+          }) => <FormItem className="flex flex-col space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                  <FormLabel className="text-foreground font-medium text-sm">Event Date (Optional)</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button 
                           variant={"outline"} 
                           className={cn(
-                            "w-full pl-3 text-left font-normal border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm", 
+                            "w-full h-10 sm:h-11 pl-3 text-left font-normal border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60", 
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value ? format(field.value, "PPP") : <span>Pick your event date</span>}
+                          {field.value ? format(field.value, "PPP") : <span className="text-sm">Pick your event date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={5}>
-                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    <PopoverContent className="w-auto p-0 z-50 bg-background/95 backdrop-blur-xl border-2 border-border/50 rounded-lg shadow-2xl animate-scale-in" align="start" sideOffset={5}>
+                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className="p-3 pointer-events-auto" />
                     </PopoverContent>
                   </Popover>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>} />
 
             <FormField control={form.control} name="message" render={({
             field
-          }) => <FormItem className="space-y-2">
-                  <FormLabel className="text-foreground font-medium">Message</FormLabel>
+          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                  <FormLabel className="text-foreground font-medium text-sm">Message</FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="Tell us about your event requirements..." 
-                      className="min-h-[120px] border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/50 backdrop-blur-sm resize-none" 
+                      className="min-h-[100px] sm:min-h-[120px] border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm resize-none rounded-lg hover:border-primary/60 text-sm" 
                       {...field} 
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>} />
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-xl hover:scale-105 transition-all duration-300 text-white font-semibold py-3 relative overflow-hidden group" 
+              className="w-full h-11 sm:h-12 bg-gradient-to-r from-primary to-accent hover:shadow-xl hover:scale-105 transition-all duration-300 text-white font-semibold relative overflow-hidden group animate-fade-in rounded-lg" 
               disabled={isLoading}
+              style={{ animationDelay: '0.6s' }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative z-10 flex items-center justify-center">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    <span className="text-sm sm:text-base">Sending...</span>
                   </>
                 ) : (
                   <>
                     <Send className="mr-2 h-4 w-4" />
-                    Send Message
+                    <span className="text-sm sm:text-base">Send Message</span>
                   </>
                 )}
               </div>

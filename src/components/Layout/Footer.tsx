@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Github } from "lucide-react";
 import { useEvents } from "@/hooks/useData";
 const Footer = () => {
   const { data: events } = useEvents();
@@ -28,6 +28,9 @@ const Footer = () => {
               </a>
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
+              </a>
+              <a href="https://github.com/lyora-dev/avens" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <Github className="h-5 w-5" />
               </a>
             </div>
           </div>

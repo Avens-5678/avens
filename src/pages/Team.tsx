@@ -77,6 +77,11 @@ const Team = () => {
                   onClick={() => setSelectedMember(member)}
                 >
                   <CardContent className="p-8 text-center">
+                    {/* Member Info */}
+                    <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
+                      {member.name}
+                    </h3>
+
                     {/* Profile Image with Gradient Border */}
                     <div className="relative mb-6">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full p-1 group-hover:scale-105 transition-transform duration-300">
@@ -88,11 +93,6 @@ const Team = () => {
                         </Avatar>
                       </div>
                     </div>
-
-                    {/* Member Info */}
-                    <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
-                      {member.name}
-                    </h3>
                     
                     <Badge variant="outline" className="mb-4 px-4 py-1">
                       {member.role}

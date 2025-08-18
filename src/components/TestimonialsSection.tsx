@@ -55,33 +55,30 @@ const TestimonialsSection = () => {
   };
 
   return (
-    <section className="py-32 bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-primary/[0.02] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
-      
+    <section className="py-16 relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <AnimatedText variant="fade-in-up">
-            <Badge variant="secondary" className="mb-6 px-4 py-2">
+            <Badge variant="secondary" className="mb-4 px-4 py-2">
               <Users className="mr-2 h-4 w-4" />
               Client Stories
             </Badge>
           </AnimatedText>
           
           <AnimatedText variant="fade-in-up" delay={200}>
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-              What Our <GradientText>Clients</GradientText><br />
-              <GradientText variant="secondary">Say About Us</GradientText>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+              What Our <GradientText>Clients</GradientText> Say
             </h2>
           </AnimatedText>
           
           <AnimatedText variant="fade-in-up" delay={400}>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Real experiences from real clients who trusted us with their most important moments
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Real experiences from clients who trusted us with their important moments
             </p>
           </AnimatedText>
         </div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <Carousel
             opts={{
               align: "start",
@@ -90,44 +87,44 @@ const TestimonialsSection = () => {
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {testimonials.map((testimonial, index) => (
+              {testimonials.slice(0, 3).map((testimonial, index) => (
                 <CarouselItem key={testimonial.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                   <AnimatedText 
                     variant="fade-in-up" 
                     delay={index * 100}
                     className="h-full"
                   >
-                    <Card className="glassmorphism-card hover:shadow-glow transition-all duration-500 h-full">
-                      <CardContent className="p-8 h-full flex flex-col">
-                        <div className="mb-6">
-                          <Quote className="h-8 w-8 text-primary/60 mb-4" />
-                          <p className="text-lg leading-relaxed text-foreground mb-6 italic">
+                    <Card className="glassmorphism-card hover:shadow-glow transition-all duration-300 h-full group">
+                      <CardContent className="p-6 h-full flex flex-col">
+                        <div className="mb-4">
+                          <Quote className="h-6 w-6 text-primary/60 mb-3" />
+                          <p className="text-base leading-relaxed text-foreground mb-4 italic line-clamp-3">
                             "{testimonial.testimonial}"
                           </p>
                         </div>
                         
                         <div className="mt-auto">
-                          <div className="flex items-center gap-4 mb-4">
-                            <Avatar className="h-12 w-12">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Avatar className="h-10 w-10">
                               <AvatarImage src={testimonial.image_url} alt={testimonial.client_name} />
-                              <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                              <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
                                 {testimonial.client_name.split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
-                              <h4 className="font-semibold text-lg">{testimonial.client_name}</h4>
+                              <h4 className="font-semibold text-base">{testimonial.client_name}</h4>
                               {testimonial.position && testimonial.company && (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs text-muted-foreground">
                                   {testimonial.position} at {testimonial.company}
                                 </p>
                               )}
                               {testimonial.position && !testimonial.company && (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs text-muted-foreground">
                                   {testimonial.position}
                                 </p>
                               )}
                               {!testimonial.position && testimonial.company && (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs text-muted-foreground">
                                   {testimonial.company}
                                 </p>
                               )}
@@ -149,9 +146,9 @@ const TestimonialsSection = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="flex justify-center gap-4 mt-8">
-              <CarouselPrevious className="glassmorphism-btn border-primary/20 hover:border-primary/40" />
-              <CarouselNext className="glassmorphism-btn border-primary/20 hover:border-primary/40" />
+            <div className="flex justify-center gap-4 mt-6">
+              <CarouselPrevious className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-8 w-8" />
+              <CarouselNext className="glassmorphism-btn border-primary/20 hover:border-primary/40 h-8 w-8" />
             </div>
           </Carousel>
         </div>

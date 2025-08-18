@@ -23,6 +23,7 @@ import EquipmentRental from "./pages/events/EquipmentRental";
 import GovernmentEvents from "./pages/events/GovernmentEvents";
 import DynamicEventPage from "./pages/events/DynamicEventPage";
 import Team from "./pages/Team";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/gallery/:portfolioId" element={<Gallery />} />
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
             <Route path="/team" element={<Team />} />
             <Route path="/events/wedding" element={<WeddingEvents />} />
             <Route path="/events/corporate" element={<CorporateEvents />} />

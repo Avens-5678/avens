@@ -9,17 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "glassmorphism-btn text-primary-foreground hover:shadow-glow",
+        default: "px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300",
         destructive:
           "glassmorphism-btn bg-destructive/20 text-destructive hover:shadow-red-glow hover:bg-destructive/30",
         outline:
-          "glassmorphism-btn border border-input hover:bg-accent/20 hover:text-accent-foreground hover:border-primary/50",
+          "px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300",
         secondary:
           "glassmorphism-btn bg-secondary/20 text-secondary hover:shadow-red-glow hover:bg-secondary/30",
-        ghost: "hover:bg-accent/20 hover:text-accent-foreground glassmorphism-btn bg-transparent",
+        ghost: "px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300",
         link: "text-primary underline-offset-4 hover:underline hover:text-primary-glow bg-transparent backdrop-filter-none border-0 shadow-none",
         premium: "gradient-primary text-primary-foreground hover:shadow-glow hover:scale-105 shadow-medium font-semibold",
         elegant: "glassmorphism-card text-card-foreground border border-border hover:shadow-medium",
+        news: "px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300",
       },
       size: {
         default: "h-10 px-6 py-2",

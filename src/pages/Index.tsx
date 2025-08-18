@@ -278,9 +278,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <TestimonialsSection />
-
         {/* Trusted Clients */}
         {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-0">
             <div className="container mx-auto relative z-10 px-0 py-[20px]">
@@ -398,12 +395,15 @@ const Index = () => {
                         {/* Read more button */}
                         <div className="flex items-center justify-between">
                           <Button 
+                            asChild
                             variant="ghost" 
                             size="sm" 
-                            className="text-primary hover:text-primary-glow hover:bg-primary/5 transition-all duration-300 group/btn"
+                            className="px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300 group/btn"
                           >
-                            Read More 
-                            <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                            <Link to={`/blog/${news.id}`}>
+                              Read More 
+                              <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                            </Link>
                           </Button>
                           
                           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
@@ -424,9 +424,9 @@ const Index = () => {
                 <Button 
                   asChild 
                   size="lg" 
-                  className="glassmorphism-btn rounded-full px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-500"
+                  className="px-3 py-1 rounded-full bg-gradient-to-r from-secondary/10 to-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300"
                 >
-                  <Link to="/portfolio">
+                  <Link to="/blog">
                     View All News & Updates
                     <ArrowRight className="ml-3 h-5 w-5" />
                   </Link>
@@ -434,6 +434,9 @@ const Index = () => {
               </AnimatedText>
             </div>
           </section>}
+
+        {/* Client Stories Section */}
+        <TestimonialsSection />
 
         {/* Get in Touch CTA */}
         <section className="py-16 relative overflow-hidden">

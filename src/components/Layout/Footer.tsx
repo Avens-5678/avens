@@ -13,7 +13,7 @@ const Footer = () => {
             <div className="w-32 h-auto">
               <video
                 src="/lovable-uploads/Logo_Animation_Video_Generation.mp4"
-                alt="Avens Expositions Animated Logo"
+                title="Avens Expositions Animated Logo" // Using title for accessibility instead of alt
                 className="w-full h-auto"
                 autoPlay
                 loop

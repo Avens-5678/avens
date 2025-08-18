@@ -15,8 +15,8 @@ import { AnimatedText, GradientText } from "@/components/ui/animated-text";
 import Layout from "@/components/Layout/Layout";
 import TestimonialsSection from "@/components/TestimonialsSection";
 
-// Helper component for scroll animations
-const ScrollAnimated = ({ children, className }) => {
+// Helper component for scroll animations - FIXED
+const ScrollAnimated = ({ children, className = '' }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef(null);
 
@@ -54,8 +54,8 @@ const ScrollAnimated = ({ children, className }) => {
   );
 };
 
-// Helper component for animating numbers
-const AnimatedStat = ({ finalValue, suffix, isDecimal }) => {
+// Helper component for animating numbers - FIXED
+const AnimatedStat = ({ finalValue, suffix = '', isDecimal = false }) => {
     const [count, setCount] = useState(isDecimal ? 0.0 : 0);
     const ref = useRef(null);
     const duration = 2000; // 2 seconds

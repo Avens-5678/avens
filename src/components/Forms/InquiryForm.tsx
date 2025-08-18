@@ -90,27 +90,26 @@ const InquiryForm = ({
   };
   return (
     <>
-      <Card className="w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl mx-auto border-0 shadow-2xl bg-gradient-to-br from-background/95 via-background/90 to-primary/5 backdrop-blur-xl relative overflow-hidden animate-scale-in">
+      <Card className="w-full border-0 shadow-none bg-transparent relative overflow-hidden animate-scale-in">
         {/* Enhanced animated background elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/8 animate-pulse"></div>
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gradient-to-r from-primary/15 to-accent/15 rounded-full blur-xl animate-float"></div>
-        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-r from-accent/15 to-primary/15 rounded-full blur-xl animate-float-delayed"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl animate-slow-spin"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-pulse"></div>
+        <div className="absolute top-2 right-2 w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-lg animate-float"></div>
+        <div className="absolute bottom-2 left-2 w-6 h-6 sm:w-10 sm:h-10 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-lg animate-float-delayed"></div>
         
-        <CardHeader className="relative z-10 text-center space-y-3 sm:space-y-4 p-4 sm:p-6">
+        <CardHeader className="relative z-10 text-center space-y-2 p-3 sm:p-4">
           <div className="flex items-center justify-center space-x-2">
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary animate-twinkle" />
-            <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient-text">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-twinkle" />
+            <CardTitle className="text-base sm:text-lg font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient-text">
               {title}
             </CardTitle>
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-accent animate-twinkle-delayed" />
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-accent animate-twinkle-delayed" />
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground font-medium">Ready to create something amazing together?</p>
+          <p className="text-xs text-muted-foreground font-medium">Ready to create something amazing together?</p>
         </CardHeader>
         
-        <CardContent className="relative z-10 p-4 sm:p-6">
+        <CardContent className="relative z-10 p-3 sm:p-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 lg:space-y-5">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:space-y-3">
             <FormField control={form.control} name="name" render={({
             field
           }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in">

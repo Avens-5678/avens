@@ -7,6 +7,7 @@ import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
 import { Heart, ArrowRight, Camera, ExternalLink, Crown, Flower, Diamond, Church, Heart as Ring, Calendar } from "lucide-react";
+import AnimatedSection from "@/components/ui/animated-section";
 import weddingHero from "@/assets/wedding-events-hero.jpg";
 
 const WeddingEvents = () => {
@@ -55,54 +56,56 @@ const WeddingEvents = () => {
       <section className="relative py-20 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            {/* Content Side */}
-            <div className="lg:w-1/2 space-y-8">
+            <AnimatedSection animation="fade-in-up" delay={0.1} className="lg:w-1/2 space-y-8">
               <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 w-fit">
                 <Heart className="mr-2 h-4 w-4" />
                 Wedding Events
               </Badge>
               
-              <div className="space-y-6">
-                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                  Your Love Story
-                  <span className="block text-primary">Perfectly Told</span>
-                </h1>
-                
-                <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
-                  {event?.description || "At Avens Events, we believe every wedding should be as unique as your love story. From intimate ceremonies to grand celebrations, we craft unforgettable experiences that reflect your style and dreams."}
-                </p>
-              </div>
+              <AnimatedSection animation="fade-in-up" delay={0.3}>
+                <div className="space-y-6">
+                  <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                    Your Love Story
+                    <span className="block text-primary">Perfectly Told</span>
+                  </h1>
+                  
+                  <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                    {event?.description || "At Avens Events, we believe every wedding should be as unique as your love story. From intimate ceremonies to grand celebrations, we craft unforgettable experiences that reflect your style and dreams."}
+                  </p>
+                </div>
+              </AnimatedSection>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
-                    Plan My Wedding <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogTitle>Plan Your Dream Wedding</DialogTitle>
-                  <DialogDescription>Fill out this form to start planning your wedding</DialogDescription>
-                  <InquiryForm 
-                    formType="inquiry"
-                    eventType="wedding"
-                    title="Plan Your Dream Wedding"
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
+              <AnimatedSection animation="scale-in" delay={0.5}>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
+                      Plan My Wedding <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
+                    <div className="overflow-y-auto flex-1 p-4 sm:p-6">
+                      <InquiryForm 
+                        formType="inquiry"
+                        eventType="wedding"
+                        title="Plan Your Dream Wedding"
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </AnimatedSection>
+            </AnimatedSection>
 
-            {/* Image Side */}
-            <div className="lg:w-1/2">
+            <AnimatedSection animation="slide-in-right" delay={0.4} className="lg:w-1/2">
               <div className="relative">
                 <img 
                   src={weddingHero}
                   alt="Beautiful wedding ceremony setup"
                   className="w-full h-[500px] object-cover rounded-2xl shadow-2xl"
                 />
-                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-primary to-accent rounded-full opacity-20"></div>
-                <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-accent to-primary rounded-full opacity-30"></div>
+                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-primary to-accent rounded-full opacity-20 animate-float"></div>
+                <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-accent to-primary rounded-full opacity-30 animate-float-delayed"></div>
               </div>
-            </div>
+            </AnimatedSection>
           </div>
         </div>
       </section>

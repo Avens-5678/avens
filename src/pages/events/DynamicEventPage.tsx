@@ -8,6 +8,7 @@ import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
 import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap } from "lucide-react";
+import AnimatedSection from "@/components/ui/animated-section";
 
 const iconMap = {
   star: Star,
@@ -65,61 +66,62 @@ const DynamicEventPage = () => {
       <section className="relative py-20 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            {/* Content Side */}
-            <div className="lg:w-1/2 space-y-8">
+            <AnimatedSection animation="fade-in-up" delay={0.1} className="lg:w-1/2 space-y-8">
               <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 w-fit">
                 <Briefcase className="mr-2 h-4 w-4" />
                 {event.title}
               </Badge>
               
-               <div className="space-y-6">
-                 <h1 className="text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
-                   {event.title}
-                   {!event.hero_subtitle && <span className="block bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">Excellence</span>}
-                 </h1>
-                 
-                 {event.hero_subtitle && (
-                   <p className="text-2xl font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
-                     {event.hero_subtitle}
+               <AnimatedSection animation="fade-in-up" delay={0.3}>
+                 <div className="space-y-6">
+                   <h1 className="text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
+                     {event.title}
+                     {!event.hero_subtitle && <span className="block bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">Excellence</span>}
+                   </h1>
+                   
+                   {event.hero_subtitle && (
+                     <p className="text-2xl font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+                       {event.hero_subtitle}
+                     </p>
+                   )}
+                   
+                   <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                     {event.description}
                    </p>
-                 )}
-                 
-                 <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
-                   {event.description}
-                 </p>
-               </div>
+                 </div>
+               </AnimatedSection>
 
-               <Dialog>
-                 <DialogTrigger asChild>
-                   <Button size="lg" className="bg-primary text-primary-foreground px-8">
-                     {event.hero_cta_text || 'Book a Consultation'} <ArrowRight className="ml-2 h-5 w-5" />
-                   </Button>
-                 </DialogTrigger>
-                <DialogContent className="max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle>Book {event.title} Consultation</DialogTitle>
-                  </DialogHeader>
-                  <InquiryForm 
-                    formType="inquiry"
-                    eventType={event.event_type}
-                    title="Book Consultation"
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
+               <AnimatedSection animation="scale-in" delay={0.5}>
+                 <Dialog>
+                   <DialogTrigger asChild>
+                     <Button size="lg" className="bg-primary text-primary-foreground px-8">
+                       {event.hero_cta_text || 'Book a Consultation'} <ArrowRight className="ml-2 h-5 w-5" />
+                     </Button>
+                   </DialogTrigger>
+                 <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
+                   <div className="overflow-y-auto flex-1 p-4 sm:p-6">
+                     <InquiryForm 
+                       formType="inquiry"
+                       eventType={event.event_type}
+                       title="Book Consultation"
+                     />
+                   </div>
+                 </DialogContent>
+               </Dialog>
+               </AnimatedSection>
+            </AnimatedSection>
 
-            {/* Image Side */}
-            <div className="lg:w-1/2">
+            <AnimatedSection animation="slide-in-right" delay={0.4} className="lg:w-1/2">
               <div className="relative">
                 <img 
                   src={event.hero_image_url || "/placeholder-event.jpg"}
                   alt={event.title}
                   className="w-full h-[500px] object-cover rounded-2xl shadow-2xl"
                 />
-                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/20 rounded-full"></div>
-                <div className="absolute -top-6 -right-6 w-24 h-24 bg-accent/30 rounded-full"></div>
+                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/20 rounded-full animate-float"></div>
+                <div className="absolute -top-6 -right-6 w-24 h-24 bg-accent/30 rounded-full animate-float-delayed"></div>
               </div>
-            </div>
+            </AnimatedSection>
           </div>
         </div>
       </section>
@@ -283,16 +285,15 @@ const DynamicEventPage = () => {
                     Book a Consultation
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle>Book {event.title} Consultation</DialogTitle>
-                  </DialogHeader>
-                  <InquiryForm 
-                    formType="inquiry"
-                    eventType={event.event_type}
-                    title="Book Consultation"
-                  />
-                </DialogContent>
+                 <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
+                   <div className="overflow-y-auto flex-1 p-4 sm:p-6">
+                     <InquiryForm 
+                       formType="inquiry"
+                       eventType={event.event_type}
+                       title="Book Consultation"
+                     />
+                   </div>
+                 </DialogContent>
               </Dialog>
             </div>
           </div>

@@ -109,8 +109,8 @@ const Ecommerce = () => {
                           Enquire
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="w-[95vw] max-w-md sm:max-w-lg max-h-[95vh] overflow-hidden flex flex-col p-0">
-                        <div className="overflow-y-auto flex-1 max-h-[90vh]">
+                      <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
+                        <div className="overflow-y-auto flex-1 p-4 sm:p-6">
                           <InquiryForm 
                             formType="rental"
                             rentalId={selectedRental?.id}

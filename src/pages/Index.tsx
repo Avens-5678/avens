@@ -468,7 +468,11 @@ const Index = () => {
                         <Button 
                           variant="ghost" 
                           className="group/btn p-0 h-auto font-medium hover:text-primary"
-                          onClick={() => setSelectedPost(news)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('Button clicked, setting post:', news.title);
+                            setSelectedPost(news);
+                          }}
                         >
                           Read More 
                           <ArrowRight className="ml-1 h-3 w-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
@@ -546,8 +550,11 @@ const Index = () => {
           </div>
         </section>
       {/* Blog Post Modal */}
-      <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl">
+      <Dialog open={!!selectedPost} onOpenChange={(open) => {
+        console.log('Dialog open state changed:', open);
+        if (!open) setSelectedPost(null);
+      }}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl z-50">
           <DialogHeader>
             <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {selectedPost?.title}

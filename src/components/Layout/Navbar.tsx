@@ -51,7 +51,7 @@ const Navbar = () => {
               </Link>)}
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300 text-stone-500">
+                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300 text-slate-50">
                   Contact Us
                 </Button>
               </DialogTrigger>

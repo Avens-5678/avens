@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useNewsAchievements } from "@/hooks/useData";
-import { ArrowRight, Sparkles, Clock, Users, Award, CheckCircle, Star, Trophy, Heart, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Clock, Users, Award, CheckCircle, Star, Trophy, Heart, Calendar, MapPin, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import Autoplay from "embla-carousel-autoplay";
@@ -551,41 +551,69 @@ const Index = () => {
           </div>
         </div>
       </section>
-      {/* Blog Post Modal - Fixed */}
+      
+      {/* Blog Post Modal - REDESIGNED */}
       <Dialog open={selectedPost !== null} onOpenChange={(open) => {
-      if (!open) setSelectedPost(null);
-    }}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto glassmorphism-card p-0">
+        if (!open) setSelectedPost(null);
+      }}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glassmorphism-card p-0 grid grid-cols-1 md:grid-cols-2 gap-0">
           {selectedPost && (
             <>
-              {selectedPost.image_url && (
-                <div className="aspect-video overflow-hidden rounded-t-lg">
+              {/* Left Column: Image */}
+              <div className="relative md:col-span-1 h-64 md:h-full">
+                {selectedPost.image_url && (
                   <img
                     src={selectedPost.image_url}
                     alt={selectedPost.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
                   />
-                </div>
-              )}
-              <div className="p-6">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-foreground">
+                )}
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+              </div>
+
+              {/* Right Column: Content */}
+              <div className="md:col-span-1 flex flex-col p-6 md:p-8">
+                <DialogHeader className="mb-4">
+                  <DialogTitle className="text-3xl font-bold text-foreground mb-3">
                     {selectedPost.title}
                   </DialogTitle>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{new Date(selectedPost.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}</span>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span>{new Date(selectedPost.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    </div>
+                     <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span>{new Date(selectedPost.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span>{selectedPost.location || 'Virtual Event'}</span>
+                    </div>
                   </div>
                 </DialogHeader>
                 
-                <div className="mt-4 prose prose-invert max-w-none">
-                  <div className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
-                    {selectedPost.content}
-                  </div>
+                <div className="flex-grow overflow-y-auto pr-2 text-base leading-relaxed text-foreground whitespace-pre-wrap mb-6">
+                  {selectedPost.content}
+                </div>
+
+                <div className="mt-auto flex justify-between items-center pt-4 border-t border-white/10">
+                   <Button
+                    variant="ghost"
+                    className="group/btn p-0 h-auto font-medium text-primary hover:text-primary"
+                    onClick={() => navigator.clipboard.writeText(window.location.href)}
+                  >
+                    <Share2 className="mr-2 h-4 w-4"/>
+                    Share
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="glassmorphism-btn rounded-lg"
+                    onClick={() => setSelectedPost(null)}
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4"/>
+                    Back
+                  </Button>
                 </div>
               </div>
             </>

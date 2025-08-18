@@ -43,10 +43,10 @@ const Portfolio = () => {
             <Camera className="mr-2 h-4 w-4" />
             Our Work
           </Badge>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Event Portfolio
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto">
             Explore our collection of successful events and celebrations. Each project showcases our commitment to excellence and attention to detail.
           </p>
         </div>
@@ -87,10 +87,10 @@ const Portfolio = () => {
               <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
                 <Camera className="h-12 w-12 text-muted-foreground" />
               </div>
-              <h3 className="text-2xl font-semibold mb-4">
+              <h3 className="mb-4">
                 {activeFilter === "all" ? "Portfolio Coming Soon" : "No Events Found"}
               </h3>
-              <p className="text-xl text-muted-foreground max-w-md mx-auto">
+              <p className="text-lg lg:text-xl text-muted-foreground max-w-md mx-auto">
                 {activeFilter === "all" 
                   ? "We're currently building our portfolio gallery. Check back soon to see our amazing work!"
                   : "No events found for the selected category. Try selecting a different filter."
@@ -104,10 +104,10 @@ const Portfolio = () => {
       {/* Call to Action */}
       <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          <h2 className="mb-6">
             Ready to Create Your Own Success Story?
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg lg:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Let us help you plan and execute an unforgettable event that will be featured in our next portfolio showcase.
           </p>
           <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent">

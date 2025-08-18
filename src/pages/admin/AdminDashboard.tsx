@@ -76,95 +76,96 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
-      <header className="bg-background border-b border-border px-6 py-4">
+      <header className="bg-background border-b border-border px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <Logo className="scale-75" />
-            <div className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Admin Dashboard
+            <div className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="hidden sm:inline">Admin Dashboard</span>
+              <span className="sm:hidden">Admin</span>
             </div>
-            <Badge variant="secondary">Dashboard</Badge>
+            <Badge variant="secondary" className="hidden sm:inline-flex">Dashboard</Badge>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <Link
               to="/"
               className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Website
+              <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Back to Website</span>
+              <span className="sm:hidden">Back</span>
             </Link>
-            <div className="text-right">
+            <div className="text-right hidden md:block">
               <p className="text-sm font-medium">{currentAdminUser.full_name}</p>
               <p className="text-xs text-muted-foreground capitalize">{currentAdminUser.role}</p>
             </div>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
+            <Button variant="outline" onClick={handleLogout} size="sm">
+              <LogOut className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 sm:p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-12 h-auto p-1 gap-1 overflow-x-auto"
-                     style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
-            <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-12 h-auto p-1 gap-1 overflow-x-auto">
+            <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <BarChart3 className="h-3 w-3" />
-              <span>Overview</span>
+              <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="banners" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="banners" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Home className="h-3 w-3" />
-              <span>Banners</span>
+              <span className="hidden sm:inline">Banners</span>
             </TabsTrigger>
-            <TabsTrigger value="services" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="services" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Calendar className="h-3 w-3" />
-              <span>Services</span>
+              <span className="hidden sm:inline">Services</span>
             </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="events" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Calendar className="h-3 w-3" />
-              <span>Events</span>
+              <span className="hidden sm:inline">Events</span>
             </TabsTrigger>
-            <TabsTrigger value="rentals" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="rentals" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Calendar className="h-3 w-3" />
-              <span>Rentals</span>
+              <span className="hidden sm:inline">Rentals</span>
             </TabsTrigger>
-            <TabsTrigger value="portfolio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="portfolio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Image className="h-3 w-3" />
-              <span>Portfolio</span>
+              <span className="hidden sm:inline">Portfolio</span>
             </TabsTrigger>
-            <TabsTrigger value="clients" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="clients" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Users className="h-3 w-3" />
-              <span>Clients</span>
+              <span className="hidden sm:inline">Clients</span>
             </TabsTrigger>
-            <TabsTrigger value="testimonials" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="testimonials" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Star className="h-3 w-3" />
-              <span>Reviews</span>
+              <span className="hidden sm:inline">Reviews</span>
             </TabsTrigger>
-            <TabsTrigger value="forms" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="forms" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <MessageSquare className="h-3 w-3" />
-              <span>Forms</span>
+              <span className="hidden sm:inline">Forms</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="settings" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Award className="h-3 w-3" />
-              <span>Awards</span>
+              <span className="hidden sm:inline">Awards</span>
             </TabsTrigger>
-            <TabsTrigger value="audio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="audio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Volume2 className="h-3 w-3" />
-              <span>Audio</span>
+              <span className="hidden sm:inline">Audio</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[100px]">
+            <TabsTrigger value="profile" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <UserCircle className="h-3 w-3" />
-              <span>Profile</span>
+              <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <GoogleAnalyticsDashboard />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Events</CardTitle>
@@ -210,7 +211,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Quick Actions</CardTitle>

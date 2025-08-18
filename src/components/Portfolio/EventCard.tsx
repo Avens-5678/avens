@@ -13,9 +13,14 @@ interface EventCardProps {
 }
 
 const EventCard = ({ id, title, eventType, location, heroImage, description }: EventCardProps) => {
+  // Limit description to maintain card height consistency
+  const truncatedDescription = description.length > 120 
+    ? description.substring(0, 120) + "..." 
+    : description;
+
   return (
-    <Link to={`/gallery/${id}`} className="block group">
-      <Card className="overflow-hidden border-0 bg-card shadow-lg hover:shadow-elegant transition-all duration-500 group-hover:scale-[1.02]">
+    <Link to={`/gallery/${id}`} className="block group h-full">
+      <Card className="overflow-hidden border-0 bg-card shadow-lg hover:shadow-elegant transition-all duration-500 group-hover:scale-[1.02] h-full flex flex-col">
         <div className="relative aspect-[4/3] overflow-hidden">
           <img 
             src={heroImage} 
@@ -31,9 +36,9 @@ const EventCard = ({ id, title, eventType, location, heroImage, description }: E
           <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
         
-        <CardContent className="p-6 space-y-4">
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold line-clamp-2 group-hover:text-hover transition-colors duration-300">
+        <CardContent className="p-6 flex-1 flex flex-col justify-between">
+          <div className="space-y-2 mb-4">
+            <h3 className="font-bold line-clamp-2 group-hover:text-hover transition-colors duration-300">
               {title}
             </h3>
             
@@ -45,9 +50,16 @@ const EventCard = ({ id, title, eventType, location, heroImage, description }: E
             )}
           </div>
           
-          <p className="text-muted-foreground text-sm line-clamp-3">
-            {description}
-          </p>
+          <div className="mt-auto">
+            <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
+              {truncatedDescription}
+            </p>
+            <div className="pt-2 border-t border-border/50">
+              <span className="text-primary text-sm font-medium hover:underline transition-all duration-300">
+                View Gallery →
+              </span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </Link>

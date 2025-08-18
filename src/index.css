@@ -195,40 +195,25 @@
     letter-spacing: -0.015em;
   }
 
-  /* Enhanced typography with strong hierarchy */
+  /* Standardized Typography - 3 Hierarchy Levels for Desktop */
+  /* Main Heading - For page titles and primary content */
   h1 { 
-    @apply font-display text-5xl md:text-6xl lg:text-7xl font-bold;
-    line-height: 1.1;
-    letter-spacing: -0.045em;
-  }
-  
-  h2 { 
     @apply font-display text-3xl md:text-4xl lg:text-5xl font-bold;
-    line-height: 1.2;
-    letter-spacing: -0.035em;
-  }
-  
-  h3 { 
-    @apply font-display text-2xl md:text-3xl font-semibold;
-    line-height: 1.3;
+    line-height: 1.1;
     letter-spacing: -0.025em;
   }
   
-  h4 { 
-    @apply font-sans text-xl md:text-2xl font-semibold;
-    line-height: 1.4;
-    letter-spacing: -0.02em;
-  }
-  
-  h5 { 
-    @apply font-sans text-lg md:text-xl font-medium;
-    line-height: 1.5;
+  /* Sub Heading - For section titles and secondary content */
+  h2 { 
+    @apply font-display text-xl md:text-2xl lg:text-3xl font-semibold;
+    line-height: 1.2;
     letter-spacing: -0.015em;
   }
   
-  h6 { 
-    @apply font-sans text-base md:text-lg font-medium;
-    line-height: 1.5;
+  /* Sub-Sub Heading - For card titles and tertiary content */
+  h3, h4, h5, h6 { 
+    @apply font-body text-lg md:text-xl lg:text-2xl font-semibold;
+    line-height: 1.3;
     letter-spacing: -0.01em;
   }
 
@@ -571,17 +556,8 @@
     @apply px-4 lg:px-8 xl:px-12 max-w-screen-2xl;
   }
   
-  /* Desktop typography scaling */
+  /* Controlled desktop typography scaling */
   @screen lg {
-    h1, .text-4xl { @apply text-5xl; }
-    h2, .text-3xl { @apply text-4xl; }
-    h3, .text-2xl { @apply text-3xl; }
     .text-lg { @apply text-xl; }
-  }
-  
-  @screen xl {
-    h1, .text-5xl { @apply text-6xl; }
-    h2, .text-4xl { @apply text-5xl; }
-    h3, .text-3xl { @apply text-4xl; }
   }
 }

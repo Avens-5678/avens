@@ -63,12 +63,12 @@ const BirthdayParties = () => {
               </Badge>
               
               <div className="space-y-6">
-                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                <h1 className="leading-tight">
                   Celebrate Life's
                   <span className="block text-primary">Special Moments</span>
                 </h1>
                 
-                <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg">
                   {event?.description || "At Avens Events, we specialize in creating magical birthday celebrations that reflect personality and bring pure joy. From intimate gatherings to grand celebrations, we make every birthday unforgettable."}
                 </p>
               </div>
@@ -111,7 +111,7 @@ const BirthdayParties = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto space-y-6">
-            <h2 className="text-4xl font-bold">What We Do</h2>
+            <h2>What We Do</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               At Avens Events, we create personalized birthday experiences that capture the magic of your special day. From themed decorations to entertainment coordination, 
               we handle every detail to ensure your celebration is truly memorable.
@@ -121,7 +121,7 @@ const BirthdayParties = () => {
           {/* Event Specialties */}
           <div className="mt-16">
             <div className="text-center mb-12">
-              <h3 className="text-2xl font-semibold mb-2">Our Birthday Party Specialties</h3>
+              <h3 className="mb-2">Our Birthday Party Specialties</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -135,7 +135,7 @@ const BirthdayParties = () => {
                     />
                   </div>
                   <CardContent className="p-6 text-center bg-background">
-                    <h4 className="text-xl font-semibold mb-3">{specialty.title}</h4>
+                    <h4 className="mb-3">{specialty.title}</h4>
                     <p className="text-muted-foreground text-sm">{specialty.description}</p>
                   </CardContent>
                 </Card>
@@ -153,7 +153,7 @@ const BirthdayParties = () => {
             <div className="lg:w-1/3">
               <div className="relative">
                 <div className="transform -rotate-12 origin-left">
-                  <h2 className="text-4xl lg:text-5xl font-bold text-primary leading-tight">
+                  <h2 className="text-primary leading-tight">
                     Party
                     <br />
                     Services
@@ -211,7 +211,7 @@ const BirthdayParties = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-6">Our Process</h2>
+            <h2 className="mb-6">Our Process</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -219,7 +219,7 @@ const BirthdayParties = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-6">
                 <PartyPopper className="h-8 w-8 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold">Step 1: Dream Discovery</h3>
+              <h3>Step 1: Dream Discovery</h3>
               <p className="text-muted-foreground leading-relaxed">
                 We learn about the birthday person's interests, favorite colors, themes, and dream celebration to create the perfect personalized experience.
               </p>
@@ -229,7 +229,7 @@ const BirthdayParties = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-6">
                 <Star className="h-8 w-8 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold">Step 2: Creative Planning</h3>
+              <h3>Step 2: Creative Planning</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Our team designs a custom celebration plan, sourcing decorations, entertainment, and all the special touches that will make the day magical.
               </p>
@@ -239,7 +239,7 @@ const BirthdayParties = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-6">
                 <Music className="h-8 w-8 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold">Step 3: Party Time!</h3>
+              <h3>Step 3: Party Time!</h3>
               <p className="text-muted-foreground leading-relaxed">
                 On the big day, we handle setup, coordination, and cleanup so you can focus on celebrating and creating precious memories.
               </p>
@@ -253,10 +253,10 @@ const BirthdayParties = () => {
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="mb-4">
                 Birthday Party Gallery
               </h2>
-              <p className="text-xl text-muted-foreground">
+              <p className="text-lg lg:text-xl text-muted-foreground">
                 See the joy and magic we've created for birthday celebrations
               </p>
             </div>
@@ -298,7 +298,7 @@ const BirthdayParties = () => {
       <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto space-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+            <h2 className="leading-tight">
               Ready to Create
               <span className="block text-primary">Birthday Magic?</span>
             </h2>

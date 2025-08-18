@@ -40,14 +40,14 @@ const Blog = () => {
             </AnimatedText>
             
             <AnimatedText variant="fade-in-up" delay={200}>
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
+              <h1 className="mb-8 leading-tight">
                 Latest <GradientText>News</GradientText> &<br />
                 <GradientText variant="secondary">Achievements</GradientText>
               </h1>
             </AnimatedText>
             
             <AnimatedText variant="fade-in-up" delay={400}>
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              <p className="text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                 Stay updated with our latest milestones, industry insights, and behind-the-scenes stories from the world of luxury event planning.
               </p>
             </AnimatedText>
@@ -113,7 +113,7 @@ const Blog = () => {
                 <div className="w-20 h-20 mx-auto mb-6 bg-primary/10 rounded-full flex items-center justify-center">
                   <Calendar className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">No Posts Yet</h3>
+                <h3 className="mb-4">No Posts Yet</h3>
                 <p className="text-muted-foreground">
                   We're working on exciting content. Check back soon for our latest updates and achievements!
                 </p>

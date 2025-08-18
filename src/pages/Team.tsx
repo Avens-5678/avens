@@ -79,7 +79,7 @@ const Team = () => {
             {teamMembers?.map((member, index) => (
               <AnimatedText key={member.id} variant="fade-in-up" delay={600 + index * 100}>
                 <Card 
-                  className="glassmorphism-card relative overflow-hidden transition-all duration-500 cursor-pointer group hover:-translate-y-2 border border-white/10 hover:border-primary/50 [transform-style:preserve-3d] hover:[transform:rotateY(var(--rotate-y,0))_rotateX(var(--rotate-x,0))]"
+                  className="glassmorphism-card relative overflow-hidden transition-all duration-500 cursor-pointer group hover:-translate-y-2 border border-white/10 hover:border-primary/50 [transform-style:preserve-3d] hover:[transform:rotateY(var(--rotate-y,0))_rotateX(var(--rotate-x,0))] hover:shadow-2xl hover:shadow-primary/20"
                   onClick={() => setSelectedMember(member)}
                   onMouseMove={(e) => {
                     const card = e.currentTarget;
@@ -90,6 +90,8 @@ const Team = () => {
                     const rotateY = 10 * ((x - width / 2) / width);
                     card.style.setProperty('--rotate-x', `${rotateX}deg`);
                     card.style.setProperty('--rotate-y', `${rotateY}deg`);
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
                   }}
                   onMouseLeave={(e) => {
                     const card = e.currentTarget;
@@ -97,13 +99,17 @@ const Team = () => {
                     card.style.setProperty('--rotate-y', '0deg');
                   }}
                 >
-                  {/* Shine Effect */}
-                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-500" />
-                  <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                  {/* Spotlight Effect */}
+                   <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `radial-gradient(350px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(148, 163, 184, 0.15), transparent 80%)`,
+                    }}
+                  />
 
                   <CardContent className="p-8 text-center [transform:translateZ(40px)]">
                     {/* Profile Image with Gradient Border */}
-                    <div className="relative w-32 h-32 mx-auto mb-6">
+                    <div className="relative w-32 h-32 mx-auto mb-6 [transform:translateZ(20px)]">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full p-1 group-hover:scale-105 transition-transform duration-300">
                         <Avatar className="w-full h-full bg-background">
                           <AvatarImage src={member.photo_url} alt={member.name} className="object-cover" />
@@ -115,15 +121,15 @@ const Team = () => {
                     </div>
                     
                     {/* Member Info */}
-                    <h3 className="text-2xl font-bold mb-2">
+                    <h3 className="text-2xl font-bold mb-2 [transform:translateZ(15px)]">
                       <GradientText>{member.name}</GradientText>
                     </h3>
                     
-                    <Badge variant="outline" className="mb-4 px-4 py-1">
+                    <Badge variant="outline" className="mb-4 px-4 py-1 [transform:translateZ(10px)]">
                       {member.role}
                     </Badge>
                     
-                    <p className="text-muted-foreground leading-relaxed min-h-[100px]">
+                    <p className="text-muted-foreground leading-relaxed min-h-[100px] transition-opacity duration-300 group-hover:opacity-60">
                       {member.short_bio}
                     </p>
 

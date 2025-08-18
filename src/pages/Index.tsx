@@ -556,7 +556,7 @@ const Index = () => {
       <Dialog open={selectedPost !== null} onOpenChange={(open) => {
         if (!open) setSelectedPost(null);
       }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glassmorphism-card p-0 grid grid-cols-1 md:grid-cols-2 gap-0">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 grid grid-cols-1 md:grid-cols-2 gap-0 rounded-2xl border border-white/10 bg-gradient-to-br from-primary/10 via-background/50 to-secondary/10 backdrop-blur-xl">
           {selectedPost && (
             <>
               {/* Left Column: Image */}
@@ -565,7 +565,7 @@ const Index = () => {
                   <img
                     src={selectedPost.image_url}
                     alt={selectedPost.title}
-                    className="w-full h-full object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+                    className="w-full h-full object-cover rounded-t-lg md:rounded-l-2xl md:rounded-t-none"
                   />
                 )}
                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>

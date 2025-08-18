@@ -114,7 +114,7 @@ const Index = () => {
         </div>
 
         {/* Stats Section */}
-        <section className="py-12 relative overflow-hidden">
+        <section className="relative overflow-hidden py-[40px]">
           <div className="container mx-auto px-4 relative z-10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
               <AnimatedText delay={200} className="text-center group">
@@ -158,7 +158,7 @@ const Index = () => {
         </section>
 
         {/* Services Section */}
-        <section className="py-16 relative overflow-hidden">
+        <section className="relative overflow-hidden py-0">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-12">
               <AnimatedText>
@@ -206,7 +206,7 @@ const Index = () => {
         </section>
 
         {/* Rentals Section */}
-        <section className="py-16 relative">
+        <section className="relative py-0">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-12">
               <AnimatedText>
@@ -277,7 +277,7 @@ const Index = () => {
         </section>
 
         {/* Trusted Clients */}
-        {trustedClients && trustedClients.length > 0 && <section className="py-16 relative overflow-hidden">
+        {trustedClients && trustedClients.length > 0 && <section className="relative overflow-hidden py-0">
             <div className="container mx-auto px-4 relative z-10">
               <div className="text-center mb-12">
                 <AnimatedText>
@@ -306,7 +306,7 @@ const Index = () => {
           </section>}
 
         {/* News & Achievements */}
-        {newsAchievements && newsAchievements.length > 0 && <section className="py-16 relative overflow-hidden">
+        {newsAchievements && newsAchievements.length > 0 && <section className="relative overflow-hidden py-0">
             <div className="container mx-auto px-4 relative z-10">
               <div className="text-center mb-12">
                 <AnimatedText>

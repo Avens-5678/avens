@@ -149,6 +149,48 @@ export type Database = {
         }
         Relationships: []
       }
+      client_testimonials: {
+        Row: {
+          client_name: string
+          company: string | null
+          created_at: string
+          display_order: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          position: string | null
+          rating: number
+          testimonial: string
+          updated_at: string
+        }
+        Insert: {
+          client_name: string
+          company?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          position?: string | null
+          rating: number
+          testimonial: string
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          company?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          position?: string | null
+          rating?: number
+          testimonial?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string

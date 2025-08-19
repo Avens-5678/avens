@@ -727,6 +727,10 @@ export type Database = {
         Args: { user_email: string }
         Returns: boolean
       }
+      is_admin_or_initial_setup: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_admin_secure: {
         Args: Record<PropertyKey, never>
         Returns: boolean

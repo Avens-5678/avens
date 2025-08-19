@@ -74,8 +74,43 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       // Use eventFormData if provided (from EnhancedEventForm), otherwise use formData state
       const dataToSave = eventFormData || formData;
       
-      // Clean the data to avoid circular structure issues
-      const cleanData = JSON.parse(JSON.stringify(dataToSave));
+      // Clean the data to avoid circular structure issues by only keeping serializable fields
+      const cleanData: Record<string, any> = {};
+      
+      // Copy only the fields that are defined in the fields configuration
+      for (const field of fields) {
+        if (dataToSave.hasOwnProperty(field.name)) {
+          const value = dataToSave[field.name];
+          // Only copy primitive values and avoid DOM elements or React objects
+          if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || value === undefined) {
+            cleanData[field.name] = value;
+          } else if (Array.isArray(value)) {
+            // Handle arrays by keeping only primitive values
+            cleanData[field.name] = value.filter(v => typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean');
+          } else if (typeof value === 'object' && value !== null && value.constructor === Object) {
+            // Handle plain objects (not DOM elements or React components)
+            try {
+              cleanData[field.name] = JSON.parse(JSON.stringify(value));
+            } catch {
+              // Skip if can't serialize
+              console.warn(`Skipping field ${field.name} due to serialization issues`);
+            }
+          }
+        }
+      }
+      
+      // For events, also copy additional fields that might not be in the fields config
+      if (tableName === 'events' && eventFormData) {
+        const eventFields = ['id', 'created_at', 'updated_at', 'url_slug', 'meta_description', 'hero_cta_text', 'hero_subtitle', 'what_we_do_title', 'services_section_title', 'default_portfolio_tags'];
+        for (const field of eventFields) {
+          if (eventFormData.hasOwnProperty(field) && cleanData[field] === undefined) {
+            const value = eventFormData[field];
+            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || Array.isArray(value)) {
+              cleanData[field] = value;
+            }
+          }
+        }
+      }
       
       // Ensure event_type is not empty for events table
       if (tableName === 'events' && (!cleanData.event_type || cleanData.event_type === '')) {

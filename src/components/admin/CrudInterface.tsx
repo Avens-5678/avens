@@ -162,6 +162,68 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       
       console.log('=== DATA TO SAVE ===', dataToSave);
       
+      // Check for and handle any File objects that need to be uploaded
+      const uploadPromises: Promise<void>[] = [];
+      
+      for (const [key, value] of Object.entries(dataToSave)) {
+        if (value instanceof File) {
+          console.log(`Found File object for field ${key}, uploading...`);
+          const uploadPromise = (async () => {
+            try {
+              let imageUrl;
+              if (key === 'hero_image_url' && tableName === 'events') {
+                imageUrl = await uploadEventHeroImage(value, dataToSave.event_type || 'default');
+              } else if (key === 'image_url' && tableName === 'hero_banners') {
+                imageUrl = await uploadBannerImage(value);
+              } else if (key === 'logo_url' && tableName === 'trusted_clients') {
+                imageUrl = await uploadClientLogo(value);
+              } else {
+                // Handle other image uploads
+                const fileExt = value.name.split('.').pop();
+                const fileName = `${Date.now()}.${fileExt}`;
+                
+                let bucket = 'portfolio-images'; // default
+                if (tableName === 'services') {
+                  bucket = 'specialty-images';
+                }
+                
+                const { data, error } = await supabase.storage
+                  .from(bucket)
+                  .upload(fileName, value);
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                  .from(bucket)
+                  .getPublicUrl(data.path);
+
+                imageUrl = publicUrl;
+              }
+              
+              if (imageUrl) {
+                dataToSave[key] = imageUrl;
+                console.log(`File uploaded successfully for ${key}:`, imageUrl);
+              }
+            } catch (uploadError) {
+              console.error(`Error uploading file for ${key}:`, uploadError);
+              throw new Error(`Failed to upload ${key}: ${uploadError.message}`);
+            }
+          })();
+          
+          uploadPromises.push(uploadPromise);
+        } else if (typeof value === 'string' && value.startsWith('C:\\fakepath\\')) {
+          // Prevent saving with fake paths - this indicates a failed upload
+          throw new Error(`Invalid file path detected for ${key}. Please re-upload the file.`);
+        }
+      }
+      
+      // Wait for all uploads to complete
+      if (uploadPromises.length > 0) {
+        console.log(`Waiting for ${uploadPromises.length} file uploads to complete...`);
+        await Promise.all(uploadPromises);
+        console.log('All file uploads completed successfully');
+      }
+      
       // Validate required fields
       const missingFields = validateFormData(dataToSave, fields, editingItem);
       
@@ -235,7 +297,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       console.error('Error saving:', error);
       toast({
         title: "Error",
-        description: "Failed to save. Please try again.",
+        description: error.message || "Failed to save. Please try again.",
         variant: "destructive",
       });
     }
@@ -459,14 +521,23 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  handleFileUpload(file, field.name);
+                  // Store the File object directly in formData for processing during save
+                  updateFormField(field.name, file);
                 }
               }}
               disabled={uploading}
             />
             {value && (
               <div className="text-sm text-muted-foreground">
-                Current: {typeof value === 'string' ? value.split('/').pop() : 'File uploaded'}
+                {value instanceof File ? (
+                  <span>Selected: {value.name}</span>
+                ) : typeof value === 'string' && value.startsWith('C:\\fakepath\\') ? (
+                  <span className="text-destructive">Invalid file path - please re-select file</span>
+                ) : typeof value === 'string' ? (
+                  <span>Current: {value.split('/').pop()}</span>
+                ) : (
+                  <span>File selected</span>
+                )}
               </div>
             )}
             {uploading && (

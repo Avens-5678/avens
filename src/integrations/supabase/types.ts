@@ -579,6 +579,7 @@ export type Database = {
           display_order: number | null
           event_type: string
           id: string
+          image_url: string | null
           is_active: boolean | null
           short_description: string
           show_on_home: boolean | null
@@ -591,6 +592,7 @@ export type Database = {
           display_order?: number | null
           event_type: string
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           short_description: string
           show_on_home?: boolean | null
@@ -603,6 +605,7 @@ export type Database = {
           display_order?: number | null
           event_type?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           short_description?: string
           show_on_home?: boolean | null

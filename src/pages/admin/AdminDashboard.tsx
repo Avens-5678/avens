@@ -301,6 +301,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 { name: "title", label: "Title", type: "text", required: true },
                 { name: "short_description", label: "Short Description", type: "text", required: true },
                 { name: "description", label: "Description", type: "textarea", required: true },
+                { name: "image_url", label: "Service Image", type: "file" },
                 { 
                   name: "event_type", 
                   label: "Event Type", 

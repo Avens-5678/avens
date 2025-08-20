@@ -306,6 +306,17 @@ const Index = () => {
                 <AnimatedText key={service.id} delay={600 + index * 100}>
                   <Card className="group hover:shadow-xl transition-all duration-500 border-0 glassmorphism-card hover:-translate-y-2 rounded-2xl overflow-hidden relative">
                     <div className="h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
+                    
+                    {service.image_url ? (
+                      <div className="h-48 bg-cover bg-center" style={{ backgroundImage: `url(${service.image_url})` }}>
+                        <div className="h-full bg-gradient-to-t from-black/50 to-transparent"></div>
+                      </div>
+                    ) : (
+                      <div className="h-12 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                        <Sparkles className="h-6 w-6 text-primary/60" />
+                      </div>
+                    )}
+
                     <CardHeader className="pb-3">
                       <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors flex items-center">
                         <Sparkles className="mr-2 h-5 w-5 text-primary" />

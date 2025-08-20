@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import CrudInterface from "@/components/admin/CrudInterface";
 import AdminDataTable from "@/components/admin/AdminDataTable";
-import { useAllServices, useAllRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions, useNewsAchievements, useAwards } from "@/hooks/useData";
+import { useAllServices, useAllRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions, useAllNewsAchievements, useAllAwards, useAllFAQ } from "@/hooks/useData";
 import { useEventTypes } from "@/hooks/useEventTypes";
 import { 
   LogOut, 
@@ -22,7 +22,8 @@ import {
   Volume2,
   UserCircle,
   ArrowLeft,
-  Star
+  Star,
+  HelpCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -32,6 +33,7 @@ import AudioManager from "@/components/admin/AudioManager";
 import ProfileManager from "@/components/admin/ProfileManager";
 import TestimonialManager from "@/components/admin/TestimonialManager";
 import EnhancedRentalManager from "@/components/admin/EnhancedRentalManager";
+import FAQManager from "@/components/admin/FAQManager";
 import Logo from "@/components/ui/logo";
 
 interface AdminDashboardProps {
@@ -52,8 +54,9 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const { data: portfolio } = usePortfolio();
   const { data: clients } = useTrustedClients();
   const { data: formSubmissions } = useFormSubmissions();
-  const { data: newsAchievements = [] } = useNewsAchievements();
-  const { data: awards = [] } = useAwards();
+  const { data: newsAchievements = [] } = useAllNewsAchievements();
+  const { data: awards = [] } = useAllAwards();
+  const { data: faqs = [] } = useAllFAQ();
   const { eventTypes } = useEventTypes();
 
   const handleLogout = async () => {
@@ -112,7 +115,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto p-4 sm:p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-12 h-auto p-1 gap-1 overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-13 h-auto p-1 gap-1 overflow-x-auto">
             <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <BarChart3 className="h-3 w-3" />
               <span className="hidden sm:inline">Overview</span>
@@ -148,6 +151,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <TabsTrigger value="forms" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <MessageSquare className="h-3 w-3" />
               <span className="hidden sm:inline">Forms</span>
+            </TabsTrigger>
+            <TabsTrigger value="faq" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <HelpCircle className="h-3 w-3" />
+              <span className="hidden sm:inline">FAQ</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Award className="h-3 w-3" />
@@ -416,6 +423,11 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 defaultValues={{ is_active: true, display_order: 0 }}
               />
             </div>
+          </TabsContent>
+
+          {/* FAQ Management */}
+          <TabsContent value="faq">
+            <FAQManager />
           </TabsContent>
 
           {/* Audio Management */}

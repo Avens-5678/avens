@@ -268,3 +268,64 @@ export const useAllRentals = () => {
     },
   });
 };
+
+export const useAllNewsAchievements = () => {
+  return useQuery({
+    queryKey: ["all-news-achievements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("news_achievements")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+export const useAllAwards = () => {
+  return useQuery({
+    queryKey: ["all-awards"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("awards")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+export const useAllFAQ = () => {
+  return useQuery({
+    queryKey: ["all-faq"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("faq")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+export const useActiveFAQ = () => {
+  return useQuery({
+    queryKey: ["active-faq"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("faq")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};

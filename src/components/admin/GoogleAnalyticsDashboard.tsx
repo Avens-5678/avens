@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 
 const GoogleAnalyticsDashboard = () => {
+  // Google Analytics Measurement ID: G-5RKKBP5M5S
+  // This ID should be configured in your website's tracking code
+  
   const [analyticsData, setAnalyticsData] = useState({
     totalUsers: 0,
     pageViews: 0,
@@ -111,6 +114,7 @@ const GoogleAnalyticsDashboard = () => {
 
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-xs text-muted-foreground">
+                <strong>Your Google Analytics ID:</strong> G-5RKKBP5M5S<br/>
                 <strong>Note:</strong> Once configured, this dashboard will display real-time analytics data including 
                 page views, user sessions, bounce rates, and traffic sources.
               </p>

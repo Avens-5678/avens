@@ -29,6 +29,9 @@ const GoogleAnalyticsDashboard = () => {
 
   // Mock data for demonstration - in a real implementation, you'd fetch this from Google Analytics API
   useEffect(() => {
+    // Check if Google Analytics is configured by detecting gtag function
+    const isGAConfigured = typeof window !== 'undefined' && typeof (window as any).gtag === 'function';
+    
     // Simulate analytics data
     const mockData = {
       totalUsers: 1245,
@@ -43,7 +46,7 @@ const GoogleAnalyticsDashboard = () => {
         { page: '/about', views: 321, title: 'About' },
         { page: '/events/wedding', views: 298, title: 'Wedding Events' }
       ],
-      isConfigured: false // Set to false to show setup instructions
+      isConfigured: isGAConfigured // Automatically detect GA configuration
     };
 
     setAnalyticsData(mockData);

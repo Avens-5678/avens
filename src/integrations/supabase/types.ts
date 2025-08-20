@@ -260,6 +260,39 @@ export type Database = {
         }
         Relationships: []
       }
+      faq: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       form_submissions: {
         Row: {
           created_at: string
@@ -267,6 +300,7 @@ export type Database = {
           event_type: string | null
           form_type: string
           id: string
+          location: string | null
           message: string
           name: string
           phone: string | null
@@ -281,6 +315,7 @@ export type Database = {
           event_type?: string | null
           form_type: string
           id?: string
+          location?: string | null
           message: string
           name: string
           phone?: string | null
@@ -295,6 +330,7 @@ export type Database = {
           event_type?: string | null
           form_type?: string
           id?: string
+          location?: string | null
           message?: string
           name?: string
           phone?: string | null
@@ -478,6 +514,7 @@ export type Database = {
       }
       rentals: {
         Row: {
+          categories: string[] | null
           created_at: string
           description: string
           display_order: number | null
@@ -485,12 +522,17 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           price_range: string | null
+          quantity: number | null
+          rating: number | null
+          search_keywords: string | null
           short_description: string
           show_on_home: boolean | null
+          size_options: string[] | null
           title: string
           updated_at: string
         }
         Insert: {
+          categories?: string[] | null
           created_at?: string
           description: string
           display_order?: number | null
@@ -498,12 +540,17 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           price_range?: string | null
+          quantity?: number | null
+          rating?: number | null
+          search_keywords?: string | null
           short_description: string
           show_on_home?: boolean | null
+          size_options?: string[] | null
           title: string
           updated_at?: string
         }
         Update: {
+          categories?: string[] | null
           created_at?: string
           description?: string
           display_order?: number | null
@@ -511,8 +558,12 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           price_range?: string | null
+          quantity?: number | null
+          rating?: number | null
+          search_keywords?: string | null
           short_description?: string
           show_on_home?: boolean | null
+          size_options?: string[] | null
           title?: string
           updated_at?: string
         }

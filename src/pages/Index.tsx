@@ -181,7 +181,7 @@ const Index = () => {
       {/* Hero Section with Carousel */}
       <div className="relative">
         {heroBanners && heroBanners.length > 0 ? <Carousel className="w-full h-screen relative" plugins={[Autoplay({
-        delay: 15000
+        delay: 5000
       })]} opts={{
         align: "start",
         loop: true
@@ -213,6 +213,22 @@ const Index = () => {
           {/* Persistent carousel navigation */}
           <CarouselPrevious className="hero-arrow left-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 hidden md:flex" />
           <CarouselNext className="hero-arrow right-4 bg-white/5 hover:bg-white/10 border-white/10 text-white backdrop-blur-md transition-all duration-300 hidden md:flex" />
+          
+          {/* Carousel dots navigation */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+            <div className="flex items-center justify-center space-x-2">
+              {heroBanners.map((_, index) => (
+                <button
+                  key={index}
+                  className="w-3 h-3 rounded-full transition-all duration-300 border border-white/30 bg-white/30 hover:bg-white/70 hover:scale-110"
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+              <div className="ml-3 text-white/80 text-sm font-medium backdrop-blur-sm bg-white/10 px-3 py-1 rounded-full">
+                1 / {heroBanners.length}
+              </div>
+            </div>
+          </div>
         </Carousel> : <div className="h-screen flex items-center justify-center text-center max-w-4xl mx-auto px-4">
           <div>
             <AnimatedText variant="fade-in-up" className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">

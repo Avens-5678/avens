@@ -159,7 +159,7 @@ const Index = () => {
   const {
     data: newsAchievements,
     isLoading: loadingNews
-  } = useNewsAchievements();
+  } = useNewsAchievements(true); // Only show news achievements marked to show on home
   const [selectedRental, setSelectedRental] = useState < string | null > (null);
 
   if (loadingBanners || loadingServices || loadingRentals || loadingClients || loadingNews) {

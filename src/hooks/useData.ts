@@ -83,14 +83,20 @@ export const useTrustedClients = () => {
   });
 };
 
-export const useNewsAchievements = () => {
+export const useNewsAchievements = (showOnHomeOnly = false) => {
   return useQuery({
-    queryKey: ["news-achievements"],
+    queryKey: ["news-achievements", showOnHomeOnly],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("news_achievements")
         .select("*")
-        .eq("is_active", true)
+        .eq("is_active", true);
+      
+      if (showOnHomeOnly) {
+        query = query.eq("show_on_home", true);
+      }
+      
+      const { data, error } = await query
         .order("display_order", { ascending: true })
         .limit(4);
 

@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Save, X, ExternalLink, ImageIcon, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { uploadPortfolioImage, uploadBulkPortfolioImages } from "@/utils/storageUtils";
+import { uploadPortfolioImage, uploadBulkPortfolioImages, cleanupPortfolioFiles } from '@/utils/storageUtils';
 
 interface EnhancedPortfolioManagerProps {
   portfolio: any[];
@@ -186,9 +186,22 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this portfolio item?')) return;
+    if (!confirm('Are you sure you want to delete this portfolio item? This will also delete all associated images from storage.')) return;
     
     try {
+      // First, get the portfolio item to clean up its files
+      const { data: portfolioItem } = await supabase
+        .from('portfolio')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (portfolioItem) {
+        // Clean up storage files
+        await cleanupPortfolioFiles(portfolioItem);
+      }
+
+      // Then delete the database record
       const { error } = await supabase
         .from('portfolio')
         .delete()
@@ -198,7 +211,7 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
       
       toast({
         title: "Success",
-        description: "Portfolio item deleted successfully",
+        description: "Portfolio item and associated files deleted successfully",
       });
       
       // Refresh data

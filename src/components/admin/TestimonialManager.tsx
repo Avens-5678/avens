@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Star, Plus, Edit, Trash2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { cleanupRecordFiles } from "@/utils/storageUtils";
 
 interface TestimonialFormData {
   client_name: string;
@@ -110,9 +111,22 @@ const TestimonialManager = () => {
   };
 
   const handleDelete = async (testimonial: any) => {
-    if (!confirm("Are you sure you want to delete this testimonial?")) return;
+    if (!confirm("Are you sure you want to delete this testimonial? This will also delete the associated image from storage.")) return;
 
     try {
+      // Clean up storage files first
+      if (testimonial.image_url) {
+        try {
+          const results = await cleanupRecordFiles(testimonial, ['image_url']);
+          if (results.success.length > 0) {
+            console.log(`Successfully deleted image for testimonial ${testimonial.id}`);
+          }
+        } catch (error) {
+          console.error(`Failed to delete image for testimonial ${testimonial.id}:`, error);
+          // Continue with database deletion even if file cleanup fails
+        }
+      }
+
       const { error } = await supabase
         .from("client_testimonials")
         .delete()
@@ -122,7 +136,7 @@ const TestimonialManager = () => {
 
       toast({
         title: "Success",
-        description: "Testimonial deleted successfully",
+        description: "Testimonial and associated files deleted successfully",
       });
 
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });

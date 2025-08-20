@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { createEventPage, deleteEventPage } from "@/utils/eventPageUtils";
-import { uploadEventHeroImage, uploadBannerImage, uploadClientLogo } from "@/utils/storageUtils";
+import { uploadSpecialtyImage, uploadPortfolioImage, uploadEventHeroImage, uploadBannerImage, uploadClientLogo, cleanupRecordFiles, cleanupEventFiles } from '@/utils/storageUtils';
 import { EnhancedEventForm } from "./EnhancedEventForm";
 
 interface Field {
@@ -315,11 +315,14 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   };
 
   const handleDelete = async (item: any) => {
-    if (!confirm('Are you sure you want to delete this item?')) {
+    if (!confirm('Are you sure you want to delete this item? This will also delete all associated files from storage.')) {
       return;
     }
     
     try {
+      // Clean up storage files before deleting the record
+      await cleanupStorageFiles(item);
+
       // If this is an event, delete the event page first
       if (tableName === 'events') {
         try {
@@ -348,7 +351,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       
       toast({
         title: "Deleted",
-        description: `${title.slice(0, -1)} and associated pages deleted successfully.`,
+        description: `${title.slice(0, -1)}, associated files, and pages deleted successfully.`,
       });
     } catch (error) {
       console.error('Error deleting:', error);
@@ -455,6 +458,45 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       ...prev,
       [fieldName]: value
     }));
+  };
+
+  // Clean up storage files for a record
+  const cleanupStorageFiles = async (item: any) => {
+    try {
+      // Define image fields for different table types
+      const imageFieldsMap: Record<string, string[]> = {
+        events: ['hero_image_url'],
+        services: ['image_url'],
+        hero_banners: ['image_url'],
+        trusted_clients: ['logo_url'],
+        client_testimonials: ['image_url'],
+        team_members: ['photo_url'],
+        awards: ['logo_url'],
+        news_achievements: ['image_url'],
+        rentals: ['image_url'],
+      };
+
+      // Special handling for events - clean up all associated files
+      if (tableName === 'events') {
+        await cleanupEventFiles(item.id);
+        return;
+      }
+
+      // For other tables, clean up their specific image fields
+      const imageFields = imageFieldsMap[tableName] || [];
+      if (imageFields.length > 0) {
+        const results = await cleanupRecordFiles(item, imageFields);
+        if (results.failed.length > 0) {
+          console.warn(`Failed to delete ${results.failed.length} files for ${tableName} item ${item.id}`);
+        }
+        if (results.success.length > 0) {
+          console.log(`Successfully deleted ${results.success.length} files for ${tableName} item ${item.id}`);
+        }
+      }
+    } catch (error) {
+      console.error(`Error cleaning up storage files for ${tableName} item ${item.id}:`, error);
+      // Don't throw - we still want to delete the database record even if file cleanup fails
+    }
   };
 
   // Remove image function with storage deletion

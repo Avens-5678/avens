@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Save, X, Upload, ImageIcon, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { cleanupRecordFiles } from "@/utils/storageUtils";
 
 interface EnhancedRentalManagerProps {
   rentals: any[];
@@ -156,9 +157,30 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this rental item?')) return;
+    if (!confirm('Are you sure you want to delete this rental item? This will also delete the associated image from storage.')) return;
     
     try {
+      // First, get the rental item to clean up its files
+      const { data: rentalItem } = await supabase
+        .from('rentals')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (rentalItem && rentalItem.image_url) {
+        // Clean up storage files
+        try {
+          const results = await cleanupRecordFiles(rentalItem, ['image_url']);
+          if (results.success.length > 0) {
+            console.log(`Successfully deleted image for rental ${id}`);
+          }
+        } catch (error) {
+          console.error(`Failed to delete image for rental ${id}:`, error);
+          // Continue with database deletion even if file cleanup fails
+        }
+      }
+
+      // Then delete the database record
       const { error } = await supabase
         .from('rentals')
         .delete()
@@ -168,7 +190,7 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
       
       toast({
         title: "Success",
-        description: "Rental item deleted successfully",
+        description: "Rental item and associated files deleted successfully",
       });
       
       // Refresh data

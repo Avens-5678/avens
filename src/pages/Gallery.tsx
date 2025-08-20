@@ -34,6 +34,16 @@ const Gallery = () => {
   const portfolioImages = portfolioItem && !portfolioItem.is_before_after ? [portfolioItem] : [];
   const beforeAfterImages = portfolioItem && portfolioItem.is_before_after ? [portfolioItem] : [];
   
+  // Debug logging for before/after functionality
+  console.log('Gallery Debug:', {
+    portfolioItemId: portfolioItem?.id,
+    isBeforeAfter: portfolioItem?.is_before_after,
+    beforeImageUrl: (portfolioItem as any)?.before_image_url,
+    afterImageUrl: (portfolioItem as any)?.after_image_url,
+    beforeAfterImagesLength: beforeAfterImages.length,
+    shouldShowSlider: beforeAfterImages.length > 0 && (portfolioItem as any)?.before_image_url && (portfolioItem as any)?.after_image_url
+  });
+  
   // Get all images including bulk uploaded ones
   const getAllImages = () => {
     const images: any[] = [];

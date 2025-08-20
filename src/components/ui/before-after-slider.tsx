@@ -19,7 +19,15 @@ export const BeforeAfterSlider = ({
 }: BeforeAfterSliderProps) => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [imageErrors, setImageErrors] = useState({ before: false, after: false });
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Debug logging
+  console.log('BeforeAfterSlider Debug:', {
+    beforeImage,
+    afterImage,
+    imageErrors
+  });
 
   const handleMouseDown = useCallback(() => {
     setIsDragging(true);
@@ -65,6 +73,11 @@ export const BeforeAfterSlider = ({
             alt={afterLabel}
             className="w-full h-full object-cover"
             draggable={false}
+            onError={() => {
+              console.error('After image failed to load:', afterImage);
+              setImageErrors(prev => ({ ...prev, after: true }));
+            }}
+            onLoad={() => console.log('After image loaded successfully:', afterImage)}
           />
           <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
             {afterLabel}
@@ -83,6 +96,11 @@ export const BeforeAfterSlider = ({
             alt={beforeLabel}
             className="w-full h-full object-cover"
             draggable={false}
+            onError={() => {
+              console.error('Before image failed to load:', beforeImage);
+              setImageErrors(prev => ({ ...prev, before: true }));
+            }}
+            onLoad={() => console.log('Before image loaded successfully:', beforeImage)}
           />
           <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
             {beforeLabel}

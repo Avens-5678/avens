@@ -29,7 +29,17 @@ const Portfolio = () => {
     (item as any).before_image_url && 
     (item as any).after_image_url
   );
-  const regularPortfolioItems = filteredPortfolio.filter(item => !item.is_before_after);
+  
+  // Items marked as before/after but missing images should show in regular section
+  const incompleteBeforeAfterItems = filteredPortfolio.filter(item => 
+    item.is_before_after && 
+    (!(item as any).before_image_url || !(item as any).after_image_url)
+  );
+  
+  const regularPortfolioItems = [
+    ...filteredPortfolio.filter(item => !item.is_before_after),
+    ...incompleteBeforeAfterItems
+  ];
   
   console.log('Portfolio debug:', { 
     portfolio: portfolio?.length, 

@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { MessageCircle, X, Send, ArrowLeft } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -60,7 +58,6 @@ export const WhatsAppBot = () => {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      // Instant welcome message for faster UX
       addBotMessage(
         "👋 Hi, welcome to Avens! I'm here to help you with Events, Rentals, or answer any questions. What can I assist you with today?",
         ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ General Questions']
@@ -116,7 +113,6 @@ export const WhatsAppBot = () => {
   const handleOptionClick = async (option: string) => {
     addUserMessage(option);
     
-    // Remove delay for instant responses
     if (currentStep === 'welcome') {
       if (option.includes('Plan an Event')) {
         setCustomerData(prev => ({ ...prev, intent: 'event' }));
@@ -213,7 +209,6 @@ export const WhatsAppBot = () => {
       const faqResponse = handleFAQ(option);
       addBotMessage(faqResponse);
       
-      // Instant follow-up for faster flow
       addBotMessage(
         "Is there anything else you'd like to know, or would you like to discuss an event or rental?",
         ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
@@ -228,7 +223,6 @@ export const WhatsAppBot = () => {
     addUserMessage(text);
     setInputValue('');
     
-    // Remove delay for instant responses
     if (currentStep === 'event_date') {
       setCustomerData(prev => ({ ...prev, eventDate: text }));
       setCurrentStep('event_venue');
@@ -283,7 +277,6 @@ export const WhatsAppBot = () => {
       const faqResponse = handleFAQ(text);
       addBotMessage(faqResponse);
       
-      // Instant follow-up for faster flow
       addBotMessage(
         "Is there anything else you'd like to know?",
         ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
@@ -294,7 +287,6 @@ export const WhatsAppBot = () => {
 
   const submitToHubSpot = async () => {
     try {
-      // Create comprehensive message based on intent
       let message = '';
       if (customerData.intent === 'event') {
         message = `Event Planning Request:
@@ -314,7 +306,6 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
         message = `General inquiry via chatbot`;
       }
 
-      // First save to Supabase
       const formData = {
         name: customerData.name,
         email: customerData.email,
@@ -335,7 +326,6 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
 
       if (error) throw error;
 
-      // Send to HubSpot with comprehensive data
       const hubspotData = {
         submissionId: submission.id,
         name: customerData.name,
@@ -356,11 +346,10 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
         intent: customerData.intent
       };
 
-      const response = await supabase.functions.invoke('hubspot-integration', {
+      await supabase.functions.invoke('hubspot-integration', {
         body: hubspotData,
       });
 
-      // Create summary for user
       let summary = `🎉 Perfect! I've collected all your information:\n\n`;
       summary += `👤 Name: ${customerData.name}\n`;
       summary += `📧 Email: ${customerData.email}\n`;

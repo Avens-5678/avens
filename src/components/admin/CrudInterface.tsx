@@ -446,13 +446,47 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     }));
   };
 
-  // Remove image function
-  const handleRemoveImage = (fieldName: string) => {
+  // Remove image function with storage deletion
+  const handleRemoveImage = async (fieldName: string) => {
     console.log('Removing image for field:', fieldName);
+    
+    const currentImageUrl = formData[fieldName];
+    
+    // If there's a current image URL, delete it from storage
+    if (currentImageUrl && typeof currentImageUrl === 'string' && currentImageUrl.includes('supabase.co/storage/v1/object/public/')) {
+      try {
+        // Extract bucket and file path from URL
+        const urlParts = currentImageUrl.split('/storage/v1/object/public/');
+        if (urlParts.length > 1) {
+          const pathParts = urlParts[1].split('/');
+          const bucket = pathParts[0];
+          const filePath = pathParts.slice(1).join('/');
+          
+          console.log('Deleting from storage:', { bucket, filePath });
+          
+          // Delete from Supabase storage
+          const { error } = await supabase.storage
+            .from(bucket)
+            .remove([filePath]);
+          
+          if (error) {
+            console.error('Storage deletion error:', error);
+            // Continue with form field removal even if storage deletion fails
+          } else {
+            console.log('Successfully deleted from storage');
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing image URL for deletion:', error);
+        // Continue with form field removal even if storage deletion fails
+      }
+    }
+    
+    // Clear the form field
     updateFormField(fieldName, null);
     toast({
       title: "Image Removed",
-      description: "Image has been removed. Don't forget to save changes.",
+      description: "Image has been removed from storage and form.",
     });
   };
 

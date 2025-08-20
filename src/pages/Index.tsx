@@ -229,48 +229,55 @@ const Index = () => {
         <section className="relative overflow-hidden py-12 lg:py-16">
           <div className="container mx-auto px-4 relative z-10 max-w-7xl">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Stat Card 1 */}
-              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
-                <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+              {/* Stat Card 1 - Happy Clients (Green Theme) */}
+              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-transparent backdrop-blur-lg border border-emerald-200/20 group transition-all duration-500 hover:border-emerald-400/40 hover:shadow-2xl hover:shadow-emerald-500/20 hover:scale-105">
+                <div className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-emerald-400/30 to-green-500/20 rounded-full blur-xl group-hover:scale-150 group-hover:rotate-45 transition-all duration-700"></div>
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-green-300/20 to-emerald-400/10 rounded-full blur-lg group-hover:scale-125 transition-all duration-500"></div>
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl mb-4 border border-primary/20">
-                    <IconHappyClients className="h-7 w-7 text-primary" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-400/20 via-green-500/15 to-emerald-600/10 rounded-2xl mb-4 border border-emerald-300/30 shadow-lg shadow-emerald-500/10">
+                    <IconHappyClients className="h-8 w-8 text-emerald-400" />
                   </div>
                   <AnimatedStat finalValue={100} suffix="+" />
-                  <div className="text-sm text-muted-foreground mt-1">Happy Clients</div>
+                  <div className="text-sm font-medium text-emerald-100 mt-1">Happy Clients</div>
                 </div>
               </div>
-              {/* Stat Card 2 */}
-              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10">
-                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-secondary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+
+              {/* Stat Card 2 - Events Completed (Orange Theme) */}
+              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent backdrop-blur-lg border border-orange-200/20 group transition-all duration-500 hover:border-orange-400/40 hover:shadow-2xl hover:shadow-orange-500/20 hover:scale-105">
+                <div className="absolute -top-6 -left-6 w-20 h-20 bg-gradient-to-br from-orange-400/30 to-red-500/20 rounded-full blur-xl group-hover:scale-150 group-hover:-rotate-45 transition-all duration-700"></div>
+                <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-gradient-to-tr from-amber-300/20 to-orange-400/10 rounded-full blur-lg group-hover:scale-125 transition-all duration-500"></div>
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-secondary/20 to-transparent rounded-2xl mb-4 border border-secondary/20">
-                    <IconEventsCompleted className="h-7 w-7 text-secondary" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-400/20 via-amber-500/15 to-red-500/10 rounded-2xl mb-4 border border-orange-300/30 shadow-lg shadow-orange-500/10">
+                    <IconEventsCompleted className="h-8 w-8 text-orange-400" />
                   </div>
                   <AnimatedStat finalValue={500} suffix="+" />
-                  <div className="text-sm text-muted-foreground mt-1">Events Completed</div>
+                  <div className="text-sm font-medium text-orange-100 mt-1">Events Completed</div>
                 </div>
               </div>
-              {/* Stat Card 3 */}
-              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
-                <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+
+              {/* Stat Card 3 - Rating Average (Purple Theme) */}
+              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-gradient-to-br from-purple-500/10 via-violet-500/5 to-transparent backdrop-blur-lg border border-purple-200/20 group transition-all duration-500 hover:border-purple-400/40 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-105">
+                <div className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-purple-400/30 to-indigo-500/20 rounded-full blur-xl group-hover:scale-150 group-hover:rotate-90 transition-all duration-700"></div>
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-violet-300/20 to-purple-400/10 rounded-full blur-lg group-hover:scale-125 transition-all duration-500"></div>
                 <div className="relative z-10">
-                   <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl mb-4 border border-primary/20">
-                    <IconRatingAverage className="h-7 w-7 text-primary" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-400/20 via-violet-500/15 to-indigo-500/10 rounded-2xl mb-4 border border-purple-300/30 shadow-lg shadow-purple-500/10">
+                    <IconRatingAverage className="h-8 w-8 text-purple-400" />
                   </div>
                   <AnimatedStat finalValue={4.9} isDecimal={true} />
-                  <div className="text-sm text-muted-foreground mt-1">Rating Average</div>
+                  <div className="text-sm font-medium text-purple-100 mt-1">Rating Average</div>
                 </div>
               </div>
-              {/* Stat Card 4 */}
-              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-white/5 backdrop-blur-lg border border-white/10 group transition-all duration-300 hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10">
-                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-secondary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+
+              {/* Stat Card 4 - Years Experience (Blue Theme) */}
+              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-transparent backdrop-blur-lg border border-blue-200/20 group transition-all duration-500 hover:border-blue-400/40 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105">
+                <div className="absolute -top-6 -left-6 w-20 h-20 bg-gradient-to-br from-blue-400/30 to-cyan-500/20 rounded-full blur-xl group-hover:scale-150 group-hover:-rotate-90 transition-all duration-700"></div>
+                <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-gradient-to-tr from-cyan-300/20 to-blue-400/10 rounded-full blur-lg group-hover:scale-125 transition-all duration-500"></div>
                 <div className="relative z-10">
-                   <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-secondary/20 to-transparent rounded-2xl mb-4 border border-secondary/20">
-                    <IconYearsExperience className="h-7 w-7 text-secondary" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-400/20 via-cyan-500/15 to-sky-500/10 rounded-2xl mb-4 border border-blue-300/30 shadow-lg shadow-blue-500/10">
+                    <IconYearsExperience className="h-8 w-8 text-blue-400" />
                   </div>
                   <AnimatedStat finalValue={15} suffix="+" />
-                  <div className="text-sm text-muted-foreground mt-1">Years Experience</div>
+                  <div className="text-sm font-medium text-blue-100 mt-1">Years Experience</div>
                 </div>
               </div>
             </div>

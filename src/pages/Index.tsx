@@ -98,7 +98,7 @@ const AnimatedStat = ({ finalValue, suffix = '', isDecimal = false }) => {
     }, [finalValue, isDecimal]);
 
     return (
-        <div ref={ref} className="text-xl lg:text-2xl font-bold text-white font-mono">
+        <div ref={ref} className="text-2xl lg:text-3xl font-bold text-foreground font-mono tracking-wider drop-shadow-sm">
             {count}{suffix}
         </div>
     );

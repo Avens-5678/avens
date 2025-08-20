@@ -87,8 +87,10 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       
       // Copy only the fields that are defined in the fields configuration
       for (const field of fields) {
+        let value = undefined;
+        
         if (dataToSave.hasOwnProperty(field.name)) {
-          let value = dataToSave[field.name];
+          value = dataToSave[field.name];
           
           console.log(`Processing field ${field.name}:`, { value, type: typeof value });
           
@@ -97,47 +99,42 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
             console.log(`Fixing corrupted value for ${field.name}`);
             value = undefined;
           }
-          
-          // Handle different value types more carefully
-          if (value === null || value === undefined) {
-            // For required fields, don't set them to null/undefined if they're missing
-            if (!field.required) {
-              cleanData[field.name] = value;
+        }
+        
+        // Always include all fields in cleanData, even if empty
+        if (value === null || value === undefined) {
+          if (field.type === 'boolean') {
+            cleanData[field.name] = true; // default for boolean
+          } else if (field.type === 'number') {
+            cleanData[field.name] = 0; // default for number
+          } else {
+            cleanData[field.name] = ''; // empty string for text/select/etc
+          }
+        } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+          // Keep primitive values
+          cleanData[field.name] = value;
+        } else if (Array.isArray(value)) {
+          // Handle arrays by keeping only primitive values
+          cleanData[field.name] = value.filter(v => 
+            typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+          );
+        } else if (typeof value === 'object' && value !== null) {
+          // For objects, try to serialize them, but be more permissive
+          try {
+            if (value.constructor === Object) {
+              cleanData[field.name] = JSON.parse(JSON.stringify(value));
+            } else {
+              console.warn(`Complex object for field ${field.name}:`, value);
+              // Default to empty string for unsupported objects
+              cleanData[field.name] = '';
             }
-            // Skip undefined required fields - they'll be caught by validation
-          } else if (value === '') {
-            // Empty strings are valid for text fields
-            cleanData[field.name] = value;
-          } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-            // Keep primitive values
-            cleanData[field.name] = value;
-          } else if (Array.isArray(value)) {
-            // Handle arrays by keeping only primitive values
-            cleanData[field.name] = value.filter(v => 
-              typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
-            );
-          } else if (typeof value === 'object' && value !== null) {
-            // For objects, try to serialize them, but be more permissive
-            try {
-              if (value.constructor === Object) {
-                cleanData[field.name] = JSON.parse(JSON.stringify(value));
-              } else {
-                console.warn(`Complex object for field ${field.name}:`, value);
-                // Skip complex objects that can't be serialized
-              }
-            } catch (error) {
-              console.warn(`Skipping field ${field.name} due to serialization issues:`, error);
-            }
+          } catch (error) {
+            console.warn(`Skipping field ${field.name} due to serialization issues:`, error);
+            cleanData[field.name] = '';
           }
         } else {
-          console.log(`Field ${field.name} not found in dataToSave`);
-          // If field is not in dataToSave, set appropriate default values
-          if (field.type === 'boolean') {
-            cleanData[field.name] = true;
-          } else if (field.type === 'number') {
-            cleanData[field.name] = 0;
-          }
-          // Don't set defaults for text/select fields - let validation catch missing required ones
+          // Fallback to empty string
+          cleanData[field.name] = '';
         }
       }
       

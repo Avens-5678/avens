@@ -81,11 +81,22 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       // Copy only the fields that are defined in the fields configuration
       for (const field of fields) {
         if (dataToSave.hasOwnProperty(field.name)) {
-          const value = dataToSave[field.name];
+          let value = dataToSave[field.name];
+          
+          // Handle corrupted value objects that sometimes appear
+          if (value && typeof value === 'object' && value._type === 'undefined') {
+            value = undefined;
+          }
           
           // Handle different value types more carefully
-          if (value === null || value === undefined || value === '') {
-            // Keep null/undefined/empty string values as they are
+          if (value === null || value === undefined) {
+            // For required fields, don't set them to null/undefined if they're missing
+            if (!field.required) {
+              cleanData[field.name] = value;
+            }
+            // Skip undefined required fields - they'll be caught by validation
+          } else if (value === '') {
+            // Empty strings are valid for text fields
             cleanData[field.name] = value;
           } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
             // Keep primitive values
@@ -101,7 +112,6 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
               if (value.constructor === Object) {
                 cleanData[field.name] = JSON.parse(JSON.stringify(value));
               } else {
-                // If it's not a plain object, try to extract meaningful value
                 console.warn(`Complex object for field ${field.name}:`, value);
                 // Skip complex objects that can't be serialized
               }
@@ -110,14 +120,13 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
             }
           }
         } else {
-          // If field is not in dataToSave, check if it should have a default value
+          // If field is not in dataToSave, set appropriate default values
           if (field.type === 'boolean') {
             cleanData[field.name] = true;
           } else if (field.type === 'number') {
             cleanData[field.name] = 0;
-          } else {
-            cleanData[field.name] = '';
           }
+          // Don't set defaults for text/select fields - let validation catch missing required ones
         }
       }
       

@@ -18,8 +18,17 @@ const Portfolio = () => {
     if (activeFilter === "all") return true;
     // Find the associated event and check its type
     const associatedEvent = events?.find(event => event.id === item.event_id);
-    return associatedEvent?.event_type === activeFilter;
+    return associatedEvent?.event_type === activeFilter && associatedEvent?.is_active === true;
   }) || [];
+  
+  console.log('Portfolio debug:', { 
+    portfolio: portfolio?.length, 
+    events: events?.length, 
+    activeFilter, 
+    filteredPortfolio: filteredPortfolio.length,
+    allEvents: events?.map(e => ({ id: e.id, type: e.event_type, active: e.is_active })),
+    allPortfolio: portfolio?.map(p => ({ id: p.id, event_id: p.event_id, title: p.title }))
+  });
 
   if (loadingEvents || loadingPortfolio) {
     return (

@@ -115,14 +115,26 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       // Validate required fields (excluding file fields that might be uploaded separately)
       const missingFields = fields
         .filter(field => {
-          // Skip validation for file fields if they already have a value
-          if (field.type === 'file' && cleanData[field.name]) {
-            return false;
+          // Skip validation for file fields that already have a value or are being uploaded
+          if (field.type === 'file' || field.type === 'image') {
+            // If editing and field already has a value, don't require it
+            if (editingItem && cleanData[field.name]) {
+              return false;
+            }
+            // If creating and field is required but empty, it's missing
+            return field.required && (!cleanData[field.name] || cleanData[field.name] === '');
           }
-          // Check if required field is missing or empty
-          return field.required && (!cleanData[field.name] || cleanData[field.name] === '');
+          // Check if required field is missing or empty (but allow 0 values for numbers)
+          return field.required && (
+            cleanData[field.name] === undefined || 
+            cleanData[field.name] === null || 
+            cleanData[field.name] === '' ||
+            (field.type === 'select' && cleanData[field.name] === '')
+          );
         })
         .map(field => field.label);
+      
+      console.log('Validation check:', { cleanData, missingFields, fields: fields.map(f => ({ name: f.name, required: f.required, value: cleanData[f.name] })) });
       
       if (missingFields.length > 0) {
         toast({

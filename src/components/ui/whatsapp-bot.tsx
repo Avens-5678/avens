@@ -56,19 +56,15 @@ export const WhatsAppBot = () => {
     eventDetails: ''
   });
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      setIsTyping(true);
-      setTimeout(() => {
-        addBotMessage(
-          "👋 Hi, welcome to Avens! I'm here to help you with Events, Rentals, or answer any questions. What can I assist you with today?",
-          ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ General Questions']
-        );
-        setIsTyping(false);
-      }, 1000);
+      // Instant welcome message for faster UX
+      addBotMessage(
+        "👋 Hi, welcome to Avens! I'm here to help you with Events, Rentals, or answer any questions. What can I assist you with today?",
+        ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ General Questions']
+      );
     }
   }, [isOpen]);
 
@@ -119,10 +115,8 @@ export const WhatsAppBot = () => {
 
   const handleOptionClick = async (option: string) => {
     addUserMessage(option);
-    setIsTyping(true);
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
+    
+    // Remove delay for instant responses
     if (currentStep === 'welcome') {
       if (option.includes('Plan an Event')) {
         setCustomerData(prev => ({ ...prev, intent: 'event' }));
@@ -219,16 +213,13 @@ export const WhatsAppBot = () => {
       const faqResponse = handleFAQ(option);
       addBotMessage(faqResponse);
       
-      setTimeout(() => {
-        addBotMessage(
-          "Is there anything else you'd like to know, or would you like to discuss an event or rental?",
-          ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
-        );
-      }, 2000);
+      // Instant follow-up for faster flow
+      addBotMessage(
+        "Is there anything else you'd like to know, or would you like to discuss an event or rental?",
+        ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
+      );
       setCurrentStep('welcome');
     }
-
-    setIsTyping(false);
   };
 
   const handleTextInput = async (text: string) => {
@@ -236,10 +227,8 @@ export const WhatsAppBot = () => {
 
     addUserMessage(text);
     setInputValue('');
-    setIsTyping(true);
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
+    
+    // Remove delay for instant responses
     if (currentStep === 'event_date') {
       setCustomerData(prev => ({ ...prev, eventDate: text }));
       setCurrentStep('event_venue');
@@ -294,16 +283,13 @@ export const WhatsAppBot = () => {
       const faqResponse = handleFAQ(text);
       addBotMessage(faqResponse);
       
-      setTimeout(() => {
-        addBotMessage(
-          "Is there anything else you'd like to know?",
-          ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
-        );
-      }, 2000);
+      // Instant follow-up for faster flow
+      addBotMessage(
+        "Is there anything else you'd like to know?",
+        ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
+      );
       setCurrentStep('welcome');
     }
-
-    setIsTyping(false);
   };
 
   const submitToHubSpot = async () => {
@@ -442,50 +428,50 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
       {/* Floating WhatsApp Button */}
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse-glow"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110"
         size="icon"
       >
-        <MessageCircle className="h-8 w-8 text-white" />
+        <MessageCircle className="h-6 w-6 text-white" />
       </Button>
 
       {/* Chat Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md max-h-[80vh] p-0 overflow-hidden">
-          <DialogHeader className="bg-green-500 text-white p-4 flex flex-row items-center justify-between">
+          <DialogHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 flex flex-row items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                 <MessageCircle className="h-5 w-5" />
               </div>
               <div>
-                <DialogTitle className="text-white">Avens Events Bot</DialogTitle>
-                <p className="text-green-100 text-sm">Online now</p>
+                <DialogTitle className="text-white font-semibold">Avens Events Bot</DialogTitle>
+                <p className="text-green-100 text-xs">● Online now</p>
               </div>
             </div>
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => setIsOpen(false)}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 rounded-full"
             >
               <X className="h-4 w-4" />
             </Button>
           </DialogHeader>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-96 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-96 bg-gradient-to-b from-gray-50 to-white">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-2xl ${
+                  className={`max-w-[85%] p-3 rounded-2xl ${
                     message.isBot
-                      ? 'bg-white border shadow-sm'
-                      : 'bg-green-500 text-white'
+                      ? 'bg-white border border-gray-200 shadow-sm rounded-bl-md'
+                      : 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-sm rounded-br-md'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-line">{message.text}</p>
+                  <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
                   {message.options && (
                     <div className="mt-3 space-y-2">
                       {message.options.map((option, index) => (
@@ -493,7 +479,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
                           key={index}
                           variant="outline"
                           size="sm"
-                          className="w-full justify-start text-left h-auto py-2 px-3"
+                          className="w-full justify-start text-left h-auto py-2.5 px-3 rounded-xl border-gray-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
                           onClick={() => handleOptionClick(option)}
                         >
                           {option}
@@ -504,18 +490,6 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
                 </div>
               </div>
             ))}
-
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-white border shadow-sm p-3 rounded-2xl">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Input Area */}
@@ -532,13 +506,13 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
                       handleTextInput(inputValue);
                     }
                   }}
-                  className="flex-1"
+                  className="flex-1 rounded-full border-gray-200"
                 />
                 <Button
                   onClick={() => handleTextInput(inputValue)}
-                  disabled={!inputValue.trim() || isTyping}
+                  disabled={!inputValue.trim()}
                   size="icon"
-                  className="bg-green-500 hover:bg-green-600"
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-full"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -549,7 +523,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
                   variant="ghost"
                   size="sm"
                   onClick={resetChat}
-                  className="mt-2 text-gray-500 hover:text-gray-700"
+                  className="mt-2 text-gray-500 hover:text-gray-700 rounded-full"
                 >
                   <ArrowLeft className="h-4 w-4 mr-1" />
                   Start Over

@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
-import EnhancedPortfolioManager from "@/components/admin/EnhancedPortfolioManager";
+import NewEnhancedPortfolioManager from "@/components/admin/NewEnhancedPortfolioManager";
 import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboard";
 import AudioManager from "@/components/admin/AudioManager";
 import ProfileManager from "@/components/admin/ProfileManager";
@@ -275,7 +275,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
               fields={[
                 { name: "title", label: "Title", type: "text", required: true },
                 { name: "subtitle", label: "Subtitle", type: "text" },
-                { name: "image_url", label: "Image URL", type: "image", required: true },
+                { name: "image_url", label: "Banner Image", type: "file", required: true },
                 { name: "button_text", label: "Button Text", type: "text" },
                 { 
                   name: "event_type", 
@@ -361,7 +361,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
 
           {/* Portfolio Management */}
           <TabsContent value="portfolio">
-            <EnhancedPortfolioManager 
+            <NewEnhancedPortfolioManager 
               portfolio={portfolio || []} 
               events={events || []}
             />
@@ -375,7 +375,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
               tableName="trusted_clients"
               fields={[
                 { name: "name", label: "Client Name", type: "text", required: true },
-                { name: "logo_url", label: "Logo URL", type: "image", required: true },
+                { name: "logo_url", label: "Client Logo", type: "file", required: true },
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}

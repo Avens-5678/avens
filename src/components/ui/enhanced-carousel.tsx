@@ -72,6 +72,10 @@ export const EnhancedCarousel = ({
     return () => clearInterval(interval);
   }, [isPlaying, slides.length, delay, onSlideChange]);
 
+  // Pause autoplay on hover to prevent flickering during interaction
+  const handleMouseEnter = () => setIsPlaying(false);
+  const handleMouseLeave = () => setIsPlaying(autoPlay);
+
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
     onSlideChange?.(index);
@@ -88,13 +92,21 @@ export const EnhancedCarousel = ({
   };
 
   return (
-    <div className={cn("relative overflow-hidden", className)}>
+    <div 
+      className={cn("relative overflow-hidden", className)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div 
-        className="flex transition-transform duration-500 ease-out"
-        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        className="flex transition-transform duration-700 ease-in-out will-change-transform"
+        style={{ 
+          transform: `translateX(-${currentSlide * 100}%)`,
+          backfaceVisibility: 'hidden',
+          perspective: '1000px'
+        }}
       >
         {slides.map((slide, index) => (
-          <div key={index} className="w-full flex-shrink-0">
+          <div key={index} className="w-full flex-shrink-0 transform-gpu">
             {slide}
           </div>
         ))}

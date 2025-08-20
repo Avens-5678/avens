@@ -178,7 +178,7 @@ const Index = () => {
       {/* Hero Section with Enhanced Carousel */}
       <div className="relative">
         {heroBanners && heroBanners.length > 0 ? (
-          <EnhancedCarousel className="w-full h-screen relative" autoPlay={true} delay={5000} showDots={true}>
+          <EnhancedCarousel className="w-full h-screen relative" autoPlay={true} delay={6000} showDots={true}>
             {heroBanners.map(banner => (
               <div key={banner.id} className="h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{
                 backgroundImage: `url(${banner.image_url})`

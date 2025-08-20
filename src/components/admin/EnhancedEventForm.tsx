@@ -190,8 +190,8 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
   };
 
   const handleSave = () => {
-    if (!formData.title || !formData.event_type) {
-      toast.error('Please fill in required fields');
+    if (!formData.title || !formData.event_type || !formData.process_description) {
+      toast.error('Please fill in all required fields (Title, Event Type, and Process Description)');
       return;
     }
     onSave(formData);
@@ -255,6 +255,17 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   placeholder="Brief description of the event service"
                   rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="process_description">Process Description *</Label>
+                <Textarea
+                  id="process_description"
+                  value={formData.process_description}
+                  onChange={(e) => handleInputChange('process_description', e.target.value)}
+                  placeholder="Detailed description of your event planning process"
+                  rows={4}
                 />
               </div>
 

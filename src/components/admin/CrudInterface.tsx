@@ -112,9 +112,16 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         }
       }
       
-      // Validate required fields
+      // Validate required fields (excluding file fields that might be uploaded separately)
       const missingFields = fields
-        .filter(field => field.required && (!cleanData[field.name] || cleanData[field.name] === ''))
+        .filter(field => {
+          // Skip validation for file fields if they already have a value
+          if (field.type === 'file' && cleanData[field.name]) {
+            return false;
+          }
+          // Check if required field is missing or empty
+          return field.required && (!cleanData[field.name] || cleanData[field.name] === '');
+        })
         .map(field => field.label);
       
       if (missingFields.length > 0) {

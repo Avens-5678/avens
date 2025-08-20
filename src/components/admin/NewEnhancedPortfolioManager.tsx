@@ -114,9 +114,23 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
   const handleSave = async () => {
     try {
       if (editingItem) {
+        // Update existing item - clean the form data first
+        const cleanData = {
+          title: formData.title,
+          image_url: formData.image_url,
+          event_id: formData.event_id,
+          album_url: formData.album_url || null,
+          tag: formData.tag || null,
+          display_order: formData.display_order || 0,
+          before_image_url: formData.before_image_url || null,
+          after_image_url: formData.after_image_url || null,
+          is_before_after: (formData.before_image_url && formData.after_image_url) ? true : false,
+          is_before: false
+        };
+
         const { error } = await supabase
           .from('portfolio')
-          .update(formData)
+          .update(cleanData)
           .eq('id', editingItem.id);
         
         if (error) throw error;
@@ -126,6 +140,7 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
           description: "Portfolio item updated successfully",
         });
       } else {
+        // Create new item - validate required fields
         if (!formData.title || !formData.event_id || !formData.image_url) {
           const missingFields = [];
           if (!formData.title) missingFields.push('Title');
@@ -142,12 +157,14 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
           tag: formData.tag || null,
           display_order: formData.display_order || 0,
           before_image_url: formData.before_image_url || null,
-          after_image_url: formData.after_image_url || null
+          after_image_url: formData.after_image_url || null,
+          is_before_after: (formData.before_image_url && formData.after_image_url) ? true : false,
+          is_before: false
         };
         
         const { error } = await supabase
           .from('portfolio')
-          .insert(portfolioData);
+          .insert([portfolioData]);
         
         if (error) throw error;
         
@@ -164,6 +181,7 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
       setIsCreating(false);
       setFormData({});
     } catch (error: any) {
+      console.error('Portfolio save error:', error);
       toast({
         title: "Error",
         description: error.message || "Something went wrong",

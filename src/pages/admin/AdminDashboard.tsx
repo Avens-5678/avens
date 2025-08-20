@@ -34,6 +34,7 @@ import ProfileManager from "@/components/admin/ProfileManager";
 import TestimonialManager from "@/components/admin/TestimonialManager";
 import EnhancedRentalManager from "@/components/admin/EnhancedRentalManager";
 import FAQManager from "@/components/admin/FAQManager";
+import IntegrationTester from "@/components/admin/IntegrationTester";
 import Logo from "@/components/ui/logo";
 
 interface AdminDashboardProps {
@@ -115,7 +116,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto p-4 sm:p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-13 h-auto p-1 gap-1 overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-14 h-auto p-1 gap-1 overflow-x-auto">
             <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <BarChart3 className="h-3 w-3" />
               <span className="hidden sm:inline">Overview</span>
@@ -155,6 +156,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <TabsTrigger value="faq" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <HelpCircle className="h-3 w-3" />
               <span className="hidden sm:inline">FAQ</span>
+            </TabsTrigger>
+            <TabsTrigger value="integrations" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Settings className="h-3 w-3" />
+              <span className="hidden sm:inline">Integrations</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Award className="h-3 w-3" />
@@ -428,6 +433,11 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
           {/* FAQ Management */}
           <TabsContent value="faq">
             <FAQManager />
+          </TabsContent>
+
+          {/* Integrations Testing */}
+          <TabsContent value="integrations">
+            <IntegrationTester />
           </TabsContent>
 
           {/* Audio Management */}

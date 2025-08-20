@@ -563,6 +563,16 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
                     ×
                   </Button>
                 </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => handleRemoveImage(field.name)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Remove Image
+                </Button>
               </div>
             )}
             

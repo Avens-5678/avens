@@ -31,6 +31,7 @@ import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboar
 import AudioManager from "@/components/admin/AudioManager";
 import ProfileManager from "@/components/admin/ProfileManager";
 import TestimonialManager from "@/components/admin/TestimonialManager";
+import EnhancedRentalManager from "@/components/admin/EnhancedRentalManager";
 import Logo from "@/components/ui/logo";
 
 interface AdminDashboardProps {
@@ -340,23 +341,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
 
           {/* Rentals Management */}
           <TabsContent value="rentals">
-            <AdminDataTable
-              title="Rentals"
-              data={rentals || []}
-              queryKey="rentals"
-              tableName="rentals"
-              fields={[
-                { name: "title", label: "Title", type: "text", required: true },
-                { name: "short_description", label: "Short Description", type: "text", required: true },
-                { name: "description", label: "Description", type: "textarea", required: true },
-                { name: "price_range", label: "Price Range", type: "text" },
-                { name: "image_url", label: "Image URL", type: "image" },
-                { name: "display_order", label: "Display Order", type: "number" },
-                { name: "show_on_home", label: "Show on Home Page", type: "boolean" },
-                { name: "is_active", label: "Active", type: "boolean" }
-              ]}
-              defaultValues={{ is_active: true, display_order: 0, show_on_home: true }}
-            />
+            <EnhancedRentalManager rentals={rentals || []} />
           </TabsContent>
 
           {/* Portfolio Management */}

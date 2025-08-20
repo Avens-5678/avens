@@ -14,6 +14,7 @@ import Layout from "@/components/Layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import CartModal from "@/components/Cart/CartModal";
+import { ProductImageCarousel } from "@/components/ui/product-image-carousel";
 
 const EnhancedEcommerce = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -152,19 +153,19 @@ const EnhancedEcommerce = () => {
                       </Select>
                     </div>
 
-                    {/* Cart Button */}
-                    {getItemCount() > 0 && (
-                      <Button
-                        onClick={() => setCartModalOpen(true)}
-                        className="relative bg-primary hover:bg-primary-glow shadow-glow-blue"
-                      >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        Cart ({getItemCount()})
+                    {/* Cart Button - Always visible, positioned top-right */}
+                    <Button
+                      onClick={() => setCartModalOpen(true)}
+                      className="relative bg-primary hover:bg-primary-glow shadow-glow-blue min-w-[120px]"
+                    >
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Cart ({getItemCount()})
+                      {getItemCount() > 0 && (
                         <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-xs font-bold text-white">
                           {getItemCount()}
                         </div>
-                      </Button>
-                    )}
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -180,19 +181,14 @@ const EnhancedEcommerce = () => {
                 {filteredRentals.map((rental, index) => (
                   <AnimatedText key={rental.id} delay={index * 50}>
                     <Card className="group hover:shadow-2xl transition-all duration-500 glassmorphism-card border-0 overflow-hidden hover:-translate-y-2 h-full">
-                      {/* Product Image */}
-                      <div className="relative h-48 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
-                        {rental.image_url ? (
-                          <img
-                            src={rental.image_url}
-                            alt={rental.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ShoppingCart className="h-12 w-12 text-primary/40" />
-                          </div>
-                        )}
+                      {/* Product Image Carousel */}
+                      <div className="relative">
+                        <ProductImageCarousel
+                          images={rental.image_url ? [rental.image_url] : []}
+                          title={rental.title}
+                          autoPlay={true}
+                          interval={3000}
+                        />
                         
                         {/* Rating Badge */}
                         {rental.rating && rental.rating > 0 && (
@@ -334,21 +330,6 @@ const EnhancedEcommerce = () => {
           </div>
         </section>
 
-        {/* Floating Cart Button */}
-        {getItemCount() > 0 && (
-          <div className="fixed bottom-6 right-6 z-40">
-            <Button
-              onClick={() => setCartModalOpen(true)}
-              className="w-16 h-16 rounded-full bg-primary hover:bg-primary-glow shadow-2xl hover:shadow-glow-blue transition-all duration-300 relative animate-pulse-glow"
-              size="icon"
-            >
-              <ShoppingCart className="h-6 w-6" />
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-xs font-bold text-white">
-                {getItemCount()}
-              </div>
-            </Button>
-          </div>
-        )}
 
         {/* Cart Modal */}
         <CartModal 

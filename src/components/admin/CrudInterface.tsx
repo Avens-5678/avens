@@ -446,6 +446,15 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     }));
   };
 
+  // Remove image function
+  const handleRemoveImage = (fieldName: string) => {
+    updateFormField(fieldName, '');
+    toast({
+      title: "Image Removed",
+      description: "Image has been removed. Don't forget to save changes.",
+    });
+  };
+
   const renderField = (field: Field) => {
     const value = formData[field.name] ?? (field.type === 'boolean' ? false : field.type === 'number' ? 0 : '');
     
@@ -526,38 +535,65 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       
       case 'image':
       case 'file':
+        const currentImageUrl = value && typeof value === 'string' && !value.startsWith('C:\\fakepath\\') ? value : '';
+        const hasCurrentImage = currentImageUrl && currentImageUrl.length > 0;
+        
         return (
-          <div className="space-y-2">
-            <Input
-              type="file"
-              accept={field.type === 'image' ? 'image/*' : '*'}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  // Store the File object directly in formData for processing during save
-                  updateFormField(field.name, file);
-                }
-              }}
-              disabled={uploading}
-            />
-            {value && (
-              <div className="text-sm text-muted-foreground">
-                {value instanceof File ? (
+          <div className="space-y-4">
+            {/* Current Image Preview */}
+            {hasCurrentImage && (
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-muted-foreground">Current Image:</div>
+                <div className="relative inline-block">
+                  <img 
+                    src={currentImageUrl} 
+                    alt="Current image" 
+                    className="w-32 h-24 object-cover rounded-md border"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                    onClick={() => handleRemoveImage(field.name)}
+                  >
+                    ×
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {/* File Input */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">
+                {hasCurrentImage ? "Replace Image:" : "Add Image:"}
+              </div>
+              <Input
+                type="file"
+                accept={field.type === 'image' ? 'image/*' : '*'}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    // Store the File object directly in formData for processing during save
+                    updateFormField(field.name, file);
+                  }
+                }}
+                disabled={uploading}
+              />
+              {value && value instanceof File && (
+                <div className="text-sm text-muted-foreground">
                   <span>Selected: {value.name}</span>
-                ) : typeof value === 'string' && value.startsWith('C:\\fakepath\\') ? (
-                  <span className="text-destructive">Invalid file path - please re-select file</span>
-                ) : typeof value === 'string' ? (
-                  <span>Current: {value.split('/').pop()}</span>
-                ) : (
-                  <span>File selected</span>
-                )}
-              </div>
-            )}
-            {uploading && (
-              <div className="text-sm text-muted-foreground">
-                Uploading...
-              </div>
-            )}
+                </div>
+              )}
+              {uploading && (
+                <div className="text-sm text-muted-foreground">
+                  Uploading...
+                </div>
+              )}
+            </div>
           </div>
         );
       

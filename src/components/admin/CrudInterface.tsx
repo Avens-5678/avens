@@ -74,64 +74,70 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     try {
       console.log('=== SAVE ATTEMPT START ===');
       
-      // Read form data directly from DOM using name attributes
-      const formDataFromDOM: Record<string, any> = {};
+      let cleanData: Record<string, any> = {};
       
-      fields.forEach(field => {
-        if (field.type === 'boolean') {
-          const switchInput = document.querySelector(`[name="${field.name}"]`);
-          if (switchInput) {
-            formDataFromDOM[field.name] = switchInput.getAttribute('data-state') === 'checked' || switchInput.getAttribute('aria-checked') === 'true';
+      // If eventFormData is provided (from EnhancedEventForm), use it directly
+      if (eventFormData) {
+        console.log('=== USING EVENT FORM DATA ===', eventFormData);
+        cleanData = { ...eventFormData };
+      } else {
+        // Read form data directly from DOM using name attributes (for other forms)
+        const formDataFromDOM: Record<string, any> = {};
+        
+        fields.forEach(field => {
+          if (field.type === 'boolean') {
+            const switchInput = document.querySelector(`[name="${field.name}"]`);
+            if (switchInput) {
+              formDataFromDOM[field.name] = switchInput.getAttribute('data-state') === 'checked' || switchInput.getAttribute('aria-checked') === 'true';
+            } else {
+              formDataFromDOM[field.name] = true; // default
+            }
+          } else if (field.type === 'select') {
+            // For select fields, check both the select element and custom input for event_type
+            const selectInput = document.querySelector(`select[name="${field.name}"]`);
+            const customInput = document.querySelector(`input[name="${field.name}_custom"]`);
+            
+            if (customInput && (customInput as HTMLInputElement).value) {
+              formDataFromDOM[field.name] = (customInput as HTMLInputElement).value;
+            } else if (selectInput) {
+              formDataFromDOM[field.name] = (selectInput as HTMLSelectElement).value;
+            } else {
+              // Fallback: look for hidden input or data attribute on select trigger
+              const hiddenInput = document.querySelector(`input[name="${field.name}"]`);
+              if (hiddenInput) {
+                formDataFromDOM[field.name] = (hiddenInput as HTMLInputElement).value;
+              } else {
+                formDataFromDOM[field.name] = '';
+              }
+            }
+          } else if (field.type === 'number') {
+            const numberInput = document.querySelector(`input[name="${field.name}"]`) as HTMLInputElement;
+            if (numberInput) {
+              formDataFromDOM[field.name] = Number(numberInput.value) || 0;
+            } else {
+              formDataFromDOM[field.name] = 0;
+            }
           } else {
-            formDataFromDOM[field.name] = true; // default
-          }
-        } else if (field.type === 'select') {
-          // For select fields, check both the select element and custom input for event_type
-          const selectInput = document.querySelector(`select[name="${field.name}"]`);
-          const customInput = document.querySelector(`input[name="${field.name}_custom"]`);
-          
-          if (customInput && (customInput as HTMLInputElement).value) {
-            formDataFromDOM[field.name] = (customInput as HTMLInputElement).value;
-          } else if (selectInput) {
-            formDataFromDOM[field.name] = (selectInput as HTMLSelectElement).value;
-          } else {
-            // Fallback: look for hidden input or data attribute on select trigger
-            const hiddenInput = document.querySelector(`input[name="${field.name}"]`);
-            if (hiddenInput) {
-              formDataFromDOM[field.name] = (hiddenInput as HTMLInputElement).value;
+            // Text, textarea, file fields
+            const input = document.querySelector(`input[name="${field.name}"], textarea[name="${field.name}"]`) as HTMLInputElement | HTMLTextAreaElement;
+            if (input) {
+              formDataFromDOM[field.name] = input.value;
+            } else if (field.type === 'file') {
+              // For file fields, use the uploaded URL from component state
+              if (formData[field.name]) {
+                formDataFromDOM[field.name] = formData[field.name];
+              } else {
+                formDataFromDOM[field.name] = '';
+              }
             } else {
               formDataFromDOM[field.name] = '';
             }
           }
-        } else if (field.type === 'number') {
-          const numberInput = document.querySelector(`input[name="${field.name}"]`) as HTMLInputElement;
-          if (numberInput) {
-            formDataFromDOM[field.name] = Number(numberInput.value) || 0;
-          } else {
-            formDataFromDOM[field.name] = 0;
-          }
-        } else {
-          // Text, textarea, file fields
-          const input = document.querySelector(`input[name="${field.name}"], textarea[name="${field.name}"]`) as HTMLInputElement | HTMLTextAreaElement;
-          if (input) {
-            formDataFromDOM[field.name] = input.value;
-          } else if (field.type === 'file') {
-            // For file fields, use the uploaded URL from component state
-            if (formData[field.name]) {
-              formDataFromDOM[field.name] = formData[field.name];
-            } else {
-              formDataFromDOM[field.name] = '';
-            }
-          } else {
-            formDataFromDOM[field.name] = '';
-          }
-        }
-      });
-      
-      console.log('=== FORM DATA FROM DOM ===', formDataFromDOM);
-      
-      // Use the DOM-read data as our clean data
-      const cleanData = { ...formDataFromDOM };
+        });
+        
+        console.log('=== FORM DATA FROM DOM ===', formDataFromDOM);
+        cleanData = { ...formDataFromDOM };
+      }
       
       console.log('=== FINAL CLEAN DATA ===', cleanData);
       
@@ -304,6 +310,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     setEditingItem(null);
     setIsCreating(false);
     setFormData({});
+    setIsEnhancedEventFormOpen(false);
   };
 
   const handleFileUpload = async (file: File, fieldName: string) => {

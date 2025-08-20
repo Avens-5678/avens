@@ -34,14 +34,22 @@ const Gallery = () => {
   const portfolioImages = portfolioItem && !portfolioItem.is_before_after ? [portfolioItem] : [];
   const beforeAfterImages = portfolioItem && portfolioItem.is_before_after ? [portfolioItem] : [];
   
+  // Extended type to include before/after fields
+  type ExtendedPortfolioItem = typeof portfolioItem & {
+    before_image_url?: string;
+    after_image_url?: string;
+  };
+  
+  const extendedPortfolioItem = portfolioItem as ExtendedPortfolioItem;
+  
   // Debug logging for before/after functionality
   console.log('Gallery Debug:', {
     portfolioItemId: portfolioItem?.id,
     isBeforeAfter: portfolioItem?.is_before_after,
-    beforeImageUrl: (portfolioItem as any)?.before_image_url,
-    afterImageUrl: (portfolioItem as any)?.after_image_url,
+    beforeImageUrl: extendedPortfolioItem?.before_image_url,
+    afterImageUrl: extendedPortfolioItem?.after_image_url,
     beforeAfterImagesLength: beforeAfterImages.length,
-    shouldShowSlider: beforeAfterImages.length > 0 && (portfolioItem as any)?.before_image_url && (portfolioItem as any)?.after_image_url
+    shouldShowSlider: beforeAfterImages.length > 0 && extendedPortfolioItem?.before_image_url && extendedPortfolioItem?.after_image_url
   });
   
   // Get all images including bulk uploaded ones
@@ -148,13 +156,13 @@ const Gallery = () => {
             </div>
           )}
 
-          {beforeAfterImages.length > 0 && (portfolioItem as any)?.before_image_url && (portfolioItem as any)?.after_image_url && (
+          {beforeAfterImages.length > 0 && extendedPortfolioItem?.before_image_url && extendedPortfolioItem?.after_image_url && (
             <div className="mt-20">
               <h2 className="text-center mb-12">Before & After Transformation</h2>
               <div className="max-w-4xl mx-auto">
                 <BeforeAfterSlider
-                  beforeImage={(portfolioItem as any).before_image_url}
-                  afterImage={(portfolioItem as any).after_image_url}
+                  beforeImage={extendedPortfolioItem.before_image_url}
+                  afterImage={extendedPortfolioItem.after_image_url}
                   beforeLabel="Before"
                   afterLabel="After"
                   className="mb-6"

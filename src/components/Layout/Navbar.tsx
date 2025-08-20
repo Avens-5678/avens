@@ -39,8 +39,8 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="font-bold">
-              <span className="text-red-500 text-xl">Avens</span>
-              <div className="text-gray-600 text-sm -mt-1">Expositions Pvt. Ltd.</div>
+              <span className="text-primary text-xl">Avens</span>
+              <div className="text-muted-foreground text-sm -mt-1">Expositions Pvt. Ltd.</div>
             </div>
           </Link>
 
@@ -51,7 +51,7 @@ const Navbar = () => {
               </Link>)}
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300 text-slate-50">
+                <Button variant="premium" size="default">
                   Contact Us
                 </Button>
               </DialogTrigger>
@@ -81,7 +81,7 @@ const Navbar = () => {
                 </Link>)}
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="self-start bg-gradient-to-r from-primary to-accent" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="premium" size="default" className="self-start" onClick={() => setIsMenuOpen(false)}>
                     Contact Us
                   </Button>
                 </DialogTrigger>

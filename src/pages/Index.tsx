@@ -192,7 +192,7 @@ const Index = () => {
                       {banner.subtitle}
                     </AnimatedText>}
                   <AnimatedText variant="scale-in" delay={600}>
-                    <Button asChild size="lg" className="glassmorphism-btn text-lg px-8 py-3 rounded-2xl">
+                    <Button asChild variant="premium" className="glassmorphism-btn text-lg px-8 py-3">
                       <Link to={`/events/${banner.event_type}`}>
                         {banner.button_text} <ArrowRight className="ml-2 h-5 w-5" />
                       </Link>
@@ -213,7 +213,7 @@ const Index = () => {
                 Premium event management and rental services for your special occasions
               </AnimatedText>
               <AnimatedText variant="scale-in" delay={600}>
-                <Button asChild size="lg" className="glassmorphism-btn text-lg px-8 py-3 rounded-2xl">
+                <Button asChild variant="premium" className="glassmorphism-btn text-lg px-8 py-3">
                   <Link to="/services">
                     Explore Services <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>

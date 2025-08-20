@@ -31,13 +31,13 @@ const Services = () => {
   }
   return <Layout>
       {/* Hero Section */}
-      <section className="py-16 lg:py-20 bg-gradient-to-br from-primary/10 to-accent/10">
-        <div className="container mx-auto px-4 text-center max-w-6xl">
+      <section className="section-padding bg-gradient-to-br from-primary/10 to-accent/10">
+        <div className="container-responsive text-center">
           <Badge variant="secondary" className="mb-4">
             <Sparkles className="mr-2 h-4 w-4" />
             Our Services
           </Badge>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gradient-primary">
             Exceptional Event Services
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -47,10 +47,10 @@ const Services = () => {
       </section>
 
       {/* Services Grid */}
-      <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 max-w-6xl">
+      <section className="section-padding">
+        <div className="container-responsive">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">
               Event Management Services
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -70,7 +70,7 @@ const Services = () => {
                   <p className="text-muted-foreground mb-6">
                     {service.short_description}
                   </p>
-                  <Button asChild className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300">
+                  <Button asChild variant="premium" className="w-full">
                     <Link to={`/events/${service.event_type.replace('_', '-')}`}>
                       View Details <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -82,14 +82,14 @@ const Services = () => {
       </section>
 
       {/* Rental Section */}
-      <section className="py-16 lg:py-20 bg-muted/50">
-        <div className="container mx-auto px-4 max-w-6xl">
+      <section className="section-padding bg-muted/50">
+        <div className="container-responsive">
           <div className="text-center mb-16">
             <Badge variant="secondary" className="mb-4">
               <Package className="mr-2 h-4 w-4" />
               Equipment Rental
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">
               Premium Event Rentals
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -116,7 +116,7 @@ const Services = () => {
           </div>
 
           <div className="text-center">
-            <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent">
+            <Button asChild variant="premium" size="lg">
               <Link to="/ecommerce">
                 View More Rentals <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
@@ -126,14 +126,14 @@ const Services = () => {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 max-w-6xl">
+      <section className="section-padding">
+        <div className="container-responsive">
           <div className="text-center mb-16">
             <Badge variant="secondary" className="mb-4">
               <Star className="mr-2 h-4 w-4" />
               Why Choose Us
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">
               What Sets Us Apart
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -202,14 +202,14 @@ const Services = () => {
       </section>
 
       {/* Awards Section */}
-      {awards && awards.length > 0 && <section className="py-16 lg:py-20 bg-muted/50">
-          <div className="container mx-auto px-4 max-w-6xl">
+        {awards && awards.length > 0 && <section className="section-padding bg-muted/50">
+          <div className="container-responsive">
             <div className="text-center mb-16">
               <Badge variant="secondary" className="mb-4">
                 <Award className="mr-2 h-4 w-4" />
                 Recognition
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">
                 Awards & Achievements
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -241,11 +241,11 @@ const Services = () => {
         </section>}
 
       {/* Contact Form Section */}
-      <section className="py-16 lg:py-20 bg-gradient-to-br from-primary/10 to-accent/10">
-        <div className="container mx-auto px-4 max-w-6xl">
+      <section className="section-padding bg-gradient-to-br from-primary/10 to-accent/10">
+        <div className="container-responsive">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">
                 Ready to Plan Your Event?
               </h2>
               <p className="text-xl text-muted-foreground">

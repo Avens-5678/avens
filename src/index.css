@@ -813,7 +813,34 @@
     @apply px-4 lg:px-8 xl:px-12 max-w-screen-2xl;
   }
   
+   
   /* Controlled desktop typography scaling */
   @screen lg {
     .text-lg { @apply text-xl; }
   }
+
+/* Additional utilities for consistent design */
+.text-gradient-primary {
+  @apply bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent;
+}
+
+.text-gradient-secondary {
+  @apply bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent;
+}
+
+/* Consistent spacing utilities */
+.section-padding {
+  @apply py-16 lg:py-20;
+}
+
+.section-padding-compact {
+  @apply py-12 lg:py-16;
+}
+
+.section-padding-large {
+  @apply py-20 lg:py-24;
+}
+
+.container-responsive {
+  @apply container mx-auto px-4 max-w-6xl;
+}

@@ -1,14 +1,7 @@
 import { useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import Layout from "@/components/Layout/Layout";
-import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
-import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap } from "lucide-react";
-import AnimatedSection from "@/components/ui/animated-section";
+import { Briefcase, Star, Users, Calendar, Zap } from "lucide-react";
+import EventPageTemplate from "@/components/templates/EventPageTemplate";
 
 const iconMap = {
   star: Star,

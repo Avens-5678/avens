@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAllServices, useAllRentals, useAwards } from "@/hooks/useData";
-import { ArrowRight, Sparkles, Award, Package } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Package, CheckCircle, Star, Users, Clock } from "lucide-react";
 const Services = () => {
   const {
     data: services,
@@ -125,8 +125,84 @@ const Services = () => {
         </div>
       </section>
 
+      {/* Why Choose Us Section */}
+      <section className="py-16 lg:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4">
+              <Star className="mr-2 h-4 w-4" />
+              Why Choose Us
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              What Sets Us Apart
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Experience the difference with our professional approach and attention to detail
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Card className="text-center border-0 bg-gradient-to-br from-primary/5 to-accent/5 hover:shadow-lg transition-all duration-300">
+              <CardHeader>
+                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <Star className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle className="text-xl font-semibold">Premium Quality</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Only the finest materials and equipment for your special day
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center border-0 bg-gradient-to-br from-primary/5 to-accent/5 hover:shadow-lg transition-all duration-300">
+              <CardHeader>
+                <div className="mx-auto w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-accent" />
+                </div>
+                <CardTitle className="text-xl font-semibold">Expert Team</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Experienced professionals dedicated to your event's success
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center border-0 bg-gradient-to-br from-primary/5 to-accent/5 hover:shadow-lg transition-all duration-300">
+              <CardHeader>
+                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <Clock className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle className="text-xl font-semibold">On-Time Delivery</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Punctual setup and seamless execution every time
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center border-0 bg-gradient-to-br from-primary/5 to-accent/5 hover:shadow-lg transition-all duration-300">
+              <CardHeader>
+                <div className="mx-auto w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4">
+                  <CheckCircle className="h-8 w-8 text-accent" />
+                </div>
+                <CardTitle className="text-xl font-semibold">Full Service</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Complete event management from planning to cleanup
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Awards Section */}
-      {awards && awards.length > 0 && <section className="py-16 lg:py-20">
+      {awards && awards.length > 0 && <section className="py-16 lg:py-20 bg-muted/50">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="text-center mb-16">
               <Badge variant="secondary" className="mb-4">

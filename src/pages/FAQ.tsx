@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Search, MessageCircle, Phone, Mail, HelpCircle, ArrowLeft } from "lucide-react";
+import { Search, MessageCircle, Phone, Mail, User, HelpCircle, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
@@ -257,12 +257,19 @@ const FAQ = () => {
                   </div>
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-8 space-y-4">
                   <Button asChild size="lg" className="glassmorphism-btn">
                     <Link to="/services">
                       Explore Our Services
                     </Link>
                   </Button>
+                  
+                  <div className="text-sm text-muted-foreground">
+                    Want to learn more about our story?{" "}
+                    <Link to="/about" className="text-primary hover:underline font-medium">
+                      Visit our About page
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>

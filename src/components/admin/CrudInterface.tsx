@@ -66,6 +66,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         initialData[field.name] = '';
       }
     });
+    console.log('Creating new item:', { tableName, fields: fields.map(f => f.name), initialData });
     setFormData(initialData);
   };
 
@@ -366,7 +367,10 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   const renderField = (field: Field) => {
     const value = formData[field.name] || '';
     
+    console.log(`Rendering field ${field.name}:`, { value, type: field.type, formData: formData[field.name] });
+    
     const handleChange = (newValue: any) => {
+      console.log(`Field ${field.name} changed:`, { oldValue: formData[field.name], newValue });
       setFormData(prev => ({
         ...prev,
         [field.name]: newValue

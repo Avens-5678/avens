@@ -72,8 +72,15 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
 
   const handleSave = async (eventFormData?: any) => {
     try {
+      console.log('=== SAVE ATTEMPT START ===');
+      console.log('eventFormData:', eventFormData);
+      console.log('formData state:', formData);
+      console.log('editingItem:', editingItem);
+      console.log('isCreating:', isCreating);
+      
       // Use eventFormData if provided (from EnhancedEventForm), otherwise use formData state
       const dataToSave = eventFormData || formData;
+      console.log('dataToSave before cleaning:', dataToSave);
       
       // Clean the data to avoid circular structure issues by only keeping serializable fields
       const cleanData: Record<string, any> = {};
@@ -83,8 +90,11 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         if (dataToSave.hasOwnProperty(field.name)) {
           let value = dataToSave[field.name];
           
+          console.log(`Processing field ${field.name}:`, { value, type: typeof value });
+          
           // Handle corrupted value objects that sometimes appear
           if (value && typeof value === 'object' && value._type === 'undefined') {
+            console.log(`Fixing corrupted value for ${field.name}`);
             value = undefined;
           }
           
@@ -120,6 +130,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
             }
           }
         } else {
+          console.log(`Field ${field.name} not found in dataToSave`);
           // If field is not in dataToSave, set appropriate default values
           if (field.type === 'boolean') {
             cleanData[field.name] = true;
@@ -130,11 +141,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         }
       }
       
-      console.log('Data cleaning process:', { 
-        originalData: dataToSave, 
-        cleanedData: cleanData,
-        fieldNames: fields.map(f => f.name)
-      });
+      console.log('=== FINAL CLEAN DATA ===', cleanData);
       
       // For events, also copy additional fields that might not be in the fields config
       if (tableName === 'events' && eventFormData) {

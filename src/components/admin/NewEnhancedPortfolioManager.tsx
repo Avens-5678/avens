@@ -49,6 +49,7 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
   };
 
   const handleImageUpload = async (file: File, field: string) => {
+    console.log('Portfolio image upload:', { fileName: file.name, field, eventId: formData.event_id });
     if (!file || !formData.event_id) {
       toast({
         title: "Error",
@@ -62,13 +63,14 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
     try {
       const imageUrl = await uploadPortfolioImage(file, formData.event_id);
       setFormData(prev => ({ ...prev, [field]: imageUrl }));
+      console.log('Portfolio image upload successful:', imageUrl);
       
       toast({
         title: "Success",
         description: "Image uploaded successfully",
       });
     } catch (error: any) {
-      console.error('Error uploading image:', error);
+      console.error('Error uploading portfolio image:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to upload image",

@@ -259,16 +259,20 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   };
 
   const handleFileUpload = async (file: File, fieldName: string) => {
+    console.log('Starting file upload:', { fileName: file.name, fieldName, tableName });
     if (!file) return;
     
     setUploading(true);
     try {
         let imageUrl;
         if (fieldName === 'hero_image_url' && tableName === 'events') {
+          console.log('Uploading event hero image');
           imageUrl = await uploadEventHeroImage(file, formData.event_type || 'default');
         } else if (fieldName === 'image_url' && tableName === 'hero_banners') {
+          console.log('Uploading banner image');
           imageUrl = await uploadBannerImage(file);
         } else if (fieldName === 'logo_url' && tableName === 'trusted_clients') {
+          console.log('Uploading client logo');
           imageUrl = await uploadClientLogo(file);
         } else {
           // Handle other image uploads - determine appropriate bucket
@@ -280,17 +284,23 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
             bucket = 'specialty-images';
           }
           
+          console.log('Uploading to bucket:', bucket, 'fileName:', fileName);
+          
           const { data, error } = await supabase.storage
             .from(bucket)
             .upload(fileName, file);
 
-          if (error) throw error;
+          if (error) {
+            console.error('Storage upload error:', error);
+            throw error;
+          }
 
           const { data: { publicUrl } } = supabase.storage
             .from(bucket)
             .getPublicUrl(data.path);
 
           imageUrl = publicUrl;
+          console.log('Upload successful, URL:', imageUrl);
         }
       
       setFormData(prev => ({

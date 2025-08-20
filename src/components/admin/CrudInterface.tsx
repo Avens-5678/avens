@@ -97,6 +97,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   const [uploading, setUploading] = useState(false);
   const [isEnhancedEventFormOpen, setIsEnhancedEventFormOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [removingImage, setRemovingImage] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -450,44 +451,74 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   const handleRemoveImage = async (fieldName: string) => {
     console.log('Removing image for field:', fieldName);
     
-    const currentImageUrl = formData[fieldName];
+    // Set loading state to prevent save operations
+    setRemovingImage(fieldName);
     
-    // If there's a current image URL, delete it from storage
-    if (currentImageUrl && typeof currentImageUrl === 'string' && currentImageUrl.includes('supabase.co/storage/v1/object/public/')) {
-      try {
-        // Extract bucket and file path from URL
-        const urlParts = currentImageUrl.split('/storage/v1/object/public/');
-        if (urlParts.length > 1) {
-          const pathParts = urlParts[1].split('/');
-          const bucket = pathParts[0];
-          const filePath = pathParts.slice(1).join('/');
-          
-          console.log('Deleting from storage:', { bucket, filePath });
-          
-          // Delete from Supabase storage
-          const { error } = await supabase.storage
-            .from(bucket)
-            .remove([filePath]);
-          
-          if (error) {
-            console.error('Storage deletion error:', error);
-            // Continue with form field removal even if storage deletion fails
-          } else {
-            console.log('Successfully deleted from storage');
+    try {
+      const currentImageUrl = formData[fieldName];
+      
+      // Immediately clear the form field to update UI
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: null
+      }));
+      
+      // If there's a current image URL, delete it from storage
+      if (currentImageUrl && typeof currentImageUrl === 'string' && currentImageUrl.includes('supabase.co/storage/v1/object/public/')) {
+        try {
+          // Extract bucket and file path from URL
+          const urlParts = currentImageUrl.split('/storage/v1/object/public/');
+          if (urlParts.length > 1) {
+            const pathParts = urlParts[1].split('/');
+            const bucket = pathParts[0];
+            const filePath = pathParts.slice(1).join('/');
+            
+            console.log('Deleting from storage:', { bucket, filePath });
+            
+            // Delete from Supabase storage
+            const { error } = await supabase.storage
+              .from(bucket)
+              .remove([filePath]);
+            
+            if (error) {
+              console.error('Storage deletion error:', error);
+              toast({
+                title: "Warning",
+                description: "Image removed from form but may still exist in storage.",
+                variant: "destructive",
+              });
+            } else {
+              console.log('Successfully deleted from storage');
+              toast({
+                title: "Image Removed",
+                description: "Image has been completely removed from storage and form.",
+              });
+            }
           }
+        } catch (error) {
+          console.error('Error parsing image URL for deletion:', error);
+          toast({
+            title: "Warning", 
+            description: "Image removed from form but storage cleanup failed.",
+            variant: "destructive",
+          });
         }
-      } catch (error) {
-        console.error('Error parsing image URL for deletion:', error);
-        // Continue with form field removal even if storage deletion fails
+      } else {
+        toast({
+          title: "Image Removed",
+          description: "Image has been removed from form.",
+        });
       }
+    } catch (error) {
+      console.error('Error removing image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setRemovingImage(null);
     }
-    
-    // Clear the form field
-    updateFormField(fieldName, null);
-    toast({
-      title: "Image Removed",
-      description: "Image has been removed from storage and form.",
-    });
   };
 
   const renderField = (field: Field) => {
@@ -594,8 +625,9 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
                     variant="destructive"
                     className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 hover:scale-110 transition-transform"
                     onClick={() => handleRemoveImage(field.name)}
+                    disabled={removingImage === field.name}
                   >
-                    ×
+                    {removingImage === field.name ? '...' : '×'}
                   </Button>
                 </div>
               </div>
@@ -691,8 +723,8 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
             <Button variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button onClick={() => handleSave()} disabled={uploading}>
-              {editingItem ? 'Update' : 'Create'}
+            <Button onClick={() => handleSave()} disabled={uploading || removingImage !== null}>
+              {uploading ? 'Saving...' : removingImage ? 'Removing Image...' : (editingItem ? 'Update' : 'Create')}
             </Button>
           </div>
         </DialogContent>

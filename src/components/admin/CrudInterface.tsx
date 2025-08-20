@@ -73,70 +73,61 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   const handleSave = async (eventFormData?: any) => {
     try {
       console.log('=== SAVE ATTEMPT START ===');
-      console.log('eventFormData:', eventFormData);
-      console.log('formData state:', formData);
-      console.log('editingItem:', editingItem);
-      console.log('isCreating:', isCreating);
       
       // Use eventFormData if provided (from EnhancedEventForm), otherwise use formData state
-      const dataToSave = eventFormData || formData;
-      console.log('dataToSave before cleaning:', dataToSave);
+      let dataToSave = eventFormData || formData;
       
-      // Clean the data to avoid circular structure issues by only keeping serializable fields
+      // If formData is corrupted, try to read values directly from form inputs
+      if (!eventFormData && (!dataToSave || Object.keys(dataToSave).length === 0 || 
+          Object.values(dataToSave).some(v => v && typeof v === 'object' && (v as any)._type === 'undefined'))) {
+        console.log('FormData corrupted, reading from DOM directly');
+        const formElement = document.querySelector('form') || document.querySelector('[role="dialog"]');
+        if (formElement) {
+          dataToSave = {};
+          fields.forEach(field => {
+            const input = formElement.querySelector(`[name="${field.name}"], [data-field="${field.name}"]`);
+            if (input) {
+              if (field.type === 'boolean') {
+                dataToSave[field.name] = (input as HTMLInputElement).checked;
+              } else if (field.type === 'number') {
+                dataToSave[field.name] = Number((input as HTMLInputElement).value) || 0;
+              } else {
+                dataToSave[field.name] = (input as HTMLInputElement).value || '';
+              }
+            } else {
+              // Use current formData value if DOM element not found
+              dataToSave[field.name] = formData[field.name] || (field.type === 'boolean' ? true : field.type === 'number' ? 0 : '');
+            }
+          });
+        }
+      }
+      
+      console.log('dataToSave after DOM reading:', dataToSave);
+      
+      // Simplified data cleaning - just ensure all fields exist
       const cleanData: Record<string, any> = {};
       
-      // Copy only the fields that are defined in the fields configuration
-      for (const field of fields) {
-        let value = undefined;
+      fields.forEach(field => {
+        let value = dataToSave[field.name];
         
-        if (dataToSave.hasOwnProperty(field.name)) {
-          value = dataToSave[field.name];
-          
-          console.log(`Processing field ${field.name}:`, { value, type: typeof value });
-          
-          // Handle corrupted value objects that sometimes appear
-          if (value && typeof value === 'object' && value._type === 'undefined') {
-            console.log(`Fixing corrupted value for ${field.name}`);
-            value = undefined;
-          }
+        // Handle corrupted values
+        if (value && typeof value === 'object' && (value as any)._type === 'undefined') {
+          value = undefined;
         }
         
-        // Always include all fields in cleanData, even if empty
-        if (value === null || value === undefined) {
+        // Set appropriate values
+        if (value === null || value === undefined || value === '') {
           if (field.type === 'boolean') {
-            cleanData[field.name] = true; // default for boolean
+            cleanData[field.name] = true;
           } else if (field.type === 'number') {
-            cleanData[field.name] = 0; // default for number
+            cleanData[field.name] = 0;
           } else {
-            cleanData[field.name] = ''; // empty string for text/select/etc
-          }
-        } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-          // Keep primitive values
-          cleanData[field.name] = value;
-        } else if (Array.isArray(value)) {
-          // Handle arrays by keeping only primitive values
-          cleanData[field.name] = value.filter(v => 
-            typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
-          );
-        } else if (typeof value === 'object' && value !== null) {
-          // For objects, try to serialize them, but be more permissive
-          try {
-            if (value.constructor === Object) {
-              cleanData[field.name] = JSON.parse(JSON.stringify(value));
-            } else {
-              console.warn(`Complex object for field ${field.name}:`, value);
-              // Default to empty string for unsupported objects
-              cleanData[field.name] = '';
-            }
-          } catch (error) {
-            console.warn(`Skipping field ${field.name} due to serialization issues:`, error);
             cleanData[field.name] = '';
           }
         } else {
-          // Fallback to empty string
-          cleanData[field.name] = '';
+          cleanData[field.name] = value;
         }
-      }
+      });
       
       console.log('=== FINAL CLEAN DATA ===', cleanData);
       
@@ -394,6 +385,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       case 'textarea':
         return (
           <Textarea
+            name={field.name}
             value={value}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={`Enter ${field.label.toLowerCase()}`}
@@ -403,6 +395,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       case 'boolean':
         return (
           <Switch
+            name={field.name}
             checked={value}
             onCheckedChange={handleChange}
           />
@@ -413,7 +406,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         if (field.name === 'event_type' && !editingItem) {
           return (
             <div className="space-y-2">
-              <Select value={value} onValueChange={handleChange}>
+              <Select name={field.name} value={value} onValueChange={handleChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select or create event type" />
                 </SelectTrigger>
@@ -426,6 +419,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
                 </SelectContent>
               </Select>
               <Input
+                name={`${field.name}_custom`}
                 value={value}
                 onChange={(e) => {
                   const inputValue = e.target.value.toLowerCase().replace(/\s+/g, '-');
@@ -439,7 +433,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         }
         
         return (
-          <Select value={value} onValueChange={handleChange}>
+          <Select name={field.name} value={value} onValueChange={handleChange}>
             <SelectTrigger>
               <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
             </SelectTrigger>
@@ -456,6 +450,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       case 'number':
         return (
           <Input
+            name={field.name}
             type="number"
             value={value}
             onChange={(e) => handleChange(Number(e.target.value))}
@@ -466,6 +461,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       case 'image':
         return (
           <Input
+            name={field.name}
             type="url"
             value={value}
             onChange={(e) => handleChange(e.target.value)}
@@ -477,6 +473,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         return (
           <div className="space-y-2">
             <Input
+              name={field.name}
               type="file"
               accept="image/*"
               onChange={(e) => {
@@ -499,6 +496,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       default:
         return (
           <Input
+            name={field.name}
             value={value}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={`Enter ${field.label.toLowerCase()}`}

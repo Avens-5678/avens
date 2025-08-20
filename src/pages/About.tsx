@@ -1,8 +1,10 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/Layout/Layout";
 import { useAboutContent, useNewsAchievements } from "@/hooks/useData";
-import { Quote, User, Target, Eye, Award } from "lucide-react";
+import { Quote, User, Target, Eye, Award, HelpCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const About = () => {
   const { data: aboutContent, isLoading: loadingAbout } = useAboutContent();
@@ -144,6 +146,29 @@ const About = () => {
           </div>
         </section>
       )}
+
+      {/* FAQ Section */}
+      <section className="py-16 lg:py-20 bg-gradient-to-br from-accent/10 to-primary/10">
+        <div className="container mx-auto px-4 max-w-6xl text-center">
+          <div className="max-w-3xl mx-auto">
+            <Badge variant="secondary" className="mb-4">
+              <HelpCircle className="mr-2 h-4 w-4" />
+              Need Help?
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Find answers to common questions about our services, pricing, and event planning process.
+            </p>
+            <Button asChild size="lg" className="glassmorphism-btn">
+              <Link to="/faq">
+                View FAQ <HelpCircle className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
 
     </Layout>
   );

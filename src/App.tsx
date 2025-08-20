@@ -12,7 +12,7 @@ import About from "./pages/About";
 import Blog from "./pages/Blog";
 import FAQ from "./pages/FAQ";
 import EventDetail from "./pages/EventDetail";
-import Ecommerce from "./pages/Ecommerce";
+import EnhancedEcommerce from "./pages/EnhancedEcommerce";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -51,7 +51,7 @@ const App = () => (
             <Route path="/events/equipment-rental" element={<EquipmentRental />} />
             <Route path="/events/government" element={<GovernmentEvents />} />
             <Route path="/events/:eventType" element={<DynamicEventPage />} />
-            <Route path="/ecommerce" element={<Ecommerce />} />
+            <Route path="/ecommerce" element={<EnhancedEcommerce />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />

@@ -25,17 +25,14 @@ export const CarouselDots = ({
           key={index}
           onClick={() => onSlideChange(index)}
           className={cn(
-            "w-3 h-3 rounded-full transition-all duration-300 border border-white/30",
+            "w-3 h-3 rounded-full transition-all duration-300 border-0",
             currentSlide === index
-              ? "bg-white scale-125 shadow-glow-blue"
-              : "bg-white/30 hover:bg-white/50"
+              ? "bg-black scale-125"
+              : "bg-gray-300 hover:bg-gray-400"
           )}
           aria-label={`Go to slide ${index + 1}`}
         />
       ))}
-      <div className="ml-3 text-white/70 text-sm font-medium">
-        {currentSlide + 1} / {totalSlides}
-      </div>
     </div>
   );
 };

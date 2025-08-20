@@ -401,6 +401,10 @@
     animation: scroll 30s linear infinite;
   }
 
+  .animate-scroll-x {
+    animation: scroll 20s linear infinite;
+  }
+
   .animate-shimmer {
     animation: shimmer 2s infinite;
   }

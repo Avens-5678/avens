@@ -551,19 +551,19 @@ const Index = () => {
                 </AnimatedText>
               </div>
 
-              <div className="overflow-hidden">
-                <div className="flex animate-scroll-x">
-                  {[...trustedClients, ...trustedClients].map((client, index) => (
-                    <div key={`${client.id}-${index}`} className="flex-shrink-0 mx-8">
-                      <div className="w-32 h-20 flex items-center justify-center bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-primary/30 transition-all duration-300 group">
+              <div className="overflow-hidden relative">
+                <div className="flex animate-scroll-x whitespace-nowrap">
+                  {[...trustedClients, ...trustedClients, ...trustedClients].map((client, index) => (
+                    <div key={`${client.id}-${index}`} className="flex-shrink-0 mx-6 lg:mx-8">
+                      <div className="w-28 lg:w-32 h-16 lg:h-20 flex items-center justify-center bg-card/60 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/40 hover:bg-card/80 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg">
                         {client.logo_url ? (
                           <img 
                             src={client.logo_url} 
                             alt={client.name}
-                            className="max-w-24 max-h-12 object-contain opacity-70 group-hover:opacity-100 transition-opacity"
+                            className="max-w-20 lg:max-w-24 max-h-10 lg:max-h-12 object-contain opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
                           />
                         ) : (
-                          <div className="text-muted-foreground text-sm font-medium text-center px-2">
+                          <div className="text-muted-foreground text-xs lg:text-sm font-medium text-center px-2">
                             {client.name}
                           </div>
                         )}

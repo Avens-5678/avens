@@ -139,9 +139,9 @@ export const useEvent = (eventType: string) => {
   });
 };
 
-export const usePortfolio = (eventId?: string) => {
+export const usePortfolio = (eventId?: string, showOnHome?: boolean) => {
   return useQuery({
-    queryKey: ["portfolio", eventId],
+    queryKey: ["portfolio", eventId, showOnHome],
     queryFn: async () => {
       let query = supabase
         .from("portfolio")
@@ -156,12 +156,17 @@ export const usePortfolio = (eventId?: string) => {
           tag,
           album_url,
           before_image_url,
-          after_image_url
+          after_image_url,
+          show_on_home
         `)
         .order("display_order", { ascending: true });
 
       if (eventId) {
         query = query.eq("event_id", eventId);
+      }
+
+      if (showOnHome !== undefined) {
+        query = query.eq("show_on_home", showOnHome);
       }
 
       const { data, error } = await query;

@@ -434,6 +434,7 @@ export type Database = {
           image_url: string
           is_before: boolean | null
           is_before_after: boolean | null
+          show_on_home: boolean | null
           tag: string | null
           title: string
           updated_at: string
@@ -449,6 +450,7 @@ export type Database = {
           image_url: string
           is_before?: boolean | null
           is_before_after?: boolean | null
+          show_on_home?: boolean | null
           tag?: string | null
           title: string
           updated_at?: string
@@ -464,6 +466,7 @@ export type Database = {
           image_url?: string
           is_before?: boolean | null
           is_before_after?: boolean | null
+          show_on_home?: boolean | null
           tag?: string | null
           title?: string
           updated_at?: string
@@ -572,6 +575,45 @@ export type Database = {
           size_options?: string[] | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -808,6 +850,16 @@ export type Database = {
       is_current_user_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          action_type: string
+          new_data?: Json
+          old_data?: Json
+          record_id?: string
+          table_name?: string
+        }
+        Returns: undefined
       }
       unlock_admin_account: {
         Args: { admin_id: string }

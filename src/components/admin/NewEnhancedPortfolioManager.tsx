@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +45,8 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
       album_url: '',
       image_url: '',
       before_image_url: '',
-      after_image_url: ''
+      after_image_url: '',
+      show_on_home: true
     });
   };
 
@@ -127,7 +129,8 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
           before_image_url: formData.before_image_url || null,
           after_image_url: formData.after_image_url || null,
           is_before_after: (formData.before_image_url && formData.after_image_url) ? true : false,
-          is_before: false
+          is_before: false,
+          show_on_home: formData.show_on_home !== false
         };
 
         const { error } = await supabase
@@ -168,7 +171,8 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
           before_image_url: formData.before_image_url || null,
           after_image_url: formData.after_image_url || null,
           is_before_after: (formData.before_image_url && formData.after_image_url) ? true : false,
-          is_before: false
+          is_before: false,
+          show_on_home: formData.show_on_home !== false
         };
         
         const { error } = await supabase
@@ -435,6 +439,14 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
                   placeholder="Display order (0 = first)"
                 />
               </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={formData.show_on_home !== false}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, show_on_home: checked }))}
+              />
+              <Label>Show on Home Page</Label>
             </div>
             
             <div className="flex space-x-2 pt-4">

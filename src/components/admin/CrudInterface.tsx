@@ -74,60 +74,78 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     try {
       console.log('=== SAVE ATTEMPT START ===');
       
-      // Use eventFormData if provided (from EnhancedEventForm), otherwise use formData state
-      let dataToSave = eventFormData || formData;
+      // COMPLETELY BYPASS STATE - Read directly from form every time
+      const dialogElement = document.querySelector('[role="dialog"]');
+      const formData: Record<string, any> = {};
       
-      // If formData is corrupted, try to read values directly from form inputs
-      if (!eventFormData && (!dataToSave || Object.keys(dataToSave).length === 0 || 
-          Object.values(dataToSave).some(v => v && typeof v === 'object' && (v as any)._type === 'undefined'))) {
-        console.log('FormData corrupted, reading from DOM directly');
-        const formElement = document.querySelector('form') || document.querySelector('[role="dialog"]');
-        if (formElement) {
-          dataToSave = {};
-          fields.forEach(field => {
-            const input = formElement.querySelector(`[name="${field.name}"], [data-field="${field.name}"]`);
-            if (input) {
-              if (field.type === 'boolean') {
-                dataToSave[field.name] = (input as HTMLInputElement).checked;
-              } else if (field.type === 'number') {
-                dataToSave[field.name] = Number((input as HTMLInputElement).value) || 0;
-              } else {
-                dataToSave[field.name] = (input as HTMLInputElement).value || '';
+      if (dialogElement) {
+        console.log('Reading form data directly from DOM...');
+        
+        // Read all form inputs directly
+        fields.forEach(field => {
+          console.log(`Reading field: ${field.name}`);
+          
+          if (field.type === 'boolean') {
+            const switchInput = dialogElement.querySelector(`[role="switch"][data-state]`);
+            if (switchInput) {
+              formData[field.name] = switchInput.getAttribute('data-state') === 'checked';
+              console.log(`Boolean field ${field.name}:`, formData[field.name]);
+            } else {
+              formData[field.name] = true; // default
+            }
+          } else if (field.type === 'select') {
+            const selectTrigger = dialogElement.querySelector(`[role="combobox"]`);
+            if (selectTrigger) {
+              const selectedValue = selectTrigger.getAttribute('data-value') || selectTrigger.textContent?.trim();
+              formData[field.name] = selectedValue || '';
+              console.log(`Select field ${field.name}:`, formData[field.name]);
+            } else {
+              formData[field.name] = '';
+            }
+          } else if (field.type === 'number') {
+            const numberInputs = dialogElement.querySelectorAll('input[type="number"]');
+            // For now, assume display_order is the number field
+            if (field.name === 'display_order' && numberInputs.length > 0) {
+              formData[field.name] = Number((numberInputs[0] as HTMLInputElement).value) || 0;
+              console.log(`Number field ${field.name}:`, formData[field.name]);
+            } else {
+              formData[field.name] = 0;
+            }
+          } else {
+            // Text, textarea, file fields
+            const textInputs = dialogElement.querySelectorAll('input[type="text"], input[type="url"], textarea');
+            const fileInputs = dialogElement.querySelectorAll('input[type="file"]');
+            
+            // Try to match by placeholder or order
+            let fieldValue = '';
+            
+            if (field.type === 'file') {
+              // For file fields, check if we have an uploaded URL in the current component state
+              if (formData && formData[field.name]) {
+                fieldValue = formData[field.name];
               }
             } else {
-              // Use current formData value if DOM element not found
-              dataToSave[field.name] = formData[field.name] || (field.type === 'boolean' ? true : field.type === 'number' ? 0 : '');
+              // For text fields, try to find by placeholder
+              for (let input of textInputs) {
+                const placeholder = (input as HTMLInputElement).placeholder.toLowerCase();
+                if (placeholder.includes(field.label.toLowerCase()) || 
+                    placeholder.includes(field.name.toLowerCase())) {
+                  fieldValue = (input as HTMLInputElement).value;
+                  break;
+                }
+              }
             }
-          });
-        }
+            
+            formData[field.name] = fieldValue;
+            console.log(`Text field ${field.name}:`, fieldValue);
+          }
+        });
       }
       
-      console.log('dataToSave after DOM reading:', dataToSave);
+      console.log('=== FORM DATA FROM DOM ===', formData);
       
-      // Simplified data cleaning - just ensure all fields exist
-      const cleanData: Record<string, any> = {};
-      
-      fields.forEach(field => {
-        let value = dataToSave[field.name];
-        
-        // Handle corrupted values
-        if (value && typeof value === 'object' && (value as any)._type === 'undefined') {
-          value = undefined;
-        }
-        
-        // Set appropriate values
-        if (value === null || value === undefined || value === '') {
-          if (field.type === 'boolean') {
-            cleanData[field.name] = true;
-          } else if (field.type === 'number') {
-            cleanData[field.name] = 0;
-          } else {
-            cleanData[field.name] = '';
-          }
-        } else {
-          cleanData[field.name] = value;
-        }
-      });
+      // Use the DOM-read data as our clean data
+      const cleanData = { ...formData };
       
       console.log('=== FINAL CLEAN DATA ===', cleanData);
       

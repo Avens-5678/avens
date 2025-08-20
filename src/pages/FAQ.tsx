@@ -11,69 +11,7 @@ import { AnimatedText } from "@/components/ui/animated-text";
 import { useActiveFAQ } from "@/hooks/useData";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-// Default FAQ data - in production this would come from the database
-const defaultFAQs = [
-  {
-    id: "1",
-    category: "General",
-    question: "What types of events do you specialize in?",
-    answer: "We specialize in weddings, corporate events, birthday parties, government events, and private celebrations. Our team has extensive experience in planning and executing events of all sizes, from intimate gatherings to large-scale productions."
-  },
-  {
-    id: "2", 
-    category: "Booking",
-    question: "How far in advance should I book your services?",
-    answer: "We recommend booking at least 3-6 months in advance for weddings and large events, and 2-4 weeks for smaller gatherings. However, we understand that sometimes events come up last minute, so please contact us even if your event is coming up soon - we'll do our best to accommodate you."
-  },
-  {
-    id: "3",
-    category: "Pricing",
-    question: "How do you calculate pricing for events?",
-    answer: "Our pricing depends on several factors including event type, guest count, venue, duration, services required, and customization level. We provide detailed quotes after understanding your specific needs. Contact us for a free consultation and personalized quote."
-  },
-  {
-    id: "4",
-    category: "Services",
-    question: "Do you provide venue decoration services?",
-    answer: "Yes! We offer complete venue decoration services including floral arrangements, lighting design, table settings, backdrop creation, and themed decorations. Our design team works closely with you to bring your vision to life."
-  },
-  {
-    id: "5",
-    category: "Rentals",
-    question: "What rental equipment do you offer?",
-    answer: "We offer a wide range of rental equipment including furniture (chairs, tables, sofas), audio/visual equipment (speakers, microphones, projectors), lighting systems, tents and canopies, catering equipment, and specialty items. Browse our rental catalog for a complete list."
-  },
-  {
-    id: "6",
-    category: "Delivery",
-    question: "Do you provide delivery and setup services?",
-    answer: "Yes, we provide delivery, setup, and pickup services for all rental items. Our professional team ensures everything is properly installed and positioned according to your event layout. Delivery fees may apply based on location and distance."
-  },
-  {
-    id: "7",
-    category: "Payment",
-    question: "What are your payment terms?",
-    answer: "We typically require a 30% deposit to secure your booking, with the balance due 7 days before the event. We accept various payment methods including bank transfers, credit cards, and cash. Payment plans can be discussed for larger events."
-  },
-  {
-    id: "8",
-    category: "Cancellation",
-    question: "What is your cancellation policy?",
-    answer: "Cancellations made 30+ days before the event receive a full refund minus a small processing fee. Cancellations 15-30 days prior receive a 50% refund. Cancellations less than 15 days are subject to full charges. We understand emergencies happen and will work with you when possible."
-  },
-  {
-    id: "9",
-    category: "Planning",
-    question: "Do you offer event planning consultation?",
-    answer: "Absolutely! Our experienced event planners provide consultation services to help you plan every detail of your event. This includes timeline creation, vendor coordination, budget planning, and day-of coordination to ensure everything runs smoothly."
-  },
-  {
-    id: "10",
-    category: "Customization",
-    question: "Can you accommodate special dietary requirements or cultural preferences?",
-    answer: "Yes, we work with trusted catering partners who can accommodate various dietary requirements including vegetarian, vegan, gluten-free, halal, and kosher options. We also respect and incorporate cultural preferences and traditions into your event planning."
-  }
-];
+// All FAQs are now stored in the database
 
 const FAQ = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -81,8 +19,8 @@ const FAQ = () => {
   
   const { data: faqs, isLoading } = useActiveFAQ();
 
-  // Use database data if available, otherwise fall back to default FAQs
-  const faqData = faqs && faqs.length > 0 ? faqs : defaultFAQs;
+  // Use database data directly
+  const faqData = faqs || [];
 
   // Filter FAQs based on search term and category
   const filteredFAQs = faqData.filter(faq => {

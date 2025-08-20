@@ -21,6 +21,7 @@ interface HubSpotContact {
     lifecyclestage?: string;
     lead_source?: string;
     event_type?: string;
+    event_date?: string;
     rental_items?: string;
     location?: string;
     form_type?: string;
@@ -41,7 +42,7 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    const { submissionId, name, email, phone, message, formType, eventType, rentalTitle, location } = await req.json();
+    const { submissionId, name, email, phone, message, formType, eventType, eventDate, rentalTitle, location } = await req.json();
 
     if (!email || !name) {
       return new Response('Missing required fields: email and name', {
@@ -80,6 +81,9 @@ serve(async (req: Request): Promise<Response> => {
     // Add specific properties based on form type
     if (formType === 'event') {
       hubspotContact.properties.event_type = eventType || '';
+      if (eventDate) {
+        hubspotContact.properties.event_date = eventDate;
+      }
     } else if (formType === 'rental') {
       hubspotContact.properties.rental_items = rentalTitle || '';
     }

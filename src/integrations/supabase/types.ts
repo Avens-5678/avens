@@ -297,6 +297,7 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          event_date: string | null
           event_type: string | null
           form_type: string
           id: string
@@ -312,6 +313,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email: string
+          event_date?: string | null
           event_type?: string | null
           form_type: string
           id?: string
@@ -327,6 +329,7 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string
+          event_date?: string | null
           event_type?: string | null
           form_type?: string
           id?: string

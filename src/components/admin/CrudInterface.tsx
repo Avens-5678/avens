@@ -204,6 +204,8 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
               if (imageUrl) {
                 dataToSave[key] = imageUrl;
                 console.log(`File uploaded successfully for ${key}:`, imageUrl);
+              } else {
+                throw new Error(`Failed to get upload URL for ${key}`);
               }
             } catch (uploadError) {
               console.error(`Error uploading file for ${key}:`, uploadError);
@@ -212,8 +214,14 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
           })();
           
           uploadPromises.push(uploadPromise);
-        } else if (typeof value === 'string' && value.startsWith('C:\\fakepath\\')) {
+        } else if (typeof value === 'string' && (value.startsWith('C:\\fakepath\\') || value.includes('fakepath'))) {
           // Prevent saving with fake paths - this indicates a failed upload
+          console.error(`Invalid file path detected for ${key}:`, value);
+          toast({
+            title: "Upload Error",
+            description: `Invalid file path detected for ${key}. Please re-upload the file.`,
+            variant: "destructive",
+          });
           throw new Error(`Invalid file path detected for ${key}. Please re-upload the file.`);
         }
       }

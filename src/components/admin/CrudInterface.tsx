@@ -81,23 +81,50 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       for (const field of fields) {
         if (dataToSave.hasOwnProperty(field.name)) {
           const value = dataToSave[field.name];
-          // Only copy primitive values and avoid DOM elements or React objects
-          if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || value === undefined) {
+          
+          // Handle different value types more carefully
+          if (value === null || value === undefined || value === '') {
+            // Keep null/undefined/empty string values as they are
+            cleanData[field.name] = value;
+          } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+            // Keep primitive values
             cleanData[field.name] = value;
           } else if (Array.isArray(value)) {
             // Handle arrays by keeping only primitive values
-            cleanData[field.name] = value.filter(v => typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean');
-          } else if (typeof value === 'object' && value !== null && value.constructor === Object) {
-            // Handle plain objects (not DOM elements or React components)
+            cleanData[field.name] = value.filter(v => 
+              typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+            );
+          } else if (typeof value === 'object' && value !== null) {
+            // For objects, try to serialize them, but be more permissive
             try {
-              cleanData[field.name] = JSON.parse(JSON.stringify(value));
-            } catch {
-              // Skip if can't serialize
-              console.warn(`Skipping field ${field.name} due to serialization issues`);
+              if (value.constructor === Object) {
+                cleanData[field.name] = JSON.parse(JSON.stringify(value));
+              } else {
+                // If it's not a plain object, try to extract meaningful value
+                console.warn(`Complex object for field ${field.name}:`, value);
+                // Skip complex objects that can't be serialized
+              }
+            } catch (error) {
+              console.warn(`Skipping field ${field.name} due to serialization issues:`, error);
             }
+          }
+        } else {
+          // If field is not in dataToSave, check if it should have a default value
+          if (field.type === 'boolean') {
+            cleanData[field.name] = true;
+          } else if (field.type === 'number') {
+            cleanData[field.name] = 0;
+          } else {
+            cleanData[field.name] = '';
           }
         }
       }
+      
+      console.log('Data cleaning process:', { 
+        originalData: dataToSave, 
+        cleanedData: cleanData,
+        fieldNames: fields.map(f => f.name)
+      });
       
       // For events, also copy additional fields that might not be in the fields config
       if (tableName === 'events' && eventFormData) {

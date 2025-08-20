@@ -193,25 +193,43 @@ const DynamicEventPage = () => {
 
       {/* Our Process */}
       {processSteps.length > 0 && (
-        <section className="py-20 bg-secondary/50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-6">Our Process</h2>
-            </div>
+        <section className="py-32 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
+          <div className="absolute inset-0 particles-container opacity-30" />
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <AnimatedSection animation="fade-in-up" delay={0.2} className="text-center mb-20">
+              <h2 className="text-5xl font-bold mb-6">
+                Our Process
+                <span className="block text-gradient-primary">Excellence</span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                From your first conversation to the final moment, we guide you through every step of creating your perfect {event.title} experience.
+              </p>
+            </AnimatedSection>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {processSteps.sort((a, b) => a.order - b.order).map((step, index) => {
                 const IconComponent = iconMap[step.icon as keyof typeof iconMap] || Star;
                 return (
-                  <div key={index} className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                      <IconComponent className="h-8 w-8 text-primary-foreground" />
+                  <AnimatedSection 
+                    key={index} 
+                    animation="scale-in" 
+                    delay={0.4 + (index * 0.2)}
+                    className="text-center space-y-6 group"
+                  >
+                    <div className="relative mx-auto mb-8">
+                      <div className="w-24 h-24 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                        <IconComponent className="h-12 w-12 text-white" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-bold">{index + 1}</span>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-semibold">{step.title}</h3>
+                    <h3 className="text-2xl font-bold text-gradient-primary">{step.title}</h3>
                     <p className="text-muted-foreground leading-relaxed">
                       {step.description}
                     </p>
-                  </div>
+                  </AnimatedSection>
                 );
               })}
             </div>

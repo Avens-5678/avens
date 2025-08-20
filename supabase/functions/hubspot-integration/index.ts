@@ -28,6 +28,19 @@ interface HubSpotContact {
   };
 }
 
+// Function to map internal form types to HubSpot expected values
+function mapFormTypeForHubSpot(internalFormType: string): string {
+  const formTypeMapping: { [key: string]: string } = {
+    'inquiry': 'Event Booking',
+    'contact': 'Contact Form',
+    'rental': 'Rental Request',
+    'event': 'Event Booking',
+    'general': 'General'
+  };
+  
+  return formTypeMapping[internalFormType] || 'General Inquiry';
+}
+
 serve(async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -73,7 +86,7 @@ serve(async (req: Request): Promise<Response> => {
         message: message || '',
         lifecyclestage: 'lead',
         lead_source: 'Website Form',
-        form_type: formType || 'general',
+        form_type: mapFormTypeForHubSpot(formType || 'general'),
         location: location || '',
       }
     };

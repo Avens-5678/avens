@@ -6,8 +6,12 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } 
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
-import { Heart, ArrowRight, Camera, ExternalLink, Crown, Flower, Diamond, Church, Heart as Ring, Calendar } from "lucide-react";
-import AnimatedSection from "@/components/ui/animated-section";
+import { Heart, ArrowRight, Camera, ExternalLink, Crown, Flower, Diamond, Church, Heart as Ring, Calendar, Sparkles, Star, Gift } from "lucide-react";
+import ScrollReveal from "@/components/ui/scroll-reveal";
+import FloatingParticles from "@/components/ui/floating-particles";
+import MagneticButton from "@/components/ui/magnetic-button";
+import GlassmorphismCard from "@/components/ui/glassmorphism-card";
+import InteractiveGrid from "@/components/ui/interactive-grid";
 import weddingHero from "@/assets/wedding-events-hero.jpg";
 
 const WeddingEvents = () => {
@@ -52,274 +56,397 @@ const WeddingEvents = () => {
 
   return (
     <Layout>
-      {/* Lifestyle Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <AnimatedSection animation="fade-in-up" delay={0.1} className="lg:w-1/2 space-y-8">
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 w-fit">
-                <Heart className="mr-2 h-4 w-4" />
+      {/* Enhanced Hero Section with Particles */}
+      <section className="relative min-h-screen flex items-center overflow-hidden particles-container">
+        <FloatingParticles count={30} colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))']} />
+        
+        {/* Morphing Background Elements */}
+        <div className="absolute top-20 right-20 w-96 h-96 animate-morphing-bg opacity-30 pointer-events-none" />
+        <div className="absolute bottom-20 left-20 w-80 h-80 animate-morphing-bg opacity-20 pointer-events-none" style={{ animationDelay: '4s' }} />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            <ScrollReveal animation="fade-in-up" delay={200} className="lg:w-1/2 space-y-8">
+              <Badge variant="secondary" className="glass bg-primary/10 text-primary border-primary/20 w-fit hover-glow">
+                <Heart className="mr-2 h-4 w-4 animate-pulse-glow" />
                 Wedding Events
               </Badge>
               
-              <AnimatedSection animation="fade-in-up" delay={0.3}>
+              <ScrollReveal animation="bounce-in" delay={400}>
                 <div className="space-y-6">
-                  <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                  <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
                     Your Love Story
-                    <span className="block text-primary">Perfectly Told</span>
+                    <span className="block text-gradient-primary animate-gradient-text">Perfectly Told</span>
                   </h1>
                   
                   <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
                     {event?.description || "At Avens Events, we believe every wedding should be as unique as your love story. From intimate ceremonies to grand celebrations, we craft unforgettable experiences that reflect your style and dreams."}
                   </p>
                 </div>
-              </AnimatedSection>
+              </ScrollReveal>
 
-              <AnimatedSection animation="scale-in" delay={0.5}>
+              <ScrollReveal animation="elastic" delay={600}>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8">
-                      Plan My Wedding <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
+                    <MagneticButton 
+                      size="lg" 
+                      className="button-primary px-12 py-4 text-lg font-semibold rounded-full shadow-2xl"
+                      strength={15}
+                    >
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Plan My Wedding 
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </MagneticButton>
                   </DialogTrigger>
-                  <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
-                    <div className="overflow-y-auto flex-1 p-4 sm:p-6">
-                      <InquiryForm 
-                        formType="inquiry"
-                        eventType="wedding"
-                        title="Plan Your Dream Wedding"
-                      />
-                    </div>
+                  <DialogContent className="max-w-2xl glass">
+                    <DialogTitle>✨ Start Planning Your Dream Wedding</DialogTitle>
+                    <DialogDescription>Fill out this form to begin your magical journey</DialogDescription>
+                    <InquiryForm 
+                      formType="inquiry"
+                      eventType="wedding"
+                      title="Plan Your Dream Wedding"
+                    />
                   </DialogContent>
                 </Dialog>
-              </AnimatedSection>
-            </AnimatedSection>
+              </ScrollReveal>
+            </ScrollReveal>
 
-            <AnimatedSection animation="slide-in-right" delay={0.4} className="lg:w-1/2">
-              <div className="relative">
-                <img 
-                  src={weddingHero}
-                  alt="Beautiful wedding ceremony setup"
-                  className="w-full h-[500px] object-cover rounded-2xl shadow-2xl"
-                />
-                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-primary to-accent rounded-full opacity-20 animate-float"></div>
-                <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-accent to-primary rounded-full opacity-30 animate-float-delayed"></div>
+            <ScrollReveal animation="rotate-in" delay={500} className="lg:w-1/2">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl group-hover:blur-2xl transition-all duration-500" />
+                <GlassmorphismCard variant="subtle" className="relative overflow-hidden rounded-3xl p-2">
+                  <img 
+                    src={weddingHero}
+                    alt="Beautiful wedding ceremony setup"
+                    className="w-full h-[600px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute top-4 right-4">
+                    <div className="glass p-3 rounded-full">
+                      <Crown className="h-6 w-6 text-primary animate-glow" />
+                    </div>
+                  </div>
+                </GlassmorphismCard>
+                
+                {/* Floating Icons */}
+                <div className="absolute -top-4 -left-4 animate-float">
+                  <div className="glass p-4 rounded-full shadow-2xl">
+                    <Ring className="h-8 w-8 text-accent" />
+                  </div>
+                </div>
+                <div className="absolute -bottom-4 -right-4 animate-float" style={{ animationDelay: '1s' }}>
+                  <div className="glass p-4 rounded-full shadow-2xl">
+                    <Diamond className="h-8 w-8 text-primary" />
+                  </div>
+                </div>
               </div>
-            </AnimatedSection>
+            </ScrollReveal>
           </div>
         </div>
       </section>
 
       {/* What We Do Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto space-y-6">
-            <h2 className="text-4xl font-bold">What We Do</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+      <section className="py-32 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
+        <div className="absolute inset-0 particles-container opacity-50" />
+        <div className="container mx-auto px-4 relative z-10">
+          <ScrollReveal animation="fade-in-up" className="text-center max-w-4xl mx-auto space-y-8 mb-20">
+            <h2 className="text-5xl font-bold">
+              What We Do
+              <span className="block text-gradient-secondary mt-2">For Your Special Day</span>
+            </h2>
+            <p className="text-xl text-muted-foreground leading-relaxed">
               At Avens Events, we specialize in creating wedding experiences that are as unique as your love story. From venue selection to day-of coordination, 
               we handle every detail so you can focus on celebrating your special day.
             </p>
-          </div>
+          </ScrollReveal>
 
-          {/* Event Specialties */}
-          <div className="mt-16">
-            <div className="text-center mb-12">
-              <h3 className="text-2xl font-semibold mb-2">Our Wedding Specialties</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {eventSpecialties.map((specialty, index) => (
-                <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500">
-                  <div className="aspect-[4/3] overflow-hidden">
+          {/* Event Specialties with Interactive Grid */}
+          <InteractiveGrid columns={3} gap="lg" staggerDelay={150} animation="bounce-in">
+            {eventSpecialties.map((specialty, index) => (
+              <div key={index} className="grid-item">
+                <GlassmorphismCard 
+                  variant="default" 
+                  hover={true} 
+                  glow={true}
+                  className="card-interactive group overflow-hidden h-full"
+                >
+                  <div className="aspect-[4/3] overflow-hidden relative">
                     <img 
                       src={specialty.image}
                       alt={specialty.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                      <Star className="h-6 w-6 text-white animate-twinkle" />
+                    </div>
                   </div>
-                  <CardContent className="p-6 text-center bg-background">
-                    <h4 className="text-xl font-semibold mb-3">{specialty.title}</h4>
-                    <p className="text-muted-foreground text-sm">{specialty.description}</p>
+                  <CardContent className="p-8 text-center bg-background/90 backdrop-blur-sm">
+                    <h4 className="text-2xl font-bold mb-4 text-gradient-primary">{specialty.title}</h4>
+                    <p className="text-muted-foreground leading-relaxed">{specialty.description}</p>
                   </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+                </GlassmorphismCard>
+              </div>
+            ))}
+          </InteractiveGrid>
         </div>
       </section>
 
       {/* Highlighted Services */}
-      <section className="py-20 bg-background relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-start gap-16">
-            {/* Curved Text Title */}
-            <div className="lg:w-1/3">
+      <section className="py-32 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-20">
+            {/* Enhanced Curved Text Title */}
+            <ScrollReveal animation="rotate-in" delay={200} className="lg:w-2/5">
               <div className="relative">
-                <div className="transform -rotate-12 origin-left">
-                  <h2 className="text-4xl lg:text-5xl font-bold text-primary leading-tight">
+                <div className="transform -rotate-12 origin-left hover:rotate-0 transition-transform duration-700">
+                  <h2 className="text-6xl lg:text-7xl font-bold text-gradient-primary leading-tight">
                     Wedding
                     <br />
-                    Services
+                    <span className="text-gradient-secondary">Services</span>
                   </h2>
+                  <div className="mt-4">
+                    <Flower className="h-12 w-12 text-accent animate-glow" />
+                  </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
 
-            {/* Services List */}
-            <div className="lg:w-2/3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span className="text-lg">Venue Selection & Booking</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span className="text-lg">Vendor Coordination</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span className="text-lg">Floral Design & Decor</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span className="text-lg">Catering Management</span>
-                  </div>
+            {/* Enhanced Services List */}
+            <ScrollReveal animation="slide-in-left" delay={400} className="lg:w-3/5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  {[
+                    { icon: Church, text: "Venue Selection & Booking" },
+                    { icon: Heart, text: "Vendor Coordination" },
+                    { icon: Flower, text: "Floral Design & Decor" },
+                    { icon: Gift, text: "Catering Management" }
+                  ].map((service, index) => (
+                    <ScrollReveal 
+                      key={index} 
+                      animation="fade-in-up" 
+                      delay={600 + (index * 100)}
+                      className="flex items-center space-x-4 group cursor-pointer"
+                    >
+                      <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                        <service.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <span className="text-xl font-medium group-hover:text-primary transition-colors duration-300">
+                        {service.text}
+                      </span>
+                    </ScrollReveal>
+                  ))}
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-accent rounded-full"></div>
-                    <span className="text-lg">Timeline Creation & Management</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-accent rounded-full"></div>
-                    <span className="text-lg">Day-of Coordination</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-accent rounded-full"></div>
-                    <span className="text-lg">Guest Experience Management</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-accent rounded-full"></div>
-                    <span className="text-lg">& So Much More</span>
-                  </div>
+                <div className="space-y-6">
+                  {[
+                    { icon: Calendar, text: "Timeline Creation & Management" },
+                    { icon: Star, text: "Day-of Coordination" },
+                    { icon: Crown, text: "Guest Experience Management" },
+                    { icon: Sparkles, text: "& So Much More" }
+                  ].map((service, index) => (
+                    <ScrollReveal 
+                      key={index} 
+                      animation="fade-in-up" 
+                      delay={800 + (index * 100)}
+                      className="flex items-center space-x-4 group cursor-pointer"
+                    >
+                      <div className="w-12 h-12 bg-gradient-to-r from-accent to-secondary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                        <service.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <span className="text-xl font-medium group-hover:text-accent transition-colors duration-300">
+                        {service.text}
+                      </span>
+                    </ScrollReveal>
+                  ))}
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
 
       {/* Our Process */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-6">Our Process</h2>
-          </div>
+      <section className="py-32 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
+        <FloatingParticles count={15} size="sm" speed="slow" className="opacity-30" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <ScrollReveal animation="bounce-in" delay={200} className="text-center mb-20">
+            <h2 className="text-5xl font-bold mb-6">
+              Our Magical
+              <span className="block text-gradient-primary">Process</span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              From your first conversation to your last dance, we guide you through every step of creating your perfect wedding day.
+            </p>
+          </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-6">
-                <Church className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">Step 1: Vision Discovery</h3>
+          <InteractiveGrid columns={3} gap="lg" staggerDelay={200} animation="scale-in">
+            <div className="grid-item text-center space-y-6 group">
+              <ScrollReveal animation="bounce-in" delay={400}>
+                <div className="relative mx-auto mb-8">
+                  <div className="w-24 h-24 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto shadow-2xl group-hover:scale-110 transition-transform duration-500 animate-glow-border">
+                    <Church className="h-12 w-12 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">1</span>
+                  </div>
+                </div>
+              </ScrollReveal>
+              <h3 className="text-2xl font-bold text-gradient-primary">Vision Discovery</h3>
               <p className="text-muted-foreground leading-relaxed">
                 We start by understanding your love story, style preferences, and wedding dreams to create a personalized planning approach.
               </p>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-6">
-                <Ring className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">Step 2: Design & Planning</h3>
+            <div className="grid-item text-center space-y-6 group">
+              <ScrollReveal animation="bounce-in" delay={600}>
+                <div className="relative mx-auto mb-8">
+                  <div className="w-24 h-24 bg-gradient-to-r from-accent to-secondary rounded-full flex items-center justify-center mx-auto shadow-2xl group-hover:scale-110 transition-transform duration-500 animate-glow-border" style={{ animationDelay: '1s' }}>
+                    <Ring className="h-12 w-12 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">2</span>
+                  </div>
+                </div>
+              </ScrollReveal>
+              <h3 className="text-2xl font-bold text-gradient-secondary">Design & Planning</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Our team creates detailed plans, sources the perfect vendors, and designs every element to bring your wedding vision to life.
               </p>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-6">
-                <Calendar className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">Step 3: Perfect Execution</h3>
+            <div className="grid-item text-center space-y-6 group">
+              <ScrollReveal animation="bounce-in" delay={800}>
+                <div className="relative mx-auto mb-8">
+                  <div className="w-24 h-24 bg-gradient-to-r from-secondary to-primary rounded-full flex items-center justify-center mx-auto shadow-2xl group-hover:scale-110 transition-transform duration-500 animate-glow-border" style={{ animationDelay: '2s' }}>
+                    <Calendar className="h-12 w-12 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">3</span>
+                  </div>
+                </div>
+              </ScrollReveal>
+              <h3 className="text-2xl font-bold text-gradient-primary">Perfect Execution</h3>
               <p className="text-muted-foreground leading-relaxed">
                 On your wedding day, we coordinate every detail seamlessly so you can focus on celebrating with your loved ones.
               </p>
             </div>
-          </div>
+          </InteractiveGrid>
         </div>
       </section>
 
       {/* Portfolio Showcase */}
       {weddingPortfolio && weddingPortfolio.length > 0 && (
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Wedding Gallery
+        <section className="py-32 bg-gradient-to-r from-muted/20 via-background to-muted/20 relative overflow-hidden">
+          <div className="absolute inset-0 particles-container opacity-40" />
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <ScrollReveal animation="fade-in-up" delay={200} className="text-center mb-20">
+              <h2 className="text-5xl font-bold mb-6">
+                <span className="text-gradient-primary">Wedding Gallery</span>
               </h2>
-              <p className="text-xl text-muted-foreground">
-                Beautiful moments from love stories we've helped tell
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Beautiful moments from love stories we've helped tell. Each wedding is a unique masterpiece crafted with love and attention to detail.
               </p>
-            </div>
+            </ScrollReveal>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              {weddingPortfolio.map((item) => (
-                <Card key={item.id} className="group overflow-hidden hover:shadow-xl transition-all duration-500">
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <img 
-                      src={item.image_url} 
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2 line-clamp-2">{item.title}</h3>
-                    {item.tag && (
-                      <Badge variant="secondary" className="text-xs">
-                        {item.tag}
-                      </Badge>
-                    )}
-                  </CardContent>
-                </Card>
+            <InteractiveGrid columns={3} gap="lg" staggerDelay={150} animation="scale-in">
+              {weddingPortfolio.map((item, index) => (
+                <div key={item.id} className="grid-item">
+                  <GlassmorphismCard 
+                    variant="subtle" 
+                    hover={true} 
+                    glow={true}
+                    className="card-interactive group overflow-hidden h-full"
+                  >
+                    <div className="aspect-[4/3] overflow-hidden relative">
+                      <img 
+                        src={item.image_url} 
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex space-x-2">
+                            <Heart className="h-5 w-5 text-white animate-pulse-glow" />
+                            <Camera className="h-5 w-5 text-white animate-twinkle" />
+                          </div>
+                          <span className="text-white text-sm font-medium">View Details</span>
+                        </div>
+                      </div>
+                    </div>
+                    <CardContent className="p-6 bg-background/90 backdrop-blur-sm">
+                      <h3 className="font-bold text-lg mb-3 text-gradient-primary line-clamp-2">{item.title}</h3>
+                      {item.tag && (
+                        <Badge variant="secondary" className="glass text-xs">
+                          {item.tag}
+                        </Badge>
+                      )}
+                    </CardContent>
+                  </GlassmorphismCard>
+                </div>
               ))}
-            </div>
+            </InteractiveGrid>
 
-            <div className="text-center">
-              <Button variant="outline" size="lg" asChild>
-                <Link to="/portfolio">
-                  View All Weddings <ExternalLink className="ml-2 h-5 w-5" />
+            <ScrollReveal animation="bounce-in" delay={600} className="text-center mt-16">
+              <MagneticButton variant="outline" size="lg" asChild strength={10}>
+                <Link to="/portfolio" className="glass px-8 py-4 text-lg font-semibold rounded-full">
+                  <Camera className="mr-2 h-5 w-5" />
+                  View All Weddings 
+                  <ExternalLink className="ml-2 h-5 w-5" />
                 </Link>
-              </Button>
-            </div>
+              </MagneticButton>
+            </ScrollReveal>
           </div>
         </section>
       )}
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold leading-tight">
-              Ready to Plan Your
-              <span className="block text-primary">Dream Wedding?</span>
-            </h2>
+      <section className="py-40 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 relative overflow-hidden">
+        <FloatingParticles count={25} colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))']} speed="slow" />
+        
+        {/* Morphing Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-20 left-20 w-96 h-96 animate-morphing-bg opacity-20" />
+          <div className="absolute bottom-20 right-20 w-80 h-80 animate-morphing-bg opacity-25" style={{ animationDelay: '4s' }} />
+        </div>
+        
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="max-w-5xl mx-auto space-y-12">
+            <ScrollReveal animation="bounce-in" delay={200}>
+              <h2 className="text-6xl md:text-7xl font-bold leading-tight">
+                Ready to Plan Your
+                <span className="block text-gradient-primary mt-4">Dream Wedding?</span>
+              </h2>
+            </ScrollReveal>
             
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-              Your love story deserves a perfect celebration. From intimate ceremonies to grand receptions, we'll work with you to create a wedding experience that's uniquely yours and unforgettably beautiful.
-            </p>
+            <ScrollReveal animation="fade-in-up" delay={400}>
+              <p className="text-2xl text-muted-foreground leading-relaxed max-w-4xl mx-auto">
+                Your love story deserves a perfect celebration. From intimate ceremonies to grand receptions, we'll work with you to create a wedding experience that's uniquely yours and unforgettably beautiful.
+              </p>
+            </ScrollReveal>
 
-            <div className="pt-6">
+            <ScrollReveal animation="elastic" delay={600} className="pt-8">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-4 text-lg">
+                  <MagneticButton 
+                    size="lg" 
+                    className="button-primary px-16 py-6 text-2xl font-bold rounded-full shadow-2xl transform hover:scale-105"
+                    strength={20}
+                  >
+                    <Sparkles className="mr-3 h-7 w-7 animate-twinkle" />
                     Start Planning My Wedding
-                  </Button>
+                    <Heart className="ml-3 h-7 w-7 animate-pulse-glow" />
+                  </MagneticButton>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogTitle>Start Planning Your Dream Wedding</DialogTitle>
-                  <DialogDescription>Fill out this form to begin planning your perfect wedding</DialogDescription>
+                <DialogContent className="max-w-3xl glass">
+                  <DialogTitle className="text-2xl">✨ Start Planning Your Dream Wedding</DialogTitle>
+                  <DialogDescription className="text-lg">Fill out this form to begin your magical journey with us</DialogDescription>
                   <InquiryForm 
                     formType="inquiry"
                     eventType="wedding"
@@ -327,7 +454,25 @@ const WeddingEvents = () => {
                   />
                 </DialogContent>
               </Dialog>
-            </div>
+            </ScrollReveal>
+
+            {/* Trust Indicators */}
+            <ScrollReveal animation="fade-in-up" delay={800} className="pt-16">
+              <div className="flex flex-wrap justify-center items-center gap-8 text-muted-foreground">
+                <div className="flex items-center space-x-2">
+                  <Crown className="h-6 w-6 text-primary" />
+                  <span className="text-lg font-medium">Premium Planning</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Star className="h-6 w-6 text-accent" />
+                  <span className="text-lg font-medium">5-Star Service</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Heart className="h-6 w-6 text-secondary" />
+                  <span className="text-lg font-medium">Made with Love</span>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -30,14 +30,97 @@ interface CrudInterfaceProps {
   fields: Field[];
 }
 
+// Validation utility
+const validateFormData = (data: Record<string, any>, fields: Field[], editingItem: any): string[] => {
+  console.log('=== VALIDATION START ===', { data, fields: fields.map(f => ({ name: f.name, required: f.required })) });
+  
+  const missingFields: string[] = [];
+  
+  for (const field of fields) {
+    const value = data[field.name];
+    
+    // Skip validation for non-required fields
+    if (!field.required) continue;
+    
+    // Skip validation for file fields that already have a value when editing
+    if ((field.type === 'file' || field.type === 'image') && editingItem && editingItem[field.name]) {
+      continue;
+    }
+    
+    // Check if field is missing or empty
+    const isEmpty = value === undefined || 
+                   value === null || 
+                   value === '' ||
+                   (typeof value === 'object' && (!value || Object.keys(value).length === 0));
+    
+    if (isEmpty) {
+      console.log(`Field ${field.name} is missing or empty:`, value);
+      missingFields.push(field.label);
+    }
+  }
+  
+  console.log('=== VALIDATION RESULT ===', { missingFields });
+  return missingFields;
+};
+
+// Clean form data utility - removes corrupted data and ensures proper types
+const cleanFormData = (data: Record<string, any>, fields: Field[]): Record<string, any> => {
+  const cleaned: Record<string, any> = {};
+  
+  for (const field of fields) {
+    const value = data[field.name];
+    
+    // Handle corrupted data objects
+    if (value && typeof value === 'object' && value._type !== undefined) {
+      console.warn(`Corrupted data detected for field ${field.name}:`, value);
+      // Reset to appropriate default value
+      if (field.type === 'boolean') {
+        cleaned[field.name] = false;
+      } else if (field.type === 'number') {
+        cleaned[field.name] = 0;
+      } else {
+        cleaned[field.name] = '';
+      }
+    } else {
+      // Keep clean data
+      cleaned[field.name] = value;
+    }
+  }
+  
+  return cleaned;
+};
+
 const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) => {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [uploading, setUploading] = useState(false);
   const [isEnhancedEventFormOpen, setIsEnhancedEventFormOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Initialize form data when editing or creating
+  useEffect(() => {
+    if (editingItem) {
+      console.log('Setting form data for editing:', editingItem);
+      const cleanedData = cleanFormData(editingItem, fields);
+      setFormData(cleanedData);
+    } else if (isCreating) {
+      console.log('Initializing form data for creation');
+      const initialData: Record<string, any> = {};
+      fields.forEach(field => {
+        if (field.type === 'boolean') {
+          initialData[field.name] = true;
+        } else if (field.type === 'number') {
+          initialData[field.name] = 0;
+        } else {
+          initialData[field.name] = '';
+        }
+      });
+      setFormData(initialData);
+    }
+  }, [editingItem, isCreating, fields]);
 
   const handleEdit = (item: any) => {
     if (tableName === 'events') {
@@ -47,136 +130,40 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       return;
     }
     setEditingItem(item);
-    setFormData(item);
+    setIsDialogOpen(true);
   };
 
   const handleCreate = () => {
     if (tableName === 'events') {
+      setFormData({});
+      setEditingItem(null);
       setIsEnhancedEventFormOpen(true);
       return;
     }
     setIsCreating(true);
-    const initialData: Record<string, any> = {};
-    fields.forEach(field => {
-      if (field.type === 'boolean') {
-        initialData[field.name] = true;
-      } else if (field.type === 'number') {
-        initialData[field.name] = 0;
-      } else {
-        initialData[field.name] = '';
-      }
-    });
-    console.log('Creating new item:', { tableName, fields: fields.map(f => f.name), initialData });
-    setFormData(initialData);
+    setEditingItem(null);
+    setIsDialogOpen(true);
   };
 
   const handleSave = async (eventFormData?: any) => {
+    console.log('=== SAVE ATTEMPT START ===');
+    
     try {
-      console.log('=== SAVE ATTEMPT START ===');
+      let dataToSave: Record<string, any> = {};
       
-      let cleanData: Record<string, any> = {};
-      
-      // If eventFormData is provided (from EnhancedEventForm), use it directly
+      // Use event form data if provided, otherwise use component form data
       if (eventFormData) {
-        console.log('=== USING EVENT FORM DATA ===', eventFormData);
-        cleanData = { ...eventFormData };
+        console.log('Using event form data:', eventFormData);
+        dataToSave = { ...eventFormData };
       } else {
-        // Read form data directly from DOM using name attributes (for other forms)
-        const formDataFromDOM: Record<string, any> = {};
-        
-        fields.forEach(field => {
-          if (field.type === 'boolean') {
-            const switchInput = document.querySelector(`[name="${field.name}"]`);
-            if (switchInput) {
-              formDataFromDOM[field.name] = switchInput.getAttribute('data-state') === 'checked' || switchInput.getAttribute('aria-checked') === 'true';
-            } else {
-              formDataFromDOM[field.name] = true; // default
-            }
-          } else if (field.type === 'select') {
-            // For select fields, check both the select element and custom input for event_type
-            const selectInput = document.querySelector(`select[name="${field.name}"]`);
-            const customInput = document.querySelector(`input[name="${field.name}_custom"]`);
-            
-            if (customInput && (customInput as HTMLInputElement).value) {
-              formDataFromDOM[field.name] = (customInput as HTMLInputElement).value;
-            } else if (selectInput) {
-              formDataFromDOM[field.name] = (selectInput as HTMLSelectElement).value;
-            } else {
-              // Fallback: look for hidden input or data attribute on select trigger
-              const hiddenInput = document.querySelector(`input[name="${field.name}"]`);
-              if (hiddenInput) {
-                formDataFromDOM[field.name] = (hiddenInput as HTMLInputElement).value;
-              } else {
-                formDataFromDOM[field.name] = '';
-              }
-            }
-          } else if (field.type === 'number') {
-            const numberInput = document.querySelector(`input[name="${field.name}"]`) as HTMLInputElement;
-            if (numberInput) {
-              formDataFromDOM[field.name] = Number(numberInput.value) || 0;
-            } else {
-              formDataFromDOM[field.name] = 0;
-            }
-          } else {
-            // Text, textarea, file fields
-            const input = document.querySelector(`input[name="${field.name}"], textarea[name="${field.name}"]`) as HTMLInputElement | HTMLTextAreaElement;
-            if (input) {
-              formDataFromDOM[field.name] = input.value;
-            } else if (field.type === 'file') {
-              // For file fields, use the uploaded URL from component state
-              if (formData[field.name]) {
-                formDataFromDOM[field.name] = formData[field.name];
-              } else {
-                formDataFromDOM[field.name] = '';
-              }
-            } else {
-              formDataFromDOM[field.name] = '';
-            }
-          }
-        });
-        
-        console.log('=== FORM DATA FROM DOM ===', formDataFromDOM);
-        cleanData = { ...formDataFromDOM };
+        console.log('Using component form data:', formData);
+        dataToSave = cleanFormData(formData, fields);
       }
       
-      console.log('=== FINAL CLEAN DATA ===', cleanData);
+      console.log('=== DATA TO SAVE ===', dataToSave);
       
-      // For events, also copy additional fields that might not be in the fields config
-      if (tableName === 'events' && eventFormData) {
-        const eventFields = ['id', 'created_at', 'updated_at', 'url_slug', 'meta_description', 'hero_cta_text', 'hero_subtitle', 'what_we_do_title', 'services_section_title', 'default_portfolio_tags'];
-        for (const field of eventFields) {
-          if (eventFormData.hasOwnProperty(field) && cleanData[field] === undefined) {
-            const value = eventFormData[field];
-            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || Array.isArray(value)) {
-              cleanData[field] = value;
-            }
-          }
-        }
-      }
-      
-      // Validate required fields (excluding file fields that might be uploaded separately)
-      const missingFields = fields
-        .filter(field => {
-          // Skip validation for file fields that already have a value or are being uploaded
-          if (field.type === 'file' || field.type === 'image') {
-            // If editing and field already has a value, don't require it
-            if (editingItem && cleanData[field.name]) {
-              return false;
-            }
-            // If creating and field is required but empty, it's missing
-            return field.required && (!cleanData[field.name] || cleanData[field.name] === '');
-          }
-          // Check if required field is missing or empty (but allow 0 values for numbers)
-          return field.required && (
-            cleanData[field.name] === undefined || 
-            cleanData[field.name] === null || 
-            cleanData[field.name] === '' ||
-            (field.type === 'select' && cleanData[field.name] === '')
-          );
-        })
-        .map(field => field.label);
-      
-      console.log('Validation check:', { cleanData, missingFields, fields: fields.map(f => ({ name: f.name, required: f.required, value: cleanData[f.name] })) });
+      // Validate required fields
+      const missingFields = validateFormData(dataToSave, fields, editingItem);
       
       if (missingFields.length > 0) {
         toast({
@@ -187,19 +174,11 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         return;
       }
       
-      // Ensure event_type is not empty for events table
-      if (tableName === 'events' && (!cleanData.event_type || cleanData.event_type === '')) {
-        toast({
-          title: "Validation Error",
-          description: "Event type is required. Please select or enter an event type.",
-          variant: "destructive",
-        });
-        return;
-      }
+      // Perform save operation
       if (editingItem) {
         const { error } = await supabase
           .from(tableName as any)
-          .update(cleanData)
+          .update(dataToSave)
           .eq('id', editingItem.id);
         
         if (error) throw error;
@@ -211,7 +190,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       } else {
         const { data: newItem, error } = await supabase
           .from(tableName as any)
-          .insert(cleanData as any)
+          .insert(dataToSave as any)
           .select()
           .single();
         
@@ -241,7 +220,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         }
       }
       
-      // Force refresh data by invalidating and refetching
+      // Refresh data
       await queryClient.invalidateQueries({ queryKey: [tableName] });
       await queryClient.refetchQueries({ queryKey: [tableName] });
       
@@ -250,6 +229,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         await queryClient.invalidateQueries({ queryKey: ['eventTypes'] });
         await queryClient.refetchQueries({ queryKey: ['eventTypes'] });
       }
+      
       handleCancel();
     } catch (error) {
       console.error('Error saving:', error);
@@ -283,7 +263,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       
       if (error) throw error;
       
-      // Force refresh data by invalidating and refetching
+      // Refresh data
       await queryClient.invalidateQueries({ queryKey: [tableName] });
       await queryClient.refetchQueries({ queryKey: [tableName] });
       
@@ -292,6 +272,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         await queryClient.invalidateQueries({ queryKey: ['eventTypes'] });
         await queryClient.refetchQueries({ queryKey: ['eventTypes'] });
       }
+      
       toast({
         title: "Deleted",
         description: `${title.slice(0, -1)} and associated pages deleted successfully.`,
@@ -311,6 +292,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     setIsCreating(false);
     setFormData({});
     setIsEnhancedEventFormOpen(false);
+    setIsDialogOpen(false);
   };
 
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -319,45 +301,46 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     
     setUploading(true);
     try {
-        let imageUrl;
-        if (fieldName === 'hero_image_url' && tableName === 'events') {
-          console.log('Uploading event hero image');
-          imageUrl = await uploadEventHeroImage(file, formData.event_type || 'default');
-        } else if (fieldName === 'image_url' && tableName === 'hero_banners') {
-          console.log('Uploading banner image');
-          imageUrl = await uploadBannerImage(file);
-        } else if (fieldName === 'logo_url' && tableName === 'trusted_clients') {
-          console.log('Uploading client logo');
-          imageUrl = await uploadClientLogo(file);
-        } else {
-          // Handle other image uploads - determine appropriate bucket
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${Date.now()}.${fileExt}`;
-          
-          let bucket = 'portfolio-images'; // default
-          if (tableName === 'services') {
-            bucket = 'specialty-images';
-          }
-          
-          console.log('Uploading to bucket:', bucket, 'fileName:', fileName);
-          
-          const { data, error } = await supabase.storage
-            .from(bucket)
-            .upload(fileName, file);
-
-          if (error) {
-            console.error('Storage upload error:', error);
-            throw error;
-          }
-
-          const { data: { publicUrl } } = supabase.storage
-            .from(bucket)
-            .getPublicUrl(data.path);
-
-          imageUrl = publicUrl;
-          console.log('Upload successful, URL:', imageUrl);
+      let imageUrl;
+      if (fieldName === 'hero_image_url' && tableName === 'events') {
+        console.log('Uploading event hero image');
+        imageUrl = await uploadEventHeroImage(file, formData.event_type || 'default');
+      } else if (fieldName === 'image_url' && tableName === 'hero_banners') {
+        console.log('Uploading banner image');
+        imageUrl = await uploadBannerImage(file);
+      } else if (fieldName === 'logo_url' && tableName === 'trusted_clients') {
+        console.log('Uploading client logo');
+        imageUrl = await uploadClientLogo(file);
+      } else {
+        // Handle other image uploads
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        
+        let bucket = 'portfolio-images'; // default
+        if (tableName === 'services') {
+          bucket = 'specialty-images';
         }
-      
+        
+        console.log('Uploading to bucket:', bucket, 'fileName:', fileName);
+        
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .upload(fileName, file);
+
+        if (error) {
+          console.error('Storage upload error:', error);
+          throw error;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(data.path);
+
+        imageUrl = publicUrl;
+        console.log('Upload successful, URL:', imageUrl);
+      }
+    
+      // Update form data
       setFormData(prev => ({
         ...prev,
         [fieldName]: imageUrl
@@ -379,26 +362,26 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     }
   };
 
+  // Update form field value
+  const updateFormField = (fieldName: string, value: any) => {
+    console.log(`Updating field ${fieldName}:`, { oldValue: formData[fieldName], newValue: value });
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: value
+    }));
+  };
+
   const renderField = (field: Field) => {
-    const value = formData[field.name] || '';
+    const value = formData[field.name] ?? (field.type === 'boolean' ? false : field.type === 'number' ? 0 : '');
     
-    console.log(`Rendering field ${field.name}:`, { value, type: field.type, formData: formData[field.name] });
-    
-    const handleChange = (newValue: any) => {
-      console.log(`Field ${field.name} changed:`, { oldValue: formData[field.name], newValue });
-      setFormData(prev => ({
-        ...prev,
-        [field.name]: newValue
-      }));
-    };
+    console.log(`Rendering field ${field.name}:`, { value, type: field.type });
 
     switch (field.type) {
       case 'textarea':
         return (
           <Textarea
-            name={field.name}
             value={value}
-            onChange={(e) => handleChange(e.target.value)}
+            onChange={(e) => updateFormField(field.name, e.target.value)}
             placeholder={`Enter ${field.label.toLowerCase()}`}
           />
         );
@@ -406,18 +389,17 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       case 'boolean':
         return (
           <Switch
-            name={field.name}
-            checked={value}
-            onCheckedChange={handleChange}
+            checked={Boolean(value)}
+            onCheckedChange={(checked) => updateFormField(field.name, checked)}
           />
         );
       
       case 'select':
-        // Special handling for event_type field to allow custom input when creating new events
+        // Special handling for event_type field to allow custom input when creating new items
         if (field.name === 'event_type' && !editingItem) {
           return (
             <div className="space-y-2">
-              <Select name={field.name} value={value} onValueChange={handleChange}>
+              <Select value={value} onValueChange={(val) => updateFormField(field.name, val)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select or create event type" />
                 </SelectTrigger>
@@ -430,11 +412,10 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
                 </SelectContent>
               </Select>
               <Input
-                name={`${field.name}_custom`}
                 value={value}
                 onChange={(e) => {
                   const inputValue = e.target.value.toLowerCase().replace(/\s+/g, '-');
-                  handleChange(inputValue);
+                  updateFormField(field.name, inputValue);
                 }}
                 placeholder="Or enter custom event type (e.g., national-state-functions)"
                 className="text-sm"
@@ -444,7 +425,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         }
         
         return (
-          <Select name={field.name} value={value} onValueChange={handleChange}>
+          <Select value={value} onValueChange={(val) => updateFormField(field.name, val)}>
             <SelectTrigger>
               <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
             </SelectTrigger>
@@ -461,32 +442,20 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       case 'number':
         return (
           <Input
-            name={field.name}
             type="number"
             value={value}
-            onChange={(e) => handleChange(Number(e.target.value))}
+            onChange={(e) => updateFormField(field.name, Number(e.target.value))}
             placeholder={`Enter ${field.label.toLowerCase()}`}
           />
         );
       
       case 'image':
-        return (
-          <Input
-            name={field.name}
-            type="url"
-            value={value}
-            onChange={(e) => handleChange(e.target.value)}
-            placeholder={`Enter ${field.label.toLowerCase()} URL`}
-          />
-        );
-      
       case 'file':
         return (
           <div className="space-y-2">
             <Input
-              name={field.name}
               type="file"
-              accept="image/*"
+              accept={field.type === 'image' ? 'image/*' : '*'}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
@@ -497,19 +466,23 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
             />
             {value && (
               <div className="text-sm text-muted-foreground">
-                Current: <a href={value} target="_blank" rel="noopener noreferrer" className="text-primary underline">View Image</a>
+                Current: {typeof value === 'string' ? value.split('/').pop() : 'File uploaded'}
               </div>
             )}
-            {uploading && <div className="text-sm text-muted-foreground">Uploading...</div>}
+            {uploading && (
+              <div className="text-sm text-muted-foreground">
+                Uploading...
+              </div>
+            )}
           </div>
         );
       
-      default:
+      default: // text
         return (
           <Input
-            name={field.name}
+            type="text"
             value={value}
-            onChange={(e) => handleChange(e.target.value)}
+            onChange={(e) => updateFormField(field.name, e.target.value)}
             placeholder={`Enter ${field.label.toLowerCase()}`}
           />
         );
@@ -517,129 +490,104 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
-        <Dialog open={isCreating} onOpenChange={setIsCreating}>
-          <DialogTrigger asChild>
-            <Button onClick={handleCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add New
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingItem ? `Edit ${title.slice(0, -1)}` : `Create New ${title.slice(0, -1)}`}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              {fields.map(field => (
-                <div key={field.name} className="grid gap-2">
-                  <Label htmlFor={field.name}>
-                    {field.label}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
-                  </Label>
-                  {renderField(field)}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave}>
-                {editingItem ? 'Update' : 'Create'}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+    <div className="space-y-6">
+      {/* Enhanced Event Form Dialog */}
+      {isEnhancedEventFormOpen && (
+        <EnhancedEventForm
+          isOpen={isEnhancedEventFormOpen}
+          onClose={handleCancel}
+          onSave={handleSave}
+          initialData={editingItem || formData}
+          mode={editingItem ? 'edit' : 'create'}
+        />
+      )}
+
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">{title}</h2>
+        <Button onClick={handleCreate}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add New
+        </Button>
       </div>
 
-        <Dialog open={!!editingItem} onOpenChange={(open) => !open && handleCancel()}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      {/* Regular CRUD Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit {title.slice(0, -1)}</DialogTitle>
+            <DialogTitle>
+              {editingItem ? `Edit ${title.slice(0, -1)}` : `Create New ${title.slice(0, -1)}`}
+            </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {fields.map(field => (
-              <div key={field.name} className="grid gap-2">
+          
+          <div className="space-y-4 py-4">
+            {fields.map((field) => (
+              <div key={field.name} className="space-y-2">
                 <Label htmlFor={field.name}>
                   {field.label}
-                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
                 </Label>
                 {renderField(field)}
               </div>
             ))}
           </div>
-          <div className="flex justify-end space-x-2">
+          
+          <div className="flex justify-end space-x-2 pt-4">
             <Button variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>
-              Update
+            <Button onClick={() => handleSave()} disabled={uploading}>
+              {editingItem ? 'Update' : 'Create'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {data?.length > 0 ? (
-          data.map((item) => (
-            <Card key={item.id} className="animate-fade-in">
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                  <CardTitle className="text-base md:text-lg break-words">
-                    {item.title || item.name || item.email || `${title.slice(0, -1)} ${item.id?.slice(0, 8)}`}
-                  </CardTitle>
-                  <div className="flex space-x-2 shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(item)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+      {/* Data Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {data.map((item) => (
+          <Card key={item.id} className="relative">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">
+                {item.title || item.name || `${title.slice(0, -1)} ${item.id?.slice(0, 8)}`}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {fields.slice(0, 3).map((field) => {
+                const value = item[field.name];
+                let displayValue = '';
+                
+                if (field.type === 'boolean') {
+                  displayValue = value ? 'Yes' : 'No';
+                } else if (field.type === 'image' || field.type === 'file') {
+                  displayValue = value ? 'Uploaded' : 'No file';
+                } else if (field.type === 'textarea') {
+                  displayValue = value ? `${value.slice(0, 100)}...` : '';
+                } else {
+                  displayValue = value || '';
+                }
+                
+                return (
+                  <div key={field.name} className="text-sm">
+                    <span className="font-medium">{field.label}:</span> {displayValue}
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-2 text-sm">
-                  {fields.slice(0, 3).map(field => (
-                    <div key={field.name}>
-                      <span className="font-medium">{field.label}: </span>
-                      <span className="text-muted-foreground">
-                        {field.type === 'boolean' 
-                          ? (item[field.name] ? 'Yes' : 'No')
-                          : (item[field.name] || 'N/A')
-                        }
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">No items found. Create your first {title.toLowerCase().slice(0, -1)} above.</p>
+                );
+              })}
+              
+              <div className="flex justify-end space-x-2 pt-2">
+                <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => handleDelete(item)}>
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        )}
+        ))}
       </div>
-
-      {/* Enhanced Event Form */}
-      <EnhancedEventForm
-        isOpen={isEnhancedEventFormOpen}
-        onClose={() => {
-          setIsEnhancedEventFormOpen(false);
-          setFormData({});
-          setEditingItem(null);
-        }}
-        onSave={handleSave}
-        initialData={editingItem || {}}
-        mode={editingItem ? 'edit' : 'create'}
-      />
     </div>
   );
 };

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useNewsAchievements } from "@/hooks/useData";
-import { ArrowLeft, ArrowRight, Sparkles, Clock, Users, Award, Heart, Calendar, MapPin, Share2, Trophy } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Clock, Users, Award, Heart, Calendar, MapPin, Share2, Trophy, Star } from "lucide-react";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { AnimatedText, GradientText } from "@/components/ui/animated-text";
 import Layout from "@/components/Layout/Layout";
@@ -98,7 +98,7 @@ const AnimatedStat = ({ finalValue, suffix = '', isDecimal = false }) => {
     }, [finalValue, isDecimal]);
 
     return (
-        <div ref={ref} className="text-3xl lg:text-4xl font-bold text-foreground">
+        <div ref={ref} className="text-xl lg:text-2xl font-bold text-white">
             {count}{suffix}
         </div>
     );
@@ -224,60 +224,104 @@ const Index = () => {
         )}
       </div>
 
-      {/* Stats Section - REDESIGNED */}
+      {/* Stats Section - COMPLETE REDESIGN */}
       <ScrollAnimated>
-        <section className="relative overflow-hidden py-12 lg:py-16">
-          <div className="container mx-auto px-4 relative z-10 max-w-7xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Stat Card 1 - Happy Clients (Green Theme) */}
-              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-transparent backdrop-blur-lg border border-emerald-200/20 group transition-all duration-500 hover:border-emerald-400/40 hover:shadow-2xl hover:shadow-emerald-500/20 hover:scale-105">
-                <div className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-emerald-400/30 to-green-500/20 rounded-full blur-xl group-hover:scale-150 group-hover:rotate-45 transition-all duration-700"></div>
-                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-green-300/20 to-emerald-400/10 rounded-full blur-lg group-hover:scale-125 transition-all duration-500"></div>
+        <section className="relative overflow-hidden py-8 lg:py-12">
+          <div className="container mx-auto px-4 relative z-10 max-w-6xl">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              {/* Stat Card 1 - Happy Clients */}
+              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-gradient-to-br from-emerald-50/10 to-green-50/5 backdrop-blur-sm border border-emerald-200/20 transition-all duration-500 hover:border-emerald-300/40 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1">
+                {/* Floating background elements */}
+                <div className="absolute -top-4 -right-4 w-12 h-12 bg-emerald-400/20 rounded-full blur-lg group-hover:scale-150 group-hover:rotate-45 transition-all duration-700"></div>
+                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-green-300/15 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
+                
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-400/20 via-green-500/15 to-emerald-600/10 rounded-2xl mb-4 border border-emerald-300/30 shadow-lg shadow-emerald-500/10">
-                    <IconHappyClients className="h-8 w-8 text-emerald-400" />
+                  {/* Animated Icon Container */}
+                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-emerald-500/10 rounded-xl mb-3 lg:mb-4 border border-emerald-400/20 group-hover:bg-emerald-500/20 group-hover:border-emerald-400/40 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                    <Users className="h-5 w-5 lg:h-6 lg:w-6 text-emerald-400 group-hover:text-emerald-300 group-hover:scale-110 transition-all duration-300" />
                   </div>
-                  <AnimatedStat finalValue={100} suffix="+" />
-                  <div className="text-sm font-medium text-emerald-100 mt-1">Happy Clients</div>
+                  
+                  {/* Animated Number */}
+                  <div className="relative mb-1">
+                    <AnimatedStat finalValue={100} suffix="+" />
+                  </div>
+                  
+                  {/* Label */}
+                  <div className="text-xs lg:text-sm font-medium text-gray-300 group-hover:text-emerald-200 transition-colors duration-300">
+                    Happy Clients
+                  </div>
                 </div>
               </div>
 
-              {/* Stat Card 2 - Events Completed (Orange Theme) */}
-              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent backdrop-blur-lg border border-orange-200/20 group transition-all duration-500 hover:border-orange-400/40 hover:shadow-2xl hover:shadow-orange-500/20 hover:scale-105">
-                <div className="absolute -top-6 -left-6 w-20 h-20 bg-gradient-to-br from-orange-400/30 to-red-500/20 rounded-full blur-xl group-hover:scale-150 group-hover:-rotate-45 transition-all duration-700"></div>
-                <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-gradient-to-tr from-amber-300/20 to-orange-400/10 rounded-full blur-lg group-hover:scale-125 transition-all duration-500"></div>
+              {/* Stat Card 2 - Events Completed */}
+              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-gradient-to-br from-orange-50/10 to-amber-50/5 backdrop-blur-sm border border-orange-200/20 transition-all duration-500 hover:border-orange-300/40 hover:shadow-lg hover:shadow-orange-500/10 hover:-translate-y-1">
+                {/* Floating background elements */}
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-orange-400/20 rounded-full blur-lg group-hover:scale-150 group-hover:-rotate-45 transition-all duration-700"></div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-300/15 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
+                
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-400/20 via-amber-500/15 to-red-500/10 rounded-2xl mb-4 border border-orange-300/30 shadow-lg shadow-orange-500/10">
-                    <IconEventsCompleted className="h-8 w-8 text-orange-400" />
+                  {/* Animated Icon Container */}
+                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-orange-500/10 rounded-xl mb-3 lg:mb-4 border border-orange-400/20 group-hover:bg-orange-500/20 group-hover:border-orange-400/40 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500">
+                    <Calendar className="h-5 w-5 lg:h-6 lg:w-6 text-orange-400 group-hover:text-orange-300 group-hover:scale-110 transition-all duration-300" />
                   </div>
-                  <AnimatedStat finalValue={500} suffix="+" />
-                  <div className="text-sm font-medium text-orange-100 mt-1">Events Completed</div>
+                  
+                  {/* Animated Number */}
+                  <div className="relative mb-1">
+                    <AnimatedStat finalValue={500} suffix="+" />
+                  </div>
+                  
+                  {/* Label */}
+                  <div className="text-xs lg:text-sm font-medium text-gray-300 group-hover:text-orange-200 transition-colors duration-300">
+                    Events Done
+                  </div>
                 </div>
               </div>
 
-              {/* Stat Card 3 - Rating Average (Purple Theme) */}
-              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-gradient-to-br from-purple-500/10 via-violet-500/5 to-transparent backdrop-blur-lg border border-purple-200/20 group transition-all duration-500 hover:border-purple-400/40 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-105">
-                <div className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-purple-400/30 to-indigo-500/20 rounded-full blur-xl group-hover:scale-150 group-hover:rotate-90 transition-all duration-700"></div>
-                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-violet-300/20 to-purple-400/10 rounded-full blur-lg group-hover:scale-125 transition-all duration-500"></div>
+              {/* Stat Card 3 - Rating Average */}
+              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-gradient-to-br from-purple-50/10 to-violet-50/5 backdrop-blur-sm border border-purple-200/20 transition-all duration-500 hover:border-purple-300/40 hover:shadow-lg hover:shadow-purple-500/10 hover:-translate-y-1">
+                {/* Floating background elements */}
+                <div className="absolute -top-4 -right-4 w-12 h-12 bg-purple-400/20 rounded-full blur-lg group-hover:scale-150 group-hover:rotate-90 transition-all duration-700"></div>
+                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-violet-300/15 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
+                
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-400/20 via-violet-500/15 to-indigo-500/10 rounded-2xl mb-4 border border-purple-300/30 shadow-lg shadow-purple-500/10">
-                    <IconRatingAverage className="h-8 w-8 text-purple-400" />
+                  {/* Animated Icon Container */}
+                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-purple-500/10 rounded-xl mb-3 lg:mb-4 border border-purple-400/20 group-hover:bg-purple-500/20 group-hover:border-purple-400/40 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                    <Star className="h-5 w-5 lg:h-6 lg:w-6 text-purple-400 group-hover:text-purple-300 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
                   </div>
-                  <AnimatedStat finalValue={4.9} isDecimal={true} />
-                  <div className="text-sm font-medium text-purple-100 mt-1">Rating Average</div>
+                  
+                  {/* Animated Number */}
+                  <div className="relative mb-1">
+                    <AnimatedStat finalValue={4.9} isDecimal={true} />
+                  </div>
+                  
+                  {/* Label */}
+                  <div className="text-xs lg:text-sm font-medium text-gray-300 group-hover:text-purple-200 transition-colors duration-300">
+                    Avg Rating
+                  </div>
                 </div>
               </div>
 
-              {/* Stat Card 4 - Years Experience (Blue Theme) */}
-              <div className="relative overflow-hidden rounded-2xl p-6 text-center bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-transparent backdrop-blur-lg border border-blue-200/20 group transition-all duration-500 hover:border-blue-400/40 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105">
-                <div className="absolute -top-6 -left-6 w-20 h-20 bg-gradient-to-br from-blue-400/30 to-cyan-500/20 rounded-full blur-xl group-hover:scale-150 group-hover:-rotate-90 transition-all duration-700"></div>
-                <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-gradient-to-tr from-cyan-300/20 to-blue-400/10 rounded-full blur-lg group-hover:scale-125 transition-all duration-500"></div>
+              {/* Stat Card 4 - Years Experience */}
+              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-gradient-to-br from-blue-50/10 to-cyan-50/5 backdrop-blur-sm border border-blue-200/20 transition-all duration-500 hover:border-blue-300/40 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1">
+                {/* Floating background elements */}
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-400/20 rounded-full blur-lg group-hover:scale-150 group-hover:-rotate-90 transition-all duration-700"></div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-cyan-300/15 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
+                
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-400/20 via-cyan-500/15 to-sky-500/10 rounded-2xl mb-4 border border-blue-300/30 shadow-lg shadow-blue-500/10">
-                    <IconYearsExperience className="h-8 w-8 text-blue-400" />
+                  {/* Animated Icon Container */}
+                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-blue-500/10 rounded-xl mb-3 lg:mb-4 border border-blue-400/20 group-hover:bg-blue-500/20 group-hover:border-blue-400/40 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
+                    <Award className="h-5 w-5 lg:h-6 lg:w-6 text-blue-400 group-hover:text-blue-300 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" />
                   </div>
-                  <AnimatedStat finalValue={15} suffix="+" />
-                  <div className="text-sm font-medium text-blue-100 mt-1">Years Experience</div>
+                  
+                  {/* Animated Number */}
+                  <div className="relative mb-1">
+                    <AnimatedStat finalValue={15} suffix="+" />
+                  </div>
+                  
+                  {/* Label */}
+                  <div className="text-xs lg:text-sm font-medium text-gray-300 group-hover:text-blue-200 transition-colors duration-300">
+                    Years Exp
+                  </div>
                 </div>
               </div>
             </div>

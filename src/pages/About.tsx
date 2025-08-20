@@ -47,7 +47,20 @@ const About = () => {
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div className="space-y-6">
+                {aboutContent.founder_image_url && (
+                  <div className="flex justify-center lg:order-2">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl transform rotate-3"></div>
+                      <img 
+                        src={aboutContent.founder_image_url} 
+                        alt={aboutContent.founder_name}
+                        className="relative rounded-2xl shadow-xl max-w-md w-full h-auto object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-6 lg:order-1">
                   <Badge variant="outline" className="mb-4">
                     Meet Our Founder
                   </Badge>
@@ -68,19 +81,6 @@ const About = () => {
                     </cite>
                   </div>
                 </div>
-
-                {aboutContent.founder_image_url && (
-                  <div className="flex justify-center">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl transform rotate-3"></div>
-                      <img 
-                        src={aboutContent.founder_image_url} 
-                        alt={aboutContent.founder_name}
-                        className="relative rounded-2xl shadow-xl max-w-md w-full h-auto object-cover"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>

@@ -389,6 +389,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           short_content: string
+          show_on_home: boolean | null
           title: string
           updated_at: string
         }
@@ -400,6 +401,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           short_content: string
+          show_on_home?: boolean | null
           title: string
           updated_at?: string
         }
@@ -411,6 +413,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           short_content?: string
+          show_on_home?: boolean | null
           title?: string
           updated_at?: string
         }

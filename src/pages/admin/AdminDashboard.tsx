@@ -392,9 +392,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   { name: "content", label: "Full Content", type: "textarea", required: true },
                   { name: "image_url", label: "Image URL", type: "image" },
                   { name: "display_order", label: "Display Order", type: "number" },
+                  { name: "show_on_home", label: "Show on Home Screen", type: "boolean" },
                   { name: "is_active", label: "Active", type: "boolean" }
                 ]}
-                defaultValues={{ is_active: true, display_order: 0 }}
+                defaultValues={{ is_active: true, display_order: 0, show_on_home: false }}
               />
 
               {/* Awards Management */}

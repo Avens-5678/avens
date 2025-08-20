@@ -98,7 +98,7 @@ const AnimatedStat = ({ finalValue, suffix = '', isDecimal = false }) => {
     }, [finalValue, isDecimal]);
 
     return (
-        <div ref={ref} className="text-xl lg:text-2xl font-bold text-white">
+        <div ref={ref} className="text-xl lg:text-2xl font-bold text-white font-mono">
             {count}{suffix}
         </div>
     );
@@ -230,14 +230,14 @@ const Index = () => {
           <div className="container mx-auto px-4 relative z-10 max-w-6xl">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               {/* Stat Card 1 - Happy Clients */}
-              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-gradient-to-br from-emerald-50/10 to-green-50/5 backdrop-blur-sm border border-emerald-200/20 transition-all duration-500 hover:border-emerald-300/40 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1">
+              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-card/80 backdrop-blur-sm border border-border/60 transition-all duration-500 hover:border-emerald-400/60 hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-1 hover:bg-emerald-950/20">
                 {/* Floating background elements */}
-                <div className="absolute -top-4 -right-4 w-12 h-12 bg-emerald-400/20 rounded-full blur-lg group-hover:scale-150 group-hover:rotate-45 transition-all duration-700"></div>
-                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-green-300/15 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
+                <div className="absolute -top-4 -right-4 w-12 h-12 bg-emerald-400/30 rounded-full blur-lg group-hover:scale-150 group-hover:rotate-45 transition-all duration-700"></div>
+                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-green-400/20 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
                 
                 <div className="relative z-10">
                   {/* Animated Icon Container */}
-                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-emerald-500/10 rounded-xl mb-3 lg:mb-4 border border-emerald-400/20 group-hover:bg-emerald-500/20 group-hover:border-emerald-400/40 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-emerald-500/20 rounded-xl mb-3 lg:mb-4 border border-emerald-400/30 group-hover:bg-emerald-500/30 group-hover:border-emerald-400/50 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
                     <Users className="h-5 w-5 lg:h-6 lg:w-6 text-emerald-400 group-hover:text-emerald-300 group-hover:scale-110 transition-all duration-300" />
                   </div>
                   
@@ -247,21 +247,21 @@ const Index = () => {
                   </div>
                   
                   {/* Label */}
-                  <div className="text-xs lg:text-sm font-medium text-gray-300 group-hover:text-emerald-200 transition-colors duration-300">
+                  <div className="text-xs lg:text-sm font-semibold text-foreground/80 group-hover:text-emerald-200 transition-colors duration-300 font-mono tracking-wide">
                     Happy Clients
                   </div>
                 </div>
               </div>
 
               {/* Stat Card 2 - Events Completed */}
-              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-gradient-to-br from-orange-50/10 to-amber-50/5 backdrop-blur-sm border border-orange-200/20 transition-all duration-500 hover:border-orange-300/40 hover:shadow-lg hover:shadow-orange-500/10 hover:-translate-y-1">
+              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-card/80 backdrop-blur-sm border border-border/60 transition-all duration-500 hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:bg-orange-950/20">
                 {/* Floating background elements */}
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-orange-400/20 rounded-full blur-lg group-hover:scale-150 group-hover:-rotate-45 transition-all duration-700"></div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-300/15 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-orange-400/30 rounded-full blur-lg group-hover:scale-150 group-hover:-rotate-45 transition-all duration-700"></div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-400/20 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
                 
                 <div className="relative z-10">
                   {/* Animated Icon Container */}
-                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-orange-500/10 rounded-xl mb-3 lg:mb-4 border border-orange-400/20 group-hover:bg-orange-500/20 group-hover:border-orange-400/40 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500">
+                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-orange-500/20 rounded-xl mb-3 lg:mb-4 border border-orange-400/30 group-hover:bg-orange-500/30 group-hover:border-orange-400/50 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500">
                     <Calendar className="h-5 w-5 lg:h-6 lg:w-6 text-orange-400 group-hover:text-orange-300 group-hover:scale-110 transition-all duration-300" />
                   </div>
                   
@@ -271,21 +271,21 @@ const Index = () => {
                   </div>
                   
                   {/* Label */}
-                  <div className="text-xs lg:text-sm font-medium text-gray-300 group-hover:text-orange-200 transition-colors duration-300">
+                  <div className="text-xs lg:text-sm font-semibold text-foreground/80 group-hover:text-orange-200 transition-colors duration-300 font-mono tracking-wide">
                     Events Done
                   </div>
                 </div>
               </div>
 
               {/* Stat Card 3 - Rating Average */}
-              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-gradient-to-br from-purple-50/10 to-violet-50/5 backdrop-blur-sm border border-purple-200/20 transition-all duration-500 hover:border-purple-300/40 hover:shadow-lg hover:shadow-purple-500/10 hover:-translate-y-1">
+              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-card/80 backdrop-blur-sm border border-border/60 transition-all duration-500 hover:border-purple-400/60 hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-1 hover:bg-purple-950/20">
                 {/* Floating background elements */}
-                <div className="absolute -top-4 -right-4 w-12 h-12 bg-purple-400/20 rounded-full blur-lg group-hover:scale-150 group-hover:rotate-90 transition-all duration-700"></div>
-                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-violet-300/15 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
+                <div className="absolute -top-4 -right-4 w-12 h-12 bg-purple-400/30 rounded-full blur-lg group-hover:scale-150 group-hover:rotate-90 transition-all duration-700"></div>
+                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-violet-400/20 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
                 
                 <div className="relative z-10">
                   {/* Animated Icon Container */}
-                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-purple-500/10 rounded-xl mb-3 lg:mb-4 border border-purple-400/20 group-hover:bg-purple-500/20 group-hover:border-purple-400/40 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-purple-500/20 rounded-xl mb-3 lg:mb-4 border border-purple-400/30 group-hover:bg-purple-500/30 group-hover:border-purple-400/50 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
                     <Star className="h-5 w-5 lg:h-6 lg:w-6 text-purple-400 group-hover:text-purple-300 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
                   </div>
                   
@@ -295,21 +295,21 @@ const Index = () => {
                   </div>
                   
                   {/* Label */}
-                  <div className="text-xs lg:text-sm font-medium text-gray-300 group-hover:text-purple-200 transition-colors duration-300">
+                  <div className="text-xs lg:text-sm font-semibold text-foreground/80 group-hover:text-purple-200 transition-colors duration-300 font-mono tracking-wide">
                     Avg Rating
                   </div>
                 </div>
               </div>
 
               {/* Stat Card 4 - Years Experience */}
-              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-gradient-to-br from-blue-50/10 to-cyan-50/5 backdrop-blur-sm border border-blue-200/20 transition-all duration-500 hover:border-blue-300/40 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1">
+              <div className="group relative overflow-hidden rounded-xl p-4 lg:p-5 text-center bg-card/80 backdrop-blur-sm border border-border/60 transition-all duration-500 hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1 hover:bg-blue-950/20">
                 {/* Floating background elements */}
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-400/20 rounded-full blur-lg group-hover:scale-150 group-hover:-rotate-90 transition-all duration-700"></div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-cyan-300/15 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-400/30 rounded-full blur-lg group-hover:scale-150 group-hover:-rotate-90 transition-all duration-700"></div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-cyan-400/20 rounded-full blur-md group-hover:scale-125 transition-all duration-500"></div>
                 
                 <div className="relative z-10">
                   {/* Animated Icon Container */}
-                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-blue-500/10 rounded-xl mb-3 lg:mb-4 border border-blue-400/20 group-hover:bg-blue-500/20 group-hover:border-blue-400/40 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
+                  <div className="inline-flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 bg-blue-500/20 rounded-xl mb-3 lg:mb-4 border border-blue-400/30 group-hover:bg-blue-500/30 group-hover:border-blue-400/50 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
                     <Award className="h-5 w-5 lg:h-6 lg:w-6 text-blue-400 group-hover:text-blue-300 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" />
                   </div>
                   
@@ -319,7 +319,7 @@ const Index = () => {
                   </div>
                   
                   {/* Label */}
-                  <div className="text-xs lg:text-sm font-medium text-gray-300 group-hover:text-blue-200 transition-colors duration-300">
+                  <div className="text-xs lg:text-sm font-semibold text-foreground/80 group-hover:text-blue-200 transition-colors duration-300 font-mono tracking-wide">
                     Years Exp
                   </div>
                 </div>

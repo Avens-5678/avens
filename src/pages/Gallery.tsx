@@ -38,23 +38,23 @@ const Gallery = () => {
   const getAllImages = () => {
     const images: any[] = [];
     
-    // Add the portfolio item cover image
-    if (portfolioItem) {
+    // Add the portfolio item cover image if it's not a before/after item
+    if (portfolioItem && !portfolioItem.is_before_after) {
       images.push({ ...portfolioItem, type: 'cover' });
+    }
       
-      // Add bulk album images if they exist
-      if (portfolioItem.album_url) {
-        const albumUrls = portfolioItem.album_url.split(',').map((url: string) => url.trim()).filter(Boolean);
-        albumUrls.forEach((url, index) => {
-          images.push({
-            id: `${portfolioItem.id}_album_${index}`,
-            title: `${portfolioItem.title} - Image ${index + 1}`,
-            image_url: url,
-            tag: portfolioItem.tag,
-            type: 'album'
-          });
+    // Add bulk album images if they exist
+    if (portfolioItem?.album_url) {
+      const albumUrls = portfolioItem.album_url.split(',').map((url: string) => url.trim()).filter(Boolean);
+      albumUrls.forEach((url, index) => {
+        images.push({
+          id: `${portfolioItem.id}_album_${index}`,
+          title: `${portfolioItem.title} - Image ${index + 1}`,
+          image_url: url,
+          tag: portfolioItem.tag,
+          type: 'album'
         });
-      }
+      });
     }
     
     return images;

@@ -776,7 +776,7 @@
 
   /* Enhanced interactive button styles */
   .button-primary {
-    @apply bg-primary text-primary-foreground hover:shadow-glow-blue transition-all duration-350;
+    @apply bg-primary text-primary-foreground hover:shadow-glow transition-all duration-350;
     position: relative;
     overflow: hidden;
   }

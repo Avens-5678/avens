@@ -565,7 +565,7 @@
   }
   
   .hover-glow:hover {
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-glow-blue);
   }
 
   .hover-scale {
@@ -774,33 +774,6 @@
     animation: shimmer 1.5s infinite;
   }
 
-  /* Enhanced interactive button styles */
-  .button-primary {
-    @apply bg-primary text-primary-foreground hover:shadow-glow transition-all duration-350;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .button-primary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-    transition: left 500ms var(--ease-smooth);
-  }
-
-  .button-primary:hover::before {
-    left: 100%;
-  }
-
-  .button-secondary {
-    @apply bg-secondary text-secondary-foreground hover:shadow-glow-red transition-all duration-350;
-    position: relative;
-    overflow: hidden;
-  }
 
   .button-secondary::before {
     content: '';

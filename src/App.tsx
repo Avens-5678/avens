@@ -17,9 +17,7 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
-import WeddingEvents from "./pages/events/WeddingEvents";
 import CorporateEvents from "./pages/events/CorporateEvents";
-import BirthdayParties from "./pages/events/BirthdayParties";
 import EquipmentRental from "./pages/events/EquipmentRental";
 import GovernmentEvents from "./pages/events/GovernmentEvents";
 import DynamicEventPage from "./pages/events/DynamicEventPage";
@@ -45,9 +43,7 @@ const App = () => (
             <Route path="/blog/:id" element={<BlogPost />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/team" element={<Team />} />
-            <Route path="/events/wedding" element={<WeddingEvents />} />
             <Route path="/events/corporate" element={<CorporateEvents />} />
-            <Route path="/events/birthday" element={<BirthdayParties />} />
             <Route path="/events/equipment-rental" element={<EquipmentRental />} />
             <Route path="/events/government" element={<GovernmentEvents />} />
             <Route path="/events/:eventType" element={<DynamicEventPage />} />

@@ -323,12 +323,50 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       // Clean up storage files before deleting the record
       await cleanupStorageFiles(item);
 
-      // If this is an event, delete the event page first
+      // If this is an event, delete the event page and ALL associated data
       if (tableName === 'events') {
         try {
+          console.log('Comprehensive event cleanup for:', item);
+          
+          // 1. Clean up all associated files (hero images, portfolio images)
+          await cleanupEventFiles(item.id);
+          
+          // 2. Delete all associated portfolio items
+          const { error: portfolioError } = await supabase
+            .from('portfolio')
+            .delete()
+            .eq('event_id', item.id);
+          
+          if (portfolioError) {
+            console.error('Error deleting portfolio items:', portfolioError);
+          }
+          
+          // 3. Delete associated hero banners
+          const { error: bannerError } = await supabase
+            .from('hero_banners')
+            .delete()
+            .eq('event_type', item.event_type);
+          
+          if (bannerError) {
+            console.error('Error deleting hero banners:', bannerError);
+          }
+          
+          // 4. Delete associated services
+          const { error: servicesError } = await supabase
+            .from('services')
+            .delete()
+            .eq('event_type', item.event_type);
+          
+          if (servicesError) {
+            console.error('Error deleting services:', servicesError);
+          }
+          
+          // 5. Delete the event page route (utility function)
           await deleteEventPage(item.id);
+          
+          console.log('Complete event cleanup successful');
         } catch (pageError) {
-          console.error('Error deleting event page:', pageError);
+          console.error('Error during comprehensive event cleanup:', pageError);
         }
       }
 

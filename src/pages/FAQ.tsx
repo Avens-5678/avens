@@ -8,6 +8,8 @@ import { Search, MessageCircle, Phone, Mail, User, HelpCircle, ArrowLeft } from 
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
+import { useActiveFAQ } from "@/hooks/useData";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 // Default FAQ data - in production this would come from the database
 const defaultFAQs = [
@@ -76,9 +78,14 @@ const defaultFAQs = [
 const FAQ = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  
+  const { data: faqs, isLoading } = useActiveFAQ();
+
+  // Use database data if available, otherwise fall back to default FAQs
+  const faqData = faqs && faqs.length > 0 ? faqs : defaultFAQs;
 
   // Filter FAQs based on search term and category
-  const filteredFAQs = defaultFAQs.filter(faq => {
+  const filteredFAQs = faqData.filter(faq => {
     const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "All" || faq.category === selectedCategory;
@@ -86,7 +93,17 @@ const FAQ = () => {
   });
 
   // Get unique categories
-  const categories = ["All", ...Array.from(new Set(defaultFAQs.map(faq => faq.category)))];
+  const categories = ["All", ...Array.from(new Set(faqData.map(faq => faq.category)))];
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

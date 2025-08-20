@@ -449,7 +449,10 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
 
   // Remove image function with storage deletion
   const handleRemoveImage = async (fieldName: string) => {
-    console.log('Removing image for field:', fieldName);
+    console.log('=== REMOVING IMAGE ===');
+    console.log('Field name:', fieldName);
+    console.log('Current formData:', formData);
+    console.log('Current field value:', formData[fieldName]);
     
     // Set loading state to prevent save operations
     setRemovingImage(fieldName);
@@ -458,10 +461,20 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       const currentImageUrl = formData[fieldName];
       
       // Immediately clear the form field to update UI
-      setFormData(prev => ({
-        ...prev,
-        [fieldName]: null
-      }));
+      console.log('Setting field to null for immediate UI update');
+      setFormData(prev => {
+        const newData = {
+          ...prev,
+          [fieldName]: null
+        };
+        console.log('New formData after clearing field:', newData);
+        return newData;
+      });
+      
+      // Force re-render by updating a dummy state if needed
+      setTimeout(() => {
+        console.log('FormData after timeout:', formData);
+      }, 100);
       
       // If there's a current image URL, delete it from storage
       if (currentImageUrl && typeof currentImageUrl === 'string' && currentImageUrl.includes('supabase.co/storage/v1/object/public/')) {
@@ -517,6 +530,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         variant: "destructive",
       });
     } finally {
+      console.log('=== FINISHED REMOVING IMAGE ===');
       setRemovingImage(null);
     }
   };
@@ -603,6 +617,8 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       case 'file':
         const currentImageUrl = value && typeof value === 'string' && !value.startsWith('C:\\fakepath\\') ? value : '';
         const hasCurrentImage = currentImageUrl && currentImageUrl.length > 0;
+        
+        console.log(`Rendering image field ${field.name}:`, { value, currentImageUrl, hasCurrentImage });
         
         return (
           <div className="space-y-4">

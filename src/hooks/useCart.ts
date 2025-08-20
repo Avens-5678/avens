@@ -14,6 +14,7 @@ interface CartStore {
   removeItem: (id: string) => void;
   clearCart: () => void;
   isInCart: (id: string) => boolean;
+  getItemCount: () => number;
 }
 
 export const useCart = create<CartStore>()(
@@ -34,6 +35,10 @@ export const useCart = create<CartStore>()(
       isInCart: (id) => {
         const { items } = get();
         return items.some(item => item.id === id);
+      },
+      getItemCount: () => {
+        const { items } = get();
+        return items.length;
       },
     }),
     {

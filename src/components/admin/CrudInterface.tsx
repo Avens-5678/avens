@@ -361,6 +361,19 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     console.log('Starting file upload:', { fileName: file.name, fieldName, tableName });
     if (!file) return;
     
+    // Validate file type for image fields
+    if (fieldName.includes('image') || fieldName.includes('logo')) {
+      const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validImageTypes.includes(file.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload an image file (JPG, PNG, GIF, or WebP).",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     setUploading(true);
     try {
       let imageUrl;

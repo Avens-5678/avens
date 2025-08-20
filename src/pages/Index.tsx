@@ -307,7 +307,7 @@ const Index = () => {
                   <Card className="group hover:shadow-xl transition-all duration-500 border-0 glassmorphism-card hover:-translate-y-2 rounded-2xl overflow-hidden relative">
                     <div className="h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary"></div>
                     
-                    {service.image_url ? (
+                    {service.image_url && service.image_url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ? (
                       <div className="h-48 bg-cover bg-center" style={{ backgroundImage: `url(${service.image_url})` }}>
                         <div className="h-full bg-gradient-to-t from-black/50 to-transparent"></div>
                       </div>

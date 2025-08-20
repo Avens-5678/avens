@@ -457,16 +457,24 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
 
   // Remove image function with storage deletion
   const handleRemoveImage = async (fieldName: string) => {
-    console.log('=== REMOVING IMAGE ===');
+    console.log('=== REMOVING IMAGE START ===');
     console.log('Field name:', fieldName);
     console.log('Current formData:', formData);
     console.log('Current field value:', formData[fieldName]);
+    console.log('Button clicked for field:', fieldName);
     
-    // Set loading state to prevent save operations
+    // Prevent multiple clicks
+    if (removingImage) {
+      console.log('Already removing an image, ignoring click');
+      return;
+    }
+    
+    // Set loading state to prevent save operations and multiple clicks
     setRemovingImage(fieldName);
     
     try {
       const currentImageUrl = formData[fieldName];
+      console.log('Current image URL to remove:', currentImageUrl);
       
       // Immediately clear the form field to update UI
       console.log('Setting field to null for immediate UI update');
@@ -478,11 +486,6 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         console.log('New formData after clearing field:', newData);
         return newData;
       });
-      
-      // Force re-render by updating a dummy state if needed
-      setTimeout(() => {
-        console.log('FormData after timeout:', formData);
-      }, 100);
       
       // If there's a current image URL, delete it from storage
       if (currentImageUrl && typeof currentImageUrl === 'string' && currentImageUrl.includes('supabase.co/storage/v1/object/public/')) {
@@ -625,33 +628,50 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       case 'file':
         const currentImageUrl = value && typeof value === 'string' && !value.startsWith('C:\\fakepath\\') ? value : '';
         const hasCurrentImage = currentImageUrl && currentImageUrl.length > 0;
+        const isRemoving = removingImage === field.name;
         
-        console.log(`Rendering image field ${field.name}:`, { value, currentImageUrl, hasCurrentImage });
+        console.log(`Rendering image field ${field.name}:`, { 
+          value, 
+          currentImageUrl, 
+          hasCurrentImage, 
+          isRemoving,
+          removingImage 
+        });
         
         return (
           <div className="space-y-4">
-            {/* Current Image Preview */}
-            {hasCurrentImage && (
+            {/* Current Image Preview - Show during removal process */}
+            {(hasCurrentImage || isRemoving) && (
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Current Image:</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  {isRemoving ? "Removing Image..." : "Current Image:"}
+                </div>
                 <div className="relative inline-block">
-                  <img 
-                    src={currentImageUrl} 
-                    alt="Current image" 
-                    className="w-32 h-24 object-cover rounded-md border"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+                  {hasCurrentImage && (
+                    <img 
+                      src={currentImageUrl} 
+                      alt="Current image" 
+                      className={`w-32 h-24 object-cover rounded-md border transition-opacity ${isRemoving ? 'opacity-50' : ''}`}
+                      onError={(e) => {
+                        console.log('Image load error for:', currentImageUrl);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
                   <Button
                     type="button"
                     size="sm"
                     variant="destructive"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 hover:scale-110 transition-transform"
-                    onClick={() => handleRemoveImage(field.name)}
-                    disabled={removingImage === field.name}
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 hover:scale-110 transition-transform disabled:opacity-50"
+                    onClick={(e) => {
+                      console.log('Remove button clicked for field:', field.name);
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRemoveImage(field.name);
+                    }}
+                    disabled={isRemoving}
                   >
-                    {removingImage === field.name ? '...' : '×'}
+                    {isRemoving ? '...' : '×'}
                   </Button>
                 </div>
               </div>

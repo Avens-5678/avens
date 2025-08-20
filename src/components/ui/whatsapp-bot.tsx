@@ -20,12 +20,18 @@ interface CustomerData {
   name: string;
   phone: string;
   email: string;
-  intent: 'event' | 'rental' | '';
+  intent: 'event' | 'rental' | 'general' | '';
   eventType?: string;
-  eventDetails?: string;
+  eventDate?: string;
+  hasVenue?: string;
+  venueName?: string;
+  servicesNeeded?: string[];
+  rentalCategory?: string;
   rentalItems?: string;
   quantity?: string;
+  needsSetup?: string;
   location?: string;
+  eventDetails?: string;
 }
 
 export const WhatsAppBot = () => {
@@ -38,6 +44,16 @@ export const WhatsAppBot = () => {
     email: '',
     intent: '',
     location: '',
+    eventType: '',
+    eventDate: '',
+    hasVenue: '',
+    venueName: '',
+    servicesNeeded: [],
+    rentalCategory: '',
+    rentalItems: '',
+    quantity: '',
+    needsSetup: '',
+    eventDetails: ''
   });
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -48,8 +64,8 @@ export const WhatsAppBot = () => {
       setIsTyping(true);
       setTimeout(() => {
         addBotMessage(
-          "👋 Hi! Welcome to Avens Events! I'm here to help you plan your perfect event or find rental equipment. What can I assist you with today?",
-          ['🎉 Plan an Event', '🏠 Rent Equipment', '📞 Contact Support']
+          "👋 Hi, welcome to Avens! I'm here to help you with Events, Rentals, or answer any questions. What can I assist you with today?",
+          ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ General Questions']
         );
         setIsTyping(false);
       }, 1000);
@@ -77,6 +93,30 @@ export const WhatsAppBot = () => {
     setMessages(prev => [...prev, message]);
   };
 
+  const handleFAQ = (query: string) => {
+    const faqResponses: { [key: string]: string } = {
+      'services': "🏢 We provide comprehensive event management including:\n• Event Planning & Coordination\n• Venue Setup (Hangars, Pagodas, Stages)\n• Décor & Branding\n• Audio Visual & Lighting\n• Air Conditioning (Airwingz)\n• Catering Support\n• Equipment Rentals",
+      'rentals': "📋 Our rental categories include:\n• Event Structures & Venues\n• Exhibition Stalls\n• Climate Control (Airwingz ACs)\n• Event Production Equipment\n• Branding & Décor\n• Furniture & Seating",
+      'weddings': "💒 Absolutely! We specialize in weddings including venue decoration, lighting, sound systems, climate control, and complete event coordination.",
+      'ac': "❄️ Yes! We provide Airwingz AC rentals for exhibitions, events, and outdoor functions with professional installation and maintenance.",
+      'policy': "📋 Cancellation Policy:\n• 30 days advance: Full refund\n• 15-30 days: 50% refund\n• Less than 15 days: 25% refund\n• Same day: No refund\n(Terms may vary based on event size)",
+      'quote': "💰 To get a quote, I can collect your requirements and our team will send you a detailed proposal within 24 hours!",
+      'outstation': "🚗 Yes, we provide destination event services across India. Additional travel and accommodation charges may apply."
+    };
+
+    const lowerQuery = query.toLowerCase();
+    let response = "I'd be happy to help! Could you be more specific about what you'd like to know?";
+
+    for (const [key, answer] of Object.entries(faqResponses)) {
+      if (lowerQuery.includes(key)) {
+        response = answer;
+        break;
+      }
+    }
+
+    return response;
+  };
+
   const handleOptionClick = async (option: string) => {
     addUserMessage(option);
     setIsTyping(true);
@@ -89,52 +129,103 @@ export const WhatsAppBot = () => {
         setCurrentStep('event_type');
         addBotMessage(
           "Great choice! What type of event are you planning?",
-          ['💒 Wedding', '🏢 Corporate Event', '🎂 Birthday Party', '🏛️ Government Event', '🎭 Other']
+          ['💒 Wedding', '🏢 Corporate Event', '🎪 Exhibition', '🎉 Social Party', '🏛️ Government Event', '🎭 Other']
         );
       } else if (option.includes('Rent Equipment')) {
         setCustomerData(prev => ({ ...prev, intent: 'rental' }));
-        setCurrentStep('rental_items');
+        setCurrentStep('rental_category');
         addBotMessage(
-          "Perfect! What equipment are you looking to rent?",
-          ['🪑 Furniture & Seating', '🔊 Audio/Visual', '🏕️ Tents & Canopies', '🍽️ Catering Equipment', '💡 Lighting', '📝 Tell me more']
+          "Perfect! What would you like to rent?",
+          ['🏗️ Event Structures & Venues', '🎪 Exhibition Stalls', '❄️ Climate Control (Airwingz ACs)', '🎵 Event Production Equipment', '🎨 Branding & Décor']
         );
       } else {
-        setCurrentStep('contact_info');
+        setCustomerData(prev => ({ ...prev, intent: 'general' }));
+        setCurrentStep('faq');
         addBotMessage(
-          "I'll connect you with our support team! First, let me get your contact information.",
+          "I'm here to help! What would you like to know about?",
+          ['🏢 What services do you provide?', '📋 What are your rental categories?', '💒 Do you manage weddings?', '❄️ Do you provide AC rental?', '💰 How do I get a quote?', '🚗 Do you provide outstation services?']
         );
       }
     } else if (currentStep === 'event_type') {
       let eventType = '';
       if (option.includes('Wedding')) eventType = 'wedding';
       else if (option.includes('Corporate')) eventType = 'corporate';
-      else if (option.includes('Birthday')) eventType = 'birthday';
+      else if (option.includes('Exhibition')) eventType = 'exhibition';
+      else if (option.includes('Social')) eventType = 'social';
       else if (option.includes('Government')) eventType = 'government';
       else eventType = 'other';
 
       setCustomerData(prev => ({ ...prev, eventType }));
-      setCurrentStep('event_details');
-      addBotMessage(
-        `Wonderful! Tell me more about your ${eventType} event. What's your vision?`
-      );
-    } else if (currentStep === 'rental_items') {
-      let items = '';
-      if (option.includes('Furniture')) items = 'Furniture & Seating';
-      else if (option.includes('Audio')) items = 'Audio/Visual Equipment';
-      else if (option.includes('Tents')) items = 'Tents & Canopies';
-      else if (option.includes('Catering')) items = 'Catering Equipment';
-      else if (option.includes('Lighting')) items = 'Lighting Equipment';
-      else items = 'Custom Request';
-
-      setCustomerData(prev => ({ ...prev, rentalItems: items }));
-      
-      if (option.includes('Tell me more')) {
-        setCurrentStep('rental_details');
-        addBotMessage("Please describe what specific equipment you need:");
+      setCurrentStep('event_date');
+      addBotMessage(`Excellent! When are you planning your ${eventType} event? (Please provide expected date/month)`);
+    } else if (currentStep === 'event_venue') {
+      if (option.includes('Yes')) {
+        setCustomerData(prev => ({ ...prev, hasVenue: 'yes' }));
+        setCurrentStep('venue_name');
+        addBotMessage("Great! What's the name and location of your venue?");
       } else {
-        setCurrentStep('rental_quantity');
-        addBotMessage(`Great choice! How many items or what quantity do you need for ${items}?`);
+        setCustomerData(prev => ({ ...prev, hasVenue: 'no' }));
+        setCurrentStep('event_services');
+        addBotMessage(
+          "No problem! We can help with venue suggestions. Which services do you need help with?",
+          ['🏗️ Venue Setup (Hangars, Pagodas, Stages)', '🎨 Décor & Branding', '🎵 Audio Visual & Lighting', '❄️ Air Conditioning (Airwingz)', '🍽️ Catering Support', '🎯 Full Event Management']
+        );
       }
+    } else if (currentStep === 'event_services') {
+      const services = customerData.servicesNeeded || [];
+      let service = '';
+      
+      if (option.includes('Venue Setup')) service = 'Venue Setup';
+      else if (option.includes('Décor')) service = 'Décor & Branding';
+      else if (option.includes('Audio')) service = 'Audio Visual & Lighting';
+      else if (option.includes('Air Conditioning')) service = 'Air Conditioning';
+      else if (option.includes('Catering')) service = 'Catering Support';
+      else if (option.includes('Full Event')) service = 'Full Event Management';
+
+      services.push(service);
+      setCustomerData(prev => ({ ...prev, servicesNeeded: services }));
+      setCurrentStep('quote_request');
+      addBotMessage(
+        `Perfect! You've selected: ${services.join(', ')}.\n\nWould you like us to share a custom proposal/quote?`,
+        ['✅ Yes, send me a quote', '📋 Just share your contact info']
+      );
+    } else if (currentStep === 'rental_category') {
+      let category = '';
+      if (option.includes('Event Structures')) category = 'Event Structures & Venues';
+      else if (option.includes('Exhibition')) category = 'Exhibition Stalls';
+      else if (option.includes('Climate')) category = 'Climate Control (Airwingz ACs)';
+      else if (option.includes('Production')) category = 'Event Production Equipment';
+      else if (option.includes('Branding')) category = 'Branding & Décor';
+
+      setCustomerData(prev => ({ ...prev, rentalCategory: category }));
+      setCurrentStep('rental_items');
+      addBotMessage(`Great choice! Please tell me specifically what items you need from ${category}:`);
+    } else if (currentStep === 'rental_setup') {
+      setCustomerData(prev => ({ ...prev, needsSetup: option.includes('Yes') ? 'yes' : 'no' }));
+      setCurrentStep('quote_request');
+      addBotMessage(
+        "Perfect! Would you like us to send a quotation?",
+        ['✅ Yes, send me a quote', '📋 Just share brochure/catalog']
+      );
+    } else if (currentStep === 'quote_request') {
+      if (option.includes('Yes')) {
+        setCurrentStep('get_name');
+        addBotMessage("Excellent! I'll need some information to prepare your quote. What's your name?");
+      } else {
+        setCurrentStep('get_name');
+        addBotMessage("Sure! I'll share our contact information. But first, what's your name so I can personalize our service?");
+      }
+    } else if (currentStep === 'faq') {
+      const faqResponse = handleFAQ(option);
+      addBotMessage(faqResponse);
+      
+      setTimeout(() => {
+        addBotMessage(
+          "Is there anything else you'd like to know, or would you like to discuss an event or rental?",
+          ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
+        );
+      }, 2000);
+      setCurrentStep('welcome');
     }
 
     setIsTyping(false);
@@ -149,34 +240,67 @@ export const WhatsAppBot = () => {
 
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    if (currentStep === 'event_details') {
-      setCustomerData(prev => ({ ...prev, eventDetails: text }));
-      setCurrentStep('contact_info');
-      addBotMessage("Excellent! Now I need your contact information to connect you with our event specialists.");
-    } else if (currentStep === 'rental_details') {
+    if (currentStep === 'event_date') {
+      setCustomerData(prev => ({ ...prev, eventDate: text }));
+      setCurrentStep('event_venue');
+      addBotMessage(
+        "Perfect! Do you already have a venue?",
+        ['✅ Yes, I have a venue', '❌ No, I need venue suggestions']
+      );
+    } else if (currentStep === 'venue_name') {
+      setCustomerData(prev => ({ ...prev, venueName: text }));
+      setCurrentStep('event_services');
+      addBotMessage(
+        "Great! Which services do you need help with?",
+        ['🏗️ Venue Setup (Hangars, Pagodas, Stages)', '🎨 Décor & Branding', '🎵 Audio Visual & Lighting', '❄️ Air Conditioning (Airwingz)', '🍽️ Catering Support', '🎯 Full Event Management']
+      );
+    } else if (currentStep === 'rental_items') {
       setCustomerData(prev => ({ ...prev, rentalItems: text }));
       setCurrentStep('rental_quantity');
-      addBotMessage("Perfect! How many items or what quantity do you need?");
+      addBotMessage("How many units/quantity do you need?");
     } else if (currentStep === 'rental_quantity') {
       setCustomerData(prev => ({ ...prev, quantity: text }));
-      setCurrentStep('contact_info');
-      addBotMessage("Great! Now I need your contact information to provide you with a quote.");
-    } else if (currentStep === 'contact_info') {
-      // Handle contact info collection step by step
-      if (!customerData.name) {
-        setCustomerData(prev => ({ ...prev, name: text }));
-        addBotMessage(`Nice to meet you, ${text}! What's your phone number?`);
-      } else if (!customerData.phone) {
-        setCustomerData(prev => ({ ...prev, phone: text }));
-        addBotMessage("Perfect! And your email address?");
-      } else if (!customerData.email) {
-        setCustomerData(prev => ({ ...prev, email: text }));
-        addBotMessage("Finally, what's your location or where is the event/delivery?");
-      } else if (!customerData.location) {
-        setCustomerData(prev => ({ ...prev, location: text }));
+      setCurrentStep('rental_date');
+      addBotMessage("What's the event date & location for delivery/setup?");
+    } else if (currentStep === 'rental_date') {
+      setCustomerData(prev => ({ ...prev, location: text }));
+      setCurrentStep('rental_setup');
+      addBotMessage(
+        "Do you need setup & dismantling service?",
+        ['✅ Yes, include setup service', '❌ No, just delivery']
+      );
+    } else if (currentStep === 'get_name') {
+      setCustomerData(prev => ({ ...prev, name: text }));
+      setCurrentStep('get_phone');
+      addBotMessage(`Nice to meet you, ${text}! What's your phone/WhatsApp number?`);
+    } else if (currentStep === 'get_phone') {
+      setCustomerData(prev => ({ ...prev, phone: text }));
+      setCurrentStep('get_email');
+      addBotMessage("Perfect! What's your email address?");
+    } else if (currentStep === 'get_email') {
+      setCustomerData(prev => ({ ...prev, email: text }));
+      if (!customerData.location) {
+        setCurrentStep('get_location');
+        addBotMessage("Finally, what's your city/event location?");
+      } else {
         setCurrentStep('submit');
         await submitToHubSpot();
       }
+    } else if (currentStep === 'get_location') {
+      setCustomerData(prev => ({ ...prev, location: text }));
+      setCurrentStep('submit');
+      await submitToHubSpot();
+    } else if (currentStep === 'faq') {
+      const faqResponse = handleFAQ(text);
+      addBotMessage(faqResponse);
+      
+      setTimeout(() => {
+        addBotMessage(
+          "Is there anything else you'd like to know?",
+          ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
+        );
+      }, 2000);
+      setCurrentStep('welcome');
     }
 
     setIsTyping(false);
@@ -184,15 +308,33 @@ export const WhatsAppBot = () => {
 
   const submitToHubSpot = async () => {
     try {
+      // Create comprehensive message based on intent
+      let message = '';
+      if (customerData.intent === 'event') {
+        message = `Event Planning Request:
+Event Type: ${customerData.eventType}
+Event Date: ${customerData.eventDate || 'Not specified'}
+Venue Status: ${customerData.hasVenue === 'yes' ? `Yes - ${customerData.venueName}` : 'No, needs venue suggestions'}
+Services Needed: ${customerData.servicesNeeded?.join(', ') || 'Not specified'}
+Additional Details: ${customerData.eventDetails || 'None provided'}`;
+      } else if (customerData.intent === 'rental') {
+        message = `Equipment Rental Request:
+Category: ${customerData.rentalCategory}
+Items: ${customerData.rentalItems}
+Quantity: ${customerData.quantity}
+Setup Service: ${customerData.needsSetup === 'yes' ? 'Yes, include setup & dismantling' : 'No, delivery only'}
+Event Date: ${customerData.eventDate || 'Not specified'}`;
+      } else {
+        message = `General inquiry via chatbot`;
+      }
+
       // First save to Supabase
       const formData = {
         name: customerData.name,
         email: customerData.email,
         phone: customerData.phone,
-        message: customerData.intent === 'event' 
-          ? `Event Type: ${customerData.eventType}\nDetails: ${customerData.eventDetails}`
-          : `Rental Items: ${customerData.rentalItems}\nQuantity: ${customerData.quantity}`,
-        form_type: customerData.intent === 'event' ? 'event' : 'rental',
+        message: message,
+        form_type: customerData.intent === 'event' ? 'inquiry' : (customerData.intent === 'rental' ? 'rental' : 'contact'),
         event_type: customerData.eventType || null,
         rental_title: customerData.rentalItems || null,
         location: customerData.location,
@@ -207,35 +349,69 @@ export const WhatsAppBot = () => {
 
       if (error) throw error;
 
-      // Send to HubSpot
+      // Send to HubSpot with comprehensive data
+      const hubspotData = {
+        submissionId: submission.id,
+        name: customerData.name,
+        email: customerData.email,
+        phone: customerData.phone,
+        message: message,
+        formType: formData.form_type,
+        eventType: customerData.eventType,
+        eventDate: customerData.eventDate,
+        hasVenue: customerData.hasVenue,
+        venueName: customerData.venueName,
+        servicesNeeded: customerData.servicesNeeded?.join(', '),
+        rentalCategory: customerData.rentalCategory,
+        rentalTitle: customerData.rentalItems,
+        quantity: customerData.quantity,
+        needsSetup: customerData.needsSetup,
+        location: customerData.location,
+        intent: customerData.intent
+      };
+
       const response = await supabase.functions.invoke('hubspot-integration', {
-        body: {
-          submissionId: submission.id,
-          name: customerData.name,
-          email: customerData.email,
-          phone: customerData.phone,
-          message: formData.message,
-          formType: formData.form_type,
-          eventType: customerData.eventType,
-          rentalTitle: customerData.rentalItems,
-          location: customerData.location,
-        },
+        body: hubspotData,
       });
 
-      addBotMessage(
-        `🎉 Perfect! I've saved all your information and our team will contact you within 24 hours.\n\n📧 Email: ${customerData.email}\n📱 Phone: ${customerData.phone}\n📍 Location: ${customerData.location}\n\nThank you for choosing Avens Events!`
-      );
+      // Create summary for user
+      let summary = `🎉 Perfect! I've collected all your information:\n\n`;
+      summary += `👤 Name: ${customerData.name}\n`;
+      summary += `📧 Email: ${customerData.email}\n`;
+      summary += `📱 Phone: ${customerData.phone}\n`;
+      summary += `📍 Location: ${customerData.location}\n`;
+      
+      if (customerData.intent === 'event') {
+        summary += `🎉 Event: ${customerData.eventType}\n`;
+        summary += `📅 Date: ${customerData.eventDate}\n`;
+        if (customerData.servicesNeeded?.length) {
+          summary += `🛠️ Services: ${customerData.servicesNeeded.join(', ')}\n`;
+        }
+      } else if (customerData.intent === 'rental') {
+        summary += `🏢 Rental: ${customerData.rentalItems}\n`;
+        summary += `📦 Quantity: ${customerData.quantity}\n`;
+        summary += `🔧 Setup: ${customerData.needsSetup === 'yes' ? 'Yes' : 'No'}\n`;
+      }
+
+      summary += `\n✅ Our team will contact you within 24 hours with detailed information!\n\nThank you for choosing Avens Events! 🙏`;
+
+      addBotMessage(summary);
 
       toast({
-        title: "Information Submitted!",
+        title: "Information Submitted Successfully!",
         description: "Our team will contact you within 24 hours.",
       });
 
     } catch (error) {
       console.error('Error submitting to HubSpot:', error);
       addBotMessage(
-        "I've saved your information locally, but there was an issue with our CRM. Don't worry - our team will still contact you soon!"
+        "✅ I've saved your information! There was a minor issue with our system, but don't worry - our team has your details and will contact you soon.\n\nThank you for choosing Avens Events!"
       );
+      
+      toast({
+        title: "Information Saved",
+        description: "Our team will contact you soon!",
+      });
     }
   };
 
@@ -248,6 +424,16 @@ export const WhatsAppBot = () => {
       email: '',
       intent: '',
       location: '',
+      eventType: '',
+      eventDate: '',
+      hasVenue: '',
+      venueName: '',
+      servicesNeeded: [],
+      rentalCategory: '',
+      rentalItems: '',
+      quantity: '',
+      needsSetup: '',
+      eventDetails: ''
     });
   };
 

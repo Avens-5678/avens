@@ -141,8 +141,8 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
       }
       
       // Refresh data
-      await queryClient.invalidateQueries({ queryKey: ['all-rentals'] });
       await queryClient.invalidateQueries({ queryKey: ['rentals'] });
+      await queryClient.invalidateQueries({ queryKey: ['all-rentals'] });
       
       // Reset form
       setEditingItem(null);
@@ -195,8 +195,8 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
       });
       
       // Refresh data
-      await queryClient.invalidateQueries({ queryKey: ['all-rentals'] });
       await queryClient.invalidateQueries({ queryKey: ['rentals'] });
+      await queryClient.invalidateQueries({ queryKey: ['all-rentals'] });
     } catch (error: any) {
       toast({
         title: "Error",

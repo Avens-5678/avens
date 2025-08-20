@@ -448,7 +448,8 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
 
   // Remove image function
   const handleRemoveImage = (fieldName: string) => {
-    updateFormField(fieldName, '');
+    console.log('Removing image for field:', fieldName);
+    updateFormField(fieldName, null);
     toast({
       title: "Image Removed",
       description: "Image has been removed. Don't forget to save changes.",
@@ -557,22 +558,12 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
                     type="button"
                     size="sm"
                     variant="destructive"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 hover:scale-110 transition-transform"
                     onClick={() => handleRemoveImage(field.name)}
                   >
                     ×
                   </Button>
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => handleRemoveImage(field.name)}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Remove Image
-                </Button>
               </div>
             )}
             

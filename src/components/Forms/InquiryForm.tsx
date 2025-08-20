@@ -22,6 +22,7 @@ const formSchema = z.object({
   phone: z.string().optional(),
   eventType: z.string().optional(),
   eventDate: z.date().optional(),
+  location: z.string().min(2, "Location is required"),
   message: z.string().min(10, "Message must be at least 10 characters")
 });
 interface InquiryFormProps {
@@ -51,32 +52,68 @@ const InquiryForm = ({
       phone: "",
       eventType: eventType || "",
       eventDate: undefined,
+      location: "",
       message: ""
     }
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    
     try {
-      const {
-        error
-      } = await supabase.from("form_submissions").insert({
-        name: values.name,
-        email: values.email,
-        phone: values.phone || null,
-        message: values.message,
-        form_type: formType,
-        event_type: values.eventType as any || null,
-        rental_id: rentalId || null,
-        rental_title: rentalTitle || null
-      });
+      // First save to Supabase
+      const { data: submission, error } = await supabase
+        .from("form_submissions")
+        .insert({
+          name: values.name,
+          email: values.email,
+          phone: values.phone || null,
+          message: values.message,
+          form_type: formType,
+          event_type: values.eventType as any || null,
+          rental_id: rentalId || null,
+          rental_title: rentalTitle || null,
+          location: values.location,
+          status: 'new'
+        })
+        .select()
+        .single();
+
       if (error) throw error;
 
-      // Note: We don't trigger notifications here since we can't read the submission ID
-      // due to RLS policies. The notification will be handled via database triggers
-      // or the admin panel when the submission is processed.
+      // Send to HubSpot CRM
+      try {
+        const hubspotResponse = await supabase.functions.invoke('hubspot-integration', {
+          body: {
+            submissionId: submission.id,
+            name: values.name,
+            email: values.email,
+            phone: values.phone,
+            message: values.message,
+            formType: formType,
+            eventType: values.eventType,
+            rentalTitle: rentalTitle,
+            location: values.location,
+          },
+        });
+
+        if (hubspotResponse.error) {
+          console.error('HubSpot sync error:', hubspotResponse.error);
+        } else {
+          console.log('Successfully synced to HubSpot');
+        }
+      } catch (hubspotError) {
+        console.error('HubSpot integration failed:', hubspotError);
+        // Continue anyway - form is saved locally
+      }
 
       setShowSuccess(true);
       form.reset();
+      
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you within 24 hours.",
+      });
+
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -200,6 +237,20 @@ const InquiryForm = ({
                       <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className="p-3 pointer-events-auto" />
                     </PopoverContent>
                   </Popover>
+                  <FormMessage className="text-xs" />
+                </FormItem>} />
+
+            <FormField control={form.control} name="location" render={({
+            field
+          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.45s' }}>
+                  <FormLabel className="text-foreground font-medium text-sm">Location</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter event location or city" 
+                      {...field} 
+                      className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60"
+                    />
+                  </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>} />
 

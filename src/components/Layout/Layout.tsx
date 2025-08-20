@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AudioControls from "@/components/Audio/AudioControls";
 import MouseGlow from "@/components/ui/mouse-glow";
+import WhatsAppBot from "@/components/ui/whatsapp-bot";
 
 interface LayoutProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ const Layout = ({ children }: LayoutProps) => {
       <Footer />
       <AudioControls />
       <MouseGlow />
+      <WhatsAppBot />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { useEvents, usePortfolio } from "@/hooks/useData";
 import { ArrowLeft, Camera } from "lucide-react";
 import { useState } from "react";
 import Lightbox from "@/components/Portfolio/Lightbox";
+import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
 
 const Gallery = () => {
   const { portfolioId } = useParams<{ portfolioId: string }>();
@@ -137,38 +138,25 @@ const Gallery = () => {
             </div>
           )}
 
-          {beforeAfterImages.length > 0 && (
+          {beforeAfterImages.length > 0 && (portfolioItem as any)?.before_image_url && (portfolioItem as any)?.after_image_url && (
             <div className="mt-20">
-              <h2 className="text-center mb-12">Before & After</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {beforeAfterImages.map((item, index) => (
-                  <Card 
-                    key={item.id} 
-                    className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
-                    onClick={() => openLightbox(allImages.length + index)}
-                  >
-                    <div className="aspect-video overflow-hidden relative">
-                      <img 
-                        src={item.image_url} 
-                        alt={item.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-background/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="bg-background/90 text-foreground px-3 py-1 rounded-full text-sm font-medium">
-                          Click to view
-                        </div>
-                      </div>
-                    </div>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">{item.title}</h3>
-                        <Badge variant={item.is_before ? "secondary" : "default"}>
-                          {item.is_before ? "Before" : "After"}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <h2 className="text-center mb-12">Before & After Transformation</h2>
+              <div className="max-w-4xl mx-auto">
+                <BeforeAfterSlider
+                  beforeImage={(portfolioItem as any).before_image_url}
+                  afterImage={(portfolioItem as any).after_image_url}
+                  beforeLabel="Before"
+                  afterLabel="After"
+                  className="mb-6"
+                />
+                <div className="text-center">
+                  <h3 className="font-semibold text-lg mb-2">{portfolioItem.title}</h3>
+                  {portfolioItem.tag && (
+                    <Badge variant="outline" className="text-sm">
+                      {portfolioItem.tag}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           )}

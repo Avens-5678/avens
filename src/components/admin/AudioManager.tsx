@@ -164,6 +164,22 @@ const AudioManager = () => {
 
   const handleInitialize = async () => {
     try {
+      // First check if settings already exist
+      const { data: existingSettings } = await supabase
+        .from('site_settings')
+        .select('*')
+        .maybeSingle();
+      
+      if (existingSettings) {
+        setSettings(existingSettings);
+        toast({
+          title: "Success", 
+          description: "Settings loaded successfully."
+        });
+        return;
+      }
+
+      // If no settings exist, create them
       const { data, error } = await supabase
         .from('site_settings')
         .insert({

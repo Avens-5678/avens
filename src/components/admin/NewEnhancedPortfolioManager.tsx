@@ -141,15 +141,22 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
         });
       } else {
         // Create new item - validate required fields
-        if (!formData.title || !formData.event_id || !formData.image_url) {
-          const missingFields = [];
-          if (!formData.title) missingFields.push('Title');
-          if (!formData.event_id) missingFields.push('Event');
-          if (!formData.image_url) missingFields.push('Cover Image');
-          throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-        }
+        const missingFields = [];
+        if (!formData.title) missingFields.push('Title');
+        if (!formData.event_id) missingFields.push('Event');
+        if (!formData.image_url) missingFields.push('Cover Image');
         
-        const portfolioData = {
+        if (missingFields.length > 0) {
+          toast({
+            title: "Validation Error",
+            description: `Missing required fields: ${missingFields.join(', ')}`,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Clean the form data before saving
+        const cleanData = {
           title: formData.title,
           image_url: formData.image_url,
           event_id: formData.event_id,
@@ -164,7 +171,7 @@ const NewEnhancedPortfolioManager = ({ portfolio, events }: NewEnhancedPortfolio
         
         const { error } = await supabase
           .from('portfolio')
-          .insert([portfolioData]);
+          .insert([cleanData]);
         
         if (error) throw error;
         

@@ -382,7 +382,9 @@ export type Database = {
       }
       portfolio: {
         Row: {
+          after_image_url: string | null
           album_url: string | null
+          before_image_url: string | null
           created_at: string
           display_order: number | null
           event_id: string
@@ -395,7 +397,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          after_image_url?: string | null
           album_url?: string | null
+          before_image_url?: string | null
           created_at?: string
           display_order?: number | null
           event_id: string
@@ -408,7 +412,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          after_image_url?: string | null
           album_url?: string | null
+          before_image_url?: string | null
           created_at?: string
           display_order?: number | null
           event_id?: string

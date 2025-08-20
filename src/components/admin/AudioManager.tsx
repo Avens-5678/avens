@@ -164,11 +164,29 @@ const AudioManager = () => {
 
   const handleInitialize = async () => {
     try {
-      const { error } = await supabase.from('site_settings').insert({});
+      const { data, error } = await supabase
+        .from('site_settings')
+        .insert({
+          background_audio_enabled: true,
+          background_audio_url: null
+        })
+        .select()
+        .single();
+        
       if (error) throw error;
-      await fetchSettings();
+      
+      setSettings(data);
+      toast({
+        title: "Success", 
+        description: "Settings initialized successfully."
+      });
     } catch (error: any) {
-      toast({ title: "Error", description: "Could not initialize settings: " + error.message, variant: "destructive" });
+      console.error('Error initializing settings:', error);
+      toast({ 
+        title: "Error", 
+        description: "Could not initialize settings: " + error.message, 
+        variant: "destructive" 
+      });
     }
   };
 

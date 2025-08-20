@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { createEventPage, deleteEventPage } from "@/utils/eventPageUtils";
-import { uploadEventHeroImage } from "@/utils/storageUtils";
+import { uploadEventHeroImage, uploadBannerImage, uploadClientLogo } from "@/utils/storageUtils";
 import { EnhancedEventForm } from "./EnhancedEventForm";
 
 interface Field {
@@ -256,33 +256,35 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     
     setUploading(true);
     try {
-      let imageUrl;
-      if (fieldName === 'hero_image_url' && tableName === 'events') {
-        imageUrl = await uploadEventHeroImage(file, formData.event_type || 'default');
-      } else {
-        // Handle other image uploads - determine appropriate bucket
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        
-        let bucket = 'portfolio-images'; // default
-        if (tableName === 'hero_banners' || tableName === 'trusted_clients') {
-          bucket = 'portfolio-images';
-        } else if (tableName === 'services') {
-          bucket = 'specialty-images';
+        let imageUrl;
+        if (fieldName === 'hero_image_url' && tableName === 'events') {
+          imageUrl = await uploadEventHeroImage(file, formData.event_type || 'default');
+        } else if (fieldName === 'image_url' && tableName === 'hero_banners') {
+          imageUrl = await uploadBannerImage(file);
+        } else if (fieldName === 'logo_url' && tableName === 'trusted_clients') {
+          imageUrl = await uploadClientLogo(file);
+        } else {
+          // Handle other image uploads - determine appropriate bucket
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}.${fileExt}`;
+          
+          let bucket = 'portfolio-images'; // default
+          if (tableName === 'services') {
+            bucket = 'specialty-images';
+          }
+          
+          const { data, error } = await supabase.storage
+            .from(bucket)
+            .upload(fileName, file);
+
+          if (error) throw error;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(data.path);
+
+          imageUrl = publicUrl;
         }
-        
-        const { data, error } = await supabase.storage
-          .from(bucket)
-          .upload(fileName, file);
-
-        if (error) throw error;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from(bucket)
-          .getPublicUrl(data.path);
-
-        imageUrl = publicUrl;
-      }
       
       setFormData(prev => ({
         ...prev,

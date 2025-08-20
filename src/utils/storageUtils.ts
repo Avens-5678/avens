@@ -75,6 +75,40 @@ export const uploadBulkPortfolioImages = async (files: FileList, eventId: string
   return Promise.all(uploadPromises);
 };
 
+export const uploadBannerImage = async (file: File): Promise<string> => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `banner-${Date.now()}.${fileExt}`;
+  
+  const { data, error } = await supabase.storage
+    .from('portfolio-images')
+    .upload(fileName, file);
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('portfolio-images')
+    .getPublicUrl(data.path);
+
+  return publicUrl;
+};
+
+export const uploadClientLogo = async (file: File): Promise<string> => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `client-logo-${Date.now()}.${fileExt}`;
+  
+  const { data, error } = await supabase.storage
+    .from('portfolio-images')
+    .upload(fileName, file);
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('portfolio-images')
+    .getPublicUrl(data.path);
+
+  return publicUrl;
+};
+
 export const deleteStorageFile = async (bucket: string, path: string): Promise<void> => {
   const { error } = await supabase.storage
     .from(bucket)

@@ -103,11 +103,13 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
 
   // Initialize form data when editing or creating
   useEffect(() => {
-    if (editingItem) {
+    if (editingItem && !formData.id) {
+      // Only initialize if we haven't already set form data for this item
       console.log('Setting form data for editing:', editingItem);
       const cleanedData = cleanFormData(editingItem, fields);
       setFormData(cleanedData);
-    } else if (isCreating) {
+    } else if (isCreating && Object.keys(formData).length === 0) {
+      // Only initialize if form data is empty
       console.log('Initializing form data for creation');
       const initialData: Record<string, any> = {};
       fields.forEach(field => {
@@ -121,7 +123,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
       });
       setFormData(initialData);
     }
-  }, [editingItem, isCreating, fields]);
+  }, [editingItem, isCreating]); // Removed fields dependency to prevent reinitialization
 
   const handleEdit = (item: any) => {
     if (tableName === 'events') {
@@ -487,6 +489,9 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         console.log('New formData after clearing field:', newData);
         return newData;
       });
+      
+      // Add a small delay to ensure UI updates before continuing
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // If there's a current image URL, delete it from storage
       if (currentImageUrl && typeof currentImageUrl === 'string' && currentImageUrl.includes('supabase.co/storage/v1/object/public/')) {

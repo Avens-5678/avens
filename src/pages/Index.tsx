@@ -318,11 +318,9 @@ const Index = () => {
                       </p>
 
                       <div className="flex flex-wrap gap-2">
-                        {service.categories && service.categories.length > 0 && (
-                          <Badge variant="outline" className="text-xs">
-                            {service.categories[0]}
-                          </Badge>
-                        )}
+                        <Badge variant="outline" className="text-xs">
+                          {service.event_type}
+                        </Badge>
                       </div>
 
                       <div className="pt-2">
@@ -342,8 +340,7 @@ const Index = () => {
                             </DialogHeader>
                             <InquiryForm
                               formType="contact"
-                              serviceId={service.id}
-                              serviceTitle={service.title}
+                              eventType={service.event_type}
                               title="Get Service Quote"
                             />
                           </DialogContent>

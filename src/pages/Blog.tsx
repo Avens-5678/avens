@@ -65,43 +65,52 @@ const Blog = () => {
                   delay={index * 100}
                   className="h-full"
                 >
-                  <Card className="glassmorphism-card hover:shadow-glow transition-all duration-500 cursor-pointer group h-full flex flex-col">
+                  <Card className="glassmorphism-card hover:shadow-glow transition-all duration-500 cursor-pointer group h-full flex flex-col border-0 bg-gradient-to-br from-background/50 to-background/30 backdrop-blur-xl">
                     {post.image_url && (
-                      <div className="aspect-video overflow-hidden rounded-t-lg">
+                      <div className="aspect-video overflow-hidden rounded-t-lg relative">
                         <img 
                           src={post.image_url} 
                           alt={post.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
                     )}
-                    <CardHeader className="flex-grow">
+                    <CardHeader className="flex-grow pb-3">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                         <Clock className="h-4 w-4" />
                         <span>{new Date(post.created_at).toLocaleDateString('en-US', { 
                           year: 'numeric', 
-                          month: 'long', 
+                          month: 'short', 
                           day: 'numeric' 
                         })}</span>
                       </div>
-                      <CardTitle className="text-xl group-hover:text-primary transition-colors duration-300 line-clamp-2">
+                      <CardTitle className="text-xl group-hover:text-primary transition-colors duration-300 line-clamp-2 leading-tight">
                         {post.title}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-0">
-                      <p className="text-muted-foreground mb-6 line-clamp-3">
+                    <CardContent className="pt-0 flex flex-col gap-4">
+                      <p className="text-muted-foreground line-clamp-3 leading-relaxed">
                         {post.short_content}
                       </p>
-                      <Button 
-                        asChild
-                        variant="ghost" 
-                        className="group/btn p-0 h-auto font-medium hover:text-primary"
-                      >
-                        <Link to={`/blog/${post.id}`}>
-                          Read More 
-                          <ArrowRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                        </Link>
-                      </Button>
+                      <div className="flex items-center justify-between">
+                        <Button 
+                          asChild
+                          variant="ghost" 
+                          className="group/btn hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 rounded-full px-6 py-2 transition-all duration-300"
+                        >
+                          <Link to={`/blog/${post.id}`} className="flex items-center gap-2">
+                            <span className="font-medium">Read Article</span>
+                            <div className="w-8 h-8 rounded-full bg-primary/10 group-hover/btn:bg-primary group-hover/btn:text-primary-foreground flex items-center justify-center transition-all duration-300">
+                              <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-0.5 transition-transform duration-300" />
+                            </div>
+                          </Link>
+                        </Button>
+                        <div className="text-sm text-muted-foreground">
+                          {Math.ceil(post.content.split(' ').length / 200)} min read
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </AnimatedText>

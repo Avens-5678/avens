@@ -112,6 +112,20 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
         }
       }
       
+      // Validate required fields
+      const missingFields = fields
+        .filter(field => field.required && (!cleanData[field.name] || cleanData[field.name] === ''))
+        .map(field => field.label);
+      
+      if (missingFields.length > 0) {
+        toast({
+          title: "Validation Error",
+          description: `The following required fields are missing: ${missingFields.join(', ')}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Ensure event_type is not empty for events table
       if (tableName === 'events' && (!cleanData.event_type || cleanData.event_type === '')) {
         toast({

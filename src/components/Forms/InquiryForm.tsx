@@ -129,81 +129,86 @@ const InquiryForm = ({
   };
   return (
     <>
-      <Card className="w-full border-0 shadow-none bg-transparent relative overflow-hidden animate-scale-in">
-        {/* Enhanced animated background elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-pulse"></div>
-        <div className="absolute top-2 right-2 w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-lg animate-float"></div>
-        <div className="absolute bottom-2 left-2 w-6 h-6 sm:w-10 sm:h-10 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-lg animate-float-delayed"></div>
-        
-        <CardHeader className="relative z-10 text-center space-y-2 p-3 sm:p-4">
-          <div className="flex items-center justify-center space-x-2">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-twinkle" />
-            <CardTitle className="text-base sm:text-lg font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient-text">
-              {title}
-            </CardTitle>
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-accent animate-twinkle-delayed" />
-          </div>
-          <p className="text-xs text-muted-foreground font-medium">Ready to create something amazing together?</p>
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="text-center pb-3">
+          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
         
-        <CardContent className="relative z-10 p-3 sm:p-4">
+        <CardContent className="p-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:space-y-3">
-            <FormField control={form.control} name="name" render={({
-            field
-          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in">
-                  <FormLabel className="text-foreground font-medium text-sm">Full Name</FormLabel>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+            <FormField 
+              control={form.control} 
+              name="name" 
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel className="text-sm">Full Name</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Enter your full name" 
-                      {...field} 
-                      className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60"
-                    />
+                    <Input placeholder="Enter your full name" {...field} className="h-9" />
                   </FormControl>
                   <FormMessage className="text-xs" />
-                </FormItem>} />
+                </FormItem>
+              )} 
+            />
 
-            <FormField control={form.control} name="email" render={({
-            field
-          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                  <FormLabel className="text-foreground font-medium text-sm">Email Address</FormLabel>
+            <FormField 
+              control={form.control} 
+              name="email" 
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel className="text-sm">Email Address</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="email" 
-                      placeholder="Enter your email" 
-                      {...field} 
-                      className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60"
-                    />
+                    <Input type="email" placeholder="Enter your email" {...field} className="h-9" />
                   </FormControl>
                   <FormMessage className="text-xs" />
-                </FormItem>} />
+                </FormItem>
+              )} 
+            />
 
-            <FormField control={form.control} name="phone" render={({
-            field
-          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                  <FormLabel className="text-foreground font-medium text-sm">Phone Number (Optional)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="tel" 
-                      placeholder="Enter your phone number" 
-                      {...field} 
-                      className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>} />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField 
+                control={form.control} 
+                name="phone" 
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-sm">Phone</FormLabel>
+                    <FormControl>
+                      <Input type="tel" placeholder="Phone number" {...field} className="h-9" />
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )} 
+              />
 
-            {!eventType && <FormField control={form.control} name="eventType" render={({
-            field
-          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                    <FormLabel className="text-foreground font-medium text-sm">Event Type</FormLabel>
+              <FormField 
+                control={form.control} 
+                name="location" 
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-sm">Location</FormLabel>
+                    <FormControl>
+                      <Input placeholder="City/Location" {...field} className="h-9" />
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )} 
+              />
+            </div>
+
+            {!eventType && (
+              <FormField 
+                control={form.control} 
+                name="eventType" 
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-sm">Event Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60">
+                        <SelectTrigger className="h-9">
                           <SelectValue placeholder="Select event type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="z-50 bg-background/95 backdrop-blur-xl border-2 border-border/50 rounded-lg">
+                      <SelectContent className="z-50">
                         <SelectItem value="wedding">Wedding</SelectItem>
                         <SelectItem value="corporate">Corporate Event</SelectItem>
                         <SelectItem value="birthday">Birthday Party</SelectItem>
@@ -214,82 +219,82 @@ const InquiryForm = ({
                       </SelectContent>
                     </Select>
                     <FormMessage className="text-xs" />
-                  </FormItem>} />}
+                  </FormItem>
+                )} 
+            />
+            )}
 
-            <FormField control={form.control} name="eventDate" render={({
-            field
-          }) => <FormItem className="flex flex-col space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                  <FormLabel className="text-foreground font-medium text-sm">Event Date (Optional)</FormLabel>
+            <FormField 
+              control={form.control} 
+              name="eventDate" 
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel className="text-sm">Event Date (Optional)</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button 
-                          variant={"outline"} 
+                          variant="outline" 
                           className={cn(
-                            "w-full h-10 sm:h-11 pl-3 text-left font-normal border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60", 
+                            "w-full h-9 pl-3 text-left font-normal", 
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value ? format(field.value, "PPP") : <span className="text-sm">Pick your event date</span>}
+                          {field.value ? format(field.value, "PPP") : <span>Pick date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50 bg-background/95 backdrop-blur-xl border-2 border-border/50 rounded-lg shadow-2xl animate-scale-in" align="start" sideOffset={5}>
-                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className="p-3 pointer-events-auto" />
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <Calendar 
+                        mode="single" 
+                        selected={field.value} 
+                        onSelect={field.onChange} 
+                        disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))} 
+                        initialFocus 
+                        className="p-3 pointer-events-auto" 
+                      />
                     </PopoverContent>
                   </Popover>
                   <FormMessage className="text-xs" />
-                </FormItem>} />
+                </FormItem>
+              )} 
+            />
 
-            <FormField control={form.control} name="location" render={({
-            field
-          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.45s' }}>
-                  <FormLabel className="text-foreground font-medium text-sm">Location</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter event location or city" 
-                      {...field} 
-                      className="h-10 sm:h-11 border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm rounded-lg hover:border-primary/60"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>} />
-
-            <FormField control={form.control} name="message" render={({
-            field
-          }) => <FormItem className="space-y-1 sm:space-y-2 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-                  <FormLabel className="text-foreground font-medium text-sm">Message</FormLabel>
+            <FormField 
+              control={form.control} 
+              name="message" 
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel className="text-sm">Message</FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="Tell us about your event requirements..." 
-                      className="min-h-[100px] sm:min-h-[120px] border-2 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm resize-none rounded-lg hover:border-primary/60 text-sm" 
+                      className="min-h-[80px] resize-none text-sm" 
                       {...field} 
                     />
                   </FormControl>
                   <FormMessage className="text-xs" />
-                </FormItem>} />
+                </FormItem>
+              )} 
+            />
 
             <Button 
               type="submit" 
-              className="w-full h-11 sm:h-12 bg-gradient-to-r from-primary to-accent hover:shadow-xl hover:scale-105 transition-all duration-300 text-white font-semibold relative overflow-hidden group animate-fade-in rounded-lg" 
+              className="w-full h-9" 
               disabled={isLoading}
-              style={{ animationDelay: '0.6s' }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10 flex items-center justify-center">
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    <span className="text-sm sm:text-base">Sending...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-4 w-4" />
-                    <span className="text-sm sm:text-base">Send Message</span>
-                  </>
-                )}
-              </div>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Message
+                </>
+              )}
             </Button>
           </form>
         </Form>

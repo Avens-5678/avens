@@ -85,35 +85,33 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold">Profile Management</h2>
-        <p className="text-muted-foreground mt-1">
-          Manage your admin profile and account settings
-        </p>
+        <h2 className="text-xl font-bold">Profile Management</h2>
+        <p className="text-muted-foreground text-sm">Manage your admin profile and account settings</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <User className="h-5 w-5" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-base">
+              <User className="h-4 w-4" />
               <span>Profile Information</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                 <FormField
                   control={form.control}
                   name="full_name"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-sm">Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your full name" {...field} />
+                        <Input placeholder="Enter your full name" {...field} className="h-9" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -122,17 +120,17 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-sm">Email Address</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="Enter your email" {...field} />
+                        <Input type="email" placeholder="Enter your email" {...field} className="h-9" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={isLoading} size="sm">
                   {isLoading ? "Updating..." : "Update Profile"}
                 </Button>
               </form>
@@ -141,25 +139,25 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Lock className="h-5 w-5" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-base">
+              <Lock className="h-4 w-4" />
               <span>Change Password</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                 <FormField
                   control={form.control}
                   name="current_password"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Current Password</FormLabel>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-sm">Current Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter current password" {...field} />
+                        <Input type="password" placeholder="Enter current password" {...field} className="h-9" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -168,12 +166,12 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
                   control={form.control}
                   name="new_password"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Password</FormLabel>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-sm">New Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter new password" {...field} />
+                        <Input type="password" placeholder="Enter new password" {...field} className="h-9" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -182,17 +180,17 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
                   control={form.control}
                   name="confirm_password"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm New Password</FormLabel>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-sm">Confirm New Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Confirm new password" {...field} />
+                        <Input type="password" placeholder="Confirm new password" {...field} className="h-9" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" disabled={isLoading} variant="outline">
+                <Button type="submit" disabled={isLoading} variant="outline" size="sm">
                   {isLoading ? "Updating..." : "Change Password"}
                 </Button>
               </form>

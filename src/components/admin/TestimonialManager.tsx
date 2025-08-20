@@ -221,66 +221,70 @@ const TestimonialManager = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Client Testimonials</h2>
+        <h2 className="text-xl font-bold">Client Testimonials</h2>
         <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogTrigger asChild>
-            <Button onClick={handleCreate}>
+            <Button size="sm" onClick={handleCreate}>
               <Plus className="mr-2 h-4 w-4" />
               Add Testimonial
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Add New Testimonial</DialogTitle>
+              <DialogTitle className="text-lg">Add New Testimonial</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <Label htmlFor="client_name">Client Name</Label>
+                <Label htmlFor="client_name" className="text-sm">Client Name</Label>
                 <Input
                   id="client_name"
                   value={formData.client_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
                   placeholder="Enter client name"
+                  className="h-9"
                 />
               </div>
 
               <div>
-                <Label htmlFor="testimonial">Testimonial</Label>
+                <Label htmlFor="testimonial" className="text-sm">Testimonial</Label>
                 <Textarea
                   id="testimonial"
                   value={formData.testimonial}
                   onChange={(e) => setFormData(prev => ({ ...prev, testimonial: e.target.value }))}
                   placeholder="Enter testimonial text"
-                  rows={4}
+                  rows={3}
+                  className="text-sm"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="company" className="text-sm">Company</Label>
                   <Input
                     id="company"
                     value={formData.company}
                     onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-                    placeholder="Enter company name"
+                    placeholder="Company name"
+                    className="h-9"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="position">Position</Label>
+                  <Label htmlFor="position" className="text-sm">Position</Label>
                   <Input
                     id="position"
                     value={formData.position}
                     onChange={(e) => setFormData(prev => ({ ...prev, position: e.target.value }))}
-                    placeholder="Enter position"
+                    placeholder="Position"
+                    className="h-9"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="rating">Rating</Label>
+                  <Label htmlFor="rating" className="text-sm">Rating</Label>
                   <Input
                     id="rating"
                     type="number"
@@ -288,22 +292,24 @@ const TestimonialManager = () => {
                     max="5"
                     value={formData.rating}
                     onChange={(e) => setFormData(prev => ({ ...prev, rating: parseInt(e.target.value) }))}
+                    className="h-9"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="display_order">Display Order</Label>
+                  <Label htmlFor="display_order" className="text-sm">Order</Label>
                   <Input
                     id="display_order"
                     type="number"
                     value={formData.display_order}
                     onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) }))}
+                    className="h-9"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="image">Client Image</Label>
-                <div className="mt-2">
+                <Label htmlFor="image" className="text-sm">Client Image</Label>
+                <div className="mt-1">
                   <Input
                     type="file"
                     accept="image/*"
@@ -312,13 +318,14 @@ const TestimonialManager = () => {
                       if (file) handleFileUpload(file);
                     }}
                     disabled={uploading}
+                    className="h-9"
                   />
-                  {uploading && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
+                  {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
                   {formData.image_url && (
                     <img 
                       src={formData.image_url} 
                       alt="Preview" 
-                      className="mt-2 h-20 w-20 object-cover rounded"
+                      className="mt-2 h-16 w-16 object-cover rounded"
                     />
                   )}
                 </div>

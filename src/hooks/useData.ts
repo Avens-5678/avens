@@ -154,7 +154,9 @@ export const usePortfolio = (eventId?: string) => {
           is_before,
           display_order,
           tag,
-          album_url
+          album_url,
+          before_image_url,
+          after_image_url
         `)
         .order("display_order", { ascending: true });
 

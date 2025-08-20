@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useState } from 'react';
+import React, { ReactNode, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -13,7 +13,7 @@ interface MagneticButtonProps {
   [key: string]: any;
 }
 
-export const MagneticButton = ({
+export const MagneticButton = React.forwardRef<HTMLButtonElement, MagneticButtonProps>(({
   children,
   className,
   variant = 'default',
@@ -22,14 +22,16 @@ export const MagneticButton = ({
   onClick,
   asChild,
   ...props
-}: MagneticButtonProps) => {
+}, forwardedRef) => {
   const ref = useRef<HTMLButtonElement>(null);
+  const buttonRef = forwardedRef || ref;
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!ref.current) return;
+    const currentRef = typeof buttonRef === 'function' ? null : buttonRef?.current;
+    if (!currentRef) return;
 
-    const rect = ref.current.getBoundingClientRect();
+    const rect = currentRef.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     
@@ -48,7 +50,7 @@ export const MagneticButton = ({
 
   return (
     <Button
-      ref={ref}
+      ref={buttonRef as React.RefObject<HTMLButtonElement>}
       variant={variant}
       size={size}
       className={cn(
@@ -68,6 +70,8 @@ export const MagneticButton = ({
       {children}
     </Button>
   );
-};
+});
+
+MagneticButton.displayName = "MagneticButton";
 
 export default MagneticButton;

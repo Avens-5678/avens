@@ -461,7 +461,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     console.log('Field name:', fieldName);
     console.log('Current formData:', formData);
     console.log('Current field value:', formData[fieldName]);
-    console.log('Button clicked for field:', fieldName);
+    console.log('Current removingImage state:', removingImage);
     
     // Prevent multiple clicks
     if (removingImage) {
@@ -470,6 +470,7 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
     }
     
     // Set loading state to prevent save operations and multiple clicks
+    console.log('Setting removingImage state to:', fieldName);
     setRemovingImage(fieldName);
     
     try {
@@ -662,14 +663,21 @@ const CrudInterface = ({ title, data, tableName, fields }: CrudInterfaceProps) =
                     type="button"
                     size="sm"
                     variant="destructive"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 hover:scale-110 transition-transform disabled:opacity-50"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 hover:scale-110 transition-transform disabled:opacity-50 z-10"
                     onClick={(e) => {
+                      console.log('=== BUTTON CLICK DEBUG ===');
                       console.log('Remove button clicked for field:', field.name);
+                      console.log('Event target:', e.target);
+                      console.log('Button disabled?', isRemoving);
+                      console.log('Form data before click:', formData);
+                      console.log('Current removing image:', removingImage);
                       e.preventDefault();
                       e.stopPropagation();
+                      console.log('About to call handleRemoveImage...');
                       handleRemoveImage(field.name);
                     }}
                     disabled={isRemoving}
+                    style={{ pointerEvents: 'all' }}
                   >
                     {isRemoving ? '...' : '×'}
                   </Button>

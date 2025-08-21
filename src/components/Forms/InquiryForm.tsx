@@ -129,22 +129,22 @@ const InquiryForm = ({
   };
   return (
     <>
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center pb-3">
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+      <Card className="w-full max-w-sm mx-auto">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-base font-semibold">{title}</CardTitle>
         </CardHeader>
         
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
             <FormField 
               control={form.control} 
               name="name" 
               render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel className="text-sm">Full Name</FormLabel>
+                <FormItem className="space-y-0.5">
+                  <FormLabel className="text-xs">Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your full name" {...field} className="h-9" />
+                    <Input placeholder="Enter your full name" {...field} className="h-8" />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -155,25 +155,25 @@ const InquiryForm = ({
               control={form.control} 
               name="email" 
               render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel className="text-sm">Email Address</FormLabel>
+                <FormItem className="space-y-0.5">
+                  <FormLabel className="text-xs">Email Address</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="Enter your email" {...field} className="h-9" />
+                    <Input type="email" placeholder="Enter your email" {...field} className="h-8" />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
               )} 
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <FormField 
                 control={form.control} 
                 name="phone" 
                 render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="text-sm">Phone</FormLabel>
+                  <FormItem className="space-y-0.5">
+                    <FormLabel className="text-xs">Phone</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="Phone number" {...field} className="h-9" />
+                      <Input type="tel" placeholder="Phone number" {...field} className="h-8" />
                     </FormControl>
                     <FormMessage className="text-xs" />
                   </FormItem>
@@ -184,10 +184,10 @@ const InquiryForm = ({
                 control={form.control} 
                 name="location" 
                 render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="text-sm">Location</FormLabel>
+                  <FormItem className="space-y-0.5">
+                    <FormLabel className="text-xs">Location</FormLabel>
                     <FormControl>
-                      <Input placeholder="City/Location" {...field} className="h-9" />
+                      <Input placeholder="City/Location" {...field} className="h-8" />
                     </FormControl>
                     <FormMessage className="text-xs" />
                   </FormItem>
@@ -200,11 +200,11 @@ const InquiryForm = ({
                 control={form.control} 
                 name="eventType" 
                 render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="text-sm">Event Type</FormLabel>
+                  <FormItem className="space-y-0.5">
+                    <FormLabel className="text-xs">Event Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger className="h-8">
                           <SelectValue placeholder="Select event type" />
                         </SelectTrigger>
                       </FormControl>
@@ -228,15 +228,15 @@ const InquiryForm = ({
               control={form.control} 
               name="eventDate" 
               render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel className="text-sm">Event Date (Optional)</FormLabel>
+                <FormItem className="space-y-0.5">
+                  <FormLabel className="text-xs">Event Date (Optional)</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button 
                           variant="outline" 
                           className={cn(
-                            "w-full h-9 pl-3 text-left font-normal", 
+                            "w-full h-8 pl-3 text-left font-normal text-xs", 
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -265,12 +265,12 @@ const InquiryForm = ({
               control={form.control} 
               name="message" 
               render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel className="text-sm">Message</FormLabel>
+                <FormItem className="space-y-0.5">
+                  <FormLabel className="text-xs">Message</FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="Tell us about your event requirements..." 
-                      className="min-h-[80px] resize-none text-sm" 
+                      className="min-h-[60px] resize-none text-xs" 
                       {...field} 
                     />
                   </FormControl>
@@ -281,7 +281,7 @@ const InquiryForm = ({
 
             <Button 
               type="submit" 
-              className="w-full h-9" 
+              className="w-full h-8 text-xs" 
               disabled={isLoading}
             >
               {isLoading ? (

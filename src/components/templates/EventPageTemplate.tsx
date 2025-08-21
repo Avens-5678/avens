@@ -112,24 +112,24 @@ export const EventPageTemplate = ({
         <div className="absolute top-20 right-20 w-96 h-96 animate-morphing-bg opacity-30 pointer-events-none" />
         <div className="absolute bottom-20 left-20 w-80 h-80 animate-morphing-bg opacity-20 pointer-events-none" style={{ animationDelay: '4s' }} />
         
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <ScrollReveal animation="fade-in-up" delay={200} className="lg:w-1/2 space-y-8">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-16">
+            <ScrollReveal animation="fade-in-up" delay={200} className="lg:w-1/2 space-y-4 md:space-y-6 lg:space-y-8">
               <Badge variant="secondary" className="glass bg-primary/10 text-primary border-primary/20 w-fit hover-glow">
                 <EventIcon className="mr-2 h-4 w-4 animate-pulse-glow" />
                 {eventTitle}
               </Badge>
               
               <ScrollReveal animation="bounce-in" delay={400}>
-                <div className="space-y-6">
-                  <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
+                <div className="space-y-3 md:space-y-4 lg:space-y-6">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
                     {heroSubtitle.split(' ').slice(0, -1).join(' ')}
                     <span className="block text-gradient-primary animate-gradient-text">
                       {heroSubtitle.split(' ').slice(-1)[0]}
                     </span>
                   </h1>
                   
-                  <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                  <p className="text-base md:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg">
                     {description}
                   </p>
                 </div>
@@ -140,7 +140,7 @@ export const EventPageTemplate = ({
                   <DialogTrigger asChild>
                     <MagneticButton 
                       size="lg" 
-                      className="button-primary px-12 py-4 text-lg font-semibold rounded-full shadow-2xl"
+                      className="button-primary px-6 md:px-8 lg:px-12 py-3 md:py-4 text-sm md:text-base lg:text-lg font-semibold rounded-full shadow-2xl"
                       strength={15}
                     >
                       <EventIcon className="mr-2 h-5 w-5" />
@@ -168,7 +168,7 @@ export const EventPageTemplate = ({
                   <img 
                     src={heroImage}
                     alt={`${eventTitle} setup`}
-                    className="w-full h-[600px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute top-4 right-4">
                     <div className="glass p-3 rounded-full">
@@ -195,9 +195,9 @@ export const EventPageTemplate = ({
       </section>
 
       {/* What We Do Section */}
-      <section className="py-32 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
+      <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
         <div className="absolute inset-0 particles-container opacity-50" />
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <ScrollReveal animation="fade-in-up" className="text-center max-w-4xl mx-auto space-y-8 mb-20">
             <h2 className="text-5xl font-bold">
               What We Do
@@ -242,14 +242,14 @@ export const EventPageTemplate = ({
       </section>
 
       {/* Highlighted Services */}
-      <section className="py-32 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 relative overflow-hidden">
+      <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
         </div>
         
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-20">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-20">
             {/* Enhanced Curved Text Title */}
             <ScrollReveal animation="rotate-in" delay={200} className="lg:w-2/5">
               <div className="relative">
@@ -310,10 +310,10 @@ export const EventPageTemplate = ({
       </section>
 
       {/* Our Process */}
-      <section className="py-32 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
+      <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
         <FloatingParticles count={15} size="sm" speed="slow" className="opacity-30" />
         
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <ScrollReveal animation="bounce-in" delay={200} className="text-center mb-20">
             <h2 className="text-5xl font-bold mb-6">
               Our Process
@@ -349,8 +349,8 @@ export const EventPageTemplate = ({
 
       {/* Portfolio Showcase */}
       {portfolioItems && portfolioItems.length > 0 && (
-        <section className="py-32 bg-gradient-to-b from-muted/20 to-background relative overflow-hidden">
-          <div className="container mx-auto px-4 relative z-10">
+        <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-b from-muted/20 to-background relative overflow-hidden">
+          <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10">
             <ScrollReveal animation="fade-in-up" delay={200} className="text-center mb-20">
               <h2 className="text-5xl font-bold mb-6">
                 Recent Success Stories
@@ -402,9 +402,9 @@ export const EventPageTemplate = ({
       )}
 
       {/* CTA Section */}
-      <section className="py-32 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 relative overflow-hidden">
+      <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 relative overflow-hidden">
         <FloatingParticles count={20} colors={particleColors} size="sm" className="opacity-40" />
-        <div className="container mx-auto px-4 text-center relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 text-center relative z-10">
           <div className="max-w-5xl mx-auto space-y-10">
             <ScrollReveal animation="bounce-in" delay={200}>
               <h2 className="text-5xl md:text-6xl font-bold leading-tight">

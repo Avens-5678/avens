@@ -23,7 +23,7 @@ const EnhancedEcommerce = () => {
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   
-  //const { data: rentals, isLoading } = useRentals();
+  const { data: rentals, isLoading } = useRentals();
   const { items, addItem, removeItem, getItemCount } = useCart();
   const { toast } = useToast();
 

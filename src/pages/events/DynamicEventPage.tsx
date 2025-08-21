@@ -67,14 +67,14 @@ const DynamicEventPage = () => {
   return (
     <Layout>
       {/* Enhanced Hero Section with Particles */}
-      <section className="relative min-h-screen flex items-center overflow-hidden particles-container px-4 sm:px-0">
+      <section className="relative min-h-screen flex items-center overflow-hidden particles-container py-8 md:py-12 lg:py-16 px-4 sm:px-6 md:px-8">
         <FloatingParticles count={30} colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))']} />
         
         {/* Morphing Background Elements */}
         <div className="absolute top-10 sm:top-20 right-4 sm:right-20 w-48 sm:w-96 h-48 sm:h-96 animate-morphing-bg opacity-30 pointer-events-none" />
         <div className="absolute bottom-10 sm:bottom-20 left-4 sm:left-20 w-40 sm:w-80 h-40 sm:h-80 animate-morphing-bg opacity-20 pointer-events-none" style={{ animationDelay: '4s' }} />
         
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-0 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
             <ScrollReveal animation="fade-in-up" delay={200} className="lg:w-1/2 space-y-6 lg:space-y-8 text-center lg:text-left">
               <Badge variant="secondary" className="glass bg-primary/10 text-primary border-primary/20 w-fit hover-glow mx-auto lg:mx-0">
@@ -164,7 +164,7 @@ const DynamicEventPage = () => {
       {/* What We Do Section */}
       <section className="py-16 sm:py-20 lg:py-32 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
         <div className="absolute inset-0 particles-container opacity-50" />
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <ScrollReveal animation="fade-in-up" className="text-center max-w-4xl mx-auto space-y-6 lg:space-y-8 mb-12 lg:mb-20">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
               {event.what_we_do_title || 'What We Do'}
@@ -219,7 +219,7 @@ const DynamicEventPage = () => {
             <div className="absolute bottom-5 sm:bottom-10 right-5 sm:right-10 w-48 sm:w-96 h-48 sm:h-96 bg-accent/10 rounded-full blur-2xl sm:blur-3xl animate-float" style={{ animationDelay: '2s' }} />
           </div>
           
-          <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10">
             <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
               {/* Enhanced Curved Text Title */}
               <ScrollReveal animation="rotate-in" delay={200} className="lg:w-2/5 text-center lg:text-left">
@@ -388,7 +388,7 @@ const DynamicEventPage = () => {
       <section className="py-16 sm:py-20 lg:py-32 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 relative overflow-hidden">
         <FloatingParticles count={20} colors={['hsl(var(--primary))', 'hsl(var(--accent))']} className="opacity-60" />
         
-        <div className="container mx-auto px-4 text-center relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 text-center relative z-10">
           <ScrollReveal animation="bounce-in" delay={200} className="max-w-4xl mx-auto space-y-6 lg:space-y-8">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
               Ready to Create Something

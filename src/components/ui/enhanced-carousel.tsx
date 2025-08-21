@@ -96,7 +96,9 @@ export const EnhancedCarousel = ({
 
   // Touch handlers for mobile swiping
   const handleTouchStart = (e: React.TouchEvent) => {
+    console.log('Touch start detected');
     setTouchStart(e.targetTouches[0].clientX);
+    setTouchEnd(0); // Reset touchEnd
     setIsPlaying(false); // Pause autoplay during touch
   };
 
@@ -105,17 +107,25 @@ export const EnhancedCarousel = ({
   };
 
   const handleTouchEnd = () => {
+    console.log('Touch end detected', { touchStart, touchEnd });
     if (!touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
+    console.log('Swipe distance:', distance);
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
     if (isLeftSwipe) {
+      console.log('Left swipe detected - going to next slide');
       nextSlide();
     } else if (isRightSwipe) {
+      console.log('Right swipe detected - going to previous slide');
       prevSlide();
     }
+    
+    // Reset touch values
+    setTouchStart(0);
+    setTouchEnd(0);
     
     // Resume autoplay after touch ends
     setTimeout(() => setIsPlaying(autoPlay), 100);
@@ -124,12 +134,13 @@ export const EnhancedCarousel = ({
   return (
     <div 
       ref={containerRef}
-      className={cn("relative overflow-hidden", className)}
+      className={cn("relative overflow-hidden touch-pan-x", className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      style={{ touchAction: 'pan-x' }}
     >
       <div 
         className="flex transition-transform duration-700 ease-in-out will-change-transform"

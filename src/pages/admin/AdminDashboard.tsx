@@ -31,6 +31,7 @@ import NewEnhancedPortfolioManager from "@/components/admin/NewEnhancedPortfolio
 import GoogleAnalyticsDashboard from "@/components/admin/GoogleAnalyticsDashboard";
 import AudioManager from "@/components/admin/AudioManager";
 import ProfileManager from "@/components/admin/ProfileManager";
+import AboutContentManager from "@/components/admin/AboutContentManager";
 import TestimonialManager from "@/components/admin/TestimonialManager";
 import EnhancedRentalManager from "@/components/admin/EnhancedRentalManager";
 import FAQManager from "@/components/admin/FAQManager";
@@ -168,6 +169,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <TabsTrigger value="audio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Volume2 className="h-3 w-3" />
               <span className="hidden sm:inline">Audio</span>
+            </TabsTrigger>
+            <TabsTrigger value="about" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <UserCircle className="h-3 w-3" />
+              <span className="hidden sm:inline">About</span>
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <UserCircle className="h-3 w-3" />
@@ -445,8 +450,13 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <AudioManager />
           </TabsContent>
 
+          {/* About Content Management */}
+          <TabsContent value="about" className="space-y-6">
+            <AboutContentManager />
+          </TabsContent>
+
           {/* Profile Management */}
-          <TabsContent value="profile">
+          <TabsContent value="profile" className="space-y-6">
             <ProfileManager 
               adminUser={currentAdminUser} 
               onProfileUpdate={handleProfileUpdate}

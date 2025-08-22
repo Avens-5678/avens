@@ -9,6 +9,7 @@ import CartModal from "@/components/Cart/CartModal";
 import { Package, ShoppingCart, Plus, Check } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
@@ -51,7 +52,12 @@ const Ecommerce = () => {
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold group-hover:text-hover transition-colors">
             <div className="aspect-[4/3] mb-4 overflow-hidden rounded-lg">
-              {rental.image_url ? (
+              {rental.image_urls && rental.image_urls.length > 0 ? (
+                <MultiImageCarousel 
+                  images={rental.image_urls} 
+                  title={rental.title}
+                />
+              ) : rental.image_url ? (
                 <img 
                   src={rental.image_url} 
                   alt={rental.title}

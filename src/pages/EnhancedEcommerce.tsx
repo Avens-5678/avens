@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { useRentals } from "@/hooks/useData";
+import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { Search, ShoppingCart, Plus, Minus, Star, Filter, Eye } from "lucide-react";
@@ -23,7 +23,7 @@ const EnhancedEcommerce = () => {
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   
-  const { data: rentals, isLoading } = useRentals();
+  const { data: rentals, isLoading } = useAllRentals();
   const { items, addItem, removeItem, getItemCount } = useCart();
   const { toast } = useToast();
 
@@ -184,7 +184,10 @@ const EnhancedEcommerce = () => {
                       {/* Product Image Carousel */}
                       <div className="relative">
                         <ProductImageCarousel
-                          images={rental.image_url ? [rental.image_url] : []}
+                          images={rental.image_urls && rental.image_urls.length > 0 
+                            ? rental.image_urls 
+                            : rental.image_url ? [rental.image_url] : []
+                          }
                           title={rental.title}
                           autoPlay={true}
                           interval={3000}

@@ -529,6 +529,7 @@ export type Database = {
           display_order: number | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
           is_active: boolean | null
           price_range: string | null
           quantity: number | null
@@ -547,6 +548,7 @@ export type Database = {
           display_order?: number | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           is_active?: boolean | null
           price_range?: string | null
           quantity?: number | null
@@ -565,6 +567,7 @@ export type Database = {
           display_order?: number | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           is_active?: boolean | null
           price_range?: string | null
           quantity?: number | null

@@ -34,10 +34,15 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const multipleFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleEdit = (item: any) => {
     setEditingItem(item);
-    setFormData({ ...item, categories: item.categories || [] });
+    setFormData({ 
+      ...item, 
+      categories: item.categories || [],
+      image_urls: item.image_urls || []
+    });
   };
 
   const handleCreate = () => {
@@ -54,7 +59,8 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
       quantity: 1,
       is_active: true,
       show_on_home: true,
-      image_url: ''
+      image_url: '',
+      image_urls: []
     });
   };
 
@@ -92,6 +98,56 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
     }
   };
 
+  const handleMultipleImageUpload = async (files: FileList) => {
+    setUploading(true);
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `rental-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('portfolio-images')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('portfolio-images')
+          .getPublicUrl(fileName);
+
+        return publicUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        image_urls: [...(prev.image_urls || []), ...uploadedUrls]
+      }));
+      
+      toast({
+        title: "Success",
+        description: `${uploadedUrls.length} images uploaded successfully`,
+      });
+    } catch (error: any) {
+      console.error('Error uploading images:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload images",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      image_urls: (prev.image_urls || []).filter((_: string, i: number) => i !== index)
+    }));
+  };
+
   const handleSave = async () => {
     try {
       if (!formData.title || !formData.short_description || !formData.description) {
@@ -110,7 +166,8 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
         quantity: formData.quantity || 1,
         is_active: formData.is_active !== false,
         show_on_home: formData.show_on_home !== false,
-        image_url: formData.image_url || null
+        image_url: formData.image_url || null,
+        image_urls: formData.image_urls || []
       };
 
       if (editingItem) {
@@ -304,9 +361,9 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
 
             {/* Right Column */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="image_upload">Product Image</Label>
-                <div className="space-y-3">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="image_upload">Single Product Image</Label>
                   <Input
                     id="image_upload"
                     type="file"
@@ -321,12 +378,60 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
                     disabled={uploading}
                   />
                   {formData.image_url && (
-                    <div className="mt-3">
+                    <div className="relative inline-block">
                       <img 
                         src={formData.image_url} 
                         alt="Preview" 
-                        className="w-32 h-32 object-cover rounded border"
+                        className="w-24 h-24 object-cover rounded border"
                       />
+                      <Button
+                        onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="multiple_images">Multiple Product Images</Label>
+                  <Input
+                    id="multiple_images"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    ref={multipleFileInputRef}
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files && files.length > 0) {
+                        handleMultipleImageUpload(files);
+                      }
+                    }}
+                    disabled={uploading}
+                  />
+                  
+                  {formData.image_urls && formData.image_urls.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 mt-3">
+                      {formData.image_urls.map((url: string, index: number) => (
+                        <div key={index} className="relative">
+                          <img 
+                            src={url} 
+                            alt={`Preview ${index + 1}`} 
+                            className="w-full h-20 object-cover rounded border"
+                          />
+                          <Button
+                            onClick={() => removeImage(index)}
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-5 w-5 rounded-full"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

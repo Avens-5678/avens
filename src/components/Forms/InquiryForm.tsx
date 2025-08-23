@@ -31,13 +31,15 @@ interface InquiryFormProps {
   rentalId?: string;
   rentalTitle?: string;
   title?: string;
+  onSuccess?: () => void;
 }
 const InquiryForm = ({
   formType = "inquiry",
   eventType,
   rentalId,
   rentalTitle,
-  title = "Get In Touch"
+  title = "Get In Touch",
+  onSuccess
 }: InquiryFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -115,6 +117,13 @@ const InquiryForm = ({
         title: "Message Sent!",
         description: "We'll get back to you within 24 hours.",
       });
+
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        setTimeout(() => {
+          onSuccess();
+        }, 2000); // Wait 2 seconds for the success animation
+      }
 
     } catch (error) {
       console.error("Error submitting form:", error);

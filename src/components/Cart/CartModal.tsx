@@ -38,6 +38,7 @@ const CartModal = ({ open, onOpenChange }: CartModalProps) => {
             title="Equipment Inquiry"
             rentalId={items.map(item => item.id).join(',')}
             rentalTitle={items.map(item => item.title).join(', ')}
+            onSuccess={handleInquiryComplete}
           />
         </DialogContent>
       </Dialog>

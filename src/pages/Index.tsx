@@ -334,59 +334,62 @@ const Index = () => {
         </div>
       </Section>
 
-      {/* Premium About Section */}
+      {/* Premium About Section - Like "Let's Create Magic Together" */}
       {aboutContent && (
         <Section variant="gradient" spacing="large">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <ScrollReveal animation="slide-in-left">
-                <div className="space-y-8">
-                  <div>
-                    <Badge variant="secondary" className="mb-6">
-                      <User className="mr-2 h-4 w-4" />
-                      Our Story
-                    </Badge>
-                    <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-                      Meet <GradientText>{aboutContent.founder_name}</GradientText>
-                    </h2>
-                    <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-                      {aboutContent.founder_note}
-                    </p>
-                  </div>
+          <div className="container mx-auto px-4 text-center">
+            <ScrollReveal animation="fade-in-up">
+              <div className="max-w-4xl mx-auto space-y-8">
+                <Badge variant="secondary" className="mb-6 px-6 py-2">
+                  <User className="mr-2 h-4 w-4" />
+                  About Us
+                </Badge>
+                
+                <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                  Meet
+                  <GradientText className="block">{aboutContent.founder_name}</GradientText>
+                </h2>
+                
+                <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
+                  {aboutContent.founder_note}
+                </p>
 
-                  <GlassmorphismCard className="p-6 border-l-4 border-primary">
-                    <Quote className="h-8 w-8 text-primary mb-4 opacity-50" />
-                    <blockquote className="text-lg italic text-foreground leading-relaxed">
-                      "{aboutContent.founder_quote}"
-                    </blockquote>
-                    <cite className="text-sm text-muted-foreground mt-3 block">
-                      — {aboutContent.founder_name}
-                    </cite>
+                <GlassmorphismCard className="p-8 mb-8 border-l-4 border-primary">
+                  <Quote className="h-8 w-8 text-primary mb-4 opacity-50 mx-auto" />
+                  <blockquote className="text-lg italic text-foreground leading-relaxed">
+                    "{aboutContent.founder_quote}"
+                  </blockquote>
+                  <cite className="text-sm text-muted-foreground mt-3 block">
+                    — {aboutContent.founder_name}
+                  </cite>
+                </GlassmorphismCard>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                  <GlassmorphismCard className="p-6">
+                    <Target className="h-8 w-8 text-primary mb-4 mx-auto" />
+                    <h3 className="text-xl font-bold mb-3">Our Mission</h3>
+                    <p className="text-muted-foreground">{aboutContent.mission_statement}</p>
                   </GlassmorphismCard>
-
-                  <Button size="lg" variant="outline" asChild>
-                    <Link to="/about">
-                      Learn Our Story <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                  </Button>
+                  
+                  <GlassmorphismCard className="p-6">
+                    <Eye className="h-8 w-8 text-primary mb-4 mx-auto" />
+                    <h3 className="text-xl font-bold mb-3">Our Vision</h3>
+                    <p className="text-muted-foreground">{aboutContent.vision_statement}</p>
+                  </GlassmorphismCard>
                 </div>
-              </ScrollReveal>
-
-              <ScrollReveal animation="scale-in" delay={300}>
-                <div className="relative">
-                  {aboutContent.founder_image_url && (
-                    <>
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl transform rotate-3 scale-105" />
-                      <img 
-                        src={aboutContent.founder_image_url} 
-                        alt={aboutContent.founder_name}
-                        className="relative rounded-2xl shadow-2xl w-full max-w-md mx-auto"
-                      />
-                    </>
-                  )}
-                </div>
-              </ScrollReveal>
-            </div>
+                
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
+                  asChild
+                >
+                  <Link to="/about">
+                    Learn Our Story <ArrowRight className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                  </Link>
+                </Button>
+              </div>
+            </ScrollReveal>
           </div>
         </Section>
       )}
@@ -563,6 +566,72 @@ const Index = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </Section>
+      )}
+
+      {/* Enhanced Portfolio Section - Like "Let's Create Magic Together" */}
+      {homePortfolio.length > 0 && (
+        <Section variant="muted" spacing="large">
+          <div className="container mx-auto px-4 text-center">
+            <ScrollReveal animation="fade-in-up">
+              <div className="max-w-4xl mx-auto space-y-8">
+                <Badge variant="secondary" className="mb-6 px-6 py-2">
+                  <Camera className="mr-2 h-4 w-4" />
+                  Our Portfolio
+                </Badge>
+                
+                <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                  Showcasing Our
+                  <GradientText className="block">Creative Excellence</GradientText>
+                </h2>
+                
+                <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
+                  Discover the artistry and innovation behind our most memorable events, 
+                  where every detail tells a story of elegance and sophistication.
+                </p>
+                
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+                   {homePortfolio.map((item, index) => {
+                     const associatedEvent = events?.find(event => event.id === item.event_id);
+                     return (
+                       <ScrollReveal key={item.id} animation="scale-in" delay={index * 100}>
+                         <GlassmorphismCard className="group overflow-hidden hover:shadow-glow-blue">
+                           <div className="relative">
+                             <div className="aspect-square relative overflow-hidden">
+                               <img 
+                                 src={item.image_url} 
+                                 alt={item.title}
+                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                               />
+                             </div>
+                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                               <div className="p-4 text-white">
+                                 <h3 className="font-bold text-lg">{item.title}</h3>
+                                 {associatedEvent && (
+                                   <p className="text-sm opacity-90">{associatedEvent.event_type}</p>
+                                 )}
+                               </div>
+                             </div>
+                           </div>
+                         </GlassmorphismCard>
+                       </ScrollReveal>
+                     );
+                   })}
+                 </div>
+                
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
+                  asChild
+                >
+                  <Link to="/portfolio">
+                    View Full Portfolio <Camera className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                  </Link>
+                </Button>
               </div>
             </ScrollReveal>
           </div>

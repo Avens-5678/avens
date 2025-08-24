@@ -346,48 +346,35 @@ const Index = () => {
                 </Badge>
                 
                 <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-                  Meet
-                  <GradientText className="block">{aboutContent.founder_name}</GradientText>
+                  Ready to Start Planning Your
+                  <GradientText className="block">Perfect Event?</GradientText>
                 </h2>
                 
                 <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
-                  {aboutContent.founder_note}
+                  Let's bring your vision to life with our expertise in creating unforgettable experiences. 
+                  Contact us today to begin planning your extraordinary event.
                 </p>
-
-                <GlassmorphismCard className="p-8 mb-8 border-l-4 border-primary">
-                  <Quote className="h-8 w-8 text-primary mb-4 opacity-50 mx-auto" />
-                  <blockquote className="text-lg italic text-foreground leading-relaxed">
-                    "{aboutContent.founder_quote}"
-                  </blockquote>
-                  <cite className="text-sm text-muted-foreground mt-3 block">
-                    — {aboutContent.founder_name}
-                  </cite>
-                </GlassmorphismCard>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                  <GlassmorphismCard className="p-6">
-                    <Target className="h-8 w-8 text-primary mb-4 mx-auto" />
-                    <h3 className="text-xl font-bold mb-3">Our Mission</h3>
-                    <p className="text-muted-foreground">{aboutContent.mission_statement}</p>
-                  </GlassmorphismCard>
-                  
-                  <GlassmorphismCard className="p-6">
-                    <Eye className="h-8 w-8 text-primary mb-4 mx-auto" />
-                    <h3 className="text-xl font-bold mb-3">Our Vision</h3>
-                    <p className="text-muted-foreground">{aboutContent.vision_statement}</p>
-                  </GlassmorphismCard>
-                </div>
                 
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
-                  asChild
-                >
-                  <Link to="/about">
-                    Learn Our Story <ArrowRight className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-                  </Link>
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button 
+                    size="lg" 
+                    className="group bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-secondary shadow-glow-blue hover:shadow-glow-red transition-all duration-300 px-8 py-4 text-lg font-semibold"
+                    onClick={() => setInquiryDialogOpen(true)}
+                  >
+                    Start Planning Today
+                    <Calendar className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
+                    asChild
+                  >
+                    <Link to="/about">
+                      Learn About Us <ArrowRight className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </ScrollReveal>
           </div>
@@ -488,51 +475,64 @@ const Index = () => {
         </div>
       </Section>
 
-      {/* Enhanced Portfolio Preview Section */}
+      {/* Premium Portfolio Section - Like "Let's Create Magic Together" */}
       {homePortfolio.length > 0 && (
         <Section variant="muted" spacing="large">
-          <div className="container mx-auto px-4">
-            <SectionHeader
-              badge={<Badge variant="outline"><Camera className="mr-2 h-4 w-4" />Our Portfolio</Badge>}
-              title="Exceptional Events Gallery"
-              description="Discover our recent work and get inspired by the extraordinary events we've brought to life."
-            />
-            
-            <ScrollReveal animation="fade-in-up" stagger={200} childSelector=".portfolio-card">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {homePortfolio.map((item) => {
-                  const associatedEvent = events?.find(event => event.id === item.event_id);
-                  return (
-                    <GlassmorphismCard 
-                      key={item.id} 
-                      className="portfolio-card group overflow-hidden hover:shadow-glow-blue"
-                      variant="subtle"
-                    >
-                      <div className="relative aspect-video overflow-hidden">
-                        <img 
-                          src={item.image_url} 
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <h3 className="text-lg font-bold mb-1">{item.title}</h3>
-                          {associatedEvent && (
-                            <p className="text-sm text-white/80">{associatedEvent.event_type}</p>
-                          )}
-                        </div>
-                      </div>
-                    </GlassmorphismCard>
-                  );
-                })}
-              </div>
-            </ScrollReveal>
-
-            <ScrollReveal animation="fade-in" delay={600}>
-              <div className="text-center mt-12">
-                <Button size="lg" variant="outline" asChild>
+          <div className="container mx-auto px-4 text-center">
+            <ScrollReveal animation="fade-in-up">
+              <div className="max-w-4xl mx-auto space-y-8">
+                <Badge variant="secondary" className="mb-6 px-6 py-2">
+                  <Camera className="mr-2 h-4 w-4" />
+                  Our Portfolio
+                </Badge>
+                
+                <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                  Showcasing Our
+                  <GradientText className="block">Creative Excellence</GradientText>
+                </h2>
+                
+                <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
+                  Discover the artistry and innovation behind our most memorable events, 
+                  where every detail tells a story of elegance and sophistication.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+                  {homePortfolio.map((item, index) => {
+                    const associatedEvent = events?.find(event => event.id === item.event_id);
+                    return (
+                      <ScrollReveal key={item.id} animation="scale-in" delay={index * 100}>
+                        <GlassmorphismCard className="group overflow-hidden hover:shadow-glow-blue">
+                          <div className="relative">
+                            <div className="aspect-square relative overflow-hidden">
+                              <img 
+                                src={item.image_url} 
+                                alt={item.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              />
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                              <div className="p-4 text-white">
+                                <h3 className="font-bold text-lg">{item.title}</h3>
+                                {associatedEvent && (
+                                  <p className="text-sm opacity-90">{associatedEvent.event_type}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </GlassmorphismCard>
+                      </ScrollReveal>
+                    );
+                  })}
+                </div>
+                
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
+                  asChild
+                >
                   <Link to="/portfolio">
-                    View Full Portfolio <Camera className="ml-2 h-5 w-5" />
+                    View Full Portfolio <Camera className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                   </Link>
                 </Button>
               </div>
@@ -572,71 +572,6 @@ const Index = () => {
         </Section>
       )}
 
-      {/* Enhanced Portfolio Section - Like "Let's Create Magic Together" */}
-      {homePortfolio.length > 0 && (
-        <Section variant="muted" spacing="large">
-          <div className="container mx-auto px-4 text-center">
-            <ScrollReveal animation="fade-in-up">
-              <div className="max-w-4xl mx-auto space-y-8">
-                <Badge variant="secondary" className="mb-6 px-6 py-2">
-                  <Camera className="mr-2 h-4 w-4" />
-                  Our Portfolio
-                </Badge>
-                
-                <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-                  Showcasing Our
-                  <GradientText className="block">Creative Excellence</GradientText>
-                </h2>
-                
-                <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
-                  Discover the artistry and innovation behind our most memorable events, 
-                  where every detail tells a story of elegance and sophistication.
-                </p>
-                
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
-                   {homePortfolio.map((item, index) => {
-                     const associatedEvent = events?.find(event => event.id === item.event_id);
-                     return (
-                       <ScrollReveal key={item.id} animation="scale-in" delay={index * 100}>
-                         <GlassmorphismCard className="group overflow-hidden hover:shadow-glow-blue">
-                           <div className="relative">
-                             <div className="aspect-square relative overflow-hidden">
-                               <img 
-                                 src={item.image_url} 
-                                 alt={item.title}
-                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                               />
-                             </div>
-                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                               <div className="p-4 text-white">
-                                 <h3 className="font-bold text-lg">{item.title}</h3>
-                                 {associatedEvent && (
-                                   <p className="text-sm opacity-90">{associatedEvent.event_type}</p>
-                                 )}
-                               </div>
-                             </div>
-                           </div>
-                         </GlassmorphismCard>
-                       </ScrollReveal>
-                     );
-                   })}
-                 </div>
-                
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
-                  asChild
-                >
-                  <Link to="/portfolio">
-                    View Full Portfolio <Camera className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-                  </Link>
-                </Button>
-              </div>
-            </ScrollReveal>
-          </div>
-        </Section>
-      )}
 
       {/* Premium Testimonials Section */}
       <Section variant="gradient" spacing="large">

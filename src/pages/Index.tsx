@@ -209,7 +209,7 @@ const Index = () => {
 
           <ScrollReveal animation="scale-in" delay={400}>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-              <GradientText className="block">Creating</GradientText>
+              <GradientText className="block">🚨 TEST CHANGE 🚨</GradientText>
               <span className="block text-foreground">Extraordinary</span>
               <GradientText className="block">Experiences</GradientText>
             </h1>

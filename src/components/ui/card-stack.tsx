@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CardStackProps {
@@ -44,63 +45,53 @@ export function CardStack({
   return (
     <div className={cn('relative h-96 w-full', className)}>
       <AnimatePresence mode="wait">
-        {cards.map((card, index) => {
-          const offset = index - currentIndex;
-          const isVisible = Math.abs(offset) <= 2;
-          
-          if (!isVisible) return null;
-
-          return (
-            <motion.div
-              key={index}
-              className="absolute inset-0 cursor-pointer"
-              initial={{ 
-                rotateY: offset * 25, 
-                z: -Math.abs(offset) * 100,
-                opacity: offset === 0 ? 1 : 0.7,
-              }}
-              animate={{ 
-                rotateY: offset * 25, 
-                z: -Math.abs(offset) * 100,
-                opacity: offset === 0 ? 1 : 0.7,
-                scale: offset === 0 ? 1 : 0.9 - Math.abs(offset) * 0.1,
-              }}
-              exit={{ 
-                rotateY: offset * 25, 
-                z: -Math.abs(offset) * 100,
-                opacity: 0,
-              }}
-              transition={{ 
-                duration: 0.6, 
-                ease: [0.25, 0.46, 0.45, 0.94] 
-              }}
-              style={{
-                transformStyle: 'preserve-3d',
-                transformOrigin: 'center center',
-              }}
-              onClick={offset !== 0 ? (offset > 0 ? nextCard : prevCard) : undefined}
-            >
-              {card}
-            </motion.div>
-          );
-        })}
+        <motion.div
+          key={currentIndex}
+          className="absolute inset-0"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        >
+          {cards[currentIndex]}
+        </motion.div>
       </AnimatePresence>
 
-      {/* Navigation dots */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-        {cards.map((_, index) => (
+      {/* Arrow Navigation */}
+      {cards.length > 1 && (
+        <>
           <button
-            key={index}
-            className={cn(
-              'w-2 h-2 rounded-full transition-all duration-300',
-              currentIndex === index 
-                ? 'bg-primary scale-125' 
-                : 'bg-primary/30 hover:bg-primary/50'
-            )}
-            onClick={() => setCurrentIndex(index)}
-          />
-        ))}
-      </div>
+            onClick={prevCard}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-background/90 transition-all duration-300 group"
+          >
+            <ChevronLeft className="h-6 w-6 text-foreground group-hover:text-primary transition-colors" />
+          </button>
+          <button
+            onClick={nextCard}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-background/90 transition-all duration-300 group"
+          >
+            <ChevronRight className="h-6 w-6 text-foreground group-hover:text-primary transition-colors" />
+          </button>
+        </>
+      )}
+
+      {/* Navigation dots */}
+      {cards.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+          {cards.map((_, index) => (
+            <button
+              key={index}
+              className={cn(
+                'w-3 h-3 rounded-full transition-all duration-300',
+                currentIndex === index 
+                  ? 'bg-primary scale-125' 
+                  : 'bg-primary/30 hover:bg-primary/50'
+              )}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

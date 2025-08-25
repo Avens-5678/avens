@@ -642,11 +642,15 @@ const Index = () => {
                          className="flex-shrink-0"
                        >
                          <GlassmorphismCard className="p-6 hover:shadow-lg transition-all duration-300">
-                           <img 
-                             src={client.logo_url} 
-                             alt={client.name}
-                             className="h-16 w-auto mx-auto filter grayscale hover:grayscale-0 transition-all duration-300"
-                           />
+                            <img 
+                              src={client.logo_url} 
+                              alt={client.name}
+                              className="h-16 w-auto mx-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                              onError={(e) => {
+                                console.error('Failed to load client logo:', client.logo_url);
+                                e.currentTarget.src = '/placeholder.svg';
+                              }}
+                            />
                          </GlassmorphismCard>
                        </TiltCard>
                      </TickerItem>

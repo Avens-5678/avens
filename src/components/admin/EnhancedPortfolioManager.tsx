@@ -394,6 +394,14 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
                 <Label>This is the "Before" image</Label>
               </div>
             )}
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={formData.show_on_home !== false}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, show_on_home: checked }))}
+              />
+              <Label>Show on Home Page</Label>
+            </div>
             
             <div className="flex space-x-2 pt-4">
               <Button 
@@ -456,6 +464,9 @@ const EnhancedPortfolioManager = ({ portfolio, events }: EnhancedPortfolioManage
                     )}
                     <Badge variant="outline">
                       Order: {item.display_order}
+                    </Badge>
+                    <Badge variant={item.show_on_home !== false ? "default" : "secondary"}>
+                      {item.show_on_home !== false ? "On Home Page" : "Hidden from Home"}
                     </Badge>
                   </div>
                 </div>

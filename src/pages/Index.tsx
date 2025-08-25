@@ -45,6 +45,10 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { GlassmorphismCard } from "@/components/ui/glassmorphism-card";
 import { FloatingParticles } from "@/components/ui/floating-particles";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
+import { CursorTrail } from "@/components/ui/cursor-trail";
+import { TiltCard } from "@/components/ui/tilt-card";
+import { Ticker, TickerItem } from "@/components/ui/ticker-animation";
+import { CardStack } from "@/components/ui/card-stack";
 
 // Enhanced scroll animation component
 const ScrollAnimated = ({ children, className = '', delay = 0 }) => {
@@ -169,7 +173,7 @@ const Index = () => {
   const activeClients = trustedClients?.filter(client => client.is_active) || [];
   const homeNews = newsAchievements?.filter(news => news.show_on_home && news.is_active) || [];
   const activeBanners = heroBanners?.filter(banner => banner.is_active) || [];
-  const homePortfolio = portfolio?.slice(0, 6) || [];
+  const homePortfolio = portfolio?.filter(item => item.show_on_home !== false)?.slice(0, 6) || [];
 
   if (isLoading) {
     return (
@@ -192,63 +196,131 @@ const Index = () => {
 
   return (
     <Layout>
-      {/* Enhanced Hero Section */}
-      <HeroSection 
-        backgroundImage={activeBanners[0]?.image_url}
-        className="relative overflow-hidden"
-      >
-        <FloatingParticles count={30} size="sm" speed="slow" />
-        
-        <div className="container mx-auto px-4 text-center relative z-20">
-          <ScrollReveal animation="fade-in-up" delay={200}>
-            <Badge variant="secondary" className="mb-6 px-6 py-2 text-sm font-medium backdrop-blur-sm bg-background/80">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Premium Event Management
-            </Badge>
-          </ScrollReveal>
+      <CursorTrail enabled={true} color="hsl(var(--primary))" />
+      
+      {/* Enhanced Hero Section with Dynamic Banners */}
+      {activeBanners.length > 0 ? (
+        <CardStack
+          cards={activeBanners.map((banner, index) => (
+            <HeroSection 
+              key={banner.id}
+              backgroundImage={banner.image_url}
+              className="relative overflow-hidden"
+            >
+              <FloatingParticles count={30} size="sm" speed="slow" />
+              
+              <div className="container mx-auto px-4 text-center relative z-20">
+                <ScrollReveal animation="fade-in-up" delay={200}>
+                  <Badge variant="secondary" className="mb-6 px-6 py-2 text-sm font-medium backdrop-blur-sm bg-background/80">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Premium Event Management
+                  </Badge>
+                </ScrollReveal>
 
-          <ScrollReveal animation="scale-in" delay={400}>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-              <GradientText className="block">🚨 TEST CHANGE 🚨</GradientText>
-              <span className="block text-foreground">Extraordinary</span>
-              <GradientText className="block">Experiences</GradientText>
-            </h1>
-          </ScrollReveal>
+                <ScrollReveal animation="scale-in" delay={400}>
+                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+                    <GradientText className="block">{banner.title || "Creating"}</GradientText>
+                    <span className="block text-foreground">Extraordinary</span>
+                    <GradientText className="block">Experiences</GradientText>
+                  </h1>
+                </ScrollReveal>
 
-          <ScrollReveal animation="fade-in-up" delay={600}>
-            <p className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
-              Where vision meets execution. We transform your dreams into unforgettable moments 
-              with unparalleled attention to detail and sophisticated event management.
-            </p>
-          </ScrollReveal>
+                <ScrollReveal animation="fade-in-up" delay={600}>
+                  <p className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
+                    {banner.subtitle || "Where vision meets execution. We transform your dreams into unforgettable moments with unparalleled attention to detail and sophisticated event management."}
+                  </p>
+                </ScrollReveal>
 
-          <ScrollReveal animation="bounce-in" delay={800}>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                size="lg" 
-                className="group bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-secondary shadow-glow-blue hover:shadow-glow-red transition-all duration-300 px-8 py-4 text-lg font-semibold"
-                asChild
-              >
-                <Link to="/services">
-                  Explore Services 
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
-                asChild
-              >
-                <Link to="/portfolio">
-                  View Portfolio
-                  <Camera className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-                </Link>
-              </Button>
-            </div>
-          </ScrollReveal>
-        </div>
-      </HeroSection>
+                <ScrollReveal animation="bounce-in" delay={800}>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <Button 
+                      size="lg" 
+                      className="group bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-secondary shadow-glow-blue hover:shadow-glow-red transition-all duration-300 px-8 py-4 text-lg font-semibold"
+                      asChild
+                    >
+                      <Link to={`/events/${banner.event_type?.toLowerCase().replace(/\s+/g, '-')}`}>
+                        {banner.button_text || "Explore Services"}
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
+                      asChild
+                    >
+                      <Link to="/portfolio">
+                        View Portfolio
+                        <Camera className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                      </Link>
+                    </Button>
+                  </div>
+                </ScrollReveal>
+              </div>
+            </HeroSection>
+          ))}
+          autoPlay={true}
+          interval={5000}
+          className="h-screen"
+        />
+      ) : (
+        <HeroSection 
+          backgroundImage="/assets/default-hero.jpg"
+          className="relative overflow-hidden"
+        >
+          <FloatingParticles count={30} size="sm" speed="slow" />
+          
+          <div className="container mx-auto px-4 text-center relative z-20">
+            <ScrollReveal animation="fade-in-up" delay={200}>
+              <Badge variant="secondary" className="mb-6 px-6 py-2 text-sm font-medium backdrop-blur-sm bg-background/80">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Premium Event Management
+              </Badge>
+            </ScrollReveal>
+
+            <ScrollReveal animation="scale-in" delay={400}>
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+                <GradientText className="block">Creating</GradientText>
+                <span className="block text-foreground">Extraordinary</span>
+                <GradientText className="block">Experiences</GradientText>
+              </h1>
+            </ScrollReveal>
+
+            <ScrollReveal animation="fade-in-up" delay={600}>
+              <p className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
+                Where vision meets execution. We transform your dreams into unforgettable moments 
+                with unparalleled attention to detail and sophisticated event management.
+              </p>
+            </ScrollReveal>
+
+            <ScrollReveal animation="bounce-in" delay={800}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button 
+                  size="lg" 
+                  className="group bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-secondary shadow-glow-blue hover:shadow-glow-red transition-all duration-300 px-8 py-4 text-lg font-semibold"
+                  asChild
+                >
+                  <Link to="/services">
+                    Explore Services 
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
+                  asChild
+                >
+                  <Link to="/portfolio">
+                    View Portfolio
+                    <Camera className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                  </Link>
+                </Button>
+              </div>
+            </ScrollReveal>
+          </div>
+        </HeroSection>
+      )}
 
       {/* Premium Stats Section */}
       <Section variant="muted" spacing="large">
@@ -496,34 +568,41 @@ const Index = () => {
                   where every detail tells a story of elegance and sophistication.
                 </p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
-                  {homePortfolio.map((item, index) => {
-                    const associatedEvent = events?.find(event => event.id === item.event_id);
-                    return (
-                      <ScrollReveal key={item.id} animation="scale-in" delay={index * 100}>
-                        <GlassmorphismCard className="group overflow-hidden hover:shadow-glow-blue">
-                          <div className="relative">
-                            <div className="aspect-square relative overflow-hidden">
-                              <img 
-                                src={item.image_url} 
-                                alt={item.title}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                              />
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                              <div className="p-4 text-white">
-                                <h3 className="font-bold text-lg">{item.title}</h3>
-                                {associatedEvent && (
-                                  <p className="text-sm opacity-90">{associatedEvent.event_type}</p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </GlassmorphismCard>
-                      </ScrollReveal>
-                    );
-                  })}
-                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+                   {homePortfolio.map((item, index) => {
+                     const associatedEvent = events?.find(event => event.id === item.event_id);
+                     return (
+                       <ScrollReveal key={item.id} animation="scale-in" delay={index * 100}>
+                         <TiltCard 
+                           tiltDegree={15} 
+                           scale={1.02} 
+                           glareEnable={true}
+                           className="overflow-hidden rounded-lg"
+                         >
+                           <GlassmorphismCard className="group overflow-hidden hover:shadow-glow-blue h-full">
+                             <div className="relative">
+                               <div className="aspect-square relative overflow-hidden">
+                                 <img 
+                                   src={item.image_url} 
+                                   alt={item.title}
+                                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                 />
+                               </div>
+                               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                                 <div className="p-4 text-white">
+                                   <h3 className="font-bold text-lg">{item.title}</h3>
+                                   {associatedEvent && (
+                                     <p className="text-sm opacity-90">{associatedEvent.event_type}</p>
+                                   )}
+                                 </div>
+                               </div>
+                             </div>
+                           </GlassmorphismCard>
+                         </TiltCard>
+                       </ScrollReveal>
+                     );
+                   })}
+                 </div>
                 
                 <Button 
                   size="lg" 
@@ -551,23 +630,30 @@ const Index = () => {
               description="Proud to serve leading organizations and distinguished clients across various industries."
             />
             
-            <ScrollReveal animation="fade-in-up">
-              <div className="relative overflow-hidden">
-                <div className="flex gap-8 animate-scroll">
-                  {[...activeClients, ...activeClients].map((client, index) => (
-                    <div key={`${client.id}-${index}`} className="flex-shrink-0">
-                      <GlassmorphismCard className="p-6 hover:shadow-lg transition-all duration-300">
-                        <img 
-                          src={client.logo_url} 
-                          alt={client.name}
-                          className="h-16 w-auto mx-auto filter grayscale hover:grayscale-0 transition-all duration-300"
-                        />
-                      </GlassmorphismCard>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </ScrollReveal>
+             <ScrollReveal animation="fade-in-up">
+               <div className="relative overflow-hidden">
+                 <Ticker direction="left" speed={40} pauseOnHover={true}>
+                   {activeClients.map((client, index) => (
+                     <TickerItem key={client.id} className="mx-8">
+                       <TiltCard 
+                         tiltDegree={10} 
+                         scale={1.05} 
+                         glareEnable={true}
+                         className="flex-shrink-0"
+                       >
+                         <GlassmorphismCard className="p-6 hover:shadow-lg transition-all duration-300">
+                           <img 
+                             src={client.logo_url} 
+                             alt={client.name}
+                             className="h-16 w-auto mx-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                           />
+                         </GlassmorphismCard>
+                       </TiltCard>
+                     </TickerItem>
+                   ))}
+                 </Ticker>
+               </div>
+             </ScrollReveal>
           </div>
         </Section>
       )}

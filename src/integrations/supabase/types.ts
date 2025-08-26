@@ -350,6 +350,8 @@ export type Database = {
           created_at: string
           display_order: number | null
           event_type: string
+          hero_text_1: string | null
+          hero_text_2: string | null
           id: string
           image_url: string
           is_active: boolean | null
@@ -362,6 +364,8 @@ export type Database = {
           created_at?: string
           display_order?: number | null
           event_type: string
+          hero_text_1?: string | null
+          hero_text_2?: string | null
           id?: string
           image_url: string
           is_active?: boolean | null
@@ -374,6 +378,8 @@ export type Database = {
           created_at?: string
           display_order?: number | null
           event_type?: string
+          hero_text_1?: string | null
+          hero_text_2?: string | null
           id?: string
           image_url?: string
           is_active?: boolean | null

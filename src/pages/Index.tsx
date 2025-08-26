@@ -49,7 +49,7 @@ import { CursorTrail } from "@/components/ui/cursor-trail";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { Ticker, TickerItem } from "@/components/ui/ticker-animation";
 import { CardStack } from "@/components/ui/card-stack";
-import { ElegantStats, ElegantStatCard } from "@/components/ui/elegant-stats";
+import { ProfessionalStats, ProfessionalStatCard } from "@/components/ui/elegant-stats";
 
 // Enhanced scroll animation component
 const ScrollAnimated = ({ children, className = '', delay = 0 }) => {
@@ -323,56 +323,35 @@ const Index = () => {
         </HeroSection>
       )}
 
-      {/* Elegant Professional Stats Section */}
+      {/* Professional Communication Stats Section */}
       <Section spacing="large">
         <div className="container mx-auto px-4">
           <ScrollReveal animation="fade-in-up">
-            <ElegantStats>
-              <div className="text-center mb-12">
-                <Badge variant="outline" className="mb-4">
-                  <Target className="mr-2 h-4 w-4" />
-                  Our Impact
-                </Badge>
-                <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-                  Excellence in <GradientText>Numbers</GradientText>
+            <ProfessionalStats>
+              <div className="text-center mb-16">
+                <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
+                  Unlock your professional communications
                 </h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Trusted by industry leaders and celebrated for our commitment to delivering exceptional experiences.
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                  See how our event management solutions transform business communications and drive results.
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <ElegantStatCard
-                  icon={<Heart />}
-                  value={500}
-                  label="Happy Clients"
-                  description="Satisfied customers worldwide"
-                  color="primary"
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 max-w-6xl mx-auto">
+                <ProfessionalStatCard
+                  percentage={95}
+                  description="improve event management efficiency"
                 />
-                <ElegantStatCard
-                  icon={<Calendar />}
-                  value={1200}
-                  label="Events Completed"
-                  description="Successful projects delivered"
-                  color="emerald"
+                <ProfessionalStatCard
+                  percentage={88}
+                  description="enhance client communication and satisfaction"
                 />
-                <ElegantStatCard
-                  icon={<Star />}
-                  value="4.9/5"
-                  label="Client Rating"
-                  description="Average customer satisfaction"
-                  color="orange"
-                  animated={false}
-                />
-                <ElegantStatCard
-                  icon={<Trophy />}
-                  value={15}
-                  label="Years Experience"
-                  description="Industry expertise & knowledge"
-                  color="purple"
+                <ProfessionalStatCard
+                  percentage={75}
+                  description="average improvement in event success rate"
                 />
               </div>
-            </ElegantStats>
+            </ProfessionalStats>
           </ScrollReveal>
         </div>
       </Section>

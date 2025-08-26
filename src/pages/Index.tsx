@@ -49,6 +49,7 @@ import { CursorTrail } from "@/components/ui/cursor-trail";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { Ticker, TickerItem } from "@/components/ui/ticker-animation";
 import { CardStack } from "@/components/ui/card-stack";
+import { ElegantStats, ElegantStatCard } from "@/components/ui/elegant-stats";
 
 // Enhanced scroll animation component
 const ScrollAnimated = ({ children, className = '', delay = 0 }) => {
@@ -220,8 +221,8 @@ const Index = () => {
                 <ScrollReveal animation="scale-in" delay={400}>
                   <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
                     <GradientText className="block">{banner.title || "Creating"}</GradientText>
-                    <span className="block text-foreground">Extraordinary</span>
-                    <GradientText className="block">Experiences</GradientText>
+                    <span className="block text-foreground">{banner.hero_text_1 || "Extraordinary"}</span>
+                    <GradientText className="block">{banner.hero_text_2 || "Experiences"}</GradientText>
                   </h1>
                 </ScrollReveal>
 
@@ -322,33 +323,57 @@ const Index = () => {
         </HeroSection>
       )}
 
-      {/* Premium Stats Section */}
-      <Section variant="muted" spacing="large">
+      {/* Elegant Professional Stats Section */}
+      <Section spacing="large">
         <div className="container mx-auto px-4">
-          <ScrollAnimated>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-              <div className="text-center group">
-                <StatIcon icon={Heart} className="mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <AnimatedStat finalValue={500} suffix="+" />
-                <p className="text-lg font-medium text-muted-foreground mt-2">Happy Clients</p>
+          <ScrollReveal animation="fade-in-up">
+            <ElegantStats>
+              <div className="text-center mb-12">
+                <Badge variant="outline" className="mb-4">
+                  <Target className="mr-2 h-4 w-4" />
+                  Our Impact
+                </Badge>
+                <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+                  Excellence in <GradientText>Numbers</GradientText>
+                </h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Trusted by industry leaders and celebrated for our commitment to delivering exceptional experiences.
+                </p>
               </div>
-              <div className="text-center group">
-                <StatIcon icon={Calendar} className="mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <AnimatedStat finalValue={1200} suffix="+" />
-                <p className="text-lg font-medium text-muted-foreground mt-2">Events Completed</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <ElegantStatCard
+                  icon={<Heart />}
+                  value={500}
+                  label="Happy Clients"
+                  description="Satisfied customers worldwide"
+                  color="primary"
+                />
+                <ElegantStatCard
+                  icon={<Calendar />}
+                  value={1200}
+                  label="Events Completed"
+                  description="Successful projects delivered"
+                  color="emerald"
+                />
+                <ElegantStatCard
+                  icon={<Star />}
+                  value="4.9/5"
+                  label="Client Rating"
+                  description="Average customer satisfaction"
+                  color="orange"
+                  animated={false}
+                />
+                <ElegantStatCard
+                  icon={<Trophy />}
+                  value={15}
+                  label="Years Experience"
+                  description="Industry expertise & knowledge"
+                  color="purple"
+                />
               </div>
-              <div className="text-center group">
-                <StatIcon icon={Star} className="mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <AnimatedStat finalValue={4.9} suffix="/5" isDecimal={true} />
-                <p className="text-lg font-medium text-muted-foreground mt-2">Average Rating</p>
-              </div>
-              <div className="text-center group">
-                <StatIcon icon={Trophy} className="mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <AnimatedStat finalValue={15} suffix="+" />
-                <p className="text-lg font-medium text-muted-foreground mt-2">Years Experience</p>
-              </div>
-            </div>
-          </ScrollAnimated>
+            </ElegantStats>
+          </ScrollReveal>
         </div>
       </Section>
 

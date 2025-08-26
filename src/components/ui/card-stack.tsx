@@ -57,18 +57,18 @@ export function CardStack({
         </motion.div>
       </AnimatePresence>
 
-      {/* Arrow Navigation */}
+      {/* Arrow Navigation - Hidden on mobile */}
       {cards.length > 1 && (
         <>
           <button
             onClick={prevCard}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-background/90 transition-all duration-300 group"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-background/90 transition-all duration-300 group hidden md:flex items-center justify-center"
           >
             <ChevronLeft className="h-6 w-6 text-foreground group-hover:text-primary transition-colors" />
           </button>
           <button
             onClick={nextCard}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-background/90 transition-all duration-300 group"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-background/90 transition-all duration-300 group hidden md:flex items-center justify-center"
           >
             <ChevronRight className="h-6 w-6 text-foreground group-hover:text-primary transition-colors" />
           </button>

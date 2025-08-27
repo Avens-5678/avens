@@ -49,7 +49,7 @@ import { CursorTrail } from "@/components/ui/cursor-trail";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { Ticker, TickerItem } from "@/components/ui/ticker-animation";
 import { CardStack } from "@/components/ui/card-stack";
-import { ProfessionalStats, ProfessionalStatCard } from "@/components/ui/elegant-stats";
+import { StatsContainer, StatCard } from "@/components/ui/elegant-stats";
 
 // Enhanced scroll animation component
 const ScrollAnimated = ({ children, className = '', delay = 0 }) => {
@@ -323,37 +323,38 @@ const Index = () => {
         </HeroSection>
       )}
 
-      {/* Professional Communication Stats Section */}
+      {/* Event Management Stats Section */}
       <Section spacing="large">
-        <div className="container mx-auto px-4">
-          <ScrollReveal animation="fade-in-up">
-            <ProfessionalStats>
-              <div className="text-center mb-16">
-                <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
-                  Unlock your professional communications
-                </h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                  See how our event management solutions transform business communications and drive results.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 max-w-6xl mx-auto">
-                <ProfessionalStatCard
-                  percentage={95}
-                  description="improve event management efficiency"
-                />
-                <ProfessionalStatCard
-                  percentage={88}
-                  description="enhance client communication and satisfaction"
-                />
-                <ProfessionalStatCard
-                  percentage={75}
-                  description="average improvement in event success rate"
-                />
-              </div>
-            </ProfessionalStats>
-          </ScrollReveal>
-        </div>
+        <ScrollReveal animation="fade-in-up">
+          <StatsContainer>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
+                The only platform that creates extraordinary
+                <br />
+                <span className="text-primary">& memorable events</span> with precision
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+              <StatCard
+                number="500+"
+                label="EVENTS MANAGED"
+              />
+              <StatCard
+                number="50+"
+                label="CORPORATE CLIENTS"
+              />
+              <StatCard
+                number="5000+"
+                label="SATISFIED GUESTS"
+              />
+              <StatCard
+                number="100%"
+                label="SUCCESS RATE"
+              />
+            </div>
+          </StatsContainer>
+        </ScrollReveal>
       </Section>
 
       {/* Enhanced Services Section */}

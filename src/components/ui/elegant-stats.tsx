@@ -1,15 +1,15 @@
 import { ReactNode, useState, useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
 
-interface ProfessionalStatsProps {
+interface StatsContainerProps {
   children: ReactNode
   className?: string
 }
 
-export function ProfessionalStats({ children, className }: ProfessionalStatsProps) {
+export function StatsContainer({ children, className }: StatsContainerProps) {
   return (
     <div className={cn(
-      "bg-background py-16 lg:py-20",
+      "bg-gradient-to-br from-background via-background to-muted/20 py-16 lg:py-24",
       className
     )}>
       <div className="container mx-auto px-4">
@@ -19,21 +19,21 @@ export function ProfessionalStats({ children, className }: ProfessionalStatsProp
   )
 }
 
-interface ProfessionalStatCardProps {
-  percentage: number
-  description: string
+interface StatCardProps {
+  number: string
+  label: string
   animated?: boolean
   className?: string
 }
 
-export function ProfessionalStatCard({ 
-  percentage, 
-  description,
+export function StatCard({ 
+  number, 
+  label,
   animated = true,
   className
-}: ProfessionalStatCardProps) {
-  const [count, setCount] = useState(0)
+}: StatCardProps) {
   const [isVisible, setIsVisible] = useState(false)
+  const [displayNumber, setDisplayNumber] = useState("0")
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -41,25 +41,34 @@ export function ProfessionalStatCard({
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true)
+          
           if (animated) {
-            const duration = 2000
-            const startTime = performance.now()
-            
-            const animate = (currentTime: number) => {
-              const elapsed = currentTime - startTime
-              const progress = Math.min(elapsed / duration, 1)
-              const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+            // Extract numeric part for animation
+            const numericPart = number.match(/\d+/)?.[0]
+            if (numericPart) {
+              const targetNumber = parseInt(numericPart)
+              const duration = 2000
+              const startTime = performance.now()
               
-              setCount(Math.floor(easeOutQuart * percentage))
-              
-              if (progress < 1) {
-                requestAnimationFrame(animate)
+              const animate = (currentTime: number) => {
+                const elapsed = currentTime - startTime
+                const progress = Math.min(elapsed / duration, 1)
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+                
+                const currentValue = Math.floor(easeOutQuart * targetNumber)
+                setDisplayNumber(number.replace(/\d+/, currentValue.toString()))
+                
+                if (progress < 1) {
+                  requestAnimationFrame(animate)
+                }
               }
+              
+              requestAnimationFrame(animate)
+            } else {
+              setDisplayNumber(number)
             }
-            
-            requestAnimationFrame(animate)
           } else {
-            setCount(percentage)
+            setDisplayNumber(number)
           }
           observer.unobserve(entry.target)
         }
@@ -76,40 +85,29 @@ export function ProfessionalStatCard({
         observer.unobserve(ref.current)
       }
     }
-  }, [percentage, animated])
+  }, [number, animated])
 
   return (
     <div 
       ref={ref}
       className={cn(
-        "text-center space-y-4",
+        "text-center",
         "transition-all duration-1000 ease-out",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
         className
       )}
     >
-      {/* Progress Bar */}
-      <div className="w-full bg-muted rounded-full h-2 mb-6">
-        <div 
-          className="bg-green-400 h-2 rounded-full transition-all duration-2000 ease-out"
-          style={{ 
-            width: isVisible ? `${percentage}%` : '0%',
-            transitionDelay: '0.5s'
-          }}
-        />
-      </div>
-
-      {/* Percentage */}
+      {/* Label */}
       <div className="mb-4">
-        <span className="text-6xl lg:text-7xl font-bold text-foreground tracking-tight">
-          {animated ? count : percentage}%
+        <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+          {label}
         </span>
       </div>
 
-      {/* Description */}
-      <p className="text-lg text-muted-foreground leading-relaxed max-w-xs mx-auto">
-        {description}
-      </p>
+      {/* Number */}
+      <div className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight">
+        {displayNumber}
+      </div>
     </div>
   )
 }

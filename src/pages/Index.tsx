@@ -719,8 +719,11 @@ const Index = () => {
                       <Button 
                         variant="ghost" 
                         className="group-hover:bg-primary/10 group-hover:text-primary transition-colors p-0 h-auto font-semibold"
+                        asChild
                       >
-                        Read More <ArrowRight className="ml-2 h-4 w-4" />
+                        <Link to={`/blog/${news.id}`}>
+                          Read More <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
                       </Button>
                     </div>
                   </GlassmorphismCard>

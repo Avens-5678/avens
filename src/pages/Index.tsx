@@ -182,12 +182,6 @@ const Index = () => {
               <FloatingParticles count={30} size="sm" speed="slow" />
               
               <div className="container mx-auto px-4 text-center relative z-20">
-                <ScrollReveal animation="fade-in-up" delay={200}>
-                  <Badge variant="secondary" className="mb-6 px-6 py-2 text-sm font-medium backdrop-blur-sm bg-background/80">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Premium Event Management
-                  </Badge>
-                </ScrollReveal>
 
                 <ScrollReveal animation="scale-in" delay={400}>
                   <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
@@ -222,12 +216,6 @@ const Index = () => {
           <FloatingParticles count={30} size="sm" speed="slow" />
           
           <div className="container mx-auto px-4 text-center relative z-20">
-            <ScrollReveal animation="fade-in-up" delay={200}>
-              <Badge variant="secondary" className="mb-6 px-6 py-2 text-sm font-medium backdrop-blur-sm bg-background/80">
-                <Sparkles className="mr-2 h-4 w-4" />
-                Premium Event Management
-              </Badge>
-            </ScrollReveal>
 
             <ScrollReveal animation="scale-in" delay={400}>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">

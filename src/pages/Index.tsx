@@ -220,9 +220,7 @@ const Index = () => {
 
                 <ScrollReveal animation="scale-in" delay={400}>
                   <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-                    <GradientText className="block">{banner.title || "Creating"}</GradientText>
-                    <span className="block text-foreground">{(banner as any).hero_text_1 || "Extraordinary"}</span>
-                    <GradientText className="block">{(banner as any).hero_text_2 || "Experiences"}</GradientText>
+                    <GradientText className="block">{banner.title || "Creating Extraordinary Experiences"}</GradientText>
                   </h1>
                 </ScrollReveal>
 

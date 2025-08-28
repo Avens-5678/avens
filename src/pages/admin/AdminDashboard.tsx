@@ -293,8 +293,6 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
               fields={[
                 { name: "title", label: "Title", type: "text", required: true },
                 { name: "subtitle", label: "Subtitle", type: "text" },
-                { name: "hero_text_1", label: "Hero Text 1", type: "text" },
-                { name: "hero_text_2", label: "Hero Text 2", type: "text" },
                 { name: "image_url", label: "Banner Image", type: "file", required: true },
                 { name: "button_text", label: "Button Text", type: "text" },
                 { 

@@ -225,7 +225,7 @@ const Index = () => {
                 </ScrollReveal>
 
                 <ScrollReveal animation="fade-in-up" delay={600}>
-                  <p className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
+                  <p className="text-2xl lg:text-3xl text-primary font-display mb-12 max-w-4xl mx-auto leading-relaxed font-medium tracking-wide">
                     {banner.subtitle || "Where vision meets execution. We transform your dreams into unforgettable moments with unparalleled attention to detail and sophisticated event management."}
                   </p>
                 </ScrollReveal>
@@ -286,7 +286,7 @@ const Index = () => {
             </ScrollReveal>
 
             <ScrollReveal animation="fade-in-up" delay={600}>
-              <p className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
+              <p className="text-2xl lg:text-3xl text-primary font-display mb-12 max-w-4xl mx-auto leading-relaxed font-medium tracking-wide">
                 Where vision meets execution. We transform your dreams into unforgettable moments 
                 with unparalleled attention to detail and sophisticated event management.
               </p>

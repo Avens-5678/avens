@@ -31,9 +31,22 @@ const DynamicEventPage = () => {
     item.tag?.toLowerCase().includes(eventType?.toLowerCase() || '')
   )?.slice(0, 3);
 
-  const specialties = (event?.specialties as any[]) || [];
-  const services = (event?.services as any[]) || [];
-  const processSteps = (event?.process_steps as any[]) || [];
+  // Parse JSON fields properly
+  const parseJSONField = (field: any) => {
+    if (typeof field === 'string') {
+      try {
+        return JSON.parse(field);
+      } catch (e) {
+        console.error('Error parsing JSON field:', e, field);
+        return [];
+      }
+    }
+    return Array.isArray(field) ? field : [];
+  };
+
+  const specialties = parseJSONField(event?.specialties);
+  const services = parseJSONField(event?.services);
+  const processSteps = parseJSONField(event?.process_steps);
 
   if (isLoading) {
     return (

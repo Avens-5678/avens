@@ -48,6 +48,12 @@ const DynamicEventPage = () => {
   const services = parseJSONField(event?.services);
   const processSteps = parseJSONField(event?.process_steps);
 
+  // Debug logging
+  console.log('Event data:', event);
+  console.log('Parsed specialties:', specialties);
+  console.log('Parsed services:', services);
+  console.log('Parsed processSteps:', processSteps);
+
   if (isLoading) {
     return (
       <Layout>

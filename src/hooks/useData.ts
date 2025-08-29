@@ -125,6 +125,7 @@ export const useEvent = (eventType: string) => {
   return useQuery({
     queryKey: ["event", eventType],
     queryFn: async () => {
+      console.log('Fetching event data for eventType:', eventType);
       const { data, error } = await supabase
         .from("events")
         .select("*")
@@ -132,10 +133,17 @@ export const useEvent = (eventType: string) => {
         .eq("is_active", true)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching event:', error);
+        throw error;
+      }
+      
+      console.log('Fetched event data:', data);
       return data;
     },
     enabled: !!eventType,
+    staleTime: 0, // Force fresh data fetch
+    gcTime: 0, // Don't cache the data
   });
 };
 

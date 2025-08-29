@@ -45,7 +45,6 @@ const App = () => (
             <Route path="/team" element={<Team />} />
             <Route path="/events/corporate" element={<CorporateEvents />} />
             <Route path="/events/equipment-rental" element={<EquipmentRental />} />
-            <Route path="/events/government" element={<GovernmentEvents />} />
             <Route path="/events/:eventType" element={<DynamicEventPage />} />
             <Route path="/ecommerce" element={<EnhancedEcommerce />} />
             <Route path="/auth" element={<Auth />} />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,26 +73,138 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
   mode
 }) => {
   const { eventTypes, loading: eventTypesLoading } = useEventTypes();
-  const [formData, setFormData] = useState<EventFormData>({
-    title: '',
-    description: '',
-    process_description: '',
-    event_type: '',
-    hero_cta_text: 'Book a Consultation',
-    what_we_do_title: 'What We Do',
-    services_section_title: 'Our Services',
-    specialties: [],
-    services: [],
-    process_steps: [
-      { title: 'Consultation', description: 'We discuss your vision and requirements', icon: 'users', order: 1 },
-      { title: 'Planning', description: 'We create a detailed plan for your event', icon: 'calendar', order: 2 },
-      { title: 'Execution', description: 'We bring your vision to life perfectly', icon: 'star', order: 3 },
-    ],
-    default_portfolio_tags: [],
-    ...initialData
+  const [formData, setFormData] = useState<EventFormData>(() => {
+    const baseData = {
+      title: '',
+      description: '',
+      process_description: '',
+      event_type: '',
+      hero_cta_text: 'Book a Consultation',
+      what_we_do_title: 'What We Do',
+      services_section_title: 'Our Services',
+      specialties: [],
+      services: [],
+      process_steps: [
+        { title: 'Consultation', description: 'We discuss your vision and requirements', icon: 'users', order: 1 },
+        { title: 'Planning', description: 'We create a detailed plan for your event', icon: 'calendar', order: 2 },
+        { title: 'Execution', description: 'We bring your vision to life perfectly', icon: 'star', order: 3 },
+      ],
+      default_portfolio_tags: [],
+    };
+
+    if (initialData) {
+      // Parse JSON fields if they exist as strings
+      const parsedData = { ...baseData, ...initialData };
+      
+      // Handle specialties - parse if string, use as-is if array
+      if (typeof parsedData.specialties === 'string') {
+        try {
+          parsedData.specialties = JSON.parse(parsedData.specialties);
+        } catch (e) {
+          console.error('Error parsing specialties:', e);
+          parsedData.specialties = [];
+        }
+      }
+      
+      // Handle services - parse if string, use as-is if array
+      if (typeof parsedData.services === 'string') {
+        try {
+          parsedData.services = JSON.parse(parsedData.services);
+        } catch (e) {
+          console.error('Error parsing services:', e);
+          parsedData.services = [];
+        }
+      }
+      
+      // Handle process_steps - parse if string, use as-is if array
+      if (typeof parsedData.process_steps === 'string') {
+        try {
+          parsedData.process_steps = JSON.parse(parsedData.process_steps);
+        } catch (e) {
+          console.error('Error parsing process_steps:', e);
+          parsedData.process_steps = baseData.process_steps;
+        }
+      }
+      
+      // Handle default_portfolio_tags - parse if string, use as-is if array
+      if (typeof parsedData.default_portfolio_tags === 'string') {
+        try {
+          parsedData.default_portfolio_tags = JSON.parse(parsedData.default_portfolio_tags);
+        } catch (e) {
+          console.error('Error parsing default_portfolio_tags:', e);
+          parsedData.default_portfolio_tags = [];
+        }
+      }
+      
+      return parsedData;
+    }
+    
+    return baseData;
   });
 
   const [uploading, setUploading] = useState(false);
+
+  // Update form data when initialData changes (for editing)
+  useEffect(() => {
+    if (initialData && mode === 'edit') {
+      const parsedData = { ...formData };
+      
+      // Update basic fields
+      Object.keys(initialData).forEach(key => {
+        if (key in parsedData) {
+          parsedData[key] = initialData[key];
+        }
+      });
+      
+      // Handle specialties - parse if string, use as-is if array
+      if (initialData.specialties) {
+        if (typeof initialData.specialties === 'string') {
+          try {
+            parsedData.specialties = JSON.parse(initialData.specialties);
+          } catch (e) {
+            console.error('Error parsing specialties:', e);
+            parsedData.specialties = [];
+          }
+        } else {
+          parsedData.specialties = initialData.specialties;
+        }
+      }
+      
+      // Handle services - parse if string, use as-is if array
+      if (initialData.services) {
+        if (typeof initialData.services === 'string') {
+          try {
+            parsedData.services = JSON.parse(initialData.services);
+          } catch (e) {
+            console.error('Error parsing services:', e);
+            parsedData.services = [];
+          }
+        } else {
+          parsedData.services = initialData.services;
+        }
+      }
+      
+      // Handle process_steps - parse if string, use as-is if array
+      if (initialData.process_steps) {
+        if (typeof initialData.process_steps === 'string') {
+          try {
+            parsedData.process_steps = JSON.parse(initialData.process_steps);
+          } catch (e) {
+            console.error('Error parsing process_steps:', e);
+            parsedData.process_steps = [
+              { title: 'Consultation', description: 'We discuss your vision and requirements', icon: 'users', order: 1 },
+              { title: 'Planning', description: 'We create a detailed plan for your event', icon: 'calendar', order: 2 },
+              { title: 'Execution', description: 'We bring your vision to life perfectly', icon: 'star', order: 3 },
+            ];
+          }
+        } else {
+          parsedData.process_steps = initialData.process_steps;
+        }
+      }
+      
+      setFormData(parsedData);
+    }
+  }, [initialData, mode]);
 
   const handleInputChange = (field: keyof EventFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));

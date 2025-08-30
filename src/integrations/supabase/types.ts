@@ -194,6 +194,9 @@ export type Database = {
       events: {
         Row: {
           created_at: string
+          cta_button_text: string | null
+          cta_description: string | null
+          cta_title: string | null
           default_portfolio_tags: string[] | null
           description: string
           event_type: string
@@ -218,6 +221,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          cta_button_text?: string | null
+          cta_description?: string | null
+          cta_title?: string | null
           default_portfolio_tags?: string[] | null
           description: string
           event_type: string
@@ -242,6 +248,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          cta_button_text?: string | null
+          cta_description?: string | null
+          cta_title?: string | null
           default_portfolio_tags?: string[] | null
           description?: string
           event_type?: string

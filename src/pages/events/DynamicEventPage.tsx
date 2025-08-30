@@ -410,12 +410,14 @@ const DynamicEventPage = () => {
         <div className="container mx-auto px-4 sm:px-6 md:px-8 text-center relative z-10">
           <ScrollReveal animation="bounce-in" delay={200} className="max-w-4xl mx-auto space-y-6 lg:space-y-8">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              Ready to Create Something
-              <span className="block text-gradient-primary animate-gradient-text">Amazing Together?</span>
+              {event.cta_title?.split(' ').slice(0, -1).join(' ') || 'Ready to Create Something'}
+              <span className="block text-gradient-primary animate-gradient-text">
+                {event.cta_title?.split(' ').slice(-1)[0] || 'Amazing Together?'}
+              </span>
             </h2>
             
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto px-4">
-              Let's discuss your vision and create an unforgettable experience that exceeds your expectations.
+              {event.cta_description || "Let's discuss your vision and create an unforgettable experience that exceeds your expectations."}
             </p>
 
             <ScrollReveal animation="elastic" delay={400} className="pt-4 lg:pt-6">
@@ -426,7 +428,7 @@ const DynamicEventPage = () => {
                     className="button-primary px-8 sm:px-10 lg:px-12 py-3 sm:py-4 text-lg sm:text-xl font-semibold rounded-full shadow-2xl w-full sm:w-auto"
                   >
                     <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
-                    Book a Consultation
+                    {event.cta_button_text || 'Book a Consultation'}
                     <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6" />
                   </MagneticButton>
                 </DialogTrigger>

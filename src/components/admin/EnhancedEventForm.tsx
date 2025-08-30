@@ -41,6 +41,9 @@ interface EventFormData {
   hero_description?: string;
   hero_subtitle?: string;
   hero_cta_text: string;
+  cta_title?: string;
+  cta_description?: string;
+  cta_button_text?: string;
   what_we_do_title: string;
   services_section_title: string;
   url_slug?: string;
@@ -611,6 +614,45 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
                   </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          {/* CTA Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Call to Action Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="cta_title">CTA Title</Label>
+                <Input
+                  id="cta_title"
+                  value={formData.cta_title || ''}
+                  onChange={(e) => handleInputChange('cta_title', e.target.value)}
+                  placeholder="e.g., Ready to Create Something Amazing Together?"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="cta_description">CTA Description</Label>
+                <Textarea
+                  id="cta_description"
+                  value={formData.cta_description || ''}
+                  onChange={(e) => handleInputChange('cta_description', e.target.value)}
+                  placeholder="Let's discuss your vision and create an unforgettable experience..."
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="cta_button_text">CTA Button Text</Label>
+                <Input
+                  id="cta_button_text"
+                  value={formData.cta_button_text || ''}
+                  onChange={(e) => handleInputChange('cta_button_text', e.target.value)}
+                  placeholder="e.g., Book a Consultation"
+                />
+              </div>
             </CardContent>
           </Card>
         </div>

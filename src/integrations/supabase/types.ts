@@ -198,8 +198,10 @@ export type Database = {
           description: string
           event_type: string
           hero_cta_text: string | null
+          hero_description: string | null
           hero_image_url: string | null
           hero_subtitle: string | null
+          hero_title: string | null
           id: string
           is_active: boolean | null
           location: string | null
@@ -220,8 +222,10 @@ export type Database = {
           description: string
           event_type: string
           hero_cta_text?: string | null
+          hero_description?: string | null
           hero_image_url?: string | null
           hero_subtitle?: string | null
+          hero_title?: string | null
           id?: string
           is_active?: boolean | null
           location?: string | null
@@ -242,8 +246,10 @@ export type Database = {
           description?: string
           event_type?: string
           hero_cta_text?: string | null
+          hero_description?: string | null
           hero_image_url?: string | null
           hero_subtitle?: string | null
+          hero_title?: string | null
           id?: string
           is_active?: boolean | null
           location?: string | null

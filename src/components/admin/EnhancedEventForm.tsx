@@ -37,6 +37,8 @@ interface EventFormData {
   process_description: string;
   event_type: string;
   hero_image_url?: string;
+  hero_title?: string;
+  hero_description?: string;
   hero_subtitle?: string;
   hero_cta_text: string;
   what_we_do_title: string;
@@ -399,6 +401,27 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
                     onChange={(e) => handleInputChange('hero_cta_text', e.target.value)}
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="hero_title">Hero Title</Label>
+                <Input
+                  id="hero_title"
+                  value={formData.hero_title || ''}
+                  onChange={(e) => handleInputChange('hero_title', e.target.value)}
+                  placeholder="e.g., Start Transforming Your Vision Into Reality"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="hero_description">Hero Description</Label>
+                <Textarea
+                  id="hero_description"
+                  value={formData.hero_description || ''}
+                  onChange={(e) => handleInputChange('hero_description', e.target.value)}
+                  placeholder="From concept to creation, our seasoned event planning team is ready to help you..."
+                  rows={3}
+                />
               </div>
 
               <div>

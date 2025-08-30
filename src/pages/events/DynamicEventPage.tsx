@@ -103,12 +103,12 @@ const DynamicEventPage = () => {
               
                <ScrollReveal animation="bounce-in" delay={400}>
                  <div className="space-y-4 lg:space-y-6">
-                   <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
-                     {event.hero_title || event.title}
-                     <span className="block text-gradient-primary animate-gradient-text">
-                       Excellence
-                     </span>
-                   </h1>
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
+                      {event.title}
+                      <span className="block text-gradient-primary animate-gradient-text">
+                        Excellence
+                      </span>
+                    </h1>
                    
                    {event.hero_subtitle && (
                      <p className="text-lg sm:text-xl md:text-2xl font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
@@ -116,9 +116,9 @@ const DynamicEventPage = () => {
                      </p>
                    )}
                    
-                   <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
-                     {event.hero_description || event.description}
-                   </p>
+                    <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+                      {event.description}
+                    </p>
                  </div>
                </ScrollReveal>
 

@@ -1,0 +1,25 @@
+-- Update about content with new Avens information
+UPDATE about_content SET 
+  full_about_text = 'Avens Expositions Pvt. Ltd. was established in 2006 with a singular objective: to revolutionize the construction and experiential aspects of events in India. Based in Hyderabad, we have evolved from a modest event service provider into a nationally acclaimed brand specializing in world-class event management and rental infrastructure.
+
+For over a decade, Avens has consistently delivered exceptional experiences across a diverse range of events, including corporate exhibitions, government summits, medical conferences, weddings, cultural festivals, lifestyle shows, and sporting events. From intimate gatherings to expansive expos spanning millions of square feet, our unwavering commitment remains: seamless execution, premium quality, and unforgettable experiences.
+
+What distinguishes us is not solely our infrastructure but our mindset. With in-house inventories such as German aluminum hangars (ranging from 20m to 50m spans), industrial air-conditioning solutions (Airwingz), customized exhibition stalls, pagodas, décor, staging, and audio-visual equipment, we exert control over quality, speed, and cost—providing our clients with the confidence to envision ambitious projects.
+
+Over the years, we have proudly collaborated with esteemed organizations such as CII, FICCI, ASSOCHAM, the Government of Telangana, the Government of Andhra Pradesh, and numerous corporates, NGOs, and private clients. Our work has been featured in international expos, medical summits, aero shows, and prestigious cultural events, solidifying our reputation as one of South India''s leading event infrastructure companies.';
+
+-- Clear and update team members with Avens team structure
+DELETE FROM team_members;
+
+INSERT INTO team_members (name, role, short_bio, full_bio, display_order, is_active) VALUES
+('Mr. A. Venkateshwar', 'Founder & Managing Director', 'Visionary leader who built Avens Expositions from the ground up. Oversees company strategy, client trust, and innovation in event infrastructure.', 'Visionary entrepreneur with over two decades of industry experience, founded Avens with a steadfast belief that events transcend mere logistical endeavors. Despite commencing with limited resources and boundless enthusiasm, Mr. Venkateshwar meticulously constructed Avens into a reputable brand that seamlessly integrates creativity, technology, and precision.', 1, true),
+('Operations Director', 'Director', 'Drives business growth, partnerships, and ensures financial and operational stability of the organization.', 'Strategic leader focused on business expansion and operational excellence.', 2, true),
+('General Manager', 'General Manager – Operations', 'Manages day-to-day operations, ensuring smooth coordination between departments and timely project execution.', 'Experienced operations manager ensuring seamless project delivery and departmental coordination.', 3, true),
+('Event Manager', 'Event Manager', 'Responsible for planning, organizing, and executing events while ensuring client satisfaction and seamless experiences.', 'Dedicated event planning professional committed to creating exceptional experiences for every client.', 4, true),
+('Project Manager', 'Project Manager', 'Leads individual event projects, manages budgets, timelines, and coordinates on-site operations.', 'Project management expert ensuring on-time, on-budget delivery of complex events.', 5, true),
+('Creative Director', 'Creative Director', 'Heads the design and branding team, developing innovative concepts for décor, stalls, and visual identity.', 'Creative visionary responsible for bringing artistic concepts to life in event design and branding.', 6, true),
+('Technical Head', 'Technical Head (AV & Infrastructure)', 'Oversees audio-visual, lighting, air-conditioning, and technical solutions for all events.', 'Technical expert managing all aspects of event infrastructure and AV solutions.', 7, true),
+('Site Manager', 'Site Managers', 'On-ground leaders who supervise setup, safety, and vendor coordination during events.', 'Field operations specialists ensuring safe and efficient event execution.', 8, true),
+('Logistics Manager', 'Logistics & Warehouse Manager', 'Handles transportation, storage, and inventory of event structures, ACs, stalls, and décor.', 'Supply chain and logistics expert managing extensive inventory and transportation networks.', 9, true),
+('Client Relations Manager', 'Client Relations Manager', 'Main point of contact for clients, ensuring clear communication and satisfaction throughout the project.', 'Client service specialist dedicated to maintaining strong relationships and ensuring satisfaction.', 10, true),
+('Business Development Executive', 'Business Development Executives', 'Expand client base, manage partnerships, and bring in new business opportunities.', 'Growth-focused professionals building strategic partnerships and expanding market presence.', 11, true);

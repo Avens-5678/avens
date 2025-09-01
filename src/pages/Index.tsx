@@ -190,7 +190,7 @@ const Index = () => {
                 </ScrollReveal>
 
                 <ScrollReveal animation="fade-in-up" delay={600}>
-                  <p className="text-2xl lg:text-3xl font-display mb-12 max-w-4xl mx-auto leading-relaxed font-medium tracking-wide text-zinc-900">
+                  <p className="text-2xl lg:text-3xl font-display mb-12 max-w-4xl mx-auto leading-relaxed font-medium tracking-wide text-red-600">
                     {banner.subtitle || "Where vision meets execution. We transform your dreams into unforgettable moments with unparalleled attention to detail and sophisticated event management."}
                   </p>
                 </ScrollReveal>

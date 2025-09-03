@@ -8,14 +8,9 @@ interface EventTypeOption {
 }
 
 const fetchEventTypes = async (): Promise<EventTypeOption[]> => {
-  // Default event types to always include
+  // Default event types to always include - keeping only wedding as it's the main service
   const defaultEventTypes: EventTypeOption[] = [
     { value: 'wedding', label: 'Wedding' },
-    { value: 'corporate', label: 'Corporate' },
-    { value: 'birthday', label: 'Birthday' },
-    { value: 'government', label: 'Government' },
-    { value: 'anniversary', label: 'Anniversary' },
-    { value: 'social', label: 'Social Event' },
   ];
 
   try {

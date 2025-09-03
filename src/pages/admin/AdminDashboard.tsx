@@ -300,7 +300,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   label: "Event Type", 
                   type: "select", 
                   required: true,
-                  options: eventTypes
+                  options: eventTypes || []
                 },
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "is_active", label: "Active", type: "boolean" }
@@ -324,7 +324,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   label: "Event Type", 
                   type: "select", 
                   required: true,
-                  options: eventTypes
+                  options: eventTypes || []
                 },
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "show_on_home", label: "Show on Home Page", type: "boolean" },
@@ -348,7 +348,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   label: "Event Type", 
                   type: "select", 
                   required: true,
-                  options: eventTypes
+                  options: eventTypes || []
                 },
                 { name: "hero_image_url", label: "Hero Image", type: "file" },
                 { name: "location", label: "Location", type: "text" },

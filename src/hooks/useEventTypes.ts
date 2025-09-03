@@ -56,7 +56,7 @@ export const useEventTypes = () => {
   const { data: eventTypes = [], isLoading: loading, refetch } = useQuery({
     queryKey: ['eventTypes'],
     queryFn: fetchEventTypes,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fresh data
   });
 
   // Set up real-time listener for events table changes

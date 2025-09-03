@@ -351,7 +351,7 @@ export const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
                         <SelectValue placeholder={eventTypesLoading ? "Loading..." : "Select event type"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {eventTypes.map(option => (
+                        {(eventTypes as { value: string; label: string }[]).map(option => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>

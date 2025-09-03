@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
-import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap } from "lucide-react";
+import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap, Target, Building, Mic, Monitor, Layout as LayoutIcon } from "lucide-react";
 import ScrollReveal from "@/components/ui/scroll-reveal";
 import FloatingParticles from "@/components/ui/floating-particles";
 import MagneticButton from "@/components/ui/magnetic-button";
@@ -19,6 +19,12 @@ const iconMap = {
   users: Users,
   calendar: Calendar,
   zap: Zap,
+  briefcase: Briefcase,
+  target: Target,
+  building: Building,
+  mic: Mic,
+  monitor: Monitor,
+  layout: LayoutIcon,
 };
 
 const DynamicEventPage = () => {

@@ -48,13 +48,13 @@ const About = () => {
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 {aboutContent.founder_image_url && (
-                  <div className="flex justify-center lg:order-2">
-                    <div className="relative">
+                  <div className="flex justify-center lg:justify-end lg:order-2">
+                    <div className="relative w-full max-w-sm lg:max-w-lg xl:max-w-xl">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl transform rotate-3"></div>
                       <img 
                         src={aboutContent.founder_image_url} 
                         alt={aboutContent.founder_name}
-                        className="relative rounded-2xl shadow-xl max-w-md w-full h-auto object-cover"
+                        className="relative rounded-2xl shadow-xl w-full h-[400px] lg:h-[500px] xl:h-[600px] object-cover"
                       />
                     </div>
                   </div>

@@ -108,21 +108,21 @@ const DynamicEventPage = () => {
               </Badge>
               
                <ScrollReveal animation="bounce-in" delay={400}>
-                 <div className="space-y-4 lg:space-y-6">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
-                      {event.title}
-                      <span className="block text-gradient-primary animate-gradient-text">
+                 <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
+                      <span className="block">{event.title}</span>
+                      <span className="block text-gradient-primary animate-gradient-text mt-1 sm:mt-2">
                         Excellence
                       </span>
                     </h1>
                    
                    {event.hero_subtitle && (
-                     <p className="text-lg sm:text-xl md:text-2xl font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+                     <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                        {event.hero_subtitle}
                      </p>
                    )}
                    
-                    <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+                    <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
                       {event.description}
                     </p>
                  </div>
@@ -131,14 +131,14 @@ const DynamicEventPage = () => {
               <ScrollReveal animation="elastic" delay={600}>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <MagneticButton 
-                      size="lg" 
-                      className="button-primary px-6 sm:px-8 lg:px-12 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-full shadow-2xl w-full sm:w-auto"
-                    >
-                      <Briefcase className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                      Plan My {event.title}
-                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                    </MagneticButton>
+                     <MagneticButton 
+                       size="lg" 
+                       className="button-primary px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold rounded-full shadow-2xl w-full sm:w-auto"
+                     >
+                       <Briefcase className="mr-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
+                       Plan My {event.title}
+                       <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
+                     </MagneticButton>
                   </DialogTrigger>
                   <DialogContent className="w-[95vw] sm:w-[90vw] max-w-2xl glass mx-4">
                     <DialogTitle>✨ Start Planning Your {event.title}</DialogTitle>

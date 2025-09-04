@@ -104,6 +104,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             </Link>
             <div className="text-right hidden md:block">
               <p className="text-sm font-medium">{currentAdminUser.full_name}</p>
+              <p className="text-xs text-muted-foreground">{currentAdminUser.email}</p>
               <p className="text-xs text-muted-foreground capitalize">{currentAdminUser.role}</p>
             </div>
             <Button variant="outline" onClick={handleLogout} size="sm">

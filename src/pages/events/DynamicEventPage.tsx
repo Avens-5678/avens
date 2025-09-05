@@ -99,16 +99,48 @@ const DynamicEventPage = () => {
         <div className="absolute top-10 sm:top-20 right-4 sm:right-20 w-48 sm:w-96 h-48 sm:h-96 animate-morphing-bg opacity-30 pointer-events-none" />
         <div className="absolute bottom-10 sm:bottom-20 left-4 sm:left-20 w-40 sm:w-80 h-40 sm:h-80 animate-morphing-bg opacity-20 pointer-events-none" style={{ animationDelay: '4s' }} />
         
-        <div className="container mx-auto px-0 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-            <ScrollReveal animation="fade-in-up" delay={200} className="lg:w-1/2 space-y-6 lg:space-y-8 text-center lg:text-left">
+            {/* Hero Image - Shows first on mobile, second on desktop */}
+            <ScrollReveal animation="rotate-in" delay={500} className="lg:w-1/2 w-full order-1 lg:order-2">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl lg:rounded-3xl blur-2xl lg:blur-3xl group-hover:blur-xl lg:group-hover:blur-2xl transition-all duration-500" />
+                <GlassmorphismCard variant="subtle" className="relative overflow-hidden rounded-2xl lg:rounded-3xl p-1 lg:p-2">
+                  <img 
+                    src={event.hero_image_url || "/placeholder-event.jpg"}
+                    alt={`${event.title} setup`}
+                    className="w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[600px] object-cover rounded-xl lg:rounded-2xl transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute top-2 lg:top-4 right-2 lg:right-4">
+                    <div className="glass p-2 lg:p-3 rounded-full">
+                      <Briefcase className="h-4 w-4 lg:h-6 lg:w-6 text-primary animate-glow" />
+                    </div>
+                  </div>
+                </GlassmorphismCard>
+                
+                {/* Floating Icons - Hidden on mobile */}
+                <div className="hidden sm:block absolute -top-2 lg:-top-4 -left-2 lg:-left-4 animate-float">
+                  <div className="glass p-2 lg:p-4 rounded-full shadow-2xl">
+                    <Briefcase className="h-4 w-4 lg:h-8 lg:w-8 text-accent" />
+                  </div>
+                </div>
+                <div className="hidden sm:block absolute -bottom-2 lg:-bottom-4 -right-2 lg:-right-4 animate-float" style={{ animationDelay: '1s' }}>
+                  <div className="glass p-2 lg:p-4 rounded-full shadow-2xl">
+                    <Briefcase className="h-4 w-4 lg:h-8 lg:w-8 text-primary" />
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Hero Content - Shows second on mobile, first on desktop */}
+            <ScrollReveal animation="fade-in-up" delay={200} className="lg:w-1/2 space-y-6 lg:space-y-8 text-center lg:text-left order-2 lg:order-1 px-2 sm:px-4 lg:px-0">
               <Badge variant="secondary" className="glass bg-primary/10 text-primary border-primary/20 w-fit hover-glow mx-auto lg:mx-0">
                 <Briefcase className="mr-2 h-4 w-4 animate-pulse-glow" />
                 {event.title}
               </Badge>
               
                <ScrollReveal animation="bounce-in" delay={400}>
-                 <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+                 <div className="space-y-3 sm:space-y-4 lg:space-y-6 px-2 sm:px-4 lg:px-0">
                     <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
                       <span className="block">{event.title}</span>
                       <span className="block text-gradient-primary animate-gradient-text mt-1 sm:mt-2">
@@ -151,36 +183,6 @@ const DynamicEventPage = () => {
                   </DialogContent>
                 </Dialog>
               </ScrollReveal>
-            </ScrollReveal>
-
-            <ScrollReveal animation="rotate-in" delay={500} className="lg:w-1/2 w-full">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl lg:rounded-3xl blur-2xl lg:blur-3xl group-hover:blur-xl lg:group-hover:blur-2xl transition-all duration-500" />
-                <GlassmorphismCard variant="subtle" className="relative overflow-hidden rounded-2xl lg:rounded-3xl p-1 lg:p-2">
-                  <img 
-                    src={event.hero_image_url || "/placeholder-event.jpg"}
-                    alt={`${event.title} setup`}
-                    className="w-full h-[300px] sm:h-[400px] lg:h-[600px] object-cover rounded-xl lg:rounded-2xl transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute top-2 lg:top-4 right-2 lg:right-4">
-                    <div className="glass p-2 lg:p-3 rounded-full">
-                      <Briefcase className="h-4 w-4 lg:h-6 lg:w-6 text-primary animate-glow" />
-                    </div>
-                  </div>
-                </GlassmorphismCard>
-                
-                {/* Floating Icons - Hidden on mobile */}
-                <div className="hidden sm:block absolute -top-2 lg:-top-4 -left-2 lg:-left-4 animate-float">
-                  <div className="glass p-2 lg:p-4 rounded-full shadow-2xl">
-                    <Briefcase className="h-4 w-4 lg:h-8 lg:w-8 text-accent" />
-                  </div>
-                </div>
-                <div className="hidden sm:block absolute -bottom-2 lg:-bottom-4 -right-2 lg:-right-4 animate-float" style={{ animationDelay: '1s' }}>
-                  <div className="glass p-2 lg:p-4 rounded-full shadow-2xl">
-                    <Briefcase className="h-4 w-4 lg:h-8 lg:w-8 text-primary" />
-                  </div>
-                </div>
-              </div>
             </ScrollReveal>
           </div>
         </div>

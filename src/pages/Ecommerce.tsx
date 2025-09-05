@@ -70,27 +70,6 @@ const Ecommerce = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {/* Grid View Selector */}
-          <div className="flex justify-end mb-6">
-            <div className="flex items-center gap-1 bg-background border border-border rounded-lg p-1 shadow-sm">
-              {gridOptions.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <Button
-                    key={option.value}
-                    variant={gridView === option.value ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setGridView(option.value)}
-                    className="h-8 px-3 transition-all duration-200"
-                    title={option.label}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="ml-1 text-xs hidden sm:inline">{option.value}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Items Grid with Dynamic Layout */}
           <div className={`grid ${currentGridClasses} gap-6`}>
@@ -181,9 +160,30 @@ const Ecommerce = () => {
         </div>
       </section>
       
-      {/* Floating Cart Button */}
-      {items.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50">
+      {/* Floating Grid Toggle and Cart Button */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+        {/* Grid View Selector */}
+        <div className="flex items-center gap-1 bg-gray-100 border border-gray-300 rounded-lg p-1 shadow-sm">
+          {gridOptions.map((option) => {
+            const Icon = option.icon;
+            return (
+              <Button
+                key={option.value}
+                variant={gridView === option.value ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setGridView(option.value)}
+                className="h-8 px-3 transition-all duration-200 text-gray-700 hover:text-gray-900"
+                title={option.label}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="ml-1 text-xs hidden sm:inline">{option.value}</span>
+              </Button>
+            );
+          })}
+        </div>
+        
+        {/* Cart Button */}
+        {items.length > 0 && (
           <Button
             onClick={() => setCartModalOpen(true)}
             size="lg"
@@ -192,8 +192,8 @@ const Ecommerce = () => {
             <ShoppingCart className="mr-2 h-5 w-5" />
             Cart ({items.length})
           </Button>
-        </div>
-      )}
+        )}
+      </div>
       
       <CartModal 
         open={cartModalOpen} 

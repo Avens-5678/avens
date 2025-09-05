@@ -26,6 +26,9 @@ const Navbar = () => {
     href: "/portfolio",
     label: "Portfolio"
   }, {
+    href: "/ecommerce",
+    label: "Shop"
+  }, {
     href: "/about",
     label: "About"
   }, {

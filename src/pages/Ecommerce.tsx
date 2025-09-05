@@ -72,13 +72,13 @@ const Ecommerce = () => {
         <div className="container mx-auto px-4">
           {/* Grid View Selector */}
           <div className="flex justify-end mb-6">
-            <div className="flex items-center gap-2 bg-card border rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-background border border-border rounded-lg p-1 shadow-sm">
               {gridOptions.map((option) => {
                 const Icon = option.icon;
                 return (
                   <Button
                     key={option.value}
-                    variant={gridView === option.value ? "secondary" : "ghost"}
+                    variant={gridView === option.value ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setGridView(option.value)}
                     className="h-8 px-3 transition-all duration-200"

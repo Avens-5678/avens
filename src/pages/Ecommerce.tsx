@@ -6,7 +6,7 @@ import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import CartModal from "@/components/Cart/CartModal";
-import { Package, ShoppingCart, Plus, Check } from "lucide-react";
+import { Package, ShoppingCart, Plus, Check, Grid2X2, Grid3X3, LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
@@ -16,6 +16,30 @@ const Ecommerce = () => {
   const { items, addItem, isInCart } = useCart();
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [selectedRental, setSelectedRental] = useState<any>(null);
+  const [gridView, setGridView] = useState<'2' | '3' | '4'>('3');
+
+  const gridOptions = [
+    { 
+      value: '2' as const, 
+      label: '2 Columns', 
+      icon: Grid2X2, 
+      classes: 'grid-cols-1 sm:grid-cols-2'
+    },
+    { 
+      value: '3' as const, 
+      label: '3 Columns', 
+      icon: Grid3X3, 
+      classes: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+    },
+    { 
+      value: '4' as const, 
+      label: '4 Columns', 
+      icon: LayoutGrid, 
+      classes: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+    }
+  ];
+
+  const currentGridClasses = gridOptions.find(option => option.value === gridView)?.classes || gridOptions[1].classes;
 
   if (isLoading) {
     return (
@@ -46,7 +70,30 @@ const Ecommerce = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Grid View Selector */}
+          <div className="flex justify-end mb-6">
+            <div className="flex items-center gap-2 bg-card border rounded-lg p-1">
+              {gridOptions.map((option) => {
+                const Icon = option.icon;
+                return (
+                  <Button
+                    key={option.value}
+                    variant={gridView === option.value ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setGridView(option.value)}
+                    className="h-8 px-3 transition-all duration-200"
+                    title={option.label}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="ml-1 text-xs hidden sm:inline">{option.value}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Items Grid with Dynamic Layout */}
+          <div className={`grid ${currentGridClasses} gap-6`}>
             {rentals?.map((rental) => (
               <Card key={rental.id} className="group hover:shadow-xl transition-all duration-300">
                 <CardHeader>

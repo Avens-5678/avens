@@ -100,15 +100,16 @@ const Ecommerce = () => {
             {/* Right side: View Toggle, Grid Controls and Cart */}
             <div className="flex items-center gap-4">
               {/* Grid/List View Toggle Switch */}
-              <div className="flex items-center space-x-2 bg-background border rounded-lg p-2">
-                <Grid3X3 className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center space-x-3 bg-card border-2 border-border rounded-lg p-3 shadow-sm">
+                <Grid3X3 className={`h-4 w-4 transition-colors ${!isListView ? 'text-primary' : 'text-muted-foreground'}`} />
                 <Switch
                   id="view-mode"
                   checked={isListView}
                   onCheckedChange={setIsListView}
+                  className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
                 />
-                <List className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="view-mode" className="text-xs text-muted-foreground">
+                <List className={`h-4 w-4 transition-colors ${isListView ? 'text-primary' : 'text-muted-foreground'}`} />
+                <Label htmlFor="view-mode" className="text-sm font-medium cursor-pointer select-none">
                   {isListView ? 'List' : 'Grid'}
                 </Label>
               </div>

@@ -6,10 +6,12 @@ import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import CartModal from "@/components/Cart/CartModal";
-import { Package, ShoppingCart, Plus, Check, Grid2X2, Grid3X3, LayoutGrid, Search } from "lucide-react";
+import { Package, ShoppingCart, Plus, Check, Grid2X2, Grid3X3, LayoutGrid, Search, List } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
@@ -17,6 +19,7 @@ const Ecommerce = () => {
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [gridView, setGridView] = useState<'2' | '3' | '4'>('3');
+  const [isListView, setIsListView] = useState(false);
 
   const gridOptions = [
     { 
@@ -94,27 +97,42 @@ const Ecommerce = () => {
               </select>
             </div>
             
-            {/* Right side: Grid Toggle and Cart */}
+            {/* Right side: View Toggle, Grid Controls and Cart */}
             <div className="flex items-center gap-4">
-              {/* Grid View Toggle */}
-              <div className="flex items-center gap-1 bg-white border-2 border-red-500 rounded-lg p-2 shadow-lg z-10" style={{opacity: 1, visibility: 'visible'}}>
-                {gridOptions.map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <Button
-                      key={option.value}
-                      variant={gridView === option.value ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setGridView(option.value)}
-                      className="h-8 px-2 transition-all duration-200 bg-blue-500 text-white hover:bg-blue-600"
-                      title={option.label}
-                      style={{opacity: 1, visibility: 'visible'}}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </Button>
-                  );
-                })}
+              {/* Grid/List View Toggle Switch */}
+              <div className="flex items-center space-x-2 bg-background border rounded-lg p-2">
+                <Grid3X3 className="h-4 w-4 text-muted-foreground" />
+                <Switch
+                  id="view-mode"
+                  checked={isListView}
+                  onCheckedChange={setIsListView}
+                />
+                <List className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="view-mode" className="text-xs text-muted-foreground">
+                  {isListView ? 'List' : 'Grid'}
+                </Label>
               </div>
+
+              {/* Grid Column Options (only show when not in list view) */}
+              {!isListView && (
+                <div className="flex items-center gap-1 bg-background border rounded-lg p-2">
+                  {gridOptions.map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <Button
+                        key={option.value}
+                        variant={gridView === option.value ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setGridView(option.value)}
+                        className="h-8 px-2"
+                        title={option.label}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </Button>
+                    );
+                  })}
+                </div>
+              )}
               
               {/* Cart Button */}
               <Button
@@ -127,89 +145,179 @@ const Ecommerce = () => {
             </div>
           </div>
 
-          {/* Items Grid with Dynamic Layout */}
-          <div className={`grid ${currentGridClasses} gap-6`}>
+          {/* Items Display with Dynamic Layout */}
+          <div className={isListView ? "space-y-4" : `grid ${currentGridClasses} gap-6`}>
             {rentals?.map((rental) => (
-              <Card key={rental.id} className="group hover:shadow-xl transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold group-hover:text-hover transition-colors">
-            <div className="aspect-[4/3] mb-4 overflow-hidden rounded-lg">
-              {rental.image_urls && rental.image_urls.length > 0 ? (
-                <MultiImageCarousel 
-                  images={rental.image_urls} 
-                  title={rental.title}
-                />
-              ) : rental.image_url ? (
-                <img 
-                  src={rental.image_url} 
-                  alt={rental.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <span className="text-muted-foreground">No Image</span>
-                </div>
-              )}
-            </div>
-            {rental.title}
-                  </CardTitle>
-                  {rental.price_range && (
-                    <p className="text-sm text-primary font-semibold">
-                      {rental.price_range}
-                    </p>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4 text-sm">
-                    {rental.short_description}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => addItem({
-                        id: rental.id,
-                        title: rental.title,
-                        price_range: rental.price_range,
-                        image_url: rental.image_url
-                      })}
-                      variant={isInCart(rental.id) ? "secondary" : "outline"}
-                      className="flex-1"
-                      disabled={isInCart(rental.id)}
-                    >
-                      {isInCart(rental.id) ? (
-                        <>
-                          <Check className="mr-2 h-4 w-4" />
-                          Added
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="mr-2 h-4 w-4" />
-                          Add to Cart
-                        </>
-                      )}
-                    </Button>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          className="bg-gradient-to-r from-primary to-accent"
-                          onClick={() => setSelectedRental(rental)}
-                        >
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          Enquire
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
-                        <div className="overflow-y-auto flex-1 p-4 sm:p-6">
-                          <InquiryForm 
-                            formType="rental"
-                            rentalId={selectedRental?.id}
-                            rentalTitle={selectedRental?.title}
-                            title="Equipment Inquiry"
+              <Card key={rental.id} className={`group hover:shadow-xl transition-all duration-300 ${isListView ? "flex flex-row" : ""}`}>
+                {isListView ? (
+                  <>
+                    {/* List View Layout */}
+                    <div className="w-48 flex-shrink-0 p-4">
+                      <div className="aspect-[4/3] overflow-hidden rounded-lg">
+                        {rental.image_urls && rental.image_urls.length > 0 ? (
+                          <MultiImageCarousel 
+                            images={rental.image_urls} 
+                            title={rental.title}
                           />
+                        ) : rental.image_url ? (
+                          <img 
+                            src={rental.image_url} 
+                            alt={rental.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-muted flex items-center justify-center">
+                            <span className="text-muted-foreground">No Image</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-between p-6">
+                      <div>
+                        <CardTitle className="text-lg font-semibold group-hover:text-hover transition-colors mb-2">
+                          {rental.title}
+                        </CardTitle>
+                        {rental.price_range && (
+                          <p className="text-sm text-primary font-semibold mb-2">
+                            {rental.price_range}
+                          </p>
+                        )}
+                        <p className="text-muted-foreground text-sm">
+                          {rental.short_description}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <Button 
+                          onClick={() => addItem({
+                            id: rental.id,
+                            title: rental.title,
+                            price_range: rental.price_range,
+                            image_url: rental.image_url
+                          })}
+                          variant={isInCart(rental.id) ? "secondary" : "outline"}
+                          className="flex-1"
+                          disabled={isInCart(rental.id)}
+                        >
+                          {isInCart(rental.id) ? (
+                            <>
+                              <Check className="mr-2 h-4 w-4" />
+                              Added
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add to Cart
+                            </>
+                          )}
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              className="bg-gradient-to-r from-primary to-accent"
+                              onClick={() => setSelectedRental(rental)}
+                            >
+                              <ShoppingCart className="mr-2 h-4 w-4" />
+                              Enquire
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
+                            <div className="overflow-y-auto flex-1 p-4 sm:p-6">
+                              <InquiryForm 
+                                formType="rental"
+                                rentalId={selectedRental?.id}
+                                rentalTitle={selectedRental?.title}
+                                title="Equipment Inquiry"
+                              />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Grid View Layout */}
+                    <CardHeader>
+                      <CardTitle className="text-lg font-semibold group-hover:text-hover transition-colors">
+                        <div className="aspect-[4/3] mb-4 overflow-hidden rounded-lg">
+                          {rental.image_urls && rental.image_urls.length > 0 ? (
+                            <MultiImageCarousel 
+                              images={rental.image_urls} 
+                              title={rental.title}
+                            />
+                          ) : rental.image_url ? (
+                            <img 
+                              src={rental.image_url} 
+                              alt={rental.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <span className="text-muted-foreground">No Image</span>
+                            </div>
+                          )}
                         </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </CardContent>
+                        {rental.title}
+                      </CardTitle>
+                      {rental.price_range && (
+                        <p className="text-sm text-primary font-semibold">
+                          {rental.price_range}
+                        </p>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground mb-4 text-sm">
+                        {rental.short_description}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => addItem({
+                            id: rental.id,
+                            title: rental.title,
+                            price_range: rental.price_range,
+                            image_url: rental.image_url
+                          })}
+                          variant={isInCart(rental.id) ? "secondary" : "outline"}
+                          className="flex-1"
+                          disabled={isInCart(rental.id)}
+                        >
+                          {isInCart(rental.id) ? (
+                            <>
+                              <Check className="mr-2 h-4 w-4" />
+                              Added
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add to Cart
+                            </>
+                          )}
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              className="bg-gradient-to-r from-primary to-accent"
+                              onClick={() => setSelectedRental(rental)}
+                            >
+                              <ShoppingCart className="mr-2 h-4 w-4" />
+                              Enquire
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
+                            <div className="overflow-y-auto flex-1 p-4 sm:p-6">
+                              <InquiryForm 
+                                formType="rental"
+                                rentalId={selectedRental?.id}
+                                rentalTitle={selectedRental?.title}
+                                title="Equipment Inquiry"
+                              />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </CardContent>
+                  </>
+                )}
               </Card>
             ))}
           </div>

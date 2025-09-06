@@ -162,7 +162,7 @@ const Ecommerce = () => {
       
       {/* Floating Grid Toggle and Cart Button */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
-        {/* Grid View Selector */}
+        {/* Grid View Selector - Always Visible */}
         <div className="flex items-center gap-1 bg-white border-2 border-gray-400 rounded-lg p-2 shadow-lg">
           {gridOptions.map((option) => {
             const Icon = option.icon;
@@ -182,7 +182,7 @@ const Ecommerce = () => {
           })}
         </div>
         
-        {/* Cart Button */}
+        {/* Cart Button - Only when items exist */}
         {items.length > 0 && (
           <Button
             onClick={() => setCartModalOpen(true)}

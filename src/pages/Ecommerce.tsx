@@ -70,6 +70,33 @@ const Ecommerce = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
+          {/* Controls Section */}
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold">All Equipment</h2>
+            
+            {/* Grid View Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground mr-2">View:</span>
+              <div className="flex items-center gap-1 bg-background border border-border rounded-lg p-1 shadow-sm">
+                {gridOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <Button
+                      key={option.value}
+                      variant={gridView === option.value ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setGridView(option.value)}
+                      className="h-8 px-3 transition-all duration-200"
+                      title={option.label}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="ml-1 text-xs hidden sm:inline">{option.value}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
           {/* Items Grid with Dynamic Layout */}
           <div className={`grid ${currentGridClasses} gap-6`}>
@@ -160,30 +187,9 @@ const Ecommerce = () => {
         </div>
       </section>
       
-      {/* Floating Grid Toggle and Cart Button */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
-        {/* Grid View Selector - Always Visible */}
-        <div className="flex items-center gap-1 bg-white border-2 border-gray-400 rounded-lg p-2 shadow-lg">
-          {gridOptions.map((option) => {
-            const Icon = option.icon;
-            return (
-              <Button
-                key={option.value}
-                variant={gridView === option.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => setGridView(option.value)}
-                className="h-10 px-3 transition-all duration-200 text-gray-800 hover:text-gray-900 border-gray-300"
-                title={option.label}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="ml-1 text-xs hidden sm:inline font-medium">{option.value}</span>
-              </Button>
-            );
-          })}
-        </div>
-        
-        {/* Cart Button - Only when items exist */}
-        {items.length > 0 && (
+      {/* Floating Cart Button */}
+      {items.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-50">
           <Button
             onClick={() => setCartModalOpen(true)}
             size="lg"
@@ -192,8 +198,8 @@ const Ecommerce = () => {
             <ShoppingCart className="mr-2 h-5 w-5" />
             Cart ({items.length})
           </Button>
-        )}
-      </div>
+        </div>
+      )}
       
       <CartModal 
         open={cartModalOpen} 

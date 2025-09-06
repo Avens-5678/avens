@@ -163,20 +163,20 @@ const Ecommerce = () => {
       {/* Floating Grid Toggle and Cart Button */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
         {/* Grid View Selector */}
-        <div className="flex items-center gap-1 bg-gray-100 border border-gray-300 rounded-lg p-1 shadow-sm">
+        <div className="flex items-center gap-1 bg-white border-2 border-gray-400 rounded-lg p-2 shadow-lg">
           {gridOptions.map((option) => {
             const Icon = option.icon;
             return (
               <Button
                 key={option.value}
-                variant={gridView === option.value ? "secondary" : "ghost"}
+                variant={gridView === option.value ? "default" : "outline"}
                 size="sm"
                 onClick={() => setGridView(option.value)}
-                className="h-8 px-3 transition-all duration-200 text-gray-700 hover:text-gray-900"
+                className="h-10 px-3 transition-all duration-200 text-gray-800 hover:text-gray-900 border-gray-300"
                 title={option.label}
               >
                 <Icon className="h-4 w-4" />
-                <span className="ml-1 text-xs hidden sm:inline">{option.value}</span>
+                <span className="ml-1 text-xs hidden sm:inline font-medium">{option.value}</span>
               </Button>
             );
           })}

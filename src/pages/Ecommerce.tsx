@@ -73,7 +73,26 @@ const Ecommerce = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {/* Search, Filter, Grid Toggle, and Cart Controls */}
+          {/* View Toggle - Moved to top for visibility */}
+          <div className="mb-4">
+            <div className="flex items-center justify-center">
+              <div className="flex items-center space-x-3 bg-red-500 border-4 border-yellow-400 rounded-lg p-3 shadow-lg">
+                <Grid3X3 className={`h-6 w-6 ${!isListView ? 'text-white' : 'text-gray-300'}`} />
+                <Switch
+                  id="view-mode"
+                  checked={isListView}
+                  onCheckedChange={setIsListView}
+                  className="scale-125"
+                />
+                <List className={`h-6 w-6 ${isListView ? 'text-white' : 'text-gray-300'}`} />
+                <Label htmlFor="view-mode" className="text-lg font-bold text-white cursor-pointer">
+                  {isListView ? 'LIST VIEW' : 'GRID VIEW'}
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Search, Filter, and Cart Controls */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
             {/* Left side: Search and Filter */}
             <div className="flex flex-1 gap-4 items-center w-full sm:w-auto">
@@ -97,22 +116,8 @@ const Ecommerce = () => {
               </select>
             </div>
             
-            {/* Right side: View Toggle, Grid Controls and Cart */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Grid/List View Toggle Switch - Debug with bright colors */}
-              <div className="flex items-center space-x-2 bg-red-500 border-4 border-yellow-400 rounded-lg p-2 shadow-lg min-w-fit">
-                <Grid3X3 className={`h-5 w-5 transition-colors ${!isListView ? 'text-white' : 'text-gray-300'}`} />
-                <Switch
-                  id="view-mode"
-                  checked={isListView}
-                  onCheckedChange={setIsListView}
-                  className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-blue-500"
-                />
-                <List className={`h-5 w-5 transition-colors ${isListView ? 'text-white' : 'text-gray-300'}`} />
-                <Label htmlFor="view-mode" className="text-sm font-bold text-white cursor-pointer select-none">
-                  {isListView ? 'List' : 'Grid'}
-                </Label>
-              </div>
+            {/* Right side: Grid Controls and Cart */}
+            <div className="flex items-center gap-4">
 
               {/* Grid Column Options (only show when not in list view) */}
               {!isListView && (

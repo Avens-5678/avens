@@ -6,7 +6,7 @@ import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import CartModal from "@/components/Cart/CartModal";
-import { Package, ShoppingCart, Plus, Check, Grid2X2, Grid3X3, LayoutGrid } from "lucide-react";
+import { Package, ShoppingCart, Plus, Check, Grid2X2, Grid3X3, LayoutGrid, Search } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
@@ -70,14 +70,34 @@ const Ecommerce = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {/* Controls Section */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">All Equipment</h2>
+          {/* Search, Filter, Grid Toggle, and Cart Controls */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
+            {/* Left side: Search and Filter */}
+            <div className="flex flex-1 gap-4 items-center w-full sm:w-auto">
+              {/* Search Bar */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Search equipment, furniture, or services..."
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                />
+              </div>
+              
+              {/* Filter Dropdown */}
+              <select className="px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">All</option>
+                <option value="furniture">Furniture</option>
+                <option value="lighting">Lighting</option>
+                <option value="audio">Audio/Visual</option>
+                <option value="decor">Decor</option>
+              </select>
+            </div>
             
-            {/* Grid View Selector */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground mr-2">View:</span>
-              <div className="flex items-center gap-1 bg-background border border-border rounded-lg p-1 shadow-sm">
+            {/* Right side: Grid Toggle and Cart */}
+            <div className="flex items-center gap-4">
+              {/* Grid View Toggle */}
+              <div className="flex items-center gap-1 bg-background border border-border rounded-lg p-1">
                 {gridOptions.map((option) => {
                   const Icon = option.icon;
                   return (
@@ -86,15 +106,23 @@ const Ecommerce = () => {
                       variant={gridView === option.value ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setGridView(option.value)}
-                      className="h-8 px-3 transition-all duration-200"
+                      className="h-8 px-2 transition-all duration-200"
                       title={option.label}
                     >
                       <Icon className="h-4 w-4" />
-                      <span className="ml-1 text-xs hidden sm:inline">{option.value}</span>
                     </Button>
                   );
                 })}
               </div>
+              
+              {/* Cart Button */}
+              <Button
+                onClick={() => setCartModalOpen(true)}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Cart ({items.length})
+              </Button>
             </div>
           </div>
 

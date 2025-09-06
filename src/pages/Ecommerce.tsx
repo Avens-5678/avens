@@ -97,17 +97,18 @@ const Ecommerce = () => {
             {/* Right side: Grid Toggle and Cart */}
             <div className="flex items-center gap-4">
               {/* Grid View Toggle */}
-              <div className="flex items-center gap-1 bg-background border border-border rounded-lg p-1">
+              <div className="flex items-center gap-1 bg-white border-2 border-red-500 rounded-lg p-2 shadow-lg z-10" style={{opacity: 1, visibility: 'visible'}}>
                 {gridOptions.map((option) => {
                   const Icon = option.icon;
                   return (
                     <Button
                       key={option.value}
-                      variant={gridView === option.value ? "default" : "ghost"}
+                      variant={gridView === option.value ? "default" : "outline"}
                       size="sm"
                       onClick={() => setGridView(option.value)}
-                      className="h-8 px-2 transition-all duration-200"
+                      className="h-8 px-2 transition-all duration-200 bg-blue-500 text-white hover:bg-blue-600"
                       title={option.label}
+                      style={{opacity: 1, visibility: 'visible'}}
                     >
                       <Icon className="h-4 w-4" />
                     </Button>

@@ -73,19 +73,22 @@ const Ecommerce = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {/* View Toggle - Fixed positioning with high z-index */}
-          <div className="sticky top-4 z-30 mb-6">
+          {/* View Toggle - Ultra-visible with high contrast */}
+          <div className="relative z-40 mb-8">
             <div className="flex items-center justify-center">
-              <div className="flex items-center space-x-4 bg-background/95 backdrop-blur-sm border-2 border-primary/20 rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300">
-                <Grid3X3 className={`h-5 w-5 transition-colors ${!isListView ? 'text-primary' : 'text-muted-foreground'}`} />
-                <Switch
-                  id="view-mode"
-                  checked={isListView}
-                  onCheckedChange={setIsListView}
-                  className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted scale-150"
-                />
-                <List className={`h-5 w-5 transition-colors ${isListView ? 'text-primary' : 'text-muted-foreground'}`} />
-                <Label htmlFor="view-mode" className="text-sm font-semibold cursor-pointer text-foreground">
+              <div className="flex items-center space-x-4 bg-white border-4 border-primary rounded-2xl p-6 shadow-2xl ring-4 ring-primary/20">
+                <Grid3X3 className={`h-6 w-6 transition-colors ${!isListView ? 'text-primary' : 'text-muted-foreground'}`} />
+                <div className="relative">
+                  <Switch
+                    id="view-mode"
+                    checked={isListView}
+                    onCheckedChange={setIsListView}
+                    className="h-8 w-16 data-[state=checked]:bg-primary data-[state=unchecked]:bg-gray-300"
+                  />
+                  <div className="absolute -top-2 -left-2 -right-2 -bottom-2 border-2 border-secondary rounded-full animate-pulse"></div>
+                </div>
+                <List className={`h-6 w-6 transition-colors ${isListView ? 'text-primary' : 'text-muted-foreground'}`} />
+                <Label htmlFor="view-mode" className="text-lg font-bold cursor-pointer text-foreground">
                   {isListView ? 'List View' : 'Grid View'}
                 </Label>
               </div>

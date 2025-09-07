@@ -10,7 +10,7 @@ import { Package, ShoppingCart, Plus, Check, Grid2X2, Grid3X3, LayoutGrid, Searc
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
-import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
 const Ecommerce = () => {
@@ -18,31 +18,41 @@ const Ecommerce = () => {
   const { items, addItem, isInCart } = useCart();
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [selectedRental, setSelectedRental] = useState<any>(null);
-  const [gridView, setGridView] = useState<'2' | '3' | '4'>('3');
-  const [isListView, setIsListView] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | '2' | '3' | '4'>('3');
 
-  const gridOptions = [
+  const viewOptions = [
+    { 
+      value: 'list' as const, 
+      label: 'List', 
+      icon: List, 
+      classes: 'space-y-4',
+      isGrid: false
+    },
     { 
       value: '2' as const, 
-      label: '2 Columns', 
+      label: '2 Col', 
       icon: Grid2X2, 
-      classes: 'grid-cols-1 sm:grid-cols-2'
+      classes: 'grid grid-cols-1 sm:grid-cols-2 gap-6',
+      isGrid: true
     },
     { 
       value: '3' as const, 
-      label: '3 Columns', 
+      label: '3 Col', 
       icon: Grid3X3, 
-      classes: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+      classes: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6',
+      isGrid: true
     },
     { 
       value: '4' as const, 
-      label: '4 Columns', 
+      label: '4 Col', 
       icon: LayoutGrid, 
-      classes: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+      classes: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6',
+      isGrid: true
     }
   ];
 
-  const currentGridClasses = gridOptions.find(option => option.value === gridView)?.classes || gridOptions[1].classes;
+  const currentViewOption = viewOptions.find(option => option.value === viewMode) || viewOptions[2];
+  const isListView = viewMode === 'list';
 
   if (isLoading) {
     return (
@@ -73,24 +83,42 @@ const Ecommerce = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {/* View Toggle - Ultra-visible with high contrast */}
-          <div className="relative z-40 mb-8">
+          {/* View Options - Clear and Visible */}
+          <div className="mb-8">
             <div className="flex items-center justify-center">
-              <div className="flex items-center space-x-4 bg-white border-4 border-primary rounded-2xl p-6 shadow-2xl ring-4 ring-primary/20">
-                <Grid3X3 className={`h-6 w-6 transition-colors ${!isListView ? 'text-primary' : 'text-muted-foreground'}`} />
-                <div className="relative">
-                  <Switch
-                    id="view-mode"
-                    checked={isListView}
-                    onCheckedChange={setIsListView}
-                    className="h-8 w-16 data-[state=checked]:bg-primary data-[state=unchecked]:bg-gray-300"
-                  />
-                  <div className="absolute -top-2 -left-2 -right-2 -bottom-2 border-2 border-secondary rounded-full animate-pulse"></div>
-                </div>
-                <List className={`h-6 w-6 transition-colors ${isListView ? 'text-primary' : 'text-muted-foreground'}`} />
-                <Label htmlFor="view-mode" className="text-lg font-bold cursor-pointer text-foreground">
-                  {isListView ? 'List View' : 'Grid View'}
-                </Label>
+              <div className="bg-background border border-border rounded-xl p-2 shadow-lg">
+                <h3 className="text-sm font-semibold text-center mb-3 px-4">View Options</h3>
+                <RadioGroup 
+                  value={viewMode} 
+                  onValueChange={(value) => setViewMode(value as 'list' | '2' | '3' | '4')}
+                  className="flex flex-wrap justify-center gap-2"
+                >
+                  {viewOptions.map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <div key={option.value} className="flex items-center">
+                        <RadioGroupItem 
+                          value={option.value} 
+                          id={option.value}
+                          className="peer sr-only"
+                        />
+                        <Label 
+                          htmlFor={option.value}
+                          className={`
+                            flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all duration-200
+                            ${viewMode === option.value 
+                              ? 'bg-primary text-primary-foreground border-primary shadow-md' 
+                              : 'bg-background border-border hover:border-primary/50 hover:bg-primary/5'
+                            }
+                          `}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="text-sm font-medium">{option.label}</span>
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </RadioGroup>
               </div>
             </div>
           </div>
@@ -119,30 +147,8 @@ const Ecommerce = () => {
               </select>
             </div>
             
-            {/* Right side: Grid Controls and Cart */}
+            {/* Right side: Cart */}
             <div className="flex items-center gap-4">
-
-              {/* Grid Column Options (only show when not in list view) */}
-              {!isListView && (
-                <div className="flex items-center gap-1 bg-background border rounded-lg p-2">
-                  {gridOptions.map((option) => {
-                    const Icon = option.icon;
-                    return (
-                      <Button
-                        key={option.value}
-                        variant={gridView === option.value ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setGridView(option.value)}
-                        className="h-8 px-2"
-                        title={option.label}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </Button>
-                    );
-                  })}
-                </div>
-              )}
-              
               {/* Cart Button */}
               <Button
                 onClick={() => setCartModalOpen(true)}
@@ -155,7 +161,7 @@ const Ecommerce = () => {
           </div>
 
           {/* Items Display with Dynamic Layout */}
-          <div className={isListView ? "space-y-4" : `grid ${currentGridClasses} gap-6`}>
+          <div className={currentViewOption.classes}>
             {rentals?.map((rental) => (
               <Card key={rental.id} className={`group hover:shadow-xl transition-all duration-300 ${isListView ? "flex flex-row" : ""}`}>
                 {isListView ? (

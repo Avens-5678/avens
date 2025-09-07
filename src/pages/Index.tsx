@@ -178,8 +178,8 @@ const Index = () => {
       <CursorTrail enabled={true} color="hsl(var(--primary))" />
       
       {/* Enhanced Hero Section with Dynamic Banners */}
-      {activeBanners.length > 0 ? <CardStack cards={activeBanners.map((banner, index) => <HeroSection key={banner.id} backgroundImage={banner.image_url} className="relative overflow-hidden">
-              <FloatingParticles count={30} size="sm" speed="slow" />
+        {activeBanners.length > 0 ? <CardStack cards={activeBanners.map((banner, index) => <HeroSection key={banner.id} backgroundImage={banner.image_url} className="relative overflow-hidden">
+              <FloatingParticles count={12} size="sm" speed="slow" />
               
               <div className="container mx-auto px-4 text-center relative z-20">
 
@@ -213,7 +213,7 @@ const Index = () => {
                 </ScrollReveal>
               </div>
             </HeroSection>)} autoPlay={true} interval={5000} className="h-screen" /> : <HeroSection backgroundImage="/assets/default-hero.jpg" className="relative overflow-hidden">
-          <FloatingParticles count={30} size="sm" speed="slow" />
+          <FloatingParticles count={12} size="sm" speed="slow" />
           
           <div className="container mx-auto px-4 text-center relative z-20">
 

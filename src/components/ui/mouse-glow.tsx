@@ -5,6 +5,15 @@ export const MouseGlow = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Check if user prefers reduced motion or is on mobile
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.innerWidth < 768;
+    
+    if (prefersReducedMotion || isMobile) {
+      setIsVisible(false);
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
       setIsVisible(true);
@@ -14,21 +23,24 @@ export const MouseGlow = () => {
       setIsVisible(false);
     };
 
-    // Throttle mouse events for performance
+    // Much more aggressive throttling for performance
     let ticking = false;
+    let lastUpdate = 0;
     const throttledMouseMove = (e: MouseEvent) => {
-      if (!ticking) {
+      const now = performance.now();
+      if (!ticking && now - lastUpdate > 16) { // Limit to ~60fps
         requestAnimationFrame(() => {
           handleMouseMove(e);
+          lastUpdate = now;
           ticking = false;
         });
         ticking = true;
       }
     };
 
-    document.addEventListener('mousemove', throttledMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', () => setIsVisible(true));
+    document.addEventListener('mousemove', throttledMouseMove, { passive: true });
+    document.addEventListener('mouseleave', handleMouseLeave, { passive: true });
+    document.addEventListener('mouseenter', () => setIsVisible(true), { passive: true });
 
     return () => {
       document.removeEventListener('mousemove', throttledMouseMove);

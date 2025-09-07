@@ -10,7 +10,7 @@ interface FloatingParticlesProps {
 }
 
 export const FloatingParticles = ({
-  count = 20,
+  count = 8, // Reduced default count for performance
   className,
   colors = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))'],
   size = 'md',
@@ -33,7 +33,14 @@ export const FloatingParticles = ({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const particles = Array.from({ length: count }, (_, i) => {
+    // Check for reduced motion preference and reduce particles
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.innerWidth < 768;
+    const actualCount = prefersReducedMotion ? 0 : isMobile ? Math.min(count, 5) : count;
+
+    if (actualCount === 0) return;
+
+    const particles = Array.from({ length: actualCount }, (_, i) => {
       const particle = document.createElement('div');
       particle.className = `absolute rounded-full opacity-20 animate-float ${sizeClasses[size]}`;
       particle.style.backgroundColor = colors[i % colors.length];
@@ -43,6 +50,7 @@ export const FloatingParticles = ({
         speedDurations[speed].min + Math.random() * (speedDurations[speed].max - speedDurations[speed].min)
       }s`;
       particle.style.animationDelay = `${Math.random() * 5}s`;
+      particle.style.willChange = 'transform'; // Optimize for animations
       
       return particle;
     });

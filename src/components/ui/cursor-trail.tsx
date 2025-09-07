@@ -20,7 +20,18 @@ export function CursorTrail({
   useEffect(() => {
     if (!enabled) return;
 
+    // Check for reduced motion preference and mobile
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.innerWidth < 768;
+    
+    if (prefersReducedMotion || isMobile) return;
+
+    let lastUpdate = 0;
     const updateMousePosition = (e: MouseEvent) => {
+      const now = performance.now();
+      if (now - lastUpdate < 32) return; // Limit to 30fps for trail
+      lastUpdate = now;
+      
       setMousePosition({ x: e.clientX, y: e.clientY });
       
       const newTrail = {
@@ -29,10 +40,10 @@ export function CursorTrail({
         id: Date.now(),
       };
       
-      setTrail(prev => [...prev.slice(-10), newTrail]);
+      setTrail(prev => [...prev.slice(-5), newTrail]); // Reduced trail length
     };
 
-    window.addEventListener('mousemove', updateMousePosition);
+    window.addEventListener('mousemove', updateMousePosition, { passive: true });
     return () => window.removeEventListener('mousemove', updateMousePosition);
   }, [enabled]);
 

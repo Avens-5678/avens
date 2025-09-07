@@ -25,28 +25,28 @@ const Ecommerce = () => {
       value: 'list' as const, 
       label: 'List', 
       icon: List, 
-      classes: 'space-y-4',
+      classes: 'space-y-4 sm:space-y-6',
       isGrid: false
     },
     { 
       value: '2' as const, 
       label: '2 Col', 
       icon: Grid2X2, 
-      classes: 'grid grid-cols-1 sm:grid-cols-2 gap-6',
+      classes: 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6',
       isGrid: true
     },
     { 
       value: '3' as const, 
       label: '3 Col', 
       icon: Grid3X3, 
-      classes: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6',
+      classes: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6',
       isGrid: true
     },
     { 
       value: '4' as const, 
       label: '4 Col', 
       icon: LayoutGrid, 
-      classes: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6',
+      classes: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6',
       isGrid: true
     }
   ];
@@ -66,32 +66,32 @@ const Ecommerce = () => {
 
   return (
     <Layout>
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
-        <div className="container mx-auto px-4 text-center">
-          <Badge variant="secondary" className="mb-4">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-primary/10 to-accent/10">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-4 text-center">
+          <Badge variant="secondary" className="mb-6">
             <Package className="mr-2 h-4 w-4" />
             Equipment Rental
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Premium Event Rentals
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             Browse our extensive collection of high-quality equipment and decor for your special event.
           </p>
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="py-12 sm:py-16 lg:py-20">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-4">
           {/* View Options - Clear and Visible */}
-          <div className="mb-8">
+          <div className="mb-8 sm:mb-10">
             <div className="flex items-center justify-center">
-              <div className="bg-background border border-border rounded-xl p-2 shadow-lg">
-                <h3 className="text-sm font-semibold text-center mb-3 px-4">View Options</h3>
+              <div className="bg-background border border-border rounded-xl p-3 sm:p-4 shadow-lg w-full max-w-md">
+                <h3 className="text-sm font-semibold text-center mb-4 px-2">View Options</h3>
                 <RadioGroup 
                   value={viewMode} 
                   onValueChange={(value) => setViewMode(value as 'list' | '2' | '3' | '4')}
-                  className="flex flex-wrap justify-center gap-2"
+                  className="flex flex-wrap justify-center gap-3"
                 >
                   {viewOptions.map((option) => {
                     const Icon = option.icon;
@@ -105,7 +105,7 @@ const Ecommerce = () => {
                         <Label 
                           htmlFor={option.value}
                           className={`
-                            flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer transition-all duration-200
+                            flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg border-2 cursor-pointer transition-all duration-200 min-w-[70px] justify-center
                             ${viewMode === option.value 
                               ? 'bg-primary text-primary-foreground border-primary shadow-md' 
                               : 'bg-background border-border hover:border-primary/50 hover:bg-primary/5'
@@ -124,21 +124,21 @@ const Ecommerce = () => {
           </div>
 
           {/* Search, Filter, and Cart Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8 relative z-10">
+          <div className="flex flex-col gap-6 sm:flex-row sm:gap-4 items-stretch sm:items-center justify-between mb-8 sm:mb-10 relative z-10">
             {/* Left side: Search and Filter */}
-            <div className="flex flex-1 gap-4 items-center w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row flex-1 gap-4 items-stretch sm:items-center w-full sm:w-auto">
               {/* Search Bar */}
-              <div className="relative flex-1 max-w-md">
+              <div className="relative flex-1 max-w-full sm:max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <input
                   type="text"
-                  placeholder="Search equipment, furniture, or services..."
-                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                  placeholder="Search equipment..."
+                  className="w-full pl-10 pr-4 py-3 sm:py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background text-base"
                 />
               </div>
               
               {/* Filter Dropdown */}
-              <select className="px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary">
+              <select className="px-4 py-3 sm:py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary text-base min-w-[120px]">
                 <option value="all">All</option>
                 <option value="furniture">Furniture</option>
                 <option value="lighting">Lighting</option>
@@ -148,11 +148,12 @@ const Ecommerce = () => {
             </div>
             
             {/* Right side: Cart */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
               {/* Cart Button */}
               <Button
                 onClick={() => setCartModalOpen(true)}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto py-3 sm:py-2"
+                size="lg"
               >
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 Cart ({items.length})
@@ -161,13 +162,13 @@ const Ecommerce = () => {
           </div>
 
           {/* Items Display with Dynamic Layout */}
-          <div className={currentViewOption.classes}>
+          <div className={`${currentViewOption.classes} px-2 sm:px-0`}>
             {rentals?.map((rental) => (
-              <Card key={rental.id} className={`group hover:shadow-xl transition-all duration-300 ${isListView ? "flex flex-row" : ""}`}>
+              <Card key={rental.id} className={`group hover:shadow-xl transition-all duration-300 ${isListView ? "flex flex-col sm:flex-row" : ""}`}>
                 {isListView ? (
                   <>
                     {/* List View Layout */}
-                    <div className="w-48 flex-shrink-0 p-4">
+                    <div className="w-full sm:w-48 flex-shrink-0 p-4 sm:p-4">
                       <div className="aspect-[4/3] overflow-hidden rounded-lg">
                         {rental.image_urls && rental.image_urls.length > 0 ? (
                           <MultiImageCarousel 
@@ -187,7 +188,7 @@ const Ecommerce = () => {
                         )}
                       </div>
                     </div>
-                    <div className="flex-1 flex flex-col justify-between p-6">
+                    <div className="flex-1 flex flex-col justify-between p-4 sm:p-6">
                       <div>
                         <CardTitle className="text-lg font-semibold group-hover:text-hover transition-colors mb-2">
                           {rental.title}
@@ -201,7 +202,7 @@ const Ecommerce = () => {
                           {rental.short_description}
                         </p>
                       </div>
-                      <div className="flex gap-2 mt-4">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 mt-4">
                         <Button 
                           onClick={() => addItem({
                             id: rental.id,
@@ -210,7 +211,7 @@ const Ecommerce = () => {
                             image_url: rental.image_url
                           })}
                           variant={isInCart(rental.id) ? "secondary" : "outline"}
-                          className="flex-1"
+                          className="flex-1 py-2.5"
                           disabled={isInCart(rental.id)}
                         >
                           {isInCart(rental.id) ? (
@@ -228,7 +229,7 @@ const Ecommerce = () => {
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button 
-                              className="bg-gradient-to-r from-primary to-accent"
+                              className="bg-gradient-to-r from-primary to-accent py-2.5"
                               onClick={() => setSelectedRental(rental)}
                             >
                               <ShoppingCart className="mr-2 h-4 w-4" />
@@ -284,7 +285,7 @@ const Ecommerce = () => {
                       <p className="text-muted-foreground mb-4 text-sm">
                         {rental.short_description}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                         <Button 
                           onClick={() => addItem({
                             id: rental.id,
@@ -293,7 +294,7 @@ const Ecommerce = () => {
                             image_url: rental.image_url
                           })}
                           variant={isInCart(rental.id) ? "secondary" : "outline"}
-                          className="flex-1"
+                          className="flex-1 py-2.5"
                           disabled={isInCart(rental.id)}
                         >
                           {isInCart(rental.id) ? (
@@ -311,7 +312,7 @@ const Ecommerce = () => {
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button 
-                              className="bg-gradient-to-r from-primary to-accent"
+                              className="bg-gradient-to-r from-primary to-accent py-2.5"
                               onClick={() => setSelectedRental(rental)}
                             >
                               <ShoppingCart className="mr-2 h-4 w-4" />
@@ -341,7 +342,7 @@ const Ecommerce = () => {
       
       {/* Floating Cart Button */}
       {items.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
           <Button
             onClick={() => setCartModalOpen(true)}
             size="lg"

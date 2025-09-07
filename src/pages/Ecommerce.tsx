@@ -73,27 +73,27 @@ const Ecommerce = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {/* View Toggle - Moved to top for visibility */}
-          <div className="mb-4">
+          {/* View Toggle - Fixed positioning with high z-index */}
+          <div className="sticky top-4 z-30 mb-6">
             <div className="flex items-center justify-center">
-              <div className="flex items-center space-x-3 bg-red-500 border-4 border-yellow-400 rounded-lg p-3 shadow-lg">
-                <Grid3X3 className={`h-6 w-6 ${!isListView ? 'text-white' : 'text-gray-300'}`} />
+              <div className="flex items-center space-x-4 bg-background/95 backdrop-blur-sm border-2 border-primary/20 rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Grid3X3 className={`h-5 w-5 transition-colors ${!isListView ? 'text-primary' : 'text-muted-foreground'}`} />
                 <Switch
                   id="view-mode"
                   checked={isListView}
                   onCheckedChange={setIsListView}
-                  className="scale-125"
+                  className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted scale-150"
                 />
-                <List className={`h-6 w-6 ${isListView ? 'text-white' : 'text-gray-300'}`} />
-                <Label htmlFor="view-mode" className="text-lg font-bold text-white cursor-pointer">
-                  {isListView ? 'LIST VIEW' : 'GRID VIEW'}
+                <List className={`h-5 w-5 transition-colors ${isListView ? 'text-primary' : 'text-muted-foreground'}`} />
+                <Label htmlFor="view-mode" className="text-sm font-semibold cursor-pointer text-foreground">
+                  {isListView ? 'List View' : 'Grid View'}
                 </Label>
               </div>
             </div>
           </div>
 
           {/* Search, Filter, and Cart Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8 relative z-10">
             {/* Left side: Search and Filter */}
             <div className="flex flex-1 gap-4 items-center w-full sm:w-auto">
               {/* Search Bar */}
@@ -336,7 +336,7 @@ const Ecommerce = () => {
           <Button
             onClick={() => setCartModalOpen(true)}
             size="lg"
-            className="rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+            className="rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-elegant hover:shadow-xl transition-all duration-300 animate-pulse"
           >
             <ShoppingCart className="mr-2 h-5 w-5" />
             Cart ({items.length})

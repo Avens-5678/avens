@@ -10,8 +10,7 @@ import { Package, ShoppingCart, Plus, Check, Grid2X2, Grid3X3, LayoutGrid, Searc
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { AnimatedViewToggle } from "@/components/ui/animated-view-toggle";
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
@@ -83,43 +82,15 @@ const Ecommerce = () => {
 
       <section className="py-12 sm:py-16 lg:py-20">
         <div className="container mx-auto px-6 sm:px-8 lg:px-4">
-          {/* View Options - Clear and Visible */}
-          <div className="mb-8 sm:mb-10">
-            <div className="flex items-center justify-center">
-              <div className="bg-background border border-border rounded-xl p-3 sm:p-4 shadow-lg w-full max-w-md">
-                <h3 className="text-sm font-semibold text-center mb-4 px-2">View Options</h3>
-                <RadioGroup 
-                  value={viewMode} 
-                  onValueChange={(value) => setViewMode(value as 'list' | '2' | '3' | '4')}
-                  className="flex flex-wrap justify-center gap-3"
-                >
-                  {viewOptions.map((option) => {
-                    const Icon = option.icon;
-                    return (
-                      <div key={option.value} className="flex items-center">
-                        <RadioGroupItem 
-                          value={option.value} 
-                          id={option.value}
-                          className="peer sr-only"
-                        />
-                        <Label 
-                          htmlFor={option.value}
-                          className={`
-                            flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg border-2 cursor-pointer transition-all duration-200 min-w-[70px] justify-center
-                            ${viewMode === option.value 
-                              ? 'bg-primary text-primary-foreground border-primary shadow-md' 
-                              : 'bg-background border-border hover:border-primary/50 hover:bg-primary/5'
-                            }
-                          `}
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span className="text-sm font-medium">{option.label}</span>
-                        </Label>
-                      </div>
-                    );
-                  })}
-                </RadioGroup>
-              </div>
+          {/* Animated View Toggle */}
+          <div className="flex justify-center mb-8 sm:mb-10">
+            <div className="flex flex-col items-center gap-4">
+              <h3 className="text-sm font-semibold text-muted-foreground">View Options</h3>
+              <AnimatedViewToggle
+                options={viewOptions}
+                value={viewMode}
+                onValueChange={(value) => setViewMode(value as 'list' | '2' | '3' | '4')}
+              />
             </div>
           </div>
 

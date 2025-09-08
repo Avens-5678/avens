@@ -9,7 +9,8 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
-import { Search, ShoppingCart, Plus, Minus, Star, Filter, Eye } from "lucide-react";
+import { Search, ShoppingCart, Plus, Minus, Star, Filter, Eye, Grid3X3, Grid2X2, Columns2, Rows3 } from "lucide-react";
+import { AnimatedViewToggle } from "@/components/ui/animated-view-toggle";
 import Layout from "@/components/Layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
 import InquiryForm from "@/components/Forms/InquiryForm";
@@ -22,6 +23,7 @@ const EnhancedEcommerce = () => {
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [viewMode, setViewMode] = useState("3");
   
   const { data: rentals, isLoading } = useAllRentals();
   const { items, addItem, removeItem, getItemCount } = useCart();
@@ -83,6 +85,30 @@ const EnhancedEcommerce = () => {
     ));
   };
 
+  // View toggle options
+  const viewOptions = [
+    { value: "list", label: "List", icon: Rows3 },
+    { value: "2", label: "2 Cols", icon: Columns2 },
+    { value: "3", label: "3 Cols", icon: Grid2X2 },
+    { value: "4", label: "4 Cols", icon: Grid3X3 }
+  ];
+
+  // Dynamic grid classes based on view mode
+  const getGridClasses = () => {
+    switch (viewMode) {
+      case "list":
+        return "grid-cols-1";
+      case "2":
+        return "grid-cols-1 lg:grid-cols-2";
+      case "3":
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+      case "4":
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+      default:
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+    }
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -124,48 +150,62 @@ const EnhancedEcommerce = () => {
             <div className="max-w-4xl mx-auto mb-12">
               <Card className="glassmorphism-card border-0 shadow-xl">
                 <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row gap-4 items-center">
-                    {/* Search Input */}
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search equipment, furniture, or services..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 h-12 text-lg border-0 bg-muted/50 focus:bg-background"
+                  <div className="flex flex-col gap-4">
+                    {/* Top Row: Search and Cart */}
+                    <div className="flex flex-col lg:flex-row gap-4 items-center">
+                      {/* Search Input */}
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search equipment, furniture, or services..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10 h-12 text-lg border-0 bg-muted/50 focus:bg-background"
+                        />
+                      </div>
+
+                      {/* Cart Button - Always visible, positioned top-right */}
+                      <Button
+                        onClick={() => setCartModalOpen(true)}
+                        className="relative bg-primary hover:bg-primary-glow shadow-glow-blue min-w-[120px]"
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Cart ({getItemCount()})
+                        {getItemCount() > 0 && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-xs font-bold text-white">
+                            {getItemCount()}
+                          </div>
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Bottom Row: Category Filter and View Toggle */}
+                    <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                      {/* Category Filter */}
+                      <div className="flex items-center gap-3">
+                        <Filter className="h-4 w-4 text-muted-foreground" />
+                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                          <SelectTrigger className="w-48 h-12 border-0 bg-muted/50">
+                            <SelectValue placeholder="All Categories" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* View Toggle */}
+                      <AnimatedViewToggle
+                        options={viewOptions}
+                        value={viewMode}
+                        onValueChange={setViewMode}
+                        className="bg-muted/50"
                       />
                     </div>
-
-                    {/* Category Filter */}
-                    <div className="flex items-center gap-3">
-                      <Filter className="h-4 w-4 text-muted-foreground" />
-                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="w-48 h-12 border-0 bg-muted/50">
-                          <SelectValue placeholder="All Categories" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Cart Button - Always visible, positioned top-right */}
-                    <Button
-                      onClick={() => setCartModalOpen(true)}
-                      className="relative bg-primary hover:bg-primary-glow shadow-glow-blue min-w-[120px]"
-                    >
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Cart ({getItemCount()})
-                      {getItemCount() > 0 && (
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-xs font-bold text-white">
-                          {getItemCount()}
-                        </div>
-                      )}
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -177,41 +217,43 @@ const EnhancedEcommerce = () => {
         <section className="relative py-12">
           <div className="container mx-auto px-4 max-w-7xl">
             {filteredRentals && filteredRentals.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredRentals.map((rental, index) => (
-                  <AnimatedText key={rental.id} delay={index * 50}>
-                    <Card className="group hover:shadow-2xl transition-all duration-500 glassmorphism-card border-0 overflow-hidden hover:-translate-y-2 h-full">
-                      {/* Product Image Carousel */}
-                      <div className="relative">
-                        <ProductImageCarousel
-                          images={rental.image_urls && rental.image_urls.length > 0 
-                            ? rental.image_urls 
-                            : rental.image_url ? [rental.image_url] : []
-                          }
-                          title={rental.title}
-                          autoPlay={true}
-                          interval={3000}
-                        />
-                        
-                        {/* Rating Badge */}
-                        {rental.rating && rental.rating > 0 && (
-                          <div className="absolute top-3 left-3">
-                            <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
-                              <span className="text-xs font-semibold">{rental.rating}</span>
-                            </div>
-                          </div>
-                        )}
+              <div className={`grid ${getGridClasses()} gap-6`}>
+                 {filteredRentals.map((rental, index) => (
+                   <AnimatedText key={rental.id} delay={index * 50}>
+                     <Card className={`group hover:shadow-2xl transition-all duration-500 glassmorphism-card border-0 overflow-hidden hover:-translate-y-2 h-full ${
+                       viewMode === "list" ? "flex flex-row" : ""
+                     }`}>
+                       {/* Product Image Carousel */}
+                       <div className={`relative ${viewMode === "list" ? "w-80 flex-shrink-0" : ""}`}>
+                         <ProductImageCarousel
+                           images={rental.image_urls && rental.image_urls.length > 0 
+                             ? rental.image_urls 
+                             : rental.image_url ? [rental.image_url] : []
+                           }
+                           title={rental.title}
+                           autoPlay={true}
+                           interval={3000}
+                         />
+                         
+                         {/* Rating Badge */}
+                         {rental.rating && rental.rating > 0 && (
+                           <div className="absolute top-3 left-3">
+                             <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
+                               <span className="text-xs font-semibold">{rental.rating}</span>
+                             </div>
+                           </div>
+                         )}
 
-                        {/* Category Badge */}
-                        {rental.categories && rental.categories.length > 0 && (
-                          <div className="absolute top-3 right-3">
-                            <Badge variant="secondary" className="text-xs bg-white/90 text-gray-700">
-                              {rental.categories[0]}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
+                         {/* Category Badge */}
+                         {rental.categories && rental.categories.length > 0 && (
+                           <div className="absolute top-3 right-3">
+                             <Badge variant="secondary" className="text-xs bg-white/90 text-gray-700">
+                               {rental.categories[0]}
+                             </Badge>
+                           </div>
+                         )}
+                       </div>
 
                       <CardContent className="p-4 flex-1 flex flex-col">
                         <div className="flex-1">

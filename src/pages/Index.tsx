@@ -22,6 +22,7 @@ import { TiltCard } from "@/components/ui/tilt-card";
 import { Ticker, TickerItem } from "@/components/ui/ticker-animation";
 import { CardStack } from "@/components/ui/card-stack";
 import { StatsContainer, StatCard } from "@/components/ui/elegant-stats";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 // Enhanced scroll animation component
 const ScrollAnimated = ({
@@ -283,7 +284,12 @@ const Index = () => {
               {homeServices.map((service, index) => <GlassmorphismCard key={service.id} className="service-card group p-6 hover:shadow-glow-blue" variant="subtle" glow>
                   <div className="space-y-4">
                     {service.image_url && <div className="relative overflow-hidden rounded-lg aspect-video">
-                        <img src={service.image_url} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <OptimizedImage 
+                          src={service.image_url} 
+                          alt={service.title} 
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>}
                     <div className="space-y-3">
@@ -351,8 +357,13 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {homeRentals.map(rental => <GlassmorphismCard key={rental.id} className="rental-card group overflow-hidden hover:shadow-glow-blue" variant="default">
                   <div className="relative">
-                    {rental.image_urls && rental.image_urls.length > 0 ? <MultiImageCarousel images={rental.image_urls} title={rental.title} className="aspect-video" /> : rental.image_url ? <div className="aspect-video relative overflow-hidden">
-                        <img src={rental.image_url} alt={rental.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                     {rental.image_urls && rental.image_urls.length > 0 ? <MultiImageCarousel images={rental.image_urls} title={rental.title} className="aspect-video" /> : rental.image_url ? <div className="aspect-video relative overflow-hidden">
+                        <OptimizedImage 
+                          src={rental.image_url} 
+                          alt={rental.title} 
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                        />
                       </div> : <div className="aspect-video bg-muted flex items-center justify-center">
                         <Award className="h-12 w-12 text-muted-foreground" />
                       </div>}
@@ -426,9 +437,14 @@ const Index = () => {
                          <TiltCard tiltDegree={15} scale={1.02} glareEnable={true} className="overflow-hidden rounded-lg">
                            <GlassmorphismCard className="group overflow-hidden hover:shadow-glow-blue h-full">
                              <div className="relative">
-                               <div className="aspect-square relative overflow-hidden">
-                                 <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                               </div>
+                                <div className="aspect-square relative overflow-hidden">
+                                  <OptimizedImage 
+                                    src={item.image_url} 
+                                    alt={item.title} 
+                                    loading="lazy"
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                                  />
+                                </div>
                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                                  <div className="p-4 text-white">
                                    <h3 className="font-bold text-lg">{item.title}</h3>
@@ -463,10 +479,15 @@ const Index = () => {
                    {activeClients.map((client, index) => <TickerItem key={client.id} className="mx-8">
                        <TiltCard tiltDegree={10} scale={1.05} glareEnable={true} className="flex-shrink-0">
                          <GlassmorphismCard className="p-6 hover:shadow-lg transition-all duration-300">
-                            <img src={client.logo_url} alt={client.name} className="h-16 w-auto mx-auto filter grayscale hover:grayscale-0 transition-all duration-300" onError={e => {
-                      console.error('Failed to load client logo:', client.logo_url);
-                      e.currentTarget.src = '/placeholder.svg';
-                    }} />
+                             <OptimizedImage 
+                               src={client.logo_url} 
+                               alt={client.name} 
+                               loading="lazy"
+                               className="h-16 w-auto mx-auto filter grayscale hover:grayscale-0 transition-all duration-300" 
+                               onError={() => {
+                                 console.error('Failed to load client logo:', client.logo_url);
+                               }}
+                             />
                          </GlassmorphismCard>
                        </TiltCard>
                      </TickerItem>)}
@@ -495,8 +516,13 @@ const Index = () => {
             <ScrollReveal animation="fade-in-up" stagger={200} childSelector=".news-card">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {homeNews.map(news => <GlassmorphismCard key={news.id} className="news-card group hover:shadow-glow-blue" variant="default">
-                    {news.image_url && <div className="relative aspect-video overflow-hidden rounded-t-lg">
-                        <img src={news.image_url} alt={news.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                     {news.image_url && <div className="relative aspect-video overflow-hidden rounded-t-lg">
+                        <OptimizedImage 
+                          src={news.image_url} 
+                          alt={news.title} 
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                        />
                       </div>}
                     <div className="p-6 space-y-4">
                       <h3 className="text-xl font-bold group-hover:text-primary transition-colors">

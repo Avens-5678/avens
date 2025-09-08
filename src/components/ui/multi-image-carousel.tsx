@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 interface MultiImageCarouselProps {
   images: string[];
@@ -34,9 +35,10 @@ export const MultiImageCarousel = ({ images, title, className = "" }: MultiImage
   if (images.length === 1) {
     return (
       <div className={`aspect-[4/3] overflow-hidden rounded-lg ${className}`}>
-        <img 
+        <OptimizedImage 
           src={images[0]} 
           alt={title}
+          loading="lazy"
           className="w-full h-full object-cover"
         />
       </div>
@@ -45,9 +47,10 @@ export const MultiImageCarousel = ({ images, title, className = "" }: MultiImage
 
   return (
     <div className={`relative aspect-[4/3] overflow-hidden rounded-lg group ${className}`}>
-      <img 
+      <OptimizedImage 
         src={images[currentIndex]} 
         alt={`${title} - Image ${currentIndex + 1}`}
+        loading="lazy"
         className="w-full h-full object-cover transition-opacity duration-300"
       />
       

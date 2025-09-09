@@ -220,142 +220,258 @@ const EnhancedEcommerce = () => {
               <div className={getGridClasses()}>
                  {filteredRentals.map((rental, index) => (
                    <AnimatedText key={rental.id} delay={index * 50}>
-                     <Card className={`group hover:shadow-2xl transition-all duration-500 glassmorphism-card border-0 overflow-hidden hover:-translate-y-2 ${
+                     <Card className={`group hover:shadow-2xl transition-all duration-500 glassmorphism-card border-0 overflow-hidden hover:-translate-y-1 ${
                        viewMode === "list" ? "flex flex-col sm:flex-row h-auto" : "flex flex-col h-full"
                      }`}>
                         {/* Product Image Carousel */}
                         <div className={`relative ${
-                          viewMode === "list" ? "w-full sm:w-80 flex-shrink-0" : "w-full"
+                          viewMode === "list" ? "w-full sm:w-48 md:w-56 flex-shrink-0" : "w-full"
                         }`}>
-                         <ProductImageCarousel
-                           images={rental.image_urls && rental.image_urls.length > 0 
-                             ? rental.image_urls 
-                             : rental.image_url ? [rental.image_url] : []
-                           }
-                           title={rental.title}
-                           autoPlay={true}
-                           interval={3000}
-                         />
-                         
-                         {/* Rating Badge */}
-                         {rental.rating && rental.rating > 0 && (
-                           <div className="absolute top-3 left-3">
-                             <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
-                               <span className="text-xs font-semibold">{rental.rating}</span>
-                             </div>
-                           </div>
-                         )}
-
-                         {/* Category Badge */}
-                         {rental.categories && rental.categories.length > 0 && (
-                           <div className="absolute top-3 right-3">
-                             <Badge variant="secondary" className="text-xs bg-white/90 text-gray-700">
-                               {rental.categories[0]}
-                             </Badge>
-                           </div>
-                         )}
-                       </div>
-
-                      <CardContent className={`p-3 sm:p-4 flex-1 flex flex-col ${
-                        viewMode === "4" ? "p-2" : ""
-                      }`}>
-                         <div className="flex-1">
-                           <h3 className={`font-bold mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2 ${
-                             viewMode === "4" ? "text-sm" : "text-lg"
-                           }`}>
-                             {rental.title}
-                           </h3>
+                          <ProductImageCarousel
+                            images={rental.image_urls && rental.image_urls.length > 0 
+                              ? rental.image_urls 
+                              : rental.image_url ? [rental.image_url] : []
+                            }
+                            title={rental.title}
+                            autoPlay={true}
+                            interval={3000}
+                          />
                           
-                          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                            {rental.short_description || rental.description}
-                          </p>
-
-                          {/* Rating Stars */}
-                          {rental.rating && rental.rating > 0 && (
-                            <div className="flex items-center gap-1 mb-3">
-                              {renderStars(Math.floor(rental.rating))}
-                              <span className="text-xs text-muted-foreground ml-1">
-                                ({rental.rating}/5)
-                              </span>
+                          {/* Rating Badge */}
+                          {rental.rating && rental.rating > 0 && viewMode !== "list" && (
+                            <div className="absolute top-3 left-3">
+                              <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
+                                <span className="text-xs font-semibold">{rental.rating}</span>
+                              </div>
                             </div>
                           )}
 
-                          {/* Price Range */}
-                          {rental.price_range && (
-                            <div className="mb-4">
-                              <Badge variant="outline" className="text-primary border-primary/30">
-                                {rental.price_range}
+                          {/* Category Badge */}
+                          {rental.categories && rental.categories.length > 0 && viewMode !== "list" && (
+                            <div className="absolute top-3 right-3">
+                              <Badge variant="secondary" className="text-xs bg-white/90 text-gray-700">
+                                {rental.categories[0]}
                               </Badge>
                             </div>
                           )}
                         </div>
 
-                        {/* Quantity Selector and Actions */}
-                        <div className="space-y-3 mt-auto">
-                          {/* Quantity Selector */}
-                          <div className="flex items-center justify-center space-x-3">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleQuantityChange(rental.id, -1)}
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="w-12 text-center font-semibold">
-                              {quantities[rental.id] || 1}
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleQuantityChange(rental.id, 1)}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
+                      <CardContent className={`flex-1 flex flex-col ${
+                        viewMode === "list" ? "p-4 sm:p-6" : viewMode === "4" ? "p-2" : "p-3 sm:p-4"
+                      }`}>
+                        {viewMode === "list" ? (
+                          // List View Layout - Amazon Style
+                          <div className="flex flex-col h-full space-y-3">
+                            {/* Top Section: Category Badge and Title */}
+                            <div className="space-y-2">
+                              {rental.categories && rental.categories.length > 0 && (
+                                <Badge variant="outline" className="text-xs w-fit">
+                                  {rental.categories[0]}
+                                </Badge>
+                              )}
+                              <h3 className="text-lg md:text-xl font-bold text-foreground line-clamp-2 group-hover:text-primary transition-colors duration-300">
+                                {rental.title}
+                              </h3>
+                            </div>
 
-                          {/* Action Buttons */}
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={() => handleAddToCart(rental)}
-                              className={`flex-1 ${
-                                isInCart(rental.id)
-                                  ? 'bg-green-500 hover:bg-green-600'
-                                  : 'bg-primary hover:bg-primary-glow'
-                              } transition-all duration-300`}
-                              size="sm"
-                            >
-                              <ShoppingCart className="mr-2 h-3 w-3" />
-                              {isInCart(rental.id) ? 'In Cart' : 'Add to Cart'}
-                            </Button>
-                            
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" className="px-3">
-                                  <Eye className="h-3 w-3" />
+                            {/* Rating and Reviews */}
+                            {rental.rating && rental.rating > 0 && (
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1">
+                                  {renderStars(Math.floor(rental.rating))}
+                                </div>
+                                <span className="text-sm font-medium text-foreground">
+                                  {rental.rating}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  (Reviews available)
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Description */}
+                            <p className="text-muted-foreground text-sm line-clamp-2 flex-1">
+                              {rental.short_description || rental.description}
+                            </p>
+
+                            {/* Price and Actions Row */}
+                            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between pt-2 border-t border-border/50">
+                              {/* Price Section */}
+                              <div className="space-y-1">
+                                {rental.price_range && (
+                                  <div className="text-2xl font-bold text-primary">
+                                    {rental.price_range}
+                                  </div>
+                                )}
+                                <div className="text-sm text-muted-foreground">
+                                  FREE delivery available
+                                </div>
+                              </div>
+
+                              {/* Actions Section */}
+                              <div className="flex flex-col gap-2 min-w-[140px]">
+                                {/* Quantity Selector */}
+                                <div className="flex items-center justify-center space-x-2">
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => handleQuantityChange(rental.id, -1)}
+                                  >
+                                    <Minus className="h-3 w-3" />
+                                  </Button>
+                                  <span className="w-8 text-center text-sm font-semibold">
+                                    {quantities[rental.id] || 1}
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => handleQuantityChange(rental.id, 1)}
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </div>
+
+                                {/* Add to Cart Button */}
+                                <Button
+                                  onClick={() => handleAddToCart(rental)}
+                                  className={`w-full ${
+                                    isInCart(rental.id)
+                                      ? 'bg-green-500 hover:bg-green-600'
+                                      : 'bg-primary hover:bg-primary-glow'
+                                  } transition-all duration-300`}
+                                  size="sm"
+                                >
+                                  <ShoppingCart className="mr-2 h-4 w-4" />
+                                  {isInCart(rental.id) ? 'In Cart' : 'Add to Cart'}
                                 </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-md">
-                                <DialogHeader>
-                                  <DialogTitle>Inquire About {rental.title}</DialogTitle>
-                                </DialogHeader>
-                                <InquiryForm
-                                  formType="rental"
-                                  rentalId={rental.id}
-                                  rentalTitle={rental.title}
-                                  title="Get Rental Quote"
-                                />
-                              </DialogContent>
-                            </Dialog>
+
+                                {/* Inquire Button */}
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="w-full">
+                                      <Eye className="mr-2 h-3 w-3" />
+                                      Inquire
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-md">
+                                    <DialogHeader>
+                                      <DialogTitle>Inquire About {rental.title}</DialogTitle>
+                                    </DialogHeader>
+                                    <InquiryForm
+                                      formType="rental"
+                                      rentalId={rental.id}
+                                      rentalTitle={rental.title}
+                                      title="Get Rental Quote"
+                                    />
+                                  </DialogContent>
+                                </Dialog>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          // Grid View Layout
+                          <>
+                            <div className="flex-1">
+                              <h3 className={`font-bold mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2 ${
+                                viewMode === "4" ? "text-sm" : "text-lg"
+                              }`}>
+                                {rental.title}
+                              </h3>
+                              
+                              <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                                {rental.short_description || rental.description}
+                              </p>
+
+                              {/* Rating Stars */}
+                              {rental.rating && rental.rating > 0 && (
+                                <div className="flex items-center gap-1 mb-3">
+                                  {renderStars(Math.floor(rental.rating))}
+                                  <span className="text-xs text-muted-foreground ml-1">
+                                    ({rental.rating}/5)
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Price Range */}
+                              {rental.price_range && (
+                                <div className="mb-4">
+                                  <Badge variant="outline" className="text-primary border-primary/30">
+                                    {rental.price_range}
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Quantity Selector and Actions */}
+                            <div className="space-y-3 mt-auto">
+                              {/* Quantity Selector */}
+                              <div className="flex items-center justify-center space-x-3">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleQuantityChange(rental.id, -1)}
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </Button>
+                                <span className="w-12 text-center font-semibold">
+                                  {quantities[rental.id] || 1}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleQuantityChange(rental.id, 1)}
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={() => handleAddToCart(rental)}
+                                  className={`flex-1 ${
+                                    isInCart(rental.id)
+                                      ? 'bg-green-500 hover:bg-green-600'
+                                      : 'bg-primary hover:bg-primary-glow'
+                                  } transition-all duration-300`}
+                                  size="sm"
+                                >
+                                  <ShoppingCart className="mr-2 h-3 w-3" />
+                                  {isInCart(rental.id) ? 'In Cart' : 'Add to Cart'}
+                                </Button>
+                                
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="px-3">
+                                      <Eye className="h-3 w-3" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-md">
+                                    <DialogHeader>
+                                      <DialogTitle>Inquire About {rental.title}</DialogTitle>
+                                    </DialogHeader>
+                                    <InquiryForm
+                                      formType="rental"
+                                      rentalId={rental.id}
+                                      rentalTitle={rental.title}
+                                      title="Get Rental Quote"
+                                    />
+                                  </DialogContent>
+                                </Dialog>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </CardContent>
-                    </Card>
-                  </AnimatedText>
-                ))}
-              </div>
+                     </Card>
+                   </AnimatedText>
+                 ))}
+               </div>
             ) : (
               <div className="text-center py-16">
                 <Card className="glassmorphism-card border-0 shadow-xl max-w-md mx-auto">
@@ -380,7 +496,6 @@ const EnhancedEcommerce = () => {
             )}
           </div>
         </section>
-
 
         {/* Cart Modal */}
         <CartModal 

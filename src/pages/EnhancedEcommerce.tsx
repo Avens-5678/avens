@@ -97,15 +97,15 @@ const EnhancedEcommerce = () => {
   const getGridClasses = () => {
     switch (viewMode) {
       case "list":
-        return "grid-cols-1";
+        return "flex flex-col space-y-4";
       case "2":
-        return "grid-cols-1 sm:grid-cols-2";
+        return "grid grid-cols-1 xs:grid-cols-2 gap-4";
       case "3":
-        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+        return "grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-4";
       case "4":
-        return "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+        return "grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3";
       default:
-        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+        return "grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-4";
     }
   };
 
@@ -217,14 +217,16 @@ const EnhancedEcommerce = () => {
         <section className="relative py-12">
           <div className="container mx-auto px-4 max-w-7xl">
             {filteredRentals && filteredRentals.length > 0 ? (
-              <div className={`grid ${getGridClasses()} gap-6`}>
+              <div className={getGridClasses()}>
                  {filteredRentals.map((rental, index) => (
                    <AnimatedText key={rental.id} delay={index * 50}>
-                     <Card className={`group hover:shadow-2xl transition-all duration-500 glassmorphism-card border-0 overflow-hidden hover:-translate-y-2 h-full ${
-                       viewMode === "list" ? "flex flex-row" : ""
+                     <Card className={`group hover:shadow-2xl transition-all duration-500 glassmorphism-card border-0 overflow-hidden hover:-translate-y-2 ${
+                       viewMode === "list" ? "flex flex-col sm:flex-row h-auto" : "flex flex-col h-full"
                      }`}>
-                       {/* Product Image Carousel */}
-                       <div className={`relative ${viewMode === "list" ? "w-80 flex-shrink-0" : ""}`}>
+                        {/* Product Image Carousel */}
+                        <div className={`relative ${
+                          viewMode === "list" ? "w-full sm:w-80 flex-shrink-0" : "w-full"
+                        }`}>
                          <ProductImageCarousel
                            images={rental.image_urls && rental.image_urls.length > 0 
                              ? rental.image_urls 
@@ -255,11 +257,15 @@ const EnhancedEcommerce = () => {
                          )}
                        </div>
 
-                      <CardContent className="p-4 flex-1 flex flex-col">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2">
-                            {rental.title}
-                          </h3>
+                      <CardContent className={`p-3 sm:p-4 flex-1 flex flex-col ${
+                        viewMode === "4" ? "p-2" : ""
+                      }`}>
+                         <div className="flex-1">
+                           <h3 className={`font-bold mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2 ${
+                             viewMode === "4" ? "text-sm" : "text-lg"
+                           }`}>
+                             {rental.title}
+                           </h3>
                           
                           <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                             {rental.short_description || rental.description}

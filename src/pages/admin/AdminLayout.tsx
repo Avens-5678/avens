@@ -115,12 +115,15 @@ const AdminLayout = () => {
 
   const checkAdminUser = async (email: string) => {
     try {
-      // This assumes you have an RPC function `get_admin_users_secure` in Supabase
-      const { data: adminList, error } = await supabase.rpc('get_admin_users_secure');
+      // Query admin_users table directly to check if user is an admin
+      const { data: adminData, error } = await supabase
+        .from('admin_users')
+        .select('id, email, full_name, role, is_active')
+        .eq('email', email)
+        .eq('is_active', true)
+        .maybeSingle();
 
       if (error) throw error;
-
-      const adminData = adminList?.find((admin: any) => admin.email === email && admin.is_active);
 
       if (!adminData) {
         await supabase.auth.signOut();

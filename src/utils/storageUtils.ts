@@ -80,13 +80,13 @@ export const uploadBannerImage = async (file: File): Promise<string> => {
   const fileName = `banner-${Date.now()}.${fileExt}`;
   
   const { data, error } = await supabase.storage
-    .from('portfolio-images')
+    .from('banner-images')
     .upload(fileName, file);
 
   if (error) throw error;
 
   const { data: { publicUrl } } = supabase.storage
-    .from('portfolio-images')
+    .from('banner-images')
     .getPublicUrl(data.path);
 
   return publicUrl;
@@ -97,13 +97,30 @@ export const uploadClientLogo = async (file: File): Promise<string> => {
   const fileName = `client-logo-${Date.now()}.${fileExt}`;
   
   const { data, error } = await supabase.storage
-    .from('portfolio-images')
+    .from('client-logos')
     .upload(fileName, file);
 
   if (error) throw error;
 
   const { data: { publicUrl } } = supabase.storage
-    .from('portfolio-images')
+    .from('client-logos')
+    .getPublicUrl(data.path);
+
+  return publicUrl;
+};
+
+export const uploadServiceImage = async (file: File): Promise<string> => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `service-${Date.now()}.${fileExt}`;
+  
+  const { data, error } = await supabase.storage
+    .from('specialty-images')
+    .upload(fileName, file);
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('specialty-images')
     .getPublicUrl(data.path);
 
   return publicUrl;

@@ -800,6 +800,8 @@ export type Database = {
     }
     Functions: {
       is_admin_secure: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
+      validate_admin_email: { Args: { check_email: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

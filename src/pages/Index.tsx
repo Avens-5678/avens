@@ -284,12 +284,7 @@ const Index = () => {
               {homeServices.map((service, index) => <GlassmorphismCard key={service.id} className="service-card group p-6 hover:shadow-glow-blue" variant="subtle" glow>
                   <div className="space-y-4">
                     {service.image_url && <div className="relative overflow-hidden rounded-lg aspect-video">
-                        <OptimizedImage 
-                          src={service.image_url} 
-                          alt={service.title} 
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                        />
+                        <OptimizedImage src={service.image_url} alt={service.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>}
                     <div className="space-y-3">
@@ -358,12 +353,7 @@ const Index = () => {
               {homeRentals.map(rental => <GlassmorphismCard key={rental.id} className="rental-card group overflow-hidden hover:shadow-glow-blue" variant="default">
                   <div className="relative">
                      {rental.image_urls && rental.image_urls.length > 0 ? <MultiImageCarousel images={rental.image_urls} title={rental.title} className="aspect-video" /> : rental.image_url ? <div className="aspect-video relative overflow-hidden">
-                        <OptimizedImage 
-                          src={rental.image_url} 
-                          alt={rental.title} 
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                        />
+                        <OptimizedImage src={rental.image_url} alt={rental.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       </div> : <div className="aspect-video bg-muted flex items-center justify-center">
                         <Award className="h-12 w-12 text-muted-foreground" />
                       </div>}
@@ -438,12 +428,7 @@ const Index = () => {
                            <GlassmorphismCard className="group overflow-hidden hover:shadow-glow-blue h-full">
                              <div className="relative">
                                 <div className="aspect-square relative overflow-hidden">
-                                  <OptimizedImage 
-                                    src={item.image_url} 
-                                    alt={item.title} 
-                                    loading="lazy"
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                                  />
+                                  <OptimizedImage src={item.image_url} alt={item.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                 </div>
                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                                  <div className="p-4 text-white">
@@ -479,15 +464,9 @@ const Index = () => {
                    {activeClients.map((client, index) => <TickerItem key={client.id} className="mx-8">
                        <TiltCard tiltDegree={10} scale={1.05} glareEnable={true} className="flex-shrink-0">
                          <GlassmorphismCard className="p-6 hover:shadow-lg transition-all duration-300">
-                             <OptimizedImage 
-                               src={client.logo_url} 
-                               alt={client.name} 
-                               loading="lazy"
-                               className="h-16 w-auto mx-auto filter grayscale hover:grayscale-0 transition-all duration-300" 
-                               onError={() => {
-                                 console.error('Failed to load client logo:', client.logo_url);
-                               }}
-                             />
+                             <OptimizedImage src={client.logo_url} alt={client.name} loading="lazy" className="h-16 w-auto mx-auto filter grayscale hover:grayscale-0 transition-all duration-300" onError={() => {
+                      console.error('Failed to load client logo:', client.logo_url);
+                    }} />
                          </GlassmorphismCard>
                        </TiltCard>
                      </TickerItem>)}
@@ -501,7 +480,7 @@ const Index = () => {
       {/* Premium Testimonials Section */}
       <Section variant="gradient" spacing="large">
         <div className="container mx-auto px-4">
-          <SectionHeader badge={<Badge variant="secondary"><Star className="mr-2 h-4 w-4" />Client Stories</Badge>} title="What Our Clients Say" description="Real experiences from satisfied clients who trust us with their most important events." />
+          
           <ScrollReveal animation="scale-in">
             <TestimonialsSection />
           </ScrollReveal>
@@ -517,12 +496,7 @@ const Index = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {homeNews.map(news => <GlassmorphismCard key={news.id} className="news-card group hover:shadow-glow-blue" variant="default">
                      {news.image_url && <div className="relative aspect-video overflow-hidden rounded-t-lg">
-                        <OptimizedImage 
-                          src={news.image_url} 
-                          alt={news.title} 
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                        />
+                        <OptimizedImage src={news.image_url} alt={news.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       </div>}
                     <div className="p-6 space-y-4">
                       <h3 className="text-xl font-bold group-hover:text-primary transition-colors">

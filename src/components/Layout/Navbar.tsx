@@ -42,8 +42,8 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="font-bold">
-              <span className="text-primary text-xl">Avens</span>
-              <div className="text-muted-foreground text-sm -mt-1">Expositions Pvt. Ltd.</div>
+              <span className="text-primary text-xl">​Evnting.com</span>
+              <div className="text-muted-foreground text-sm -mt-1">Online platform for event production</div>
             </div>
           </Link>
 

@@ -2,19 +2,16 @@ import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
 import { useEvents } from "@/hooks/useData";
 const Footer = () => {
-  const { data: events } = useEvents();
-  
+  const {
+    data: events
+  } = useEvents();
   return <footer className="bg-muted/50 border-t border-border">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="w-32 h-auto">
-              <img 
-                src="/lovable-uploads/84d68504-507a-4ad3-a788-cd4859bf9658.png" 
-                alt="Avens Expositions Logo" 
-                className="w-full h-auto"
-              />
+              <img alt="Avens Expositions Logo" className="w-full h-auto" src="/lovable-uploads/71b5e9e7-9561-40bd-ad11-4f0a05a4225c.png" />
             </div>
             <p className="text-muted-foreground text-sm">
               Creating unforgettable experiences with exceptional event management and premium rental services.
@@ -61,15 +58,9 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="font-semibold text-foreground">Services</h4>
             <div className="space-y-2">
-              {events?.map((event) => (
-                <Link 
-                  key={event.id} 
-                  to={`/events/${event.event_type}`} 
-                  className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
+              {events?.map(event => <Link key={event.id} to={`/events/${event.event_type}`} className="block text-sm text-muted-foreground hover:text-primary transition-colors">
                   {event.title}
-                </Link>
-              ))}
+                </Link>)}
               <Link to="/ecommerce" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
                 Equipment Rental
               </Link>

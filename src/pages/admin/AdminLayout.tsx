@@ -43,16 +43,13 @@ const AdminLayout = () => {
 
   const checkAdminUser = async (email: string) => {
     try {
-      const { data: adminData, error } = await supabase
-        .from('admin_users')
-        .select('id, email, full_name, role, is_active')
-        .eq('email', email)
-        .eq('is_active', true)
-        .maybeSingle();
+      // Use secure RPC function to validate admin status
+      const { data: isAdmin, error: rpcError } = await supabase
+        .rpc('is_admin_secure');
 
-      if (error) throw error;
+      if (rpcError) throw rpcError;
 
-      if (!adminData) {
+      if (!isAdmin) {
         await supabase.auth.signOut();
         toast({
           title: "Access Denied",
@@ -61,7 +58,14 @@ const AdminLayout = () => {
         });
         return;
       }
-      setAdminUser(adminData);
+
+      // Set admin user info from the authenticated user's email
+      setAdminUser({
+        email: email,
+        full_name: 'Super Admin',
+        role: 'super_admin',
+        is_active: true
+      });
     } catch (error: any) {
       console.error("Error checking admin user:", error);
       await supabase.auth.signOut();

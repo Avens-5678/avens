@@ -37,20 +37,16 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const handleSendOTP = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
     try {
-      // First check if this email is an admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('email, is_active')
-        .eq('email', values.email)
-        .eq('is_active', true)
-        .maybeSingle();
+      // Use secure RPC function to validate admin email (doesn't expose table data)
+      const { data: isValidAdmin, error: validationError } = await supabase
+        .rpc('validate_admin_email', { check_email: values.email });
 
-      if (adminError) throw adminError;
+      if (validationError) throw validationError;
 
-      if (!adminData) {
+      if (!isValidAdmin) {
         toast({
           title: "Access Denied",
-          description: "This email is not registered as an admin.",
+          description: "This email is not authorized for admin access.",
           variant: "destructive",
         });
         setIsLoading(false);

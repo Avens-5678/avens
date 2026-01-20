@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { resolveImageUrl } from '@/utils/imageAssets';
 
 interface OptimizedImageProps {
   src: string;
@@ -25,6 +26,9 @@ export const OptimizedImage = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  
+  // Resolve the image URL using our asset mapper
+  const resolvedSrc = resolveImageUrl(src);
 
   useEffect(() => {
     const img = imgRef.current;
@@ -51,7 +55,7 @@ export const OptimizedImage = ({
       img.removeEventListener('load', handleLoad);
       img.removeEventListener('error', handleError);
     };
-  }, [src, onLoad, onError]);
+  }, [resolvedSrc, onLoad, onError]);
 
   if (hasError) {
     return (
@@ -71,7 +75,7 @@ export const OptimizedImage = ({
       )}
       <img
         ref={imgRef}
-        src={src}
+        src={resolvedSrc}
         alt={alt}
         width={width}
         height={height}

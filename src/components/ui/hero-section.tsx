@@ -1,5 +1,6 @@
 import { ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { resolveImageUrl } from "@/utils/imageAssets"
 
 interface HeroSectionProps {
   children: ReactNode
@@ -16,14 +17,16 @@ export function HeroSection({
   overlay = true,
   gradient = true
 }: HeroSectionProps) {
+  const resolvedImage = backgroundImage ? resolveImageUrl(backgroundImage) : undefined;
+  
   return (
     <section 
       className={cn(
         "relative min-h-screen flex items-center justify-center overflow-hidden",
         className
       )}
-      style={backgroundImage ? { 
-        backgroundImage: `url(${backgroundImage})`,
+      style={resolvedImage ? { 
+        backgroundImage: `url(${resolvedImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -35,7 +38,7 @@ export function HeroSection({
       )}
       
       {/* Dark overlay for readability */}
-      {overlay && backgroundImage && (
+      {overlay && resolvedImage && (
         <div className="absolute inset-0 bg-black/40" />
       )}
       

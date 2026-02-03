@@ -1,9 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, lazy, Suspense } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import AudioControls from "@/components/Audio/AudioControls";
-import MouseGlow from "@/components/ui/mouse-glow";
-import WhatsAppBot from "@/components/ui/whatsapp-bot";
+
+// Lazy load non-critical UI elements
+const AudioControls = lazy(() => import("@/components/Audio/AudioControls"));
+const WhatsAppBot = lazy(() => import("@/components/ui/whatsapp-bot"));
 
 interface LayoutProps {
   children: ReactNode;
@@ -15,9 +16,10 @@ const Layout = ({ children }: LayoutProps) => {
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
-      <AudioControls />
-      <MouseGlow />
-      <WhatsAppBot />
+      <Suspense fallback={null}>
+        <AudioControls />
+        <WhatsAppBot />
+      </Suspense>
     </div>
   );
 };

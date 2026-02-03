@@ -6,12 +6,22 @@ import { useToast } from "@/hooks/use-toast";
 import { Trash2, Download, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import * as XLSX from 'xlsx';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface EnhancedFormSubmissionsProps {
   formSubmissions: any[];
 }
+
+// CSV export utility - no external dependencies needed
+const escapeCSV = (value: string): string => {
+  if (value == null) return '';
+  const str = String(value);
+  // Escape quotes and wrap in quotes if contains comma, quote, or newline
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
 
 const EnhancedFormSubmissions = ({ formSubmissions }: EnhancedFormSubmissionsProps) => {
   const { toast } = useToast();
@@ -45,38 +55,47 @@ const EnhancedFormSubmissions = ({ formSubmissions }: EnhancedFormSubmissionsPro
     }
   };
 
-  const handleExportToExcel = () => {
+  const handleExportToCSV = () => {
     try {
-      // Prepare data for Excel export
-      const exportData = formSubmissions.map(submission => ({
-        'Name': submission.name,
-        'Email': submission.email,
-        'Phone': submission.phone || 'N/A',
-        'Event Type': submission.event_type || 'N/A',
-        'Form Type': submission.form_type,
-        'Equipment/Rental': submission.rental_title || 'N/A',
-        'Message': submission.message,
-        'Status': submission.status,
-        'Submitted Date': new Date(submission.created_at).toLocaleDateString(),
-        'Submitted Time': new Date(submission.created_at).toLocaleTimeString(),
-      }));
+      // Define headers
+      const headers = [
+        'Name', 'Email', 'Phone', 'Event Type', 'Form Type', 
+        'Equipment/Rental', 'Message', 'Status', 'Submitted Date', 'Submitted Time'
+      ];
 
-      // Create workbook and worksheet
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Form Submissions");
+      // Prepare data rows
+      const rows = formSubmissions.map(submission => [
+        escapeCSV(submission.name),
+        escapeCSV(submission.email),
+        escapeCSV(submission.phone || 'N/A'),
+        escapeCSV(submission.event_type || 'N/A'),
+        escapeCSV(submission.form_type),
+        escapeCSV(submission.rental_title || 'N/A'),
+        escapeCSV(submission.message),
+        escapeCSV(submission.status),
+        escapeCSV(new Date(submission.created_at).toLocaleDateString()),
+        escapeCSV(new Date(submission.created_at).toLocaleTimeString()),
+      ]);
 
-      // Auto-size columns
-      const colWidths = Object.keys(exportData[0] || {}).map(key => ({
-        wch: Math.max(key.length, 20)
-      }));
-      ws['!cols'] = colWidths;
+      // Build CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+      ].join('\n');
 
-      // Generate filename with current date
-      const filename = `form-submissions-${new Date().toISOString().split('T')[0]}.xlsx`;
-
-      // Save file
-      XLSX.writeFile(wb, filename);
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const filename = `form-submissions-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
       toast({
         title: "Export Successful",
@@ -85,7 +104,7 @@ const EnhancedFormSubmissions = ({ formSubmissions }: EnhancedFormSubmissionsPro
     } catch (error: any) {
       toast({
         title: "Export Failed",
-        description: error.message || "Failed to export data to Excel",
+        description: error.message || "Failed to export data",
         variant: "destructive",
       });
     }
@@ -98,13 +117,13 @@ const EnhancedFormSubmissions = ({ formSubmissions }: EnhancedFormSubmissionsPro
           <CardTitle>Form Submissions ({formSubmissions?.length || 0})</CardTitle>
           <div className="flex space-x-2">
             <Button
-              onClick={handleExportToExcel}
+              onClick={handleExportToCSV}
               variant="outline"
               disabled={!formSubmissions?.length}
               className="flex items-center space-x-2"
             >
               <Download className="h-4 w-4" />
-              <span>Export Excel</span>
+              <span>Export CSV</span>
             </Button>
           </div>
         </div>

@@ -54,15 +54,14 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
     setIsProfileLoading(true);
 
     try {
-      // Simulate profile update
+      // Update admin user state (no localStorage for security)
       const updatedUser = {
         ...adminUser,
         full_name: values.full_name,
         email: values.email,
       };
 
-      // Update local storage
-      localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+      // Only update in-memory state, not localStorage (security best practice)
       onProfileUpdate(updatedUser);
 
       toast({

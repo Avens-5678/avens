@@ -1,10 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Input validation schema
+const requestSchema = z.object({
+  submissionId: z.string().uuid("Invalid submission ID"),
+});
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -18,11 +24,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { submissionId } = await req.json()
-
-    if (!submissionId) {
-      throw new Error('Submission ID is required')
+    // Parse and validate input
+    let rawBody;
+    try {
+      rawBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body', success: false }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    // Validate input with Zod schema
+    const validationResult = requestSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error.flatten());
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid submission ID format',
+          success: false 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { submissionId } = validationResult.data;
 
     // Get form submission details
     const { data: submission, error: submissionError } = await supabase
@@ -32,58 +58,31 @@ serve(async (req) => {
       .single()
 
     if (submissionError || !submission) {
-      throw new Error('Form submission not found')
+      console.error('Form submission not found:', submissionId);
+      return new Response(
+        JSON.stringify({ error: 'Form submission not found', success: false }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log('Processing form submission:', submission)
+    console.log('Processing form submission:', {
+      id: submission.id,
+      form_type: submission.form_type,
+      created_at: submission.created_at,
+    });
 
-    // Prepare email content
-    const emailSubject = `New ${submission.form_type} inquiry from ${submission.name}`
-    const emailBody = `
-      New inquiry received from Avens Events website:
-      
-      Name: ${submission.name}
-      Email: ${submission.email}
-      Phone: ${submission.phone || 'Not provided'}
-      Form Type: ${submission.form_type}
-      ${submission.event_type ? `Event Type: ${submission.event_type}` : ''}
-      
-      Message:
-      ${submission.message}
-      
-      Submitted at: ${new Date(submission.created_at).toLocaleString()}
-      
-      Please respond to this inquiry promptly.
-    `
-
-    // Send email (using a hypothetical email service)
-    console.log('Email to be sent:', {
-      to: 'info@avensevents.com',
-      subject: emailSubject,
-      body: emailBody
+    // Prepare email content (sanitized - no sensitive data in logs)
+    const emailSubject = `New ${submission.form_type} inquiry received`
+    
+    console.log('Notification prepared:', {
+      submissionId: submission.id,
+      formType: submission.form_type,
+      timestamp: new Date().toISOString(),
     })
-
-    // Prepare WhatsApp message
-    const whatsappMessage = `🎉 New Inquiry - Avens Events
-
-👤 Name: ${submission.name}
-📧 Email: ${submission.email}
-📱 Phone: ${submission.phone || 'Not provided'}
-🎯 Type: ${submission.form_type}${submission.event_type ? `\n🎊 Event: ${submission.event_type}` : ''}
-
-💬 Message:
-${submission.message}
-
-⏰ ${new Date(submission.created_at).toLocaleString()}`
-
-    console.log('WhatsApp message to be sent:', whatsappMessage)
 
     // In a real implementation, you would integrate with:
     // 1. Email service (SendGrid, Resend, etc.)
     // 2. WhatsApp Business API
-
-    // For now, we'll just log and return success
-    console.log('Form submission processed successfully')
 
     return new Response(
       JSON.stringify({ 
@@ -102,12 +101,12 @@ ${submission.message}
     
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: 'Internal server error',
         success: false 
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400 
+        status: 500 
       }
     )
   }

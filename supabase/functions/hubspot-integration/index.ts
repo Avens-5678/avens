@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -10,6 +11,20 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  submissionId: z.string().uuid().optional(),
+  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name too long").trim(),
+  email: z.string().email("Invalid email address").max(255, "Email too long").toLowerCase(),
+  phone: z.string().max(20, "Phone number too long").regex(/^[\d\s+()-]*$/, "Invalid phone format").optional().nullable(),
+  message: z.string().max(2000, "Message too long").trim().optional(),
+  formType: z.enum(['inquiry', 'contact', 'rental', 'event', 'general']).optional(),
+  eventType: z.string().max(100, "Event type too long").optional().nullable(),
+  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional().nullable(),
+  rentalTitle: z.string().max(200, "Rental title too long").optional().nullable(),
+  location: z.string().max(200, "Location too long").optional().nullable(),
+});
 
 interface HubSpotContact {
   properties: {
@@ -55,14 +70,31 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    const { submissionId, name, email, phone, message, formType, eventType, eventDate, rentalTitle, location } = await req.json();
-
-    if (!email || !name) {
-      return new Response('Missing required fields: email and name', {
-        status: 400,
-        headers: corsHeaders,
-      });
+    // Parse and validate input
+    let rawBody;
+    try {
+      rawBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    // Validate input with Zod schema
+    const validationResult = requestSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error.flatten());
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input data',
+          details: validationResult.error.flatten().fieldErrors 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { submissionId, name, email, phone, message, formType, eventType, eventDate, rentalTitle, location } = validationResult.data;
 
     console.log('Processing HubSpot integration for:', {
       submissionId,
@@ -123,8 +155,8 @@ serve(async (req: Request): Promise<Response> => {
     let hubspotResult;
     try {
       hubspotResult = await hubspotResponse.json();
-    } catch (error) {
-      console.error('Failed to parse HubSpot response:', error);
+    } catch {
+      console.error('Failed to parse HubSpot response');
       hubspotResult = { error: 'Failed to parse response' };
     }
 

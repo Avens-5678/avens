@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -7,10 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogIn, ArrowLeft } from "lucide-react";
+import { Loader2, LogIn, ArrowLeft, UserPlus } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
-import { useEffect } from "react";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -19,7 +19,8 @@ const signInSchema = z.object({
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
+  const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -31,11 +32,26 @@ const Auth = () => {
     },
   });
 
+  // Redirect based on user role
   useEffect(() => {
-    if (user) {
-      navigate("/admin");
+    if (authLoading || roleLoading) return;
+    
+    if (user && role) {
+      switch (role) {
+        case "admin":
+          navigate("/admin");
+          break;
+        case "client":
+          navigate("/client/dashboard");
+          break;
+        case "vendor":
+          navigate("/vendor/dashboard");
+          break;
+        default:
+          navigate("/");
+      }
     }
-  }, [user, navigate]);
+  }, [user, role, authLoading, roleLoading, navigate]);
 
   const onSignIn = async (values: z.infer<typeof signInSchema>) => {
     setIsLoading(true);
@@ -132,8 +148,20 @@ const Auth = () => {
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <LogIn className="mr-2 h-4 w-4" />
-                Sign In to Admin
+                Sign In
               </Button>
+
+              <div className="text-center pt-4 border-t">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Don't have an account?
+                </p>
+                <Link to="/auth/register">
+                  <Button variant="outline" className="w-full">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Create Account
+                  </Button>
+                </Link>
+              </div>
             </form>
           </Form>
         </CardContent>

@@ -23,7 +23,9 @@ import {
   UserCircle,
   ArrowLeft,
   Star,
-  HelpCircle
+  HelpCircle,
+  ClipboardList,
+  UsersRound
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -36,6 +38,8 @@ import TestimonialManager from "@/components/admin/TestimonialManager";
 import EnhancedRentalManager from "@/components/admin/EnhancedRentalManager";
 import FAQManager from "@/components/admin/FAQManager";
 import IntegrationTester from "@/components/admin/IntegrationTester";
+import EventCenter from "@/components/admin/EventCenter";
+import UserManagement from "@/components/admin/UserManagement";
 import Logo from "@/components/ui/logo";
 
 interface AdminDashboardProps {
@@ -118,10 +122,18 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto p-4 sm:p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-14 h-auto p-1 gap-1 overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-16 h-auto p-1 gap-1 overflow-x-auto">
             <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <BarChart3 className="h-3 w-3" />
               <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="events-center" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ClipboardList className="h-3 w-3" />
+              <span className="hidden sm:inline">Event Center</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <UsersRound className="h-3 w-3" />
+              <span className="hidden sm:inline">Users</span>
             </TabsTrigger>
             <TabsTrigger value="banners" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Home className="h-3 w-3" />
@@ -283,6 +295,16 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Event Center - NEW */}
+          <TabsContent value="events-center">
+            <EventCenter />
+          </TabsContent>
+
+          {/* User Management - NEW */}
+          <TabsContent value="users">
+            <UserManagement />
           </TabsContent>
 
           {/* Hero Banners Management */}

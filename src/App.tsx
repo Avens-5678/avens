@@ -15,7 +15,10 @@ import FAQ from "./pages/FAQ";
 import EventDetail from "./pages/EventDetail";
 import EnhancedEcommerce from "./pages/EnhancedEcommerce";
 import Auth from "./pages/Auth";
+import Register from "./pages/auth/Register";
 import AdminDashboard from "./pages/AdminDashboard";
+import ClientDashboard from "./pages/client/ClientDashboard";
+import VendorDashboard from "./pages/vendor/VendorDashboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CorporateEvents from "./pages/events/CorporateEvents";
@@ -36,6 +39,7 @@ const App = () => (
         <ScrollToTop />
         <AudioProvider>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/services" element={<Services />} />
             <Route path="/portfolio" element={<Portfolio />} />
@@ -49,8 +53,30 @@ const App = () => (
             <Route path="/events/equipment-rental" element={<EquipmentRental />} />
             <Route path="/events/:eventType" element={<DynamicEventPage />} />
             <Route path="/ecommerce" element={<EnhancedEcommerce />} />
+            
+            {/* Auth Routes */}
             <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/register" element={<Register />} />
+            
+            {/* Protected Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route 
+              path="/client/dashboard" 
+              element={
+                <ProtectedRoute allowedRoles={["client"]}>
+                  <ClientDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/vendor/dashboard" 
+              element={
+                <ProtectedRoute allowedRoles={["vendor"]}>
+                  <VendorDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AudioProvider>

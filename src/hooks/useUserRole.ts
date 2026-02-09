@@ -17,9 +17,13 @@ export const useUserRole = () => {
         return;
       }
 
+      setLoading(true);
+      
       try {
         const { data, error } = await supabase
           .rpc('get_user_role', { _user_id: user.id });
+
+        console.log("Fetched user role:", data, "for user:", user.id);
 
         if (error) {
           console.error("Error fetching user role:", error);
@@ -38,7 +42,7 @@ export const useUserRole = () => {
     if (!authLoading) {
       fetchRole();
     }
-  }, [user, authLoading]);
+  }, [user?.id, authLoading]);
 
   const isAdmin = role === "admin";
   const isClient = role === "client";

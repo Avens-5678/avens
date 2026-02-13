@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogIn, User, LogOut } from "lucide-react";
 import InquiryForm from "@/components/Forms/InquiryForm";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 const Navbar = () => {
+  const { user, signOut } = useAuth();
+  const { role } = useUserRole();
+  const navigate = useNavigate();
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact');
     if (contactSection) {
@@ -16,6 +22,15 @@ const Navbar = () => {
   };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+
+  const getDashboardPath = () => {
+    switch (role) {
+      case "admin": return "/admin";
+      case "client": return "/client/dashboard";
+      case "vendor": return "/vendor/dashboard";
+      default: return "/";
+    }
+  };
   const navLinks = [{
     href: "/",
     label: "Home"
@@ -68,6 +83,33 @@ const Navbar = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="default" className="gap-2">
+                    <User className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate(getDashboardPath())}>
+                    <User className="h-4 w-4 mr-2" />
+                    My Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="default" className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -98,6 +140,27 @@ const Navbar = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+              {user ? (
+                <>
+                  <Link to={getDashboardPath()} onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="outline" size="default" className="self-start gap-2">
+                      <User className="h-4 w-4" />
+                      My Dashboard
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="default" className="self-start gap-2" onClick={() => { signOut(); setIsMenuOpen(false); }}>
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" size="default" className="self-start gap-2">
+                    <LogIn className="h-4 w-4" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>}
       </div>

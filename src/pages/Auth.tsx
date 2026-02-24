@@ -14,7 +14,7 @@ import { useNavigate, Link } from "react-router-dom";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters")
 });
 
 const Auth = () => {
@@ -28,14 +28,14 @@ const Auth = () => {
     resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
-      password: "",
-    },
+      password: ""
+    }
   });
 
   // Redirect based on user role
   useEffect(() => {
     if (authLoading || roleLoading) return;
-    
+
     if (user && role) {
       switch (role) {
         case "admin":
@@ -64,13 +64,13 @@ const Auth = () => {
           toast({
             title: "Sign In Failed",
             description: "Invalid email or password. Please try again.",
-            variant: "destructive",
+            variant: "destructive"
           });
         } else {
           toast({
             title: "Error",
             description: error.message,
-            variant: "destructive",
+            variant: "destructive"
           });
         }
         return;
@@ -78,14 +78,14 @@ const Auth = () => {
 
       toast({
         title: "Welcome back!",
-        description: "You have successfully signed in to the admin portal.",
+        description: "You have successfully signed in to the admin portal."
       });
     } catch (error) {
       console.error("Error signing in:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -99,16 +99,16 @@ const Auth = () => {
           <div className="flex items-center justify-center mb-4">
             <Link
               to="/"
-              className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
-            >
+              className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
+
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Website
             </Link>
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Avens Events
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Evnting.com
+
           </CardTitle>
-          <p className="text-muted-foreground">Admin Portal - Sign In</p>
+          <p className="text-muted-foreground">Dashboard- Sign In</p>
         </CardHeader>
         <CardContent>
           <Form {...signInForm}>
@@ -116,36 +116,36 @@ const Auth = () => {
               <FormField
                 control={signInForm.control}
                 name="email"
-                render={({ field }) => (
-                  <FormItem>
+                render={({ field }) =>
+                <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="Enter your admin email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
+                } />
+
 
               <FormField
                 control={signInForm.control}
                 name="password"
-                render={({ field }) => (
-                  <FormItem>
+                render={({ field }) =>
+                <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="Enter your password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
+                } />
 
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full bg-gradient-to-r from-primary to-accent"
-                disabled={isLoading}
-              >
+                disabled={isLoading}>
+
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <LogIn className="mr-2 h-4 w-4" />
                 Sign In
@@ -166,8 +166,8 @@ const Auth = () => {
           </Form>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Auth;

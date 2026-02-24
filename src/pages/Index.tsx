@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -54,6 +54,7 @@ const Index = () => {
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [inquiryDialogOpen, setInquiryDialogOpen] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [showBannerFallback, setShowBannerFallback] = useState(false);
 
   // Filter data
   const homeServices = services?.filter(s => s.show_on_home && s.is_active) || [];
@@ -63,8 +64,21 @@ const Index = () => {
 
   const currentBanner = activeBanners[currentBannerIndex];
 
-  // Show skeleton only for critical above-fold content
-  if (loadingBanners) {
+  useEffect(() => {
+    if (!loadingBanners) {
+      setShowBannerFallback(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowBannerFallback(true);
+    }, 3500);
+
+    return () => window.clearTimeout(timer);
+  }, [loadingBanners]);
+
+  // Show skeleton only briefly; then render fallback hero if banner query is stuck
+  if (loadingBanners && !showBannerFallback) {
     return <Layout><HeroSkeleton /></Layout>;
   }
 

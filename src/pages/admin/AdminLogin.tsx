@@ -56,9 +56,6 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
       // Send OTP via Supabase magic link
       const { error } = await supabase.auth.signInWithOtp({
         email: values.email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
-        },
       });
 
       if (error) throw error;
@@ -125,9 +122,6 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
-        },
       });
 
       if (error) throw error;

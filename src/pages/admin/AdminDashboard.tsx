@@ -25,7 +25,8 @@ import {
   Star,
   HelpCircle,
   ClipboardList,
-  UsersRound
+  UsersRound,
+  ShieldCheck
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -40,6 +41,7 @@ import FAQManager from "@/components/admin/FAQManager";
 import IntegrationTester from "@/components/admin/IntegrationTester";
 import EventCenter from "@/components/admin/EventCenter";
 import UserManagement from "@/components/admin/UserManagement";
+import VendorInventoryAdmin from "@/components/admin/VendorInventoryAdmin";
 import Logo from "@/components/ui/logo";
 
 interface AdminDashboardProps {
@@ -134,6 +136,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <TabsTrigger value="users" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <UsersRound className="h-3 w-3" />
               <span className="hidden sm:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="vendor-inventory" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ShieldCheck className="h-3 w-3" />
+              <span className="hidden sm:inline">Vendors</span>
             </TabsTrigger>
             <TabsTrigger value="banners" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Home className="h-3 w-3" />
@@ -302,9 +308,14 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <EventCenter />
           </TabsContent>
 
-          {/* User Management - NEW */}
+          {/* User Management */}
           <TabsContent value="users">
             <UserManagement />
+          </TabsContent>
+
+          {/* Vendor Inventory Verification */}
+          <TabsContent value="vendor-inventory">
+            <VendorInventoryAdmin />
           </TabsContent>
 
           {/* Hero Banners Management */}

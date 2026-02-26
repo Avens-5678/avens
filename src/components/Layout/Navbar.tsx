@@ -34,19 +34,20 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-foreground/90 backdrop-blur-2xl sticky top-0 z-50">
+    <nav className="bg-foreground sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Left: Nav Links (desktop) */}
-          <div className="hidden md:flex items-center gap-6 flex-1">
+        {/* Desktop layout: 3-column grid for perfect centering */}
+        <div className="hidden md:grid grid-cols-3 items-center h-14">
+          {/* Left: Nav Links */}
+          <div className="flex items-center gap-5">
             {navLinks.map(link => (
               <Link
                 key={link.href}
                 to={link.href}
                 className={`text-sm font-medium transition-colors ${
                   isActive(link.href)
-                    ? "text-white"
-                    : "text-white/60 hover:text-white"
+                    ? "text-primary-foreground"
+                    : "text-primary-foreground/50 hover:text-primary-foreground/80"
                 }`}
               >
                 {link.label}
@@ -54,27 +55,17 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Mobile hamburger */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden text-white hover:bg-white/10"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-
           {/* Center: Logo */}
-          <Link to="/" className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-            <span className="text-white text-xl font-bold tracking-tight">Evnting.com</span>
+          <Link to="/" className="flex items-center justify-center">
+            <span className="text-primary-foreground text-xl font-bold tracking-tight">Evnting.com</span>
           </Link>
 
-          {/* Right: Actions (desktop) */}
-          <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 justify-end">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="default" className="gap-2 text-white/70 hover:text-white hover:bg-white/10">
+                  <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
                     <User className="h-4 w-4" />
                     Dashboard
                   </Button>
@@ -92,7 +83,7 @@ const Navbar = () => {
               </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button variant="ghost" size="default" className="gap-2 text-white/70 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="sm" className="gap-1.5 text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
                   <LogIn className="h-4 w-4" />
                   Sign In
                 </Button>
@@ -100,7 +91,7 @@ const Navbar = () => {
             )}
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="rounded-full bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm px-5">
+                <Button size="sm" className="rounded-full bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 hover:bg-primary-foreground/20 px-4">
                   Contact Us
                 </Button>
               </DialogTrigger>
@@ -115,67 +106,81 @@ const Navbar = () => {
               </DialogContent>
             </Dialog>
           </div>
+        </div>
 
-          {/* Mobile right placeholder for balance */}
-          <div className="md:hidden w-10" />
+        {/* Mobile layout */}
+        <div className="flex md:hidden items-center justify-between h-14">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+
+          <Link to="/" className="absolute left-1/2 -translate-x-1/2">
+            <span className="text-primary-foreground text-lg font-bold tracking-tight">Evnting.com</span>
+          </Link>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm" className="rounded-full bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 hover:bg-primary-foreground/20 px-3 text-xs">
+                Contact
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto p-0">
+              <div className="p-6">
+                <DialogTitle>Contact Us</DialogTitle>
+                <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
+                <div className="mt-4">
+                  <InquiryForm formType="contact" title="Contact Us" />
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-white/10">
-            <div className="flex flex-col space-y-3">
+          <div className="md:hidden py-3 border-t border-primary-foreground/10">
+            <div className="flex flex-col space-y-1">
               {navLinks.map(link => (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`text-sm font-medium transition-colors px-2 py-1.5 rounded-lg ${
+                  className={`text-sm font-medium transition-colors px-3 py-2 rounded-lg ${
                     isActive(link.href)
-                      ? "text-white bg-white/10"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                      ? "text-primary-foreground bg-primary-foreground/10"
+                      : "text-primary-foreground/50 hover:text-primary-foreground hover:bg-primary-foreground/5"
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="border-t border-white/10 pt-3 flex flex-col gap-2">
+              <div className="border-t border-primary-foreground/10 pt-2 mt-1">
                 {user ? (
                   <>
                     <Link to={getDashboardPath()} onClick={() => setIsMenuOpen(false)}>
-                      <Button variant="ghost" size="default" className="w-full justify-start gap-2 text-white/70 hover:text-white hover:bg-white/10">
+                      <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5">
                         <User className="h-4 w-4" />
                         My Dashboard
-                      </Button>
+                      </button>
                     </Link>
-                    <Button variant="ghost" size="default" className="w-full justify-start gap-2 text-white/70 hover:text-white hover:bg-white/10" onClick={() => { signOut(); setIsMenuOpen(false); }}>
+                    <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5" onClick={() => { signOut(); setIsMenuOpen(false); }}>
                       <LogOut className="h-4 w-4" />
                       Sign Out
-                    </Button>
+                    </button>
                   </>
                 ) : (
                   <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="ghost" size="default" className="w-full justify-start gap-2 text-white/70 hover:text-white hover:bg-white/10">
+                    <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5">
                       <LogIn className="h-4 w-4" />
                       Sign In
-                    </Button>
+                    </button>
                   </Link>
                 )}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button className="rounded-full bg-white/10 text-white border border-white/20 hover:bg-white/20 w-full" onClick={() => setIsMenuOpen(false)}>
-                      Contact Us
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto p-0">
-                    <div className="p-6">
-                      <DialogTitle>Contact Us</DialogTitle>
-                      <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
-                      <div className="mt-4">
-                        <InquiryForm formType="contact" title="Contact Us" />
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
               </div>
             </div>
           </div>

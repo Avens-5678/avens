@@ -198,7 +198,7 @@ const Auth = () => {
             {step === "forgot-password" && "Reset your password"}
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 px-6 pb-8">
           {/* Step 1: Email */}
           {step === "email" && (
             <>

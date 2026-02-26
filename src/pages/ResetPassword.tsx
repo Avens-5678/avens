@@ -94,9 +94,9 @@ const ResetPassword = () => {
           <CardTitle className="text-2xl font-bold">Set New Password</CardTitle>
           <p className="text-muted-foreground">Enter your new password below</p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 pb-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 control={form.control}
                 name="password"

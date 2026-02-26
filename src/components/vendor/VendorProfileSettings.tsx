@@ -65,9 +65,7 @@ const VendorProfileSettings = () => {
 
     const { error } = await supabase
       .from("profiles")
-      .upsert({
-        user_id: user.id,
-        email: profile.email,
+      .update({
         full_name: profile.full_name,
         phone: profile.phone,
         company_name: profile.company_name,
@@ -77,7 +75,8 @@ const VendorProfileSettings = () => {
         city: profile.city,
         gst_number: profile.gst_number,
         pan_number: profile.pan_number,
-      } as any);
+      })
+      .eq("user_id", user.id);
 
     if (error) {
       toast({

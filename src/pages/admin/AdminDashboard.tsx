@@ -26,7 +26,8 @@ import {
   HelpCircle,
   ClipboardList,
   UsersRound,
-  ShieldCheck
+  ShieldCheck,
+  Truck
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -42,6 +43,7 @@ import IntegrationTester from "@/components/admin/IntegrationTester";
 import EventCenter from "@/components/admin/EventCenter";
 import UserManagement from "@/components/admin/UserManagement";
 import VendorInventoryAdmin from "@/components/admin/VendorInventoryAdmin";
+import LiveRentalOrders from "@/components/admin/LiveRentalOrders";
 import Logo from "@/components/ui/logo";
 
 interface AdminDashboardProps {
@@ -140,6 +142,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             <TabsTrigger value="vendor-inventory" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ShieldCheck className="h-3 w-3" />
               <span className="hidden sm:inline">Vendors</span>
+            </TabsTrigger>
+            <TabsTrigger value="rental-orders" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Truck className="h-3 w-3" />
+              <span className="hidden sm:inline">Orders</span>
             </TabsTrigger>
             <TabsTrigger value="banners" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Home className="h-3 w-3" />
@@ -316,6 +322,11 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
           {/* Vendor Inventory Verification */}
           <TabsContent value="vendor-inventory">
             <VendorInventoryAdmin />
+          </TabsContent>
+
+          {/* Live Rental Orders */}
+          <TabsContent value="rental-orders">
+            <LiveRentalOrders />
           </TabsContent>
 
           {/* Hero Banners Management */}

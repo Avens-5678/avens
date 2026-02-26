@@ -19,6 +19,7 @@ import Register from "./pages/auth/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
+import VendorAction from "./pages/vendor/VendorAction";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CorporateEvents from "./pages/events/CorporateEvents";
@@ -79,6 +80,7 @@ const App = () => (
               } 
             />
             
+            <Route path="/vendor/action" element={<VendorAction />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AudioProvider>

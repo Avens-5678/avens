@@ -21,8 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));
 
 // Skeleton loaders for faster perceived loading
-const HeroSkeleton = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
+const HeroSkeleton = () =>
+<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
     <div className="text-center space-y-6 max-w-2xl px-4">
       <Skeleton className="h-16 w-3/4 mx-auto" />
       <Skeleton className="h-8 w-full" />
@@ -32,17 +32,17 @@ const HeroSkeleton = () => (
         <Skeleton className="h-12 w-40" />
       </div>
     </div>
-  </div>
-);
+  </div>;
 
-const CardSkeleton = () => (
-  <div className="space-y-4 p-6">
+
+const CardSkeleton = () =>
+<div className="space-y-4 p-6">
     <Skeleton className="aspect-video w-full rounded-lg" />
     <Skeleton className="h-6 w-3/4" />
     <Skeleton className="h-4 w-full" />
     <Skeleton className="h-4 w-2/3" />
-  </div>
-);
+  </div>;
+
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -65,10 +65,10 @@ const Index = () => {
   const arrowTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Filter data
-  const homeServices = services?.filter(s => s.show_on_home && s.is_active) || [];
-  const homeRentals = rentals?.filter(r => r.show_on_home && r.is_active) || [];
-  const activeClients = trustedClients?.filter(c => c.is_active) || [];
-  const activeBanners = heroBanners?.filter(b => b.is_active) || [];
+  const homeServices = services?.filter((s) => s.show_on_home && s.is_active) || [];
+  const homeRentals = rentals?.filter((r) => r.show_on_home && r.is_active) || [];
+  const activeClients = trustedClients?.filter((c) => c.is_active) || [];
+  const activeBanners = heroBanners?.filter((b) => b.is_active) || [];
 
   const currentBanner = activeBanners[currentBannerIndex];
 
@@ -81,7 +81,7 @@ const Index = () => {
 
   useEffect(() => {
     resetArrowTimer();
-    return () => { if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current); };
+    return () => {if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current);};
   }, [resetArrowTimer]);
 
   useEffect(() => {
@@ -105,45 +105,45 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero Section - Simple, no heavy animations */}
-      <HeroSection 
-        backgroundImage={currentBanner?.image_url} 
+      <HeroSection
+        backgroundImage={currentBanner?.image_url}
         className="relative overflow-hidden"
         onMouseMove={resetArrowTimer}
-        onTouchStart={(e: React.TouchEvent) => { touchStartX.current = e.changedTouches[0].screenX; }}
+        onTouchStart={(e: React.TouchEvent) => {touchStartX.current = e.changedTouches[0].screenX;}}
         onTouchEnd={(e: React.TouchEvent) => {
           touchEndX.current = e.changedTouches[0].screenX;
           if (touchStartX.current !== null && activeBanners.length > 1) {
             const diff = touchStartX.current - touchEndX.current;
             if (Math.abs(diff) > 50) {
               if (diff > 0) {
-                setCurrentBannerIndex(prev => prev === activeBanners.length - 1 ? 0 : prev + 1);
+                setCurrentBannerIndex((prev) => prev === activeBanners.length - 1 ? 0 : prev + 1);
               } else {
-                setCurrentBannerIndex(prev => prev === 0 ? activeBanners.length - 1 : prev - 1);
+                setCurrentBannerIndex((prev) => prev === 0 ? activeBanners.length - 1 : prev - 1);
               }
             }
           }
           touchStartX.current = null;
-        }}
-      >
+        }}>
+
         {/* Desktop/Tablet navigation arrows - auto-hide on inactivity */}
-        {!isMobile && activeBanners.length > 1 && (
-          <>
+        {!isMobile && activeBanners.length > 1 &&
+        <>
             <button
-              onClick={() => { setCurrentBannerIndex(prev => prev === 0 ? activeBanners.length - 1 : prev - 1); resetArrowTimer(); }}
-              className={`absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-500 ${showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-              aria-label="Previous banner"
-            >
+            onClick={() => {setCurrentBannerIndex((prev) => prev === 0 ? activeBanners.length - 1 : prev - 1);resetArrowTimer();}}
+            className={`absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-500 ${showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            aria-label="Previous banner">
+
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
-              onClick={() => { setCurrentBannerIndex(prev => prev === activeBanners.length - 1 ? 0 : prev + 1); resetArrowTimer(); }}
-              className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-500 ${showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-              aria-label="Next banner"
-            >
+            onClick={() => {setCurrentBannerIndex((prev) => prev === activeBanners.length - 1 ? 0 : prev + 1);resetArrowTimer();}}
+            className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-500 ${showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            aria-label="Next banner">
+
               <ChevronRight className="h-6 w-6" />
             </button>
           </>
-        )}
+        }
 
         <div className="container mx-auto px-4 text-center relative z-20">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight animate-fade-in">
@@ -157,22 +157,22 @@ const Index = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg" 
-              className="group bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 px-8 py-4 text-lg font-semibold" 
-              asChild
-            >
+            <Button
+              size="lg"
+              className="group bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 px-8 py-4 text-lg font-semibold"
+              asChild>
+
               <Link to={`/events/${currentBanner?.event_type?.toLowerCase().replace(/\s+/g, '-') || 'corporate'}`}>
                 {currentBanner?.button_text || "Explore Services"}
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold" 
-              asChild
-            >
+            <Button
+              variant="outline"
+              size="lg"
+              className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
+              asChild>
+
               <Link to="/portfolio">
                 View Portfolio
                 <Camera className="ml-2 h-5 w-5" />
@@ -182,22 +182,22 @@ const Index = () => {
         </div>
 
         {/* Navigation dots at the bottom of hero container */}
-        {activeBanners.length > 1 && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex gap-2.5">
-            {activeBanners.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentBannerIndex(idx)}
-                className={`rounded-full transition-all duration-300 ${
-                  idx === currentBannerIndex 
-                    ? 'w-8 h-3 bg-white' 
-                    : 'w-3 h-3 bg-white/40 hover:bg-white/60'
-                }`}
-                aria-label={`Go to banner ${idx + 1}`}
-              />
-            ))}
+        {activeBanners.length > 1 &&
+        <div className="absolute bottom--56 left-1/2 -translate-x-1/2 z-30 gap-2.5 flex-row flex items-end justify-center border-0">
+            {activeBanners.map((_, idx) =>
+          <button
+            key={idx}
+            onClick={() => setCurrentBannerIndex(idx)}
+            className={`rounded-full transition-all duration-300 ${
+            idx === currentBannerIndex ?
+            'w-8 h-3 bg-white' :
+            'w-3 h-3 bg-white/40 hover:bg-white/60'}`
+            }
+            aria-label={`Go to banner ${idx + 1}`} />
+
+          )}
           </div>
-        )}
+        }
       </HeroSection>
 
       {/* Stats Section - Static, no animations */}
@@ -223,35 +223,35 @@ const Index = () => {
       {/* Services Section */}
       <Section spacing="large">
         <div className="container mx-auto px-4">
-          <SectionHeader 
-            badge={<Badge variant="outline"><Sparkles className="mr-2 h-4 w-4" />Premium Services</Badge>} 
-            title="Exceptional Event Management" 
-            description="From intimate gatherings to grand celebrations, we deliver sophistication and excellence." 
-          />
+          <SectionHeader
+            badge={<Badge variant="outline"><Sparkles className="mr-2 h-4 w-4" />Premium Services</Badge>}
+            title="Exceptional Event Management"
+            description="From intimate gatherings to grand celebrations, we deliver sophistication and excellence." />
+
           
-          {loadingServices ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {homeServices.map((service) => (
-                <GlassmorphismCard 
-                  key={service.id} 
-                  className="group p-6 hover:shadow-lg transition-shadow duration-300" 
-                  variant="subtle"
-                >
+          {loadingServices ?
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
+            </div> :
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {homeServices.map((service) =>
+            <GlassmorphismCard
+              key={service.id}
+              className="group p-6 hover:shadow-lg transition-shadow duration-300"
+              variant="subtle">
+
                   <div className="space-y-4">
-                    {service.image_url && (
-                      <div className="relative overflow-hidden rounded-lg aspect-video">
-                        <OptimizedImage 
-                          src={service.image_url} 
-                          alt={service.title} 
-                          loading="lazy" 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        />
+                    {service.image_url &&
+                <div className="relative overflow-hidden rounded-lg aspect-video">
+                        <OptimizedImage
+                    src={service.image_url}
+                    alt={service.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+
                       </div>
-                    )}
+                }
                     <div className="space-y-3">
                       <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
                         {service.title}
@@ -267,15 +267,15 @@ const Index = () => {
                     </div>
                   </div>
                 </GlassmorphismCard>
-              ))}
+            )}
             </div>
-          )}
+          }
         </div>
       </Section>
 
       {/* About CTA Section */}
-      {aboutContent && (
-        <Section variant="gradient" spacing="large">
+      {aboutContent &&
+      <Section variant="gradient" spacing="large">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-4xl mx-auto space-y-8">
               <Badge variant="secondary" className="mb-6 px-6 py-2">
@@ -293,11 +293,11 @@ const Index = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="group bg-gradient-to-r from-primary to-accent px-8 py-4 text-lg font-semibold" 
-                  onClick={() => setInquiryDialogOpen(true)}
-                >
+                <Button
+                size="lg"
+                className="group bg-gradient-to-r from-primary to-accent px-8 py-4 text-lg font-semibold"
+                onClick={() => setInquiryDialogOpen(true)}>
+
                   Start Planning Today
                   <Calendar className="ml-2 h-5 w-5" />
                 </Button>
@@ -310,43 +310,43 @@ const Index = () => {
             </div>
           </div>
         </Section>
-      )}
+      }
 
       {/* Equipment Rental Section */}
       <Section spacing="large">
         <div className="container mx-auto px-4">
-          <SectionHeader 
-            badge={<Badge variant="outline"><Award className="mr-2 h-4 w-4" />Premium Equipment</Badge>} 
-            title="Professional Event Rentals" 
-            description="High-quality equipment to elevate your event experience." 
-          />
+          <SectionHeader
+            badge={<Badge variant="outline"><Award className="mr-2 h-4 w-4" />Premium Equipment</Badge>}
+            title="Professional Event Rentals"
+            description="High-quality equipment to elevate your event experience." />
+
           
-          {loadingRentals ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {homeRentals.slice(0, 6).map(rental => (
-                <GlassmorphismCard 
-                  key={rental.id} 
-                  className="group overflow-hidden hover:shadow-lg transition-shadow duration-300"
-                >
+          {loadingRentals ?
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
+            </div> :
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {homeRentals.slice(0, 6).map((rental) =>
+            <GlassmorphismCard
+              key={rental.id}
+              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
+
                   <div className="relative">
-                    {rental.image_url ? (
-                      <div className="aspect-video relative overflow-hidden">
-                        <OptimizedImage 
-                          src={rental.image_url} 
-                          alt={rental.title} 
-                          loading="lazy" 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        />
-                      </div>
-                    ) : (
-                      <div className="aspect-video bg-muted flex items-center justify-center">
+                    {rental.image_url ?
+                <div className="aspect-video relative overflow-hidden">
+                        <OptimizedImage
+                    src={rental.image_url}
+                    alt={rental.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+
+                      </div> :
+
+                <div className="aspect-video bg-muted flex items-center justify-center">
                         <Award className="h-12 w-12 text-muted-foreground" />
                       </div>
-                    )}
+                }
                   </div>
                   
                   <div className="p-6 space-y-4">
@@ -354,26 +354,26 @@ const Index = () => {
                       <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
                         {rental.title}
                       </h3>
-                      {rental.price_range && (
-                        <Badge variant="secondary" className="font-medium">
+                      {rental.price_range &&
+                  <Badge variant="secondary" className="font-medium">
                           {rental.price_range}
                         </Badge>
-                      )}
+                  }
                       <p className="text-muted-foreground leading-relaxed">
                         {rental.short_description}
                       </p>
                     </div>
                     
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => {
-                          setSelectedRental(rental);
-                          setInquiryDialogOpen(true);
-                        }}
-                      >
+                      <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => {
+                      setSelectedRental(rental);
+                      setInquiryDialogOpen(true);
+                    }}>
+
                         Inquire
                       </Button>
                       <Button size="sm" className="bg-gradient-to-r from-primary to-accent" asChild>
@@ -382,56 +382,56 @@ const Index = () => {
                     </div>
                   </div>
                 </GlassmorphismCard>
-              ))}
+            )}
             </div>
-          )}
+          }
 
-          {homeRentals.length > 0 && (
-            <div className="text-center mt-12">
+          {homeRentals.length > 0 &&
+          <div className="text-center mt-12">
               <Button size="lg" variant="outline" asChild>
                 <Link to="/ecommerce">
                   View All Equipment <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
-          )}
+          }
         </div>
       </Section>
 
       {/* Trusted Clients */}
-      {activeClients.length > 0 && (
-        <Section spacing="large">
+      {activeClients.length > 0 &&
+      <Section spacing="large">
           <div className="container mx-auto px-4">
-            <SectionHeader 
-              badge={<Badge variant="outline"><Users className="mr-2 h-4 w-4" />Trusted Partners</Badge>} 
-              title="Prestigious Clientele" 
-              description="Proud to serve leading organizations across various industries." 
-            />
+            <SectionHeader
+            badge={<Badge variant="outline"><Users className="mr-2 h-4 w-4" />Trusted Partners</Badge>}
+            title="Prestigious Clientele"
+            description="Proud to serve leading organizations across various industries." />
+
             
             <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
-              {activeClients.slice(0, 8).map((client) => (
-                <div 
-                  key={client.id} 
-                  className="p-4 grayscale hover:grayscale-0 transition-all duration-300"
-                >
-                  <OptimizedImage 
-                    src={client.logo_url} 
-                    alt={client.name} 
-                    loading="lazy" 
-                    className="h-12 w-auto" 
-                  />
+              {activeClients.slice(0, 8).map((client) =>
+            <div
+              key={client.id}
+              className="p-4 grayscale hover:grayscale-0 transition-all duration-300">
+
+                  <OptimizedImage
+                src={client.logo_url}
+                alt={client.name}
+                loading="lazy"
+                className="h-12 w-auto" />
+
                 </div>
-              ))}
+            )}
             </div>
           </div>
         </Section>
-      )}
+      }
 
       {/* Testimonials - Lazy loaded */}
       <Section variant="gradient" spacing="large">
         <div className="container mx-auto px-4">
           <Suspense fallback={
-            <div className="text-center py-12">
+          <div className="text-center py-12">
               <Skeleton className="h-8 w-64 mx-auto mb-4" />
               <Skeleton className="h-32 w-full max-w-2xl mx-auto" />
             </div>
@@ -461,11 +461,11 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="group bg-gradient-to-r from-primary to-accent px-8 py-4 text-lg font-semibold" 
-                onClick={() => setInquiryDialogOpen(true)}
-              >
+              <Button
+                size="lg"
+                className="group bg-gradient-to-r from-primary to-accent px-8 py-4 text-lg font-semibold"
+                onClick={() => setInquiryDialogOpen(true)}>
+
                 Start Planning 
                 <Calendar className="ml-2 h-5 w-5" />
               </Button>
@@ -489,20 +489,20 @@ const Index = () => {
               {selectedRental ? `Inquire About ${selectedRental.title}` : 'Event Inquiry'}
             </DialogTitle>
           </DialogHeader>
-          <InquiryForm 
-            formType={selectedRental ? "rental" : "inquiry"} 
-            title={selectedRental ? `${selectedRental.title} Inquiry` : "General Inquiry"} 
-            rentalId={selectedRental?.id} 
-            rentalTitle={selectedRental?.title} 
+          <InquiryForm
+            formType={selectedRental ? "rental" : "inquiry"}
+            title={selectedRental ? `${selectedRental.title} Inquiry` : "General Inquiry"}
+            rentalId={selectedRental?.id}
+            rentalTitle={selectedRental?.title}
             onSuccess={() => {
               setInquiryDialogOpen(false);
               setSelectedRental(null);
-            }} 
-          />
+            }} />
+
         </DialogContent>
       </Dialog>
-    </Layout>
-  );
+    </Layout>);
+
 };
 
 export default Index;

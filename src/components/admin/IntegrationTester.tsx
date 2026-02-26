@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, XCircle, TestTube, Loader2, TrendingUp, Users } from "lucide-react";
+import { CheckCircle, XCircle, TestTube, Loader2, TrendingUp, Users, Database } from "lucide-react";
 
 declare global {
   interface Window {
@@ -14,9 +14,9 @@ declare global {
 
 const IntegrationTester = () => {
   const [isTestingGA, setIsTestingGA] = useState(false);
-  const [isTestingHubSpot, setIsTestingHubSpot] = useState(false);
+  const [isTestingZoho, setIsTestingZoho] = useState(false);
   const [gaStatus, setGaStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [hubspotStatus, setHubspotStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [zohoStatus, setZohoStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { toast } = useToast();
 
   const testGoogleAnalytics = async () => {
@@ -51,8 +51,8 @@ const IntegrationTester = () => {
     }
   };
 
-  const testHubSpotIntegration = async () => {
-    setIsTestingHubSpot(true);
+  const testZohoIntegration = async () => {
+    setIsTestingZoho(true);
     try {
       const testData = {
         submissionId: null,
@@ -66,7 +66,7 @@ const IntegrationTester = () => {
         location: 'Test Location',
       };
 
-      const response = await supabase.functions.invoke('hubspot-integration', {
+      const response = await supabase.functions.invoke('zoho-crm', {
         body: testData,
       });
 
@@ -74,26 +74,26 @@ const IntegrationTester = () => {
         throw new Error(response.error.message);
       }
 
-      setHubspotStatus('success');
+      setZohoStatus('success');
       toast({
-        title: "HubSpot Test",
-        description: "Test contact created successfully in HubSpot CRM!",
+        title: "Zoho CRM Test",
+        description: "Test lead created successfully in Zoho CRM!",
       });
     } catch (error) {
-      setHubspotStatus('error');
+      setZohoStatus('error');
       toast({
-        title: "HubSpot Error",
-        description: error instanceof Error ? error.message : "Failed to create test contact",
+        title: "Zoho CRM Error",
+        description: error instanceof Error ? error.message : "Failed to create test lead",
         variant: "destructive"
       });
     } finally {
-      setIsTestingHubSpot(false);
+      setIsTestingZoho(false);
     }
   };
 
   const resetTests = () => {
     setGaStatus('idle');
-    setHubspotStatus('idle');
+    setZohoStatus('idle');
   };
 
   return (
@@ -151,43 +151,43 @@ const IntegrationTester = () => {
           </CardContent>
         </Card>
 
-        {/* HubSpot Test */}
+        {/* Zoho CRM Test */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-primary" />
-              <span>HubSpot CRM</span>
-              <StatusBadge status={hubspotStatus} />
+              <Database className="h-5 w-5 text-primary" />
+              <span>Zoho CRM</span>
+              <StatusBadge status={zohoStatus} />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-sm text-muted-foreground">
-              <p><strong>API Key:</strong> pat-na2-c98***7860 (Hidden)</p>
-              <p><strong>Portal ID:</strong> 243650365</p>
-              <p><strong>App ID:</strong> 18272842</p>
+              <p><strong>Integration:</strong> Zoho CRM v2 API</p>
+              <p><strong>Auth:</strong> OAuth2 (Refresh Token)</p>
+              <p><strong>Module:</strong> Leads</p>
             </div>
             
             <div className="space-y-2">
               <h4 className="font-medium">Test Details:</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Creates test contact in HubSpot</li>
-                <li>• Verifies API connectivity</li>
-                <li>• Check your HubSpot contacts for test entry</li>
+                <li>• Creates test lead in Zoho CRM</li>
+                <li>• Verifies OAuth2 token exchange</li>
+                <li>• Check your Zoho CRM Leads for test entry</li>
               </ul>
             </div>
 
             <Button 
-              onClick={testHubSpotIntegration}
-              disabled={isTestingHubSpot}
+              onClick={testZohoIntegration}
+              disabled={isTestingZoho}
               className="w-full"
             >
-              {isTestingHubSpot ? (
+              {isTestingZoho ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Testing HubSpot...
+                  Testing Zoho CRM...
                 </>
               ) : (
-                'Test HubSpot Integration'
+                'Test Zoho CRM Integration'
               )}
             </Button>
           </CardContent>
@@ -214,13 +214,13 @@ const IntegrationTester = () => {
             </div>
             
             <div className="flex items-center justify-between p-3 border rounded-lg">
-              <span className="font-medium">HubSpot CRM</span>
+              <span className="font-medium">Zoho CRM</span>
               <div className="flex items-center space-x-2">
-                <StatusIcon status={hubspotStatus} />
+                <StatusIcon status={zohoStatus} />
                 <span className="text-sm text-muted-foreground">
-                  {hubspotStatus === 'idle' && 'Not tested'}
-                  {hubspotStatus === 'success' && 'Working correctly'}
-                  {hubspotStatus === 'error' && 'API connection issue'}
+                  {zohoStatus === 'idle' && 'Not tested'}
+                  {zohoStatus === 'success' && 'Working correctly'}
+                  {zohoStatus === 'error' && 'API connection issue'}
                 </span>
               </div>
             </div>

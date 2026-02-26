@@ -393,7 +393,7 @@ const Index = () => {
         </div>
       </Section>
 
-      {/* Trusted Clients */}
+      {/* Trusted Clients - Marquee */}
       {activeClients.length > 0 &&
       <Section spacing="large">
           <div className="container mx-auto px-4">
@@ -402,21 +402,25 @@ const Index = () => {
             title="Prestigious Clientele"
             description="Proud to serve leading organizations across various industries." />
 
-            
-            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
-              {activeClients.slice(0, 8).map((client) =>
-            <div
-              key={client.id}
-              className="p-4 grayscale hover:grayscale-0 transition-all duration-300">
-
-                  <OptimizedImage
-                src={client.logo_url}
-                alt={client.name}
-                loading="lazy"
-                className="h-12 w-auto" />
-
-                </div>
-            )}
+            <div className="overflow-hidden relative">
+              {/* Fade edges */}
+              <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+              
+              <div className="flex animate-marquee w-max items-center gap-12 lg:gap-16 py-4">
+                {/* Duplicate the list for seamless loop */}
+                {[...activeClients, ...activeClients].map((client, i) =>
+                  <div
+                    key={`${client.id}-${i}`}
+                    className="flex-shrink-0 grayscale hover:grayscale-0 transition-all duration-300 px-2">
+                    <OptimizedImage
+                      src={client.logo_url}
+                      alt={client.name}
+                      loading="lazy"
+                      className="h-12 w-auto object-contain" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </Section>

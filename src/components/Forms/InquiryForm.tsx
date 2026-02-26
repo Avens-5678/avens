@@ -158,7 +158,7 @@ const InquiryForm = ({
   };
   return (
     <>
-      <Card className="w-full max-w-md mx-auto">
+      <Card className="w-full">
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>

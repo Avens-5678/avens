@@ -847,42 +847,95 @@ export type Database = {
         }
         Relationships: []
       }
-      vendor_inventory: {
+      vendor_availability: {
         Row: {
           created_at: string
-          description: string | null
+          date: string
           id: string
-          image_url: string | null
-          is_available: boolean
-          name: string
-          price_per_day: number | null
-          quantity: number
+          inventory_item_id: string | null
+          is_booked: boolean | null
+          notes: string | null
           updated_at: string
           vendor_id: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
+          date: string
           id?: string
-          image_url?: string | null
-          is_available?: boolean
-          name: string
-          price_per_day?: number | null
-          quantity?: number
+          inventory_item_id?: string | null
+          is_booked?: boolean | null
+          notes?: string | null
           updated_at?: string
           vendor_id: string
         }
         Update: {
           created_at?: string
+          date?: string
+          id?: string
+          inventory_item_id?: string | null
+          is_booked?: boolean | null
+          notes?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_availability_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_inventory: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_available: boolean
+          is_verified: boolean | null
+          name: string
+          price_per_day: number | null
+          quantity: number
+          updated_at: string
+          vendor_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
           is_available?: boolean
+          is_verified?: boolean | null
+          name: string
+          price_per_day?: number | null
+          quantity?: number
+          updated_at?: string
+          vendor_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          is_verified?: boolean | null
           name?: string
           price_per_day?: number | null
           quantity?: number
           updated_at?: string
           vendor_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }

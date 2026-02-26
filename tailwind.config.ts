@@ -21,10 +21,10 @@ export default {
 			screens: {
 				'xs': '480px',
 			},
-			fontFamily: {
-				sans: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+		fontFamily: {
+				sans: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
 				display: ['Playfair Display', 'serif'],
-				body: ['Inter', 'system-ui', 'sans-serif'],
+				body: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
 			},
 			fontSize: {
 				'xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.05em' }],

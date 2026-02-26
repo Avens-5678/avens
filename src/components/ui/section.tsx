@@ -17,15 +17,15 @@ export function Section({
   container = true
 }: SectionProps) {
   const spacingClasses = {
-    compact: "py-12 lg:py-16",
-    default: "py-16 lg:py-20", 
-    large: "py-20 lg:py-24"
+    compact: "py-14 lg:py-18",
+    default: "py-16 lg:py-24", 
+    large: "py-20 lg:py-28"
   }
 
   const variantClasses = {
     default: "",
-    muted: "bg-muted/50",
-    gradient: "bg-gradient-to-br from-primary/10 to-accent/10"
+    muted: "bg-muted/40",
+    gradient: "bg-gradient-to-br from-primary/4 via-background to-secondary/3"
   }
 
   return (
@@ -37,7 +37,7 @@ export function Section({
       )}
     >
       {container ? (
-        <div className="container mx-auto px-4 max-w-6xl">
+        <div className="container mx-auto px-5 sm:px-6 max-w-6xl">
           {children}
         </div>
       ) : (
@@ -71,15 +71,15 @@ export function SectionHeader({
       className
     )}>
       {badge && (
-        <div className="mb-4">
+        <div className="mb-5">
           {badge}
         </div>
       )}
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-gradient-primary">
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
         {title}
       </h2>
       {description && (
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           {description}
         </p>
       )}

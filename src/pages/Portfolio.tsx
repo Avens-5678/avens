@@ -13,16 +13,12 @@ const Portfolio = () => {
   const { data: portfolio, isLoading: loadingPortfolio } = usePortfolio();
   const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  // Filter portfolio items by selected filter
   const filteredPortfolio = portfolio?.filter(item => {
     if (activeFilter === "all") return true;
-    // Find the associated event and check its type
     const associatedEvent = events?.find(event => event.id === item.event_id);
     return associatedEvent?.event_type === activeFilter && associatedEvent?.is_active === true;
   }) || [];
 
-  // Show ALL portfolio items as cover tiles on portfolio page
-  // Before/after functionality should only be in gallery
   const allPortfolioItems = filteredPortfolio;
   
   console.log('Portfolio debug:', { 
@@ -39,8 +35,8 @@ const Portfolio = () => {
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading portfolio...</p>
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent mx-auto mb-4" />
+            <p className="text-muted-foreground text-sm">Loading portfolio...</p>
           </div>
         </div>
       </Layout>
@@ -49,25 +45,25 @@ const Portfolio = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
-        <div className="container mx-auto px-4 text-center">
-          <Badge variant="secondary" className="mb-4">
-            <Camera className="mr-2 h-4 w-4" />
+      {/* Hero */}
+      <section className="py-20 lg:py-28 bg-gradient-to-br from-primary/4 via-background to-secondary/3">
+        <div className="container mx-auto px-5 sm:px-6 text-center max-w-6xl">
+          <Badge variant="outline" className="mb-5">
+            <Camera className="mr-2 h-3.5 w-3.5" />
             Our Work
           </Badge>
-          <h1 className="mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="mb-6 text-foreground">
             Event Portfolio
           </h1>
-          <p className="text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Explore our collection of successful events and celebrations. Each project showcases our commitment to excellence and attention to detail.
           </p>
         </div>
       </section>
 
-      {/* Filter Section */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
+      {/* Filters */}
+      <section className="py-10">
+        <div className="container mx-auto px-5 sm:px-6">
           <FilterButtons 
             activeFilter={activeFilter} 
             onFilterChange={setActiveFilter} 
@@ -75,20 +71,20 @@ const Portfolio = () => {
         </div>
       </section>
 
-      {/* Event Cards Grid */}
-      <section className="pb-20">
-        <div className="container mx-auto px-4">
+      {/* Portfolio Grid */}
+      <section className="pb-20 lg:pb-28">
+        <div className="container mx-auto px-5 sm:px-6">
           {allPortfolioItems.length > 0 ? (
             <>
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
                   Event Portfolio
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                <p className="text-base text-muted-foreground max-w-2xl mx-auto">
                   Explore our collection of successful events and celebrations
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {allPortfolioItems.map((portfolioItem) => {
                   const associatedEvent = events?.find(event => event.id === portfolioItem.event_id);
                   return (
@@ -107,13 +103,13 @@ const Portfolio = () => {
             </>
           ) : (
             <div className="text-center py-20">
-              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                <Camera className="h-12 w-12 text-muted-foreground" />
+              <div className="w-20 h-20 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Camera className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="mb-4">
+              <h3 className="mb-3 text-foreground">
                 {activeFilter === "all" ? "Portfolio Coming Soon" : "No Events Found"}
               </h3>
-              <p className="text-lg lg:text-xl text-muted-foreground max-w-md mx-auto">
+              <p className="text-base text-muted-foreground max-w-md mx-auto">
                 {activeFilter === "all" 
                   ? "We're currently building our portfolio gallery. Check back soon to see our amazing work!"
                   : "No events found for the selected category. Try selecting a different filter."
@@ -124,16 +120,16 @@ const Portfolio = () => {
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-6">
+      {/* CTA */}
+      <section className="py-20 lg:py-28 bg-gradient-to-br from-primary/4 via-background to-secondary/3">
+        <div className="container mx-auto px-5 sm:px-6 text-center max-w-6xl">
+          <h2 className="mb-6 text-foreground">
             Ready to Create Your Own Success Story?
           </h2>
-          <p className="text-lg lg:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-base text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
             Let us help you plan and execute an unforgettable event that will be featured in our next portfolio showcase.
           </p>
-          <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent">
+          <Button asChild size="lg" variant="premium">
             <Link to="/services">
               Start Planning <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

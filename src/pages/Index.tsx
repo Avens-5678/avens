@@ -145,34 +145,30 @@ const Index = () => {
           </>
         }
 
-        <div className="container mx-auto px-4 text-center relative z-20">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight animate-fade-in">
-            <GradientText className="block">
-              {currentBanner?.title || "Creating Extraordinary Experiences"}
-            </GradientText>
+        <div className="container mx-auto px-5 sm:px-6 text-center relative z-20">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-[1.05] animate-fade-in text-white">
+            {currentBanner?.title || "Creating Extraordinary Experiences"}
           </h1>
 
-          <p className="text-2xl lg:text-3xl font-display mb-12 max-w-4xl mx-auto leading-relaxed font-medium tracking-wide text-white/90">
+          <p className="text-lg sm:text-xl lg:text-2xl font-body mb-12 max-w-3xl mx-auto leading-relaxed text-white/80">
             {currentBanner?.subtitle || "Where vision meets execution. We transform your dreams into unforgettable moments."}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button
               size="lg"
-              className="group bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 px-8 py-4 text-lg font-semibold"
+              className="bg-secondary hover:bg-secondary/90 text-white px-8 py-4 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl"
               asChild>
-
               <Link to={`/events/${currentBanner?.event_type?.toLowerCase().replace(/\s+/g, '-') || 'corporate'}`}>
                 {currentBanner?.button_text || "Explore Services"}
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button
               variant="outline"
               size="lg"
-              className="group backdrop-blur-sm bg-background/80 border-border/50 hover:bg-background/90 px-8 py-4 text-lg font-semibold"
+              className="backdrop-blur-md bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white px-8 py-4 text-base font-semibold rounded-xl"
               asChild>
-
               <Link to="/portfolio">
                 View Portfolio
                 <Camera className="ml-2 h-5 w-5" />
@@ -200,18 +196,18 @@ const Index = () => {
         }
       </HeroSection>
 
-      {/* Stats Section - Static, no animations */}
-      <Section spacing="large">
+      {/* Stats Section */}
+      <Section spacing="large" variant="muted">
         <StatsContainer>
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
               The only platform that creates extraordinary
               <br />
               <span className="text-primary">& memorable events</span> with precision
             </h2>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             <StatCard number="500+" label="EVENTS MANAGED" />
             <StatCard number="50+" label="CORPORATE CLIENTS" />
             <StatCard number="5000+" label="SATISFIED GUESTS" />
@@ -276,32 +272,31 @@ const Index = () => {
       {/* About CTA Section */}
       {aboutContent &&
       <Section variant="gradient" spacing="large">
-          <div className="container mx-auto px-4 text-center">
-            <div className="max-w-4xl mx-auto space-y-8">
-              <Badge variant="secondary" className="mb-6 px-6 py-2">
-                <User className="mr-2 h-4 w-4" />
+          <div className="container mx-auto px-5 sm:px-6 text-center">
+            <div className="max-w-3xl mx-auto space-y-6">
+              <Badge variant="outline" className="mb-4">
+                <User className="mr-2 h-3.5 w-3.5" />
                 About Us
               </Badge>
               
-              <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
                 Ready to Start Planning Your
-                <GradientText className="block">Perfect Event?</GradientText>
+                <span className="text-primary block">Perfect Event?</span>
               </h2>
               
-              <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
+              <p className="text-lg text-muted-foreground leading-relaxed">
                 Let's bring your vision to life with our expertise in creating unforgettable experiences.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
                 <Button
                 size="lg"
-                className="group bg-gradient-to-r from-primary to-accent px-8 py-4 text-lg font-semibold"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
                 onClick={() => setInquiryDialogOpen(true)}>
-
                   Start Planning Today
                   <Calendar className="ml-2 h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="lg" className="px-8 py-4 text-lg font-semibold" asChild>
+                <Button variant="outline" size="lg" className="px-8 py-4 text-base font-semibold" asChild>
                   <Link to="/about">
                     Learn About Us <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
@@ -443,33 +438,32 @@ const Index = () => {
 
       {/* Final CTA */}
       <Section variant="gradient" spacing="large">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <Badge variant="secondary" className="mb-6 px-6 py-2">
-              <Heart className="mr-2 h-4 w-4" />
+        <div className="container mx-auto px-5 sm:px-6 text-center">
+          <div className="max-w-3xl mx-auto space-y-6">
+            <Badge variant="outline" className="mb-4">
+              <Heart className="mr-2 h-3.5 w-3.5" />
               Let's Create Magic Together
             </Badge>
             
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
               Ready to Create Your
-              <GradientText className="block">Dream Event?</GradientText>
+              <span className="text-primary block">Dream Event?</span>
             </h2>
             
-            <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
+            <p className="text-lg text-muted-foreground leading-relaxed">
               From conceptualization to execution, we're here to transform your vision into an 
               extraordinary experience.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
               <Button
                 size="lg"
-                className="group bg-gradient-to-r from-primary to-accent px-8 py-4 text-lg font-semibold"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
                 onClick={() => setInquiryDialogOpen(true)}>
-
                 Start Planning 
                 <Calendar className="ml-2 h-5 w-5" />
               </Button>
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg font-semibold" asChild>
+              <Button variant="outline" size="lg" className="px-8 py-4 text-base font-semibold" asChild>
                 <Link to="/portfolio">
                   View Our Work
                   <Camera className="ml-2 h-5 w-5" />

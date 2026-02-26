@@ -1,382 +1,133 @@
 
-# Role-Based Access Control (RBAC) Implementation Plan
+# Phase 1: Auth & Branding Overhaul for "Evnting"
 
 ## Overview
-This plan implements a comprehensive three-tier RBAC system for Avens Expositions with Super Admin, Client, and Vendor roles. The system will enable clients to request events, admins to assign vendors, and vendors to manage their inventory and job assignments.
+Rebrand from "Avens" to "Evnting" across the entire application, implement intelligent unified sign-in with role auto-detection, add Google Sign-In, and build a Forgot Password flow.
 
 ---
 
-## Phase 1: Database Schema Design
+## 1. Global Rebrand: "Avens" to "Evnting"
 
-### 1.1 Create User Roles Table (Security Best Practice)
-Following Supabase security guidelines, roles will be stored in a separate `user_roles` table rather than on the profiles table to prevent privilege escalation attacks.
+Update all references across 12+ files:
 
-```text
-+------------------+       +-------------------+
-|   auth.users     |       |   user_roles      |
-+------------------+       +-------------------+
-| id (uuid)        |<----->| user_id (uuid)    |
-| email            |       | role (enum)       |
-+------------------+       | created_at        |
-                           +-------------------+
-                           
-Role Enum: 'admin' | 'client' | 'vendor'
-```
-
-### 1.2 Create Event Requests Table
-New table for client event requests with vendor assignment workflow.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Primary key |
-| client_id | uuid | FK to auth.users |
-| assigned_vendor_id | uuid | FK to auth.users (nullable) |
-| status | enum | pending, approved, in-progress, completed |
-| event_type | text | Type of event requested |
-| event_date | date | Requested event date |
-| location | text | Event location |
-| budget | text | Budget range |
-| guest_count | integer | Expected guests |
-| requirements | text | Detailed requirements |
-| created_at | timestamp | Request timestamp |
-| updated_at | timestamp | Last update |
-
-### 1.3 Create Vendor Inventory Table
-Table for vendors to list their rental equipment.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Primary key |
-| vendor_id | uuid | FK to auth.users (owner) |
-| name | text | Item name |
-| description | text | Item description |
-| quantity | integer | Available quantity |
-| price_per_day | numeric | Daily rental price |
-| image_url | text | Item image |
-| is_available | boolean | Availability status |
-| created_at | timestamp | Created timestamp |
-| updated_at | timestamp | Updated timestamp |
-
-### 1.4 Extend Profiles Table
-Add contact fields for vendor-client communication.
-
-| New Column | Type | Description |
-|------------|------|-------------|
-| phone | text | Contact phone |
-| company_name | text | Business name |
-| bio | text | Short description |
+- **Navbar** (`src/components/Layout/Navbar.tsx`): Already shows "Evnting.com" -- confirm consistency
+- **Logo component** (`src/components/ui/logo.tsx`): Change "Avens" to "Evnting" and subtitle to "Online platform for event production"
+- **Footer** (`src/components/Layout/Footer.tsx`): Replace Avens logo reference, copyright text, and email
+- **Register page** (`src/pages/auth/Register.tsx`): "Join Avens Events Platform" to "Join Evnting"
+- **Admin Login** (`src/pages/admin/AdminLogin.tsx`): Update placeholder email
+- **WhatsApp Bot** (`src/components/ui/whatsapp-bot.tsx`): All "Avens" references in messages
+- **Event page template** (`src/components/templates/EventPageTemplate.tsx`): "At Avens Events" text
+- **Government Events** (`src/pages/events/GovernmentEvents.tsx`): Any Avens references
+- **Team page** (`src/pages/Team.tsx`): Contact email
+- **Marketplace** (`src/components/vendor/Marketplace.tsx`): "Avens Marketplace" to "Evnting Marketplace"
+- **Integration Tester** (`src/components/admin/IntegrationTester.tsx`): Test email and stream name
+- **Custom Knowledge** (project settings): Update brand references
 
 ---
 
-## Phase 2: Security Functions & RLS Policies
+## 2. Intelligent Unified Sign-In
 
-### 2.1 Security Definer Functions
+Replace the current separate Auth page (`/auth`) with a smart sign-in flow:
 
-```text
-has_role(user_id, role) -> boolean
-  - Checks if user has specific role
-  - SECURITY DEFINER to bypass RLS
+**How it works:**
+1. User enters email only (single field, no password initially)
+2. System checks:
+   - Is this email in `admin_users`? --> Redirect to Admin OTP login
+   - Is this email registered in `auth.users`? --> Show password field for sign-in
+   - Is this email registered with **both** client and vendor roles? --> After password, show a role toggle to pick dashboard
+   - Not registered? --> Show "Create Account" option
+3. Admin OTP flow remains unchanged (already working)
 
-get_user_role(user_id) -> text
-  - Returns user's current role
-  - Used for dashboard routing
-```
+**Technical approach:**
+- Create a new edge function `check-user-type` that accepts an email and returns `{ exists: boolean, isAdmin: boolean, roles: string[] }` using service role key to query `admin_users` and `user_roles` tables securely
+- Update `src/pages/Auth.tsx` to implement a multi-step form: Email --> Password (or Admin redirect) --> Role toggle (if dual-role)
+- Keep existing registration flow at `/auth/register`
 
-### 2.2 RLS Policy Matrix
-
-| Table | Admin | Client | Vendor |
-|-------|-------|--------|--------|
-| **event_requests** | Full CRUD | SELECT/INSERT own | SELECT assigned only |
-| **vendor_inventory** | Full CRUD | SELECT all | CRUD own items |
-| **profiles** | Full CRUD | SELECT own + assigned vendor | SELECT own |
-| **rentals (existing)** | Full CRUD | SELECT | SELECT (marketplace) |
-| **user_roles** | Full CRUD | SELECT own | SELECT own |
-
-### 2.3 Critical Security Rules
-
-**Event Requests:**
-- Clients: `client_id = auth.uid()` for SELECT/INSERT
-- Vendors: `assigned_vendor_id = auth.uid()` for SELECT, can UPDATE status only
-- Admins: Full access via `has_role(auth.uid(), 'admin')`
-
-**Vendor Inventory:**
-- Vendors: `vendor_id = auth.uid()` for CRUD
-- Others: SELECT only for marketplace view
-
----
-
-## Phase 3: Authentication Flow Updates
-
-### 3.1 Unified Login Page Enhancement
-Update `/auth` page to handle all role types:
-
-```text
-Login Flow:
-1. User enters email/password
-2. Supabase authenticates user
-3. Fetch user role from user_roles table
-4. Redirect based on role:
-   - admin    -> /admin/dashboard
-   - client   -> /client/dashboard  
-   - vendor   -> /vendor/dashboard
-```
-
-### 3.2 New Pages to Create
-
-| Route | Component | Purpose |
-|-------|-----------|---------|
-| /client/dashboard | ClientDashboard.tsx | Client event management |
-| /vendor/dashboard | VendorDashboard.tsx | Vendor jobs & inventory |
-| /auth/register | Registration.tsx | New user signup with role selection |
-
-### 3.3 Protected Route Enhancement
-Update `ProtectedRoute.tsx` to support role-based access:
-
-```text
-<ProtectedRoute allowedRoles={['admin']}>
-  <AdminDashboard />
-</ProtectedRoute>
-```
-
----
-
-## Phase 4: Client Dashboard
-
-### 4.1 Components Structure
-
-```text
-/client/dashboard
-├── EventRequestForm     (Submit new requests)
-├── EventTracker         (View all requests)
-│   ├── PendingCard      (Status: pending)
-│   └── AssignedCard     (Shows vendor info)
-└── ProfileSettings      (Update contact info)
-```
-
-### 4.2 Event Request Form Fields
-- Event Type (dropdown)
-- Event Date (date picker)
-- Location (text)
-- Guest Count (number)
-- Budget Range (dropdown)
-- Requirements (textarea)
-
-### 4.3 Event Tracker Logic
-
-```text
-IF assigned_vendor_id IS NULL:
-  Display: "Pending Review" badge
-  Show: Event details only
-  
-ELSE:
-  Display: "Vendor Assigned" badge
-  Show: Event details + Vendor card
-  Vendor Card includes:
-    - Vendor Name
-    - Phone Number
-    - Email Address
-    - Company Name
-```
-
----
-
-## Phase 5: Vendor Dashboard
-
-### 5.1 Components Structure
-
-```text
-/vendor/dashboard
-├── Tabs
-│   ├── Job Board        (Assigned events)
-│   ├── My Inventory     (CRUD equipment)
-│   └── Marketplace      (Avens rentals catalog)
-└── ProfileSettings
-```
-
-### 5.2 Job Board Features
-- List of events where `assigned_vendor_id = current_user`
-- Status badges (Approved, In-Progress, Completed)
-- "Update Status" button with dropdown
-- Event details expansion
-
-### 5.3 Inventory Manager
-- Add new equipment items
-- Edit existing items
-- Toggle availability
-- Delete items
-- Image upload support
-
-### 5.4 Marketplace View
-- Read-only view of existing `rentals` table
-- Filter by category
-- Search functionality
-- Contact Avens for cross-rental inquiries
-
----
-
-## Phase 6: Admin Dashboard Enhancement
-
-### 6.1 New "Event Center" Tab
-Add to existing admin dashboard tabs:
-
-```text
-Event Center Features:
-├── All Event Requests Table
-│   ├── Client Name
-│   ├── Event Type
-│   ├── Date
-│   ├── Status
-│   └── Actions
-├── Assign Vendor Dropdown
-│   └── Lists all active vendors
-├── Status Override Controls
-└── Communication History
-```
-
-### 6.2 Vendor Assignment Flow
-
-```text
-1. Admin views incoming request
-2. Clicks "Assign Vendor" dropdown
-3. Selects vendor from list
-4. System updates:
-   - Sets assigned_vendor_id
-   - Changes status to "approved"
-   - Triggers notification (future)
-5. Client can now see vendor contact info
-```
-
-### 6.3 User Management Section
-- View all users by role
-- Activate/deactivate accounts
-- Change user roles (super admin only)
-
----
-
-## Phase 7: File Structure
-
-### New Files to Create
-
-```text
-src/
-├── pages/
-│   ├── client/
-│   │   └── ClientDashboard.tsx
-│   ├── vendor/
-│   │   └── VendorDashboard.tsx
-│   └── auth/
-│       └── Register.tsx
-├── components/
-│   ├── client/
-│   │   ├── EventRequestForm.tsx
-│   │   ├── EventTracker.tsx
-│   │   └── VendorCard.tsx
-│   ├── vendor/
-│   │   ├── JobBoard.tsx
-│   │   ├── InventoryManager.tsx
-│   │   └── Marketplace.tsx
-│   └── admin/
-│       ├── EventCenter.tsx
-│       ├── VendorAssignment.tsx
-│       └── UserManagement.tsx
-├── hooks/
-│   ├── useUserRole.ts
-│   ├── useEventRequests.ts
-│   └── useVendorInventory.ts
-```
-
-### Files to Modify
-
-```text
-src/
-├── App.tsx                    (Add new routes)
-├── pages/Auth.tsx             (Add registration link)
-├── pages/admin/AdminDashboard.tsx (Add Event Center tab)
-├── components/ProtectedRoute.tsx  (Add role checking)
-└── hooks/useAuth.ts           (Add role fetching)
-```
-
----
-
-## Technical Details
-
-### Database Migration SQL Preview
-
+**Database function needed:**
 ```sql
--- Create role enum
-CREATE TYPE public.app_role AS ENUM ('admin', 'client', 'vendor');
-
--- Create user_roles table
-CREATE TABLE public.user_roles (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  role app_role NOT NULL,
-  created_at timestamptz DEFAULT now(),
-  UNIQUE(user_id, role)
-);
-
--- Create event_requests table
-CREATE TABLE public.event_requests (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  client_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  assigned_vendor_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  status text DEFAULT 'pending',
-  event_type text NOT NULL,
-  event_date date,
-  location text,
-  budget text,
-  guest_count integer,
-  requirements text,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-
--- Create vendor_inventory table
-CREATE TABLE public.vendor_inventory (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  vendor_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  name text NOT NULL,
-  description text,
-  quantity integer DEFAULT 1,
-  price_per_day numeric,
-  image_url text,
-  is_available boolean DEFAULT true,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-
--- Security definer function
-CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
-RETURNS boolean
-LANGUAGE sql
-STABLE
+CREATE OR REPLACE FUNCTION public.check_email_type(check_email text)
+RETURNS jsonb
+LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path TO 'public'
 AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.user_roles
-    WHERE user_id = _user_id AND role = _role
-  )
+DECLARE
+  result jsonb;
+  is_admin boolean;
+  user_id_found uuid;
+  user_roles_list text[];
+BEGIN
+  -- Check admin
+  SELECT EXISTS (SELECT 1 FROM admin_users WHERE email = check_email AND is_active = true) INTO is_admin;
+  
+  -- Check registered user
+  SELECT id INTO user_id_found FROM auth.users WHERE email = check_email LIMIT 1;
+  
+  -- Get roles if user exists
+  IF user_id_found IS NOT NULL THEN
+    SELECT array_agg(role::text) INTO user_roles_list FROM user_roles WHERE user_id = user_id_found;
+  END IF;
+  
+  result := jsonb_build_object(
+    'is_admin', is_admin,
+    'exists', user_id_found IS NOT NULL,
+    'roles', COALESCE(to_jsonb(user_roles_list), '[]'::jsonb)
+  );
+  
+  RETURN result;
+END;
 $$;
 ```
 
 ---
 
-## Implementation Order
+## 3. Google Sign-In
 
-1. **Database Setup** - Create tables, enums, functions, and RLS policies
-2. **Auth Updates** - Role fetching hook, protected route enhancement
-3. **Registration Page** - Allow new users to sign up with role selection
-4. **Client Dashboard** - Event request form and tracker
-5. **Vendor Dashboard** - Job board, inventory manager, marketplace
-6. **Admin Enhancement** - Event center and vendor assignment
-7. **Testing** - End-to-end flow verification
+- Add Google OAuth button to the Auth page using `supabase.auth.signInWithOAuth({ provider: 'google' })`
+- After Google sign-in, if the user has no role in `user_roles`, redirect to a role selection page (client or vendor)
+- Requires the user to configure Google OAuth in their Supabase dashboard (instructions will be provided)
 
 ---
 
-## Notes
+## 4. Forgot Password Flow
 
-- The existing `admin_users` table will be kept for backward compatibility
-- Super admin (leads@avens.in) will automatically have the 'admin' role
-- Email notifications for assignments can be added as a future enhancement
-- The system integrates with existing Supabase RLS patterns already in use
+**Two new components:**
+
+1. **Forgot Password** (added to Auth page as a link):
+   - Calls `supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + '/reset-password' })`
+   
+2. **Reset Password page** (`src/pages/ResetPassword.tsx`):
+   - New route at `/reset-password`
+   - Detects `type=recovery` from URL hash
+   - Shows new password + confirm password form
+   - Calls `supabase.auth.updateUser({ password })`
+
+---
+
+## Files to Create
+| File | Purpose |
+|------|---------|
+| `supabase/functions/check-user-type/index.ts` | Edge function for email role detection |
+| `src/pages/ResetPassword.tsx` | Password reset form page |
+
+## Files to Modify
+| File | Changes |
+|------|---------|
+| `src/components/ui/logo.tsx` | Rebrand to Evnting |
+| `src/components/Layout/Footer.tsx` | Rebrand text and copyright |
+| `src/pages/Auth.tsx` | Intelligent multi-step sign-in with Google OAuth |
+| `src/pages/auth/Register.tsx` | Rebrand text |
+| `src/pages/admin/AdminLogin.tsx` | Update placeholder |
+| `src/components/ui/whatsapp-bot.tsx` | Rebrand all messages |
+| `src/components/templates/EventPageTemplate.tsx` | Rebrand |
+| `src/components/vendor/Marketplace.tsx` | Rebrand |
+| `src/pages/Team.tsx` | Update contact email |
+| `src/components/admin/IntegrationTester.tsx` | Rebrand |
+| `src/App.tsx` | Add `/reset-password` route |
+| `supabase/config.toml` | Add check-user-type function config |
+
+## Database Migration
+- Add `check_email_type` security definer function for email role lookup
+
+## User Action Required
+- Configure Google OAuth provider in Supabase Dashboard (Authentication -> Providers -> Google) with Google Cloud Console credentials

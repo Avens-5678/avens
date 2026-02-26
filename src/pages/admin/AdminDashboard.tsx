@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -45,11 +44,36 @@ import UserManagement from "@/components/admin/UserManagement";
 import VendorInventoryAdmin from "@/components/admin/VendorInventoryAdmin";
 import LiveRentalOrders from "@/components/admin/LiveRentalOrders";
 import Logo from "@/components/ui/logo";
+import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 
 interface AdminDashboardProps {
   adminUser: any;
   onLogout?: () => void;
 }
+
+const sidebarItems: SidebarItem[] = [
+  { icon: BarChart3, label: "Overview", value: "overview" },
+  { icon: ClipboardList, label: "Event Center", value: "events-center" },
+  { icon: UsersRound, label: "Users", value: "users" },
+  { icon: ShieldCheck, label: "Vendors", value: "vendor-inventory" },
+  { icon: Truck, label: "Orders", value: "rental-orders" },
+  { icon: Home, label: "Banners", value: "banners" },
+  { icon: Calendar, label: "Services", value: "services" },
+  { icon: Calendar, label: "Events", value: "events" },
+  { icon: Calendar, label: "Rentals", value: "rentals" },
+  { icon: Image, label: "Portfolio", value: "portfolio" },
+  { icon: Users, label: "Clients", value: "clients" },
+  { icon: Star, label: "Reviews", value: "testimonials" },
+  { icon: MessageSquare, label: "Forms", value: "forms" },
+  { icon: HelpCircle, label: "FAQ", value: "faq" },
+  { icon: Settings, label: "Integrations", value: "integrations" },
+  { icon: Award, label: "Awards", value: "settings" },
+  { icon: Volume2, label: "Audio", value: "audio" },
+  { icon: UserCircle, label: "About", value: "about" },
+  { icon: UserCircle, label: "Profile", value: "profile" },
+];
+
+const mobilePrimaryItems = ["overview", "events-center", "users", "rental-orders", "forms"];
 
 const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -87,143 +111,65 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
     setCurrentAdminUser(updatedUser);
   };
 
-  return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-background border-b border-border px-4 sm:px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <Logo className="scale-75" />
-            <div className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              <span className="hidden sm:inline">Admin Dashboard</span>
-              <span className="sm:hidden">Admin</span>
-            </div>
-            <Badge variant="secondary" className="hidden sm:inline-flex">Dashboard</Badge>
+  const headerContent = (
+    <header className="bg-background border-b border-border px-4 sm:px-6 py-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Logo className="scale-75" />
+          <div className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="hidden sm:inline">Admin Dashboard</span>
+            <span className="sm:hidden">Admin</span>
           </div>
-          
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <Link
-              to="/"
-              className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Back to Website</span>
-              <span className="sm:hidden">Back</span>
-            </Link>
-            <div className="text-right hidden md:block">
-              <p className="text-sm font-medium">{currentAdminUser.full_name}</p>
-              <p className="text-xs text-muted-foreground">{currentAdminUser.email}</p>
-              <p className="text-xs text-muted-foreground capitalize">{currentAdminUser.role}</p>
-            </div>
-            <Button variant="outline" onClick={handleLogout} size="sm">
-              <LogOut className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
+          <Badge variant="secondary" className="hidden sm:inline-flex">Dashboard</Badge>
         </div>
-      </header>
+        
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Link
+            to="/"
+            className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Back to Website</span>
+            <span className="sm:hidden">Back</span>
+          </Link>
+          <div className="text-right hidden md:block">
+            <p className="text-sm font-medium">{currentAdminUser.full_name}</p>
+            <p className="text-xs text-muted-foreground">{currentAdminUser.email}</p>
+            <p className="text-xs text-muted-foreground capitalize">{currentAdminUser.role}</p>
+          </div>
+          <Button variant="outline" onClick={handleLogout} size="sm">
+            <LogOut className="mr-1 sm:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Logout</span>
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
 
-      {/* Main Content */}
-      <div className="container mx-auto p-4 sm:p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-16 h-auto p-1 gap-1 overflow-x-auto">
-            <TabsTrigger value="overview" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <BarChart3 className="h-3 w-3" />
-              <span className="hidden sm:inline">Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="events-center" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <ClipboardList className="h-3 w-3" />
-              <span className="hidden sm:inline">Event Center</span>
-            </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <UsersRound className="h-3 w-3" />
-              <span className="hidden sm:inline">Users</span>
-            </TabsTrigger>
-            <TabsTrigger value="vendor-inventory" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <ShieldCheck className="h-3 w-3" />
-              <span className="hidden sm:inline">Vendors</span>
-            </TabsTrigger>
-            <TabsTrigger value="rental-orders" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Truck className="h-3 w-3" />
-              <span className="hidden sm:inline">Orders</span>
-            </TabsTrigger>
-            <TabsTrigger value="banners" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Home className="h-3 w-3" />
-              <span className="hidden sm:inline">Banners</span>
-            </TabsTrigger>
-            <TabsTrigger value="services" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Calendar className="h-3 w-3" />
-              <span className="hidden sm:inline">Services</span>
-            </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Calendar className="h-3 w-3" />
-              <span className="hidden sm:inline">Events</span>
-            </TabsTrigger>
-            <TabsTrigger value="rentals" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Calendar className="h-3 w-3" />
-              <span className="hidden sm:inline">Rentals</span>
-            </TabsTrigger>
-            <TabsTrigger value="portfolio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Image className="h-3 w-3" />
-              <span className="hidden sm:inline">Portfolio</span>
-            </TabsTrigger>
-            <TabsTrigger value="clients" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Users className="h-3 w-3" />
-              <span className="hidden sm:inline">Clients</span>
-            </TabsTrigger>
-            <TabsTrigger value="testimonials" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Star className="h-3 w-3" />
-              <span className="hidden sm:inline">Reviews</span>
-            </TabsTrigger>
-            <TabsTrigger value="forms" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <MessageSquare className="h-3 w-3" />
-              <span className="hidden sm:inline">Forms</span>
-            </TabsTrigger>
-            <TabsTrigger value="faq" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <HelpCircle className="h-3 w-3" />
-              <span className="hidden sm:inline">FAQ</span>
-            </TabsTrigger>
-            <TabsTrigger value="integrations" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Settings className="h-3 w-3" />
-              <span className="hidden sm:inline">Integrations</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Award className="h-3 w-3" />
-              <span className="hidden sm:inline">Awards</span>
-            </TabsTrigger>
-            <TabsTrigger value="audio" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Volume2 className="h-3 w-3" />
-              <span className="hidden sm:inline">Audio</span>
-            </TabsTrigger>
-            <TabsTrigger value="about" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <UserCircle className="h-3 w-3" />
-              <span className="hidden sm:inline">About</span>
-            </TabsTrigger>
-            <TabsTrigger value="profile" className="flex items-center justify-center space-x-1 px-2 py-2 text-xs whitespace-nowrap min-w-[80px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <UserCircle className="h-3 w-3" />
-              <span className="hidden sm:inline">Profile</span>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
+  const renderContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <div className="space-y-6">
             <GoogleAnalyticsDashboard />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              <Card>
+              <Card className="bg-gradient-to-br from-primary to-accent text-primary-foreground border-none rounded-2xl shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Events</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium opacity-90">Total Events</CardTitle>
+                  <Calendar className="h-4 w-4 opacity-80" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">3</div>
-                  <p className="text-xs text-muted-foreground">Event types active</p>
+                  <p className="text-xs opacity-80">Event types active</p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Form Submissions</CardTitle>
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-8 w-8 rounded-lg bg-secondary/10 flex items-center justify-center">
+                    <MessageSquare className="h-4 w-4 text-secondary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">0</div>
@@ -231,10 +177,12 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Services</CardTitle>
-                  <Award className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <Award className="h-4 w-4 text-accent" />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">5</div>
@@ -242,10 +190,12 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Portfolio Items</CardTitle>
-                  <Image className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Image className="h-4 w-4 text-primary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">11</div>
@@ -255,39 +205,27 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-              <Card>
+              <Card className="rounded-2xl">
                 <CardHeader>
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => setActiveTab("banners")}
-                  >
+                  <Button className="w-full justify-start" variant="outline" onClick={() => setActiveTab("banners")}>
                     <Home className="mr-2 h-4 w-4" />
                     Manage Hero Banners
                   </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => setActiveTab("forms")}
-                  >
+                  <Button className="w-full justify-start" variant="outline" onClick={() => setActiveTab("forms")}>
                     <MessageSquare className="mr-2 h-4 w-4" />
                     View Form Submissions
                   </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => setActiveTab("portfolio")}
-                  >
+                  <Button className="w-full justify-start" variant="outline" onClick={() => setActiveTab("portfolio")}>
                     <Image className="mr-2 h-4 w-4" />
                     Update Portfolio
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="rounded-2xl">
                 <CardHeader>
                   <CardTitle>System Status</CardTitle>
                 </CardHeader>
@@ -307,209 +245,151 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          {/* Event Center - NEW */}
-          <TabsContent value="events-center">
-            <EventCenter />
-          </TabsContent>
-
-          {/* User Management */}
-          <TabsContent value="users">
-            <UserManagement />
-          </TabsContent>
-
-          {/* Vendor Inventory Verification */}
-          <TabsContent value="vendor-inventory">
-            <VendorInventoryAdmin />
-          </TabsContent>
-
-          {/* Live Rental Orders */}
-          <TabsContent value="rental-orders">
-            <LiveRentalOrders />
-          </TabsContent>
-
-          {/* Hero Banners Management */}
-          <TabsContent value="banners">
-            <CrudInterface
-              title="Hero Banners"
-              data={banners || []}
-              tableName="hero_banners"
+          </div>
+        );
+      case "events-center":
+        return <EventCenter />;
+      case "users":
+        return <UserManagement />;
+      case "vendor-inventory":
+        return <VendorInventoryAdmin />;
+      case "rental-orders":
+        return <LiveRentalOrders />;
+      case "banners":
+        return (
+          <CrudInterface
+            title="Hero Banners"
+            data={banners || []}
+            tableName="hero_banners"
+            fields={[
+              { name: "title", label: "Title", type: "text", required: true },
+              { name: "subtitle", label: "Subtitle", type: "text" },
+              { name: "image_url", label: "Banner Image", type: "file", required: true },
+              { name: "button_text", label: "Button Text", type: "text" },
+              { name: "event_type", label: "Event Type", type: "select", required: true, options: eventTypes || [] },
+              { name: "display_order", label: "Display Order", type: "number" },
+              { name: "is_active", label: "Active", type: "boolean" }
+            ]}
+          />
+        );
+      case "services":
+        return (
+          <CrudInterface
+            title="Services"
+            data={services || []}
+            tableName="services"
+            fields={[
+              { name: "title", label: "Title", type: "text", required: true },
+              { name: "short_description", label: "Short Description", type: "text", required: true },
+              { name: "description", label: "Description", type: "textarea", required: true },
+              { name: "image_url", label: "Service Image", type: "file" },
+              { name: "event_type", label: "Event Type", type: "select", required: true, options: eventTypes || [] },
+              { name: "display_order", label: "Display Order", type: "number" },
+              { name: "show_on_home", label: "Show on Home Page", type: "boolean" },
+              { name: "is_active", label: "Active", type: "boolean" }
+            ]}
+          />
+        );
+      case "events":
+        return (
+          <CrudInterface
+            title="Events"
+            data={events || []}
+            tableName="events"
+            fields={[
+              { name: "title", label: "Title", type: "text", required: true },
+              { name: "description", label: "Description", type: "textarea", required: true },
+              { name: "process_description", label: "Process Description", type: "textarea", required: true },
+              { name: "event_type", label: "Event Type", type: "select", required: true, options: eventTypes || [] },
+              { name: "hero_image_url", label: "Hero Image", type: "file" },
+              { name: "location", label: "Location", type: "text" },
+              { name: "is_active", label: "Active", type: "boolean" }
+            ]}
+          />
+        );
+      case "rentals":
+        return <EnhancedRentalManager rentals={rentals || []} />;
+      case "portfolio":
+        return <NewEnhancedPortfolioManager portfolio={portfolio || []} events={events || []} />;
+      case "clients":
+        return (
+          <CrudInterface
+            title="Trusted Clients"
+            data={clients || []}
+            tableName="trusted_clients"
+            fields={[
+              { name: "name", label: "Client Name", type: "text", required: true },
+              { name: "logo_url", label: "Client Logo", type: "file", required: true },
+              { name: "display_order", label: "Display Order", type: "number" },
+              { name: "is_active", label: "Active", type: "boolean" }
+            ]}
+          />
+        );
+      case "testimonials":
+        return <TestimonialManager />;
+      case "forms":
+        return <EnhancedFormSubmissions formSubmissions={formSubmissions || []} />;
+      case "settings":
+        return (
+          <div className="space-y-8">
+            <AdminDataTable
+              title="News & Achievements"
+              data={newsAchievements || []}
+              queryKey="news-achievements"
+              tableName="news_achievements"
               fields={[
                 { name: "title", label: "Title", type: "text", required: true },
-                { name: "subtitle", label: "Subtitle", type: "text" },
-                { name: "image_url", label: "Banner Image", type: "file", required: true },
-                { name: "button_text", label: "Button Text", type: "text" },
-                { 
-                  name: "event_type", 
-                  label: "Event Type", 
-                  type: "select", 
-                  required: true,
-                  options: eventTypes || []
-                },
+                { name: "short_content", label: "Short Content", type: "text", required: true },
+                { name: "content", label: "Full Content", type: "textarea", required: true },
+                { name: "image_url", label: "Image URL", type: "image" },
                 { name: "display_order", label: "Display Order", type: "number" },
+                { name: "show_on_home", label: "Show on Home Screen", type: "boolean" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}
+              defaultValues={{ is_active: true, display_order: 0, show_on_home: false }}
             />
-          </TabsContent>
-
-          {/* Services Management */}
-          <TabsContent value="services">
-            <CrudInterface
-              title="Services"
-              data={services || []}
-              tableName="services"
+            <AdminDataTable
+              title="Awards"
+              data={awards || []}
+              queryKey="awards"
+              tableName="awards"
               fields={[
-                { name: "title", label: "Title", type: "text", required: true },
-                { name: "short_description", label: "Short Description", type: "text", required: true },
+                { name: "title", label: "Award Title", type: "text", required: true },
                 { name: "description", label: "Description", type: "textarea", required: true },
-                { name: "image_url", label: "Service Image", type: "file" },
-                { 
-                  name: "event_type", 
-                  label: "Event Type", 
-                  type: "select", 
-                  required: true,
-                  options: eventTypes || []
-                },
-                { name: "display_order", label: "Display Order", type: "number" },
-                { name: "show_on_home", label: "Show on Home Page", type: "boolean" },
-                { name: "is_active", label: "Active", type: "boolean" }
-              ]}
-            />
-          </TabsContent>
-
-          {/* Events Management */}
-          <TabsContent value="events">
-            <CrudInterface
-              title="Events"
-              data={events || []}
-              tableName="events"
-              fields={[
-                { name: "title", label: "Title", type: "text", required: true },
-                { name: "description", label: "Description", type: "textarea", required: true },
-                { name: "process_description", label: "Process Description", type: "textarea", required: true },
-                { 
-                  name: "event_type", 
-                  label: "Event Type", 
-                  type: "select", 
-                  required: true,
-                  options: eventTypes || []
-                },
-                { name: "hero_image_url", label: "Hero Image", type: "file" },
-                { name: "location", label: "Location", type: "text" },
-                { name: "is_active", label: "Active", type: "boolean" }
-              ]}
-            />
-          </TabsContent>
-
-          {/* Rentals Management */}
-          <TabsContent value="rentals">
-            <EnhancedRentalManager rentals={rentals || []} />
-          </TabsContent>
-
-          {/* Portfolio Management */}
-          <TabsContent value="portfolio">
-            <NewEnhancedPortfolioManager 
-              portfolio={portfolio || []} 
-              events={events || []}
-            />
-          </TabsContent>
-
-          {/* Trusted Clients Management */}
-          <TabsContent value="clients">
-            <CrudInterface
-              title="Trusted Clients"
-              data={clients || []}
-              tableName="trusted_clients"
-              fields={[
-                { name: "name", label: "Client Name", type: "text", required: true },
-                { name: "logo_url", label: "Client Logo", type: "file", required: true },
+                { name: "year", label: "Year", type: "number" },
+                { name: "logo_url", label: "Logo URL", type: "image" },
                 { name: "display_order", label: "Display Order", type: "number" },
                 { name: "is_active", label: "Active", type: "boolean" }
               ]}
+              defaultValues={{ is_active: true, display_order: 0 }}
             />
-          </TabsContent>
+          </div>
+        );
+      case "faq":
+        return <FAQManager />;
+      case "integrations":
+        return <IntegrationTester />;
+      case "audio":
+        return <AudioManager />;
+      case "about":
+        return <AboutContentManager />;
+      case "profile":
+        return <ProfileManager adminUser={currentAdminUser} onProfileUpdate={handleProfileUpdate} />;
+      default:
+        return null;
+    }
+  };
 
-          {/* Testimonials Management */}
-          <TabsContent value="testimonials">
-            <TestimonialManager />
-          </TabsContent>
-
-          {/* Form Submissions */}
-          <TabsContent value="forms">
-            <EnhancedFormSubmissions formSubmissions={formSubmissions || []} />
-          </TabsContent>
-
-          {/* News & Achievements and Awards */}
-          <TabsContent value="settings">
-            <div className="space-y-8">
-              {/* News & Achievements Management */}
-              <AdminDataTable
-                title="News & Achievements"
-                data={newsAchievements || []}
-                queryKey="news-achievements"
-                tableName="news_achievements"
-                fields={[
-                  { name: "title", label: "Title", type: "text", required: true },
-                  { name: "short_content", label: "Short Content", type: "text", required: true },
-                  { name: "content", label: "Full Content", type: "textarea", required: true },
-                  { name: "image_url", label: "Image URL", type: "image" },
-                  { name: "display_order", label: "Display Order", type: "number" },
-                  { name: "show_on_home", label: "Show on Home Screen", type: "boolean" },
-                  { name: "is_active", label: "Active", type: "boolean" }
-                ]}
-                defaultValues={{ is_active: true, display_order: 0, show_on_home: false }}
-              />
-
-              {/* Awards Management */}
-              <AdminDataTable
-                title="Awards"
-                data={awards || []}
-                queryKey="awards"
-                tableName="awards"
-                fields={[
-                  { name: "title", label: "Award Title", type: "text", required: true },
-                  { name: "description", label: "Description", type: "textarea", required: true },
-                  { name: "year", label: "Year", type: "number" },
-                  { name: "logo_url", label: "Logo URL", type: "image" },
-                  { name: "display_order", label: "Display Order", type: "number" },
-                  { name: "is_active", label: "Active", type: "boolean" }
-                ]}
-                defaultValues={{ is_active: true, display_order: 0 }}
-              />
-            </div>
-          </TabsContent>
-
-          {/* FAQ Management */}
-          <TabsContent value="faq">
-            <FAQManager />
-          </TabsContent>
-
-          {/* Integrations Testing */}
-          <TabsContent value="integrations">
-            <IntegrationTester />
-          </TabsContent>
-
-          {/* Audio Management */}
-          <TabsContent value="audio">
-            <AudioManager />
-          </TabsContent>
-
-          {/* About Content Management */}
-          <TabsContent value="about" className="space-y-6">
-            <AboutContentManager />
-          </TabsContent>
-
-          {/* Profile Management */}
-          <TabsContent value="profile" className="space-y-6">
-            <ProfileManager 
-              adminUser={currentAdminUser} 
-              onProfileUpdate={handleProfileUpdate}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+  return (
+    <DashboardShell
+      sidebarItems={sidebarItems}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      headerContent={headerContent}
+      mobilePrimaryItems={mobilePrimaryItems}
+    >
+      {renderContent()}
+    </DashboardShell>
   );
 };
 

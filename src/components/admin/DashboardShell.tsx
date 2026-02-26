@@ -1,0 +1,167 @@
+import { ReactNode, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MoreHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
+
+export interface SidebarItem {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+}
+
+interface DashboardShellProps {
+  sidebarItems: SidebarItem[];
+  activeTab: string;
+  onTabChange: (value: string) => void;
+  headerContent: ReactNode;
+  children: ReactNode;
+  /** Items to show in mobile bottom bar (max ~5). Rest go into "More" sheet. If not provided, all items shown. */
+  mobilePrimaryItems?: string[];
+}
+
+const DashboardShell = ({
+  sidebarItems,
+  activeTab,
+  onTabChange,
+  headerContent,
+  children,
+  mobilePrimaryItems,
+}: DashboardShellProps) => {
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const primaryValues = mobilePrimaryItems || sidebarItems.map((i) => i.value);
+  const primaryItems = sidebarItems.filter((i) => primaryValues.includes(i.value));
+  const secondaryItems = sidebarItems.filter((i) => !primaryValues.includes(i.value));
+  const needsMore = secondaryItems.length > 0;
+
+  // Check if active tab is in secondary items (for "More" button highlight)
+  const activeInSecondary = secondaryItems.some((i) => i.value === activeTab);
+
+  return (
+    <div className="min-h-screen bg-muted/30 flex flex-col">
+      {/* Header */}
+      {headerContent}
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:flex w-[72px] flex-col items-center py-4 gap-1 bg-background border-r border-border overflow-y-auto shrink-0">
+          <TooltipProvider delayDuration={200}>
+            {sidebarItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.value;
+              return (
+                <Tooltip key={item.value}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => onTabChange(item.value)}
+                      className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
+                        isActive
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="font-medium">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </TooltipProvider>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+          <div className="p-4 sm:p-6">{children}</div>
+        </main>
+      </div>
+
+      {/* Mobile Bottom Tab Bar */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-background border-t border-border z-40 px-1 py-1.5 safe-area-bottom">
+        <div className="flex items-center justify-around">
+          {primaryItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.value;
+            return (
+              <button
+                key={item.value}
+                onClick={() => onTabChange(item.value)}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[48px] transition-colors",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-[10px] font-medium leading-tight truncate max-w-[56px]">
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+
+          {needsMore && (
+            <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[48px] transition-colors",
+                    activeInSecondary
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                  <span className="text-[10px] font-medium leading-tight">More</span>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[70vh] rounded-t-2xl px-2 pt-4">
+                <SheetHeader className="px-4 pb-2">
+                  <SheetTitle>All Sections</SheetTitle>
+                </SheetHeader>
+                <ScrollArea className="h-full">
+                  <div className="grid grid-cols-3 gap-2 p-2 pb-8">
+                    {sidebarItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeTab === item.value;
+                      return (
+                        <button
+                          key={item.value}
+                          onClick={() => {
+                            onTabChange(item.value);
+                            setMoreOpen(false);
+                          }}
+                          className={cn(
+                            "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors",
+                            isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          )}
+                        >
+                          <Icon className="h-5 w-5" />
+                          <span className="text-xs font-medium text-center leading-tight">
+                            {item.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
+          )}
+        </div>
+      </nav>
+    </div>
+  );
+};
+
+export default DashboardShell;

@@ -537,3 +537,17 @@
     @apply px-5 sm:px-6 lg:px-8 xl:px-12 max-w-screen-2xl;
   }
 }
+
+/* ═══════ Marquee / infinite scroll animation ═══════ */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

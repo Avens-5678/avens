@@ -53,6 +53,8 @@ const LiveRentalOrders = () => {
   const [selectedVendors, setSelectedVendors] = useState<Set<string>>(new Set());
   const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
   const [vendorSearch, setVendorSearch] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [localityFilter, setLocalityFilter] = useState("");
 
   const [newOrder, setNewOrder] = useState<RentalOrderInsert>({
     title: "", equipment_category: "General", equipment_details: "",
@@ -71,7 +73,7 @@ const LiveRentalOrders = () => {
 
   // Fetch matching vendors when send dialog opens
   const { data: matchingVendors, isLoading: vendorsLoading } = useQuery({
-    queryKey: ["matching_vendors", selectedOrder?.equipment_category, selectedOrder?.location],
+    queryKey: ["matching_vendors", selectedOrder?.id],
     queryFn: async () => {
       if (!selectedOrder) return [];
 
@@ -90,34 +92,67 @@ const LiveRentalOrders = () => {
         .select("*")
         .in("user_id", vendorIds);
 
-      // Get vendor inventory matching category
+      // Get all available vendor inventory
       const { data: inventory } = await supabase
         .from("vendor_inventory")
         .select("*")
         .eq("is_available", true);
 
-      // Filter vendors who have matching items AND matching city
+      // Smart keyword extraction from order title + category
+      const orderTitle = (selectedOrder.title || "").toLowerCase();
+      const orderCategory = (selectedOrder.equipment_category || "").toLowerCase();
+      const orderDetails = (selectedOrder.equipment_details || "").toLowerCase();
+      
+      // Extract meaningful keywords (remove common words)
+      const stopWords = new Set(["the", "a", "an", "for", "and", "or", "of", "in", "to", "with", "is", "at", "on", "by", "-", "–", ""]);
+      const extractKeywords = (text: string) =>
+        text.split(/[\s,\-–()/]+/)
+          .map(w => w.trim().toLowerCase())
+          .filter(w => w.length > 2 && !stopWords.has(w));
+
+      const titleKeywords = extractKeywords(orderTitle);
+      const detailKeywords = extractKeywords(orderDetails);
+      const allKeywords = [...new Set([...titleKeywords, ...detailKeywords])];
+
+      // Filter vendors with smart matching
       const results = (profiles || []).map((profile: any) => {
         const vendorItems = (inventory || []).filter(
           (i) => i.vendor_id === profile.user_id
         );
-        const matchingItems = vendorItems.filter(
-          (i) => i.category === selectedOrder.equipment_category || selectedOrder.equipment_category === "General"
-        );
+
+        // Smart match: item name contains ANY keyword from order title/details
+        const matchingItems = vendorItems.filter((item) => {
+          const itemName = (item.name || "").toLowerCase();
+          const itemCategory = (item.category || "").toLowerCase();
+          const itemDesc = (item.description || "").toLowerCase();
+
+          // Category match
+          if (orderCategory !== "general" && itemCategory === orderCategory) return true;
+
+          // Keyword match against item name/description
+          return allKeywords.some(kw =>
+            itemName.includes(kw) || itemDesc.includes(kw)
+          );
+        });
+
         const cityMatch = !selectedOrder.location ||
-          ((profile as any).city || "").toLowerCase().includes(selectedOrder.location.toLowerCase());
+          (profile.city || "").toLowerCase().includes(selectedOrder.location.toLowerCase());
+
+        const addressMatch = !selectedOrder.location ||
+          (profile.address || "").toLowerCase().includes(selectedOrder.location.toLowerCase()) ||
+          (profile.godown_address || "").toLowerCase().includes(selectedOrder.location.toLowerCase());
 
         return {
           ...profile,
           allItems: vendorItems,
           matchingItems,
           totalItems: vendorItems.length,
-          cityMatch,
+          cityMatch: cityMatch || addressMatch,
           hasMatchingItems: matchingItems.length > 0,
         };
       });
 
-      // Sort: matching items + city first, then matching items, then city, then rest
+      // Sort: matching items + city first
       return results.sort((a: any, b: any) => {
         const scoreA = (a.hasMatchingItems ? 2 : 0) + (a.cityMatch ? 1 : 0);
         const scoreB = (b.hasMatchingItems ? 2 : 0) + (b.cityMatch ? 1 : 0);
@@ -170,6 +205,8 @@ const LiveRentalOrders = () => {
     setSelectedVendors(new Set());
     setExpandedVendors(new Set());
     setVendorSearch("");
+    setCityFilter(order.location || "");
+    setLocalityFilter("");
     setIsSendOpen(true);
   };
 
@@ -191,13 +228,42 @@ const LiveRentalOrders = () => {
     });
   };
 
+  // Get unique cities from vendors for filter dropdown
+  const availableCities = [...new Set(
+    (matchingVendors || [])
+      .map((v: any) => v.city)
+      .filter(Boolean)
+      .map((c: string) => c.trim())
+  )].sort();
+
   const filteredVendors = matchingVendors?.filter((v: any) => {
-    if (!vendorSearch) return true;
-    const q = vendorSearch.toLowerCase();
-    return (v.full_name || "").toLowerCase().includes(q) ||
-      (v.company_name || "").toLowerCase().includes(q) ||
-      (v.city || "").toLowerCase().includes(q) ||
-      (v.phone || "").includes(q);
+    // Text search filter
+    if (vendorSearch) {
+      const q = vendorSearch.toLowerCase();
+      const textMatch = (v.full_name || "").toLowerCase().includes(q) ||
+        (v.company_name || "").toLowerCase().includes(q) ||
+        (v.city || "").toLowerCase().includes(q) ||
+        (v.phone || "").includes(q) ||
+        (v.allItems || []).some((item: any) => (item.name || "").toLowerCase().includes(q));
+      if (!textMatch) return false;
+    }
+
+    // City filter
+    if (cityFilter) {
+      const cityMatch = (v.city || "").toLowerCase().includes(cityFilter.toLowerCase());
+      if (!cityMatch) return false;
+    }
+
+    // Locality filter (searches address + godown_address)
+    if (localityFilter) {
+      const loc = localityFilter.toLowerCase();
+      const locMatch = (v.address || "").toLowerCase().includes(loc) ||
+        (v.godown_address || "").toLowerCase().includes(loc) ||
+        (v.city || "").toLowerCase().includes(loc);
+      if (!locMatch) return false;
+    }
+
+    return true;
   });
 
   const stats = {
@@ -398,15 +464,43 @@ const LiveRentalOrders = () => {
             </div>
           )}
 
-          {/* Search input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={vendorSearch}
-              onChange={(e) => setVendorSearch(e.target.value)}
-              placeholder="Search by name, company, city, phone..."
-              className="pl-9"
-            />
+          {/* Filters */}
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={vendorSearch}
+                onChange={(e) => setVendorSearch(e.target.value)}
+                placeholder="Search by name, company, item, phone..."
+                className="pl-9"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs mb-1 block"><MapPin className="inline h-3 w-3 mr-1" />City</Label>
+                <Select value={cityFilter} onValueChange={setCityFilter}>
+                  <SelectTrigger className="h-9"><SelectValue placeholder="All Cities" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Cities</SelectItem>
+                    {availableCities.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs mb-1 block"><MapPin className="inline h-3 w-3 mr-1" />Locality / Area</Label>
+                <Input
+                  value={localityFilter}
+                  onChange={(e) => setLocalityFilter(e.target.value)}
+                  placeholder="e.g. Gachibowli"
+                  className="h-9"
+                />
+              </div>
+            </div>
+            {(cityFilter || localityFilter || vendorSearch) && (
+              <Button variant="ghost" size="sm" onClick={() => { setCityFilter(""); setLocalityFilter(""); setVendorSearch(""); }}>
+                <X className="h-3 w-3 mr-1" />Clear Filters
+              </Button>
+            )}
           </div>
 
           {/* Vendor list with checkboxes */}

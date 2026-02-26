@@ -27,6 +27,7 @@ import GovernmentEvents from "./pages/events/GovernmentEvents";
 import DynamicEventPage from "./pages/events/DynamicEventPage";
 import Team from "./pages/Team";
 import BlogPost from "./pages/BlogPost";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
             {/* Auth Routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/register" element={<Register />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Protected Routes */}
             <Route path="/admin" element={<AdminDashboard />} />

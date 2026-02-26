@@ -10,8 +10,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="w-32 h-auto">
-              <img alt="Avens Expositions Logo" className="w-full h-auto" src="/lovable-uploads/71b5e9e7-9561-40bd-ad11-4f0a05a4225c.png" />
+            <div className="font-bold">
+              <span className="text-primary text-xl">Evnting.com</span>
+              <div className="text-muted-foreground text-sm -mt-1">Online platform for event production</div>
             </div>
             <p className="text-muted-foreground text-sm">
               Creating unforgettable experiences with exceptional event management and premium rental services.
@@ -79,7 +80,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>info@avens.in</span>
+                <span>info@evnting.com</span>
               </div>
               <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
@@ -91,7 +92,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 Avens Events. All rights reserved.
+            © 2026 Evnting. All rights reserved.
           </p>
         </div>
       </div>

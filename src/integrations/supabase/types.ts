@@ -916,6 +916,7 @@ export type Database = {
       }
     }
     Functions: {
+      check_email_type: { Args: { check_email: string }; Returns: Json }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {

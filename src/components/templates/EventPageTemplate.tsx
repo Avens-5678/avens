@@ -204,7 +204,7 @@ export const EventPageTemplate = ({
               <span className="block text-gradient-secondary mt-2">For Your Special Event</span>
             </h2>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              At Avens Events, we specialize in creating {eventType} experiences that are tailored to your unique vision. From planning to execution, 
+              At Evnting, we specialize in creating {eventType} experiences that are tailored to your unique vision. From planning to execution, 
               we handle every detail so you can focus on celebrating your special occasion.
             </p>
           </ScrollReveal>

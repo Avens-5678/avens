@@ -180,7 +180,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
                           <Input 
                             {...field} 
                             type="email" 
-                            placeholder="admin@avens.in"
+                            placeholder="admin@evnting.com"
                             className="pl-10"
                             disabled={isLoading}
                           />

@@ -1,129 +1,77 @@
 
-# Dashboard UI Redesign — Sidebar Layout with Mobile Responsiveness
 
-## Goal
-Redesign all three dashboards (Admin, Client, Vendor) to use a vertical sidebar navigation matching the reference image, with proper mobile responsiveness. No functionality changes — only UI/layout restructuring.
+# AI Chatbot for Client and Vendor Dashboards
 
-## Reference Design Analysis
-- Left sidebar with icon-based navigation (vertical pills)
-- Warm neutral background
-- Gradient stat cards in overview
-- Rounded cards with soft shadows
-- On mobile: sidebar becomes a bottom tab bar or hamburger-triggered sheet
+## Overview
+Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
 
----
+## What the Chatbot Does
 
-## Implementation
+**For Clients:**
+- Help plan events (suggest themes, budgets, timelines)
+- Guide through creating event requests
+- Answer questions about event status and vendor assignments
+- Provide rental equipment recommendations
 
-### 1. Create `src/components/admin/DashboardShell.tsx` (New File)
+**For Vendors:**
+- Help with listing creation and pricing strategies
+- Guide through inventory management
+- Answer questions about assigned jobs
+- Provide marketplace tips and best practices
 
-A shared layout wrapper used by all three dashboards:
+## UI Design (Reference Image Style)
 
-**Props:**
-- `sidebarItems`: array of `{ icon, label, value }` for navigation
-- `activeTab` / `onTabChange`: controlled tab state
-- `headerContent`: logo, user info, logout button (role-specific)
-- `children`: the active tab's content
+The chat tab will feature:
+- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
+- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
+- Markdown rendering for AI responses
+- Typing indicator animation while streaming
+- Message input bar at the bottom with send button
+- Smooth token-by-token streaming display
 
-**Desktop (lg+):**
-- Fixed left sidebar (~72px wide) with icon buttons stacked vertically
-- Each item: icon inside a rounded pill, tooltip on hover showing the label
-- Active item: `bg-primary text-primary-foreground rounded-xl` with subtle shadow
-- Inactive: `text-muted-foreground hover:bg-muted`
-- Main content fills remaining space with padding
+## Technical Plan
 
-**Mobile (below lg):**
-- Sidebar hidden entirely
-- Bottom fixed navigation bar with horizontally scrollable icon+label buttons
-- Active item highlighted with primary color
-- Sheet/drawer alternative for dashboards with many tabs (Admin has 19 tabs): a hamburger menu button that opens a full-height sheet listing all nav items with icons and labels
+### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
+- Accepts `{ messages, role: "client" | "vendor" }` in the request body
+- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
+- Role-specific system prompts:
+  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
+  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
+- Returns SSE stream for token-by-token rendering
+- Handles 429/402 errors gracefully
 
-### 2. Modify `src/pages/admin/AdminDashboard.tsx`
+### 2. Update `supabase/config.toml`
+- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
 
-- Remove the horizontal `TabsList` grid
-- Wrap content with `DashboardShell`, passing 19 sidebar items
-- Keep the existing header (logo + admin info + logout)
-- Overview tab: upgrade stat cards with gradient backgrounds (`bg-gradient-to-br from-primary/90 to-primary text-white`)
-- All `TabsContent` blocks remain identical — no functional changes
+### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
+- Props: `role: "client" | "vendor"` and `userName: string`
+- **Home screen**: Greeting + quick-action chips in a card grid layout
+- **Chat view**: Scrollable message list with streaming support
+- Uses `react-markdown` (already available or will add) for rendering
+- SSE streaming via fetch to the edge function
+- Conversation stored in local React state (no persistence needed)
+- Framer Motion for message entrance animations
 
-**Mobile handling for Admin (19 tabs):**
-- Bottom bar shows 5 most-used tabs (Overview, Events, Users, Orders, Forms)
-- A "More" icon opens a sheet with all remaining tabs
-- Active tab always visible in bottom bar or sheet
+### 4. Update `src/pages/client/ClientDashboard.tsx`
+- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
+- Render `<DashboardChatbot role="client" userName={...} />` when active
 
-### 3. Modify `src/pages/client/ClientDashboard.tsx`
+### 5. Update `src/pages/vendor/VendorDashboard.tsx`
+- Add same "AI Assistant" sidebar item
+- Render `<DashboardChatbot role="vendor" userName={...} />` when active
 
-- Replace horizontal tabs with `DashboardShell`
-- 3 sidebar items: My Events, New Request, Profile
-- On mobile: simple 3-item bottom tab bar (fits perfectly)
-
-### 4. Modify `src/pages/vendor/VendorDashboard.tsx`
-
-- Replace horizontal tabs with `DashboardShell`
-- 4 sidebar items: Jobs, Inventory, Marketplace, Profile
-- On mobile: 4-item bottom tab bar
-
----
-
-## Technical Details
-
-### DashboardShell Layout Structure
-
-```text
-Desktop:
-+----------+-----------------------------+
-| [Header spanning full width]           |
-+----------+-----------------------------+
-| Sidebar  |  Main Content Area          |
-| (72px)   |  (flex-1, padded)           |
-|          |                             |
-| [icon]   |                             |
-| [icon]   |                             |
-| [icon]   |                             |
-| ...      |                             |
-+----------+-----------------------------+
-
-Mobile:
-+-----------------------------+
-| [Header]                    |
-+-----------------------------+
-| Main Content Area           |
-| (full width, padded)        |
-|                             |
-+-----------------------------+
-| [Bottom Tab Bar - fixed]    |
-+-----------------------------+
-```
-
-### Sidebar Item Styling
-- Container: `w-[72px] bg-background border-r border-border flex flex-col items-center py-4 gap-1`
-- Active button: `w-12 h-12 rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20`
-- Inactive button: `w-12 h-12 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground`
-- Tooltip wrapper on each icon for label display on hover
-
-### Bottom Tab Bar (Mobile)
-- Container: `fixed bottom-0 inset-x-0 bg-background border-t border-border z-40 px-2 py-2`
-- Items: flex row with equal spacing
-- Active: primary color icon + small label text
-- Inactive: muted foreground
-- For Admin "More" button: opens a Sheet with full navigation list
-
-### Overview Stat Cards (Admin)
-- Hero stat card: `bg-gradient-to-br from-primary to-blue-600 text-white border-none rounded-2xl`
-- Secondary cards: `bg-card rounded-2xl border shadow-sm` with colored icon badges
-- Add `pb-20 lg:pb-0` to main content on mobile to account for bottom bar
-
-### Files Summary
+## File Changes Summary
 
 | File | Action |
 |------|--------|
-| `src/components/admin/DashboardShell.tsx` | Create — shared sidebar + bottom bar layout |
-| `src/pages/admin/AdminDashboard.tsx` | Modify — use DashboardShell, restyle overview cards |
-| `src/pages/client/ClientDashboard.tsx` | Modify — use DashboardShell |
-| `src/pages/vendor/VendorDashboard.tsx` | Modify — use DashboardShell |
+| `supabase/functions/dashboard-chat/index.ts` | Create |
+| `supabase/config.toml` | Edit (add function entry) |
+| `src/components/dashboard/DashboardChatbot.tsx` | Create |
+| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
+| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
 
-### What Does NOT Change
-- All data hooks, CRUD interfaces, form handlers, and business logic
-- Tab content components (EventCenter, UserManagement, JobBoard, etc.)
-- Authentication flow and routing
-- The existing header content (logo, user info, logout) — just repositioned within DashboardShell
+## Dependencies
+- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
+- Uses existing `framer-motion` for animations
+- Uses existing Supabase client for auth token in fetch calls
+

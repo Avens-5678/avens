@@ -607,15 +607,25 @@ const LiveRentalOrders = () => {
           {selectedVendors.size > 0 && (
             <div className="border-t pt-4">
               <Button
-                onClick={() => {
-                  // Send to first selected vendor (could be extended for bulk)
-                  const firstVendor = filteredVendors?.find((v: any) => selectedVendors.has(v.user_id));
-                  if (firstVendor && selectedOrderId) {
-                    sendToVendor.mutate(
-                      { orderId: selectedOrderId, vendorPhone: firstVendor.phone || "", vendorName: firstVendor.full_name || firstVendor.company_name || "" },
-                      { onSuccess: () => { setIsSendOpen(false); setSelectedOrder(null); setSelectedOrderId(null); } }
-                    );
+                onClick={async () => {
+                  // Send to all selected vendors and assign rental order
+                  const selectedVendorsList = filteredVendors?.filter((v: any) => selectedVendors.has(v.user_id)) || [];
+                  for (const vendor of selectedVendorsList) {
+                    if (selectedOrderId) {
+                      // Assign vendor to the rental order
+                      await supabase
+                        .from("rental_orders")
+                        .update({ assigned_vendor_id: vendor.user_id, status: "sent_to_vendors" })
+                        .eq("id", selectedOrderId);
+
+                      sendToVendor.mutate(
+                        { orderId: selectedOrderId, vendorPhone: vendor.phone || "", vendorName: vendor.full_name || vendor.company_name || "" },
+                      );
+                    }
                   }
+                  setIsSendOpen(false);
+                  setSelectedOrder(null);
+                  setSelectedOrderId(null);
                 }}
                 disabled={sendToVendor.isPending}
                 className="w-full"

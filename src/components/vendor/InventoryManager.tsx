@@ -17,7 +17,6 @@ import {
 } from "@/hooks/useVendorInventory";
 import { Loader2, Package, Plus, Pencil, Trash2, IndianRupee, ShieldCheck } from "lucide-react";
 import CSVUploader from "./CSVUploader";
-import AvailabilityCalendar from "./AvailabilityCalendar";
 
 const InventoryManager = () => {
   const { data: inventory, isLoading } = useVendorInventory();
@@ -84,9 +83,6 @@ const InventoryManager = () => {
     <div className="space-y-6">
       {/* CSV Upload Section */}
       <CSVUploader />
-
-      {/* Availability Calendar */}
-      <AvailabilityCalendar />
 
       {/* Manual Inventory */}
       <div className="space-y-4">

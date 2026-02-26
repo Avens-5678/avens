@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Menu, X, LogIn, User, LogOut } from "lucide-react";
+import { Menu, X, LogIn, User, LogOut, Mail } from "lucide-react";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -13,6 +13,7 @@ const Navbar = () => {
   const { role } = useUserRole();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileContactOpen, setIsMobileContactOpen] = useState(false);
   const location = useLocation();
 
   const getDashboardPath = () => {
@@ -123,22 +124,7 @@ const Navbar = () => {
             <span className="text-primary-foreground text-lg font-bold tracking-tight">Evnting.com</span>
           </Link>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" className="rounded-full bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 hover:bg-primary-foreground/20 px-3 text-xs">
-                Contact
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto p-0">
-              <div className="p-6">
-                <DialogTitle>Contact Us</DialogTitle>
-                <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
-                <div className="mt-4">
-                  <InquiryForm formType="contact" title="Contact Us" />
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <div className="w-10" aria-hidden="true" />
         </div>
 
         {/* Mobile Menu */}
@@ -159,7 +145,18 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <div className="border-t border-primary-foreground/10 pt-2 mt-1">
+              <div className="border-t border-primary-foreground/10 pt-2 mt-1 space-y-1">
+                <button
+                  className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsMobileContactOpen(true);
+                  }}
+                >
+                  <Mail className="h-4 w-4" />
+                  Contact Us
+                </button>
+
                 {user ? (
                   <>
                     <Link to={getDashboardPath()} onClick={() => setIsMenuOpen(false)}>
@@ -185,6 +182,18 @@ const Navbar = () => {
             </div>
           </div>
         )}
+
+        <Dialog open={isMobileContactOpen} onOpenChange={setIsMobileContactOpen}>
+          <DialogContent className="w-[calc(100%-1rem)] max-w-md max-h-[90dvh] overflow-y-auto p-0">
+            <div className="p-5 sm:p-6">
+              <DialogTitle>Contact Us</DialogTitle>
+              <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
+              <div className="mt-4">
+                <InquiryForm formType="contact" title="Contact Us" />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </nav>
   );

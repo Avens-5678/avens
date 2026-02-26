@@ -83,6 +83,26 @@ const InquiryForm = ({
 
       if (error) throw error;
 
+      // Auto-create a rental order when form type is rental
+      if (formType === "rental") {
+        try {
+          await supabase.from("rental_orders").insert({
+            title: rentalTitle || `Rental Inquiry: ${values.eventType || "General"}`,
+            equipment_category: values.eventType || "General",
+            equipment_details: values.message,
+            location: values.location || null,
+            event_date: values.eventDate ? values.eventDate.toISOString().split('T')[0] : null,
+            client_name: values.name,
+            client_phone: values.phone || null,
+            client_email: values.email,
+            notes: rentalTitle ? `Rental item: ${rentalTitle}` : null,
+            status: "new",
+          });
+        } catch (rentalErr) {
+          console.error("Failed to create rental order:", rentalErr);
+        }
+      }
+
       // Send to HubSpot CRM
       try {
         const hubspotResponse = await supabase.functions.invoke('hubspot-integration', {

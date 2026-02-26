@@ -18,19 +18,19 @@ const Navbar = () => {
 
   const getDashboardPath = () => {
     switch (role) {
-      case "admin": return "/admin";
-      case "client": return "/client/dashboard";
-      case "vendor": return "/vendor/dashboard";
-      default: return "/";
+      case "admin":return "/admin";
+      case "client":return "/client/dashboard";
+      case "vendor":return "/vendor/dashboard";
+      default:return "/";
     }
   };
 
   const navLinks = [
-    { href: "/services", label: "Services" },
-    { href: "/portfolio", label: "Portfolio" },
-    { href: "/ecommerce", label: "Shop" },
-    { href: "/about", label: "About" },
-  ];
+  { href: "/services", label: "Services" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/ecommerce", label: "Shop" },
+  { href: "/about", label: "About" }];
+
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -41,19 +41,19 @@ const Navbar = () => {
         <div className="hidden md:grid grid-cols-3 items-center h-14">
           {/* Left: Nav Links */}
           <div className="flex items-center gap-5">
-            {navLinks.map(link => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={`text-sm font-medium transition-colors ${
-                  isActive(link.href)
-                    ? "text-primary-foreground"
-                    : "text-primary-foreground/50 hover:text-primary-foreground/80"
-                }`}
-              >
+            {navLinks.map((link) =>
+            <Link
+              key={link.href}
+              to={link.href}
+              className={`text-sm font-medium transition-colors ${
+              isActive(link.href) ?
+              "text-primary-foreground" :
+              "text-primary-foreground/50 hover:text-primary-foreground/80"}`
+              }>
+
                 {link.label}
               </Link>
-            ))}
+            )}
           </div>
 
           {/* Center: Logo */}
@@ -63,8 +63,8 @@ const Navbar = () => {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2 justify-end">
-            {user ? (
-              <DropdownMenu>
+            {user ?
+            <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
                     <User className="h-4 w-4" />
@@ -81,15 +81,15 @@ const Navbar = () => {
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/auth">
+              </DropdownMenu> :
+
+            <Link to="/auth">
                 <Button variant="ghost" size="sm" className="gap-1.5 text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
                   <LogIn className="h-4 w-4" />
                   Sign In
                 </Button>
               </Link>
-            )}
+            }
             <Dialog>
               <DialogTrigger asChild>
                 <Button size="sm" className="rounded-full bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 hover:bg-primary-foreground/20 px-4">
@@ -115,73 +115,73 @@ const Navbar = () => {
             variant="ghost"
             size="icon"
             className="text-primary-foreground hover:bg-primary-foreground/10"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
+            onClick={() => setIsMenuOpen(!isMenuOpen)}>
+
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
 
           <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-            <span className="text-primary-foreground text-lg font-bold tracking-tight">Evnting.com</span>
+            <span className="text-primary-foreground text-lg font-bold tracking-tight">     Evnting.com</span>
           </Link>
 
           <div className="w-10" aria-hidden="true" />
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-3 border-t border-primary-foreground/10">
+        {isMenuOpen &&
+        <div className="md:hidden py-3 border-t border-primary-foreground/10">
             <div className="flex flex-col space-y-1">
-              {navLinks.map(link => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={`text-sm font-medium transition-colors px-3 py-2 rounded-lg ${
-                    isActive(link.href)
-                      ? "text-primary-foreground bg-primary-foreground/10"
-                      : "text-primary-foreground/50 hover:text-primary-foreground hover:bg-primary-foreground/5"
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
+              {navLinks.map((link) =>
+            <Link
+              key={link.href}
+              to={link.href}
+              className={`text-sm font-medium transition-colors px-3 py-2 rounded-lg ${
+              isActive(link.href) ?
+              "text-primary-foreground bg-primary-foreground/10" :
+              "text-primary-foreground/50 hover:text-primary-foreground hover:bg-primary-foreground/5"}`
+              }
+              onClick={() => setIsMenuOpen(false)}>
+
                   {link.label}
                 </Link>
-              ))}
+            )}
               <div className="border-t border-primary-foreground/10 pt-2 mt-1 space-y-1">
                 <button
-                  className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    setIsMobileContactOpen(true);
-                  }}
-                >
+                className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsMobileContactOpen(true);
+                }}>
+
                   <Mail className="h-4 w-4" />
                   Contact Us
                 </button>
 
-                {user ? (
-                  <>
+                {user ?
+              <>
                     <Link to={getDashboardPath()} onClick={() => setIsMenuOpen(false)}>
                       <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5">
                         <User className="h-4 w-4" />
                         My Dashboard
                       </button>
                     </Link>
-                    <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5" onClick={() => { signOut(); setIsMenuOpen(false); }}>
+                    <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5" onClick={() => {signOut();setIsMenuOpen(false);}}>
                       <LogOut className="h-4 w-4" />
                       Sign Out
                     </button>
-                  </>
-                ) : (
-                  <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                  </> :
+
+              <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                     <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5">
                       <LogIn className="h-4 w-4" />
                       Sign In
                     </button>
                   </Link>
-                )}
+              }
               </div>
             </div>
           </div>
-        )}
+        }
 
         <Dialog open={isMobileContactOpen} onOpenChange={setIsMobileContactOpen}>
           <DialogContent className="w-[calc(100%-1rem)] max-w-md max-h-[90dvh] overflow-y-auto p-0">
@@ -195,8 +195,8 @@ const Navbar = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </nav>
-  );
+    </nav>);
+
 };
 
 export default Navbar;

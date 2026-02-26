@@ -109,6 +109,7 @@ const LiveRentalOrders = () => {
 
         return {
           ...profile,
+          allItems: vendorItems,
           matchingItems,
           totalItems: vendorItems.length,
           cityMatch,
@@ -477,14 +478,25 @@ const LiveRentalOrders = () => {
                               )}
                               {vendor.matchingItems.map((item: any) => (
                                 <div key={item.id} className="flex items-center justify-between text-xs p-1.5 bg-primary/5 rounded">
-                                  <span>{item.name}</span>
+                                  <span className="font-medium">{item.name}</span>
                                   <span className="text-muted-foreground">Qty: {item.quantity} {item.price_per_day ? `• ₹${item.price_per_day}/day` : ""}</span>
                                 </div>
                               ))}
-                              {/* Show non-matching items too */}
                               {(() => {
-                                const otherItems = ((matchingVendors || []).find((v: any) => v.user_id === vendor.user_id) as any)?.totalItems > vendor.matchingItems.length;
-                                return null;
+                                const matchingIds = new Set(vendor.matchingItems.map((i: any) => i.id));
+                                const otherItems = (vendor.allItems || []).filter((i: any) => !matchingIds.has(i.id));
+                                if (otherItems.length === 0) return null;
+                                return (
+                                  <>
+                                    <p className="text-xs font-medium text-muted-foreground mb-1 mt-2">Other Items:</p>
+                                    {otherItems.map((item: any) => (
+                                      <div key={item.id} className="flex items-center justify-between text-xs p-1.5 bg-muted/50 rounded">
+                                        <span>{item.name}</span>
+                                        <span className="text-muted-foreground">Qty: {item.quantity} {item.price_per_day ? `• ₹${item.price_per_day}/day` : ""}</span>
+                                      </div>
+                                    ))}
+                                  </>
+                                );
                               })()}
                             </div>
                           )}

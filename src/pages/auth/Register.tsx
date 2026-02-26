@@ -173,9 +173,9 @@ const Register = () => {
           </CardTitle>
           <p className="text-muted-foreground">Join the Avens Platform</p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 pb-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Step 1: Role Selection - always visible first */}
               <FormField
                 control={form.control}

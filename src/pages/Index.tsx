@@ -182,21 +182,21 @@ const Index = () => {
         </div>
 
         {/* Navigation dots at the bottom of hero container */}
-        {activeBanners.length > 1 &&
-        <div className="absolute bottom--56 left-1/2 -translate-x-1/2 z-30 gap-2.5 flex-row flex items-end justify-center border-0">
-            {activeBanners.map((_, idx) =>
-          <button
-            key={idx}
-            onClick={() => setCurrentBannerIndex(idx)}
-            className={`rounded-full transition-all duration-300 ${
-            idx === currentBannerIndex ?
-            'w-8 h-3 bg-white' :
-            'w-3 h-3 bg-white/40 hover:bg-white/60'}`
-            }
-            aria-label={`Go to banner ${idx + 1}`} />
+        {activeBanners.length > 1
 
-          )}
-          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
         }
       </HeroSection>
 

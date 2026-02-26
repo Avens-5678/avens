@@ -5,7 +5,7 @@ import Layout from "@/components/Layout/Layout";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
-import CartModal from "@/components/Cart/CartModal";
+import { useNavigate } from "react-router-dom";
 import { Package, ShoppingCart, Plus, Check, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
   const { items, addItem, isInCart } = useCart();
-  const [cartModalOpen, setCartModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -214,7 +214,7 @@ const Ecommerce = () => {
               {filteredRentals.length} product{filteredRentals.length !== 1 ? "s" : ""}
             </span>
             <Button
-              onClick={() => setCartModalOpen(true)}
+              onClick={() => navigate("/cart")}
               variant="outline"
               size="sm"
               className="gap-2"
@@ -321,17 +321,17 @@ const Ecommerce = () => {
                   </p>
                 </div>
               ) : (
-                <div className={`grid gap-4 sm:gap-6 ${
+                <div className={`grid gap-3 sm:gap-4 ${
                   mobileView === "list" 
                     ? "grid-cols-1" 
                     : mobileView === "two" 
                       ? "grid-cols-2" 
                       : "grid-cols-1"
-                } sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4`}>
+                } sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5`}>
                   {filteredRentals.map((rental) => (
                     <Card
                       key={rental.id}
-                      className={`group overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow duration-300 rounded-2xl ${
+                      className={`group overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow duration-300 rounded-xl ${
                         mobileView === "list" ? "flex flex-row sm:flex-col" : ""
                       }`}
                     >
@@ -376,21 +376,21 @@ const Ecommerce = () => {
                       </div>
 
                       {/* Content */}
-                      <CardContent className="p-4 space-y-2">
-                        <h3 className="font-semibold text-foreground text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                      <CardContent className="p-3 space-y-1.5">
+                        <h3 className="font-semibold text-foreground text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors">
                           {rental.title}
                         </h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-2">
                           {rental.short_description}
                         </p>
                         {rental.price_range && (
-                          <p className="text-sm font-semibold text-foreground">
+                          <p className="text-xs sm:text-sm font-semibold text-foreground">
                             ₹{rental.price_range}
                           </p>
                         )}
 
                         {/* Action Buttons */}
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex gap-1.5 pt-1.5">
                           <Button
                             onClick={() => addItem({
                               id: rental.id,
@@ -400,23 +400,23 @@ const Ecommerce = () => {
                             })}
                             variant={isInCart(rental.id) ? "secondary" : "outline"}
                             size="sm"
-                            className="flex-1 text-xs"
+                            className="flex-1 text-[11px] h-8"
                             disabled={isInCart(rental.id)}
                           >
                             {isInCart(rental.id) ? (
-                              <><Check className="mr-1.5 h-3.5 w-3.5" />Added</>
+                              <><Check className="mr-1 h-3 w-3" />Added</>
                             ) : (
-                              <><Plus className="mr-1.5 h-3.5 w-3.5" />Add</>
+                              <><Plus className="mr-1 h-3 w-3" />Add</>
                             )}
                           </Button>
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
                                 size="sm"
-                                className="bg-primary text-primary-foreground text-xs"
+                                className="bg-primary text-primary-foreground text-[11px] h-8"
                                 onClick={() => setSelectedRental(rental)}
                               >
-                                <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+                                <ShoppingCart className="mr-1 h-3 w-3" />
                                 Enquire
                               </Button>
                             </DialogTrigger>
@@ -446,7 +446,7 @@ const Ecommerce = () => {
       {items.length > 0 && (
         <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
           <Button
-            onClick={() => setCartModalOpen(true)}
+            onClick={() => navigate("/cart")}
             size="lg"
             className="rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl transition-all duration-300"
           >
@@ -455,11 +455,6 @@ const Ecommerce = () => {
           </Button>
         </div>
       )}
-
-      <CartModal
-        open={cartModalOpen}
-        onOpenChange={setCartModalOpen}
-      />
     </Layout>
   );
 };

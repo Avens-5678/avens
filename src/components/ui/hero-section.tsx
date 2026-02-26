@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { resolveImageUrl } from "@/utils/imageAssets"
 
-interface HeroSectionProps {
+interface HeroSectionProps extends React.HTMLAttributes<HTMLElement> {
   children: ReactNode
   className?: string
   backgroundImage?: string
@@ -15,7 +15,8 @@ export function HeroSection({
   className, 
   backgroundImage,
   overlay = true,
-  gradient = true
+  gradient = true,
+  ...props
 }: HeroSectionProps) {
   const resolvedImage = backgroundImage ? resolveImageUrl(backgroundImage) : undefined;
   
@@ -31,6 +32,7 @@ export function HeroSection({
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       } : undefined}
+      {...props}
     >
       {/* Gradient overlay */}
       {gradient && (

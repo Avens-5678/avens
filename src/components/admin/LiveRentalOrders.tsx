@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useRentalOrders,
   useCreateRentalOrder,
@@ -17,20 +18,8 @@ import {
   type RentalOrderInsert,
 } from "@/hooks/useRentalOrders";
 import {
-  Plus,
-  Send,
-  Search,
-  MapPin,
-  Calendar,
-  Package,
-  Phone,
-  Trash2,
-  Eye,
-  CheckCircle,
-  Clock,
-  MessageSquare,
-  Filter,
-  X,
+  Plus, Send, Search, MapPin, Calendar, Package, Phone, Trash2, Eye,
+  CheckCircle, Clock, MessageSquare, Filter, X, Users,
 } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -44,16 +33,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const CATEGORIES = [
-  "General",
-  "Structures & Venues",
-  "Stages & Platforms",
-  "Lighting & Sound",
-  "AC & Climate Control",
-  "Furniture & Decor",
-  "Catering Equipment",
-  "AV Equipment",
-  "Power & Generators",
-  "Transport & Logistics",
+  "General", "Structures & Venues", "Stages & Platforms", "Lighting & Sound",
+  "AC & Climate Control", "Furniture & Decor", "Catering Equipment",
+  "AV Equipment", "Power & Generators", "Transport & Logistics",
 ];
 
 const LiveRentalOrders = () => {
@@ -63,27 +45,19 @@ const LiveRentalOrders = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSendOpen, setIsSendOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [vendorPhone, setVendorPhone] = useState("");
   const [vendorName, setVendorName] = useState("");
   const [viewOrder, setViewOrder] = useState<any>(null);
 
   const [newOrder, setNewOrder] = useState<RentalOrderInsert>({
-    title: "",
-    equipment_category: "General",
-    equipment_details: "",
-    location: "",
-    event_date: "",
-    budget: "",
-    client_name: "",
-    client_phone: "",
-    client_email: "",
-    notes: "",
+    title: "", equipment_category: "General", equipment_details: "",
+    location: "", event_date: "", budget: "", client_name: "",
+    client_phone: "", client_email: "", notes: "",
   });
 
   const { data: orders, isLoading } = useRentalOrders({
-    status: statusFilter,
-    category: categoryFilter,
-    location: locationSearch,
+    status: statusFilter, category: categoryFilter, location: locationSearch,
   });
 
   const createOrder = useCreateRentalOrder();
@@ -91,22 +65,72 @@ const LiveRentalOrders = () => {
   const deleteOrder = useDeleteRentalOrder();
   const sendToVendor = useSendToVendor();
 
+  // Fetch matching vendors when send dialog opens
+  const { data: matchingVendors, isLoading: vendorsLoading } = useQuery({
+    queryKey: ["matching_vendors", selectedOrder?.equipment_category, selectedOrder?.location],
+    queryFn: async () => {
+      if (!selectedOrder) return [];
+
+      // Get all vendor user IDs
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "vendor");
+      if (!roles || roles.length === 0) return [];
+
+      const vendorIds = roles.map((r) => r.user_id);
+
+      // Get vendor profiles
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("*")
+        .in("user_id", vendorIds);
+
+      // Get vendor inventory matching category
+      const { data: inventory } = await supabase
+        .from("vendor_inventory")
+        .select("*")
+        .eq("is_available", true);
+
+      // Filter vendors who have matching items AND matching city
+      const results = (profiles || []).map((profile: any) => {
+        const vendorItems = (inventory || []).filter(
+          (i) => i.vendor_id === profile.user_id
+        );
+        const matchingItems = vendorItems.filter(
+          (i) => i.category === selectedOrder.equipment_category || selectedOrder.equipment_category === "General"
+        );
+        const cityMatch = !selectedOrder.location ||
+          ((profile as any).city || "").toLowerCase().includes(selectedOrder.location.toLowerCase());
+
+        return {
+          ...profile,
+          matchingItems,
+          totalItems: vendorItems.length,
+          cityMatch,
+          hasMatchingItems: matchingItems.length > 0,
+        };
+      });
+
+      // Sort: matching items + city first, then matching items, then city, then rest
+      return results.sort((a: any, b: any) => {
+        const scoreA = (a.hasMatchingItems ? 2 : 0) + (a.cityMatch ? 1 : 0);
+        const scoreB = (b.hasMatchingItems ? 2 : 0) + (b.cityMatch ? 1 : 0);
+        return scoreB - scoreA;
+      });
+    },
+    enabled: isSendOpen && !!selectedOrder,
+  });
+
   const handleCreate = () => {
     if (!newOrder.title) return;
     createOrder.mutate(newOrder, {
       onSuccess: () => {
         setIsCreateOpen(false);
         setNewOrder({
-          title: "",
-          equipment_category: "General",
-          equipment_details: "",
-          location: "",
-          event_date: "",
-          budget: "",
-          client_name: "",
-          client_phone: "",
-          client_email: "",
-          notes: "",
+          title: "", equipment_category: "General", equipment_details: "",
+          location: "", event_date: "", budget: "", client_name: "",
+          client_phone: "", client_email: "", notes: "",
         });
       },
     });
@@ -122,13 +146,22 @@ const LiveRentalOrders = () => {
           setVendorPhone("");
           setVendorName("");
           setSelectedOrderId(null);
+          setSelectedOrder(null);
         },
       }
     );
   };
 
-  const openSendDialog = (orderId: string) => {
-    setSelectedOrderId(orderId);
+  const selectVendorFromList = (vendor: any) => {
+    setVendorPhone(vendor.phone || "");
+    setVendorName(vendor.full_name || vendor.company_name || "");
+  };
+
+  const openSendDialog = (order: any) => {
+    setSelectedOrderId(order.id);
+    setSelectedOrder(order);
+    setVendorPhone("");
+    setVendorName("");
     setIsSendOpen(true);
   };
 
@@ -153,59 +186,28 @@ const LiveRentalOrders = () => {
             <Button><Plus className="mr-2 h-4 w-4" />New Order</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create Rental Order</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle>Create Rental Order</DialogTitle></DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label>Title *</Label>
-                <Input value={newOrder.title} onChange={(e) => setNewOrder({ ...newOrder, title: e.target.value })} placeholder="e.g. 50 Round Tables for Wedding" />
-              </div>
+              <div><Label>Title *</Label><Input value={newOrder.title} onChange={(e) => setNewOrder({ ...newOrder, title: e.target.value })} placeholder="e.g. 50 Round Tables for Wedding" /></div>
               <div>
                 <Label>Equipment Category</Label>
                 <Select value={newOrder.equipment_category} onValueChange={(v) => setNewOrder({ ...newOrder, equipment_category: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
-                  </SelectContent>
+                  <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Equipment Details</Label>
-                <Textarea value={newOrder.equipment_details} onChange={(e) => setNewOrder({ ...newOrder, equipment_details: e.target.value })} placeholder="Specifications, quantities, sizes..." />
-              </div>
+              <div><Label>Equipment Details</Label><Textarea value={newOrder.equipment_details} onChange={(e) => setNewOrder({ ...newOrder, equipment_details: e.target.value })} placeholder="Specifications, quantities, sizes..." /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Location</Label>
-                  <Input value={newOrder.location} onChange={(e) => setNewOrder({ ...newOrder, location: e.target.value })} placeholder="City" />
-                </div>
-                <div>
-                  <Label>Event Date</Label>
-                  <Input type="date" value={newOrder.event_date} onChange={(e) => setNewOrder({ ...newOrder, event_date: e.target.value })} />
-                </div>
+                <div><Label>Location / City</Label><Input value={newOrder.location} onChange={(e) => setNewOrder({ ...newOrder, location: e.target.value })} placeholder="City" /></div>
+                <div><Label>Event Date</Label><Input type="date" value={newOrder.event_date} onChange={(e) => setNewOrder({ ...newOrder, event_date: e.target.value })} /></div>
               </div>
-              <div>
-                <Label>Budget</Label>
-                <Input value={newOrder.budget} onChange={(e) => setNewOrder({ ...newOrder, budget: e.target.value })} placeholder="₹50,000 - ₹1,00,000" />
-              </div>
+              <div><Label>Budget</Label><Input value={newOrder.budget} onChange={(e) => setNewOrder({ ...newOrder, budget: e.target.value })} placeholder="₹50,000 - ₹1,00,000" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Client Name</Label>
-                  <Input value={newOrder.client_name} onChange={(e) => setNewOrder({ ...newOrder, client_name: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Client Phone</Label>
-                  <Input value={newOrder.client_phone} onChange={(e) => setNewOrder({ ...newOrder, client_phone: e.target.value })} />
-                </div>
+                <div><Label>Client Name</Label><Input value={newOrder.client_name} onChange={(e) => setNewOrder({ ...newOrder, client_name: e.target.value })} /></div>
+                <div><Label>Client Phone</Label><Input value={newOrder.client_phone} onChange={(e) => setNewOrder({ ...newOrder, client_phone: e.target.value })} /></div>
               </div>
-              <div>
-                <Label>Client Email</Label>
-                <Input value={newOrder.client_email} onChange={(e) => setNewOrder({ ...newOrder, client_email: e.target.value })} />
-              </div>
-              <div>
-                <Label>Admin Notes</Label>
-                <Textarea value={newOrder.notes} onChange={(e) => setNewOrder({ ...newOrder, notes: e.target.value })} />
-              </div>
+              <div><Label>Client Email</Label><Input value={newOrder.client_email} onChange={(e) => setNewOrder({ ...newOrder, client_email: e.target.value })} /></div>
+              <div><Label>Admin Notes</Label><Textarea value={newOrder.notes} onChange={(e) => setNewOrder({ ...newOrder, notes: e.target.value })} /></div>
               <Button onClick={handleCreate} disabled={createOrder.isPending || !newOrder.title} className="w-full">
                 {createOrder.isPending ? "Creating..." : "Create Order"}
               </Button>
@@ -226,10 +228,7 @@ const LiveRentalOrders = () => {
           <Card key={label}>
             <CardContent className="flex items-center gap-3 p-4">
               <Icon className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-2xl font-bold">{value}</p>
-                <p className="text-xs text-muted-foreground">{label}</p>
-              </div>
+              <div><p className="text-2xl font-bold">{value}</p><p className="text-xs text-muted-foreground">{label}</p></div>
             </CardContent>
           </Card>
         ))}
@@ -261,7 +260,7 @@ const LiveRentalOrders = () => {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  {CATEGORIES.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+                  {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -269,12 +268,7 @@ const LiveRentalOrders = () => {
               <Label className="text-xs mb-1 block"><MapPin className="inline h-3 w-3 mr-1" />Location</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={locationSearch}
-                  onChange={(e) => setLocationSearch(e.target.value)}
-                  placeholder="Search by city..."
-                  className="pl-9"
-                />
+                <Input value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} placeholder="Search by city..." className="pl-9" />
               </div>
             </div>
             {(statusFilter !== "all" || categoryFilter !== "all" || locationSearch) && (
@@ -329,17 +323,12 @@ const LiveRentalOrders = () => {
                       <Eye className="h-4 w-4" />
                     </Button>
                     {(order.status === "new" || order.status === "sent_to_vendors") && (
-                      <Button size="sm" onClick={() => openSendDialog(order.id)} className="bg-green-600 hover:bg-green-700 text-white">
+                      <Button size="sm" onClick={() => openSendDialog(order)} className="bg-green-600 hover:bg-green-700 text-white">
                         <Send className="h-4 w-4 mr-1" />
                         <span className="hidden sm:inline">Send via WhatsApp</span>
                       </Button>
                     )}
-                    {order.status === "quoted" && (
-                      <Button size="sm" variant="default" onClick={() => updateOrder.mutate({ id: order.id, status: "confirmed" })}>
-                        <CheckCircle className="h-4 w-4 mr-1" />Confirm
-                      </Button>
-                    )}
-                    {order.status === "accepted" && (
+                    {(order.status === "quoted" || order.status === "accepted") && (
                       <Button size="sm" variant="default" onClick={() => updateOrder.mutate({ id: order.id, status: "confirmed" })}>
                         <CheckCircle className="h-4 w-4 mr-1" />Confirm
                       </Button>
@@ -355,13 +344,92 @@ const LiveRentalOrders = () => {
         </div>
       )}
 
-      {/* Send to Vendor Dialog */}
-      <Dialog open={isSendOpen} onOpenChange={setIsSendOpen}>
-        <DialogContent>
+      {/* Send to Vendor Dialog - with Search */}
+      <Dialog open={isSendOpen} onOpenChange={(open) => { setIsSendOpen(open); if (!open) { setSelectedOrder(null); setSelectedOrderId(null); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Send Order to Vendor via WhatsApp</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Find & Send to Vendor
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+
+          {selectedOrder && (
+            <div className="p-3 bg-muted rounded-lg text-sm mb-2">
+              <p className="font-medium">{selectedOrder.title}</p>
+              <p className="text-muted-foreground">
+                {selectedOrder.equipment_category} • {selectedOrder.location || "No location"}
+              </p>
+            </div>
+          )}
+
+          {/* Matching Vendors */}
+          <div className="space-y-3">
+            <h4 className="font-semibold flex items-center gap-2 text-sm">
+              <Users className="h-4 w-4" />
+              Matching Vendors
+              {matchingVendors && <Badge variant="secondary">{matchingVendors.length} found</Badge>}
+            </h4>
+
+            {vendorsLoading ? (
+              <p className="text-sm text-muted-foreground text-center py-4">Searching vendors...</p>
+            ) : !matchingVendors?.length ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No vendors found. Enter details manually below.</p>
+            ) : (
+              <div className="max-h-[300px] overflow-y-auto space-y-2">
+                {matchingVendors.map((vendor: any) => (
+                  <div
+                    key={vendor.id}
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                      vendorPhone === vendor.phone ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                    }`}
+                    onClick={() => selectVendorFromList(vendor)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm">{vendor.full_name || vendor.company_name || "Unnamed"}</p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                          {vendor.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{vendor.phone}</span>}
+                          {(vendor as any).city && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{(vendor as any).city}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {vendor.hasMatchingItems && (
+                          <Badge className="bg-emerald-100 text-emerald-800 text-xs">
+                            {vendor.matchingItems.length} matching items
+                          </Badge>
+                        )}
+                        {vendor.cityMatch && selectedOrder?.location && (
+                          <Badge className="bg-blue-100 text-blue-800 text-xs">
+                            <MapPin className="h-3 w-3 mr-1" />City match
+                          </Badge>
+                        )}
+                        {!vendor.hasMatchingItems && !vendor.cityMatch && (
+                          <Badge variant="outline" className="text-xs">No match</Badge>
+                        )}
+                      </div>
+                    </div>
+                    {vendor.matchingItems.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {vendor.matchingItems.slice(0, 3).map((item: any) => (
+                          <Badge key={item.id} variant="outline" className="text-xs">
+                            {item.name} (Qty: {item.quantity})
+                          </Badge>
+                        ))}
+                        {vendor.matchingItems.length > 3 && (
+                          <Badge variant="outline" className="text-xs">+{vendor.matchingItems.length - 3} more</Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Manual entry */}
+          <div className="border-t pt-4 space-y-3">
+            <h4 className="font-semibold text-sm">Send Details</h4>
             <div>
               <Label>Vendor WhatsApp Number *</Label>
               <Input value={vendorPhone} onChange={(e) => setVendorPhone(e.target.value)} placeholder="919876543210 (with country code)" />
@@ -382,9 +450,7 @@ const LiveRentalOrders = () => {
       {/* View Order Dialog */}
       <Dialog open={!!viewOrder} onOpenChange={() => setViewOrder(null)}>
         <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Order Details</DialogTitle></DialogHeader>
           {viewOrder && (
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-3">

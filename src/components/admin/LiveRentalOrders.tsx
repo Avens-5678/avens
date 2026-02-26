@@ -17,9 +17,10 @@ import {
   useSendToVendor,
   type RentalOrderInsert,
 } from "@/hooks/useRentalOrders";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Plus, Send, Search, MapPin, Calendar, Package, Phone, Trash2, Eye,
-  CheckCircle, Clock, MessageSquare, Filter, X, Users,
+  CheckCircle, Clock, MessageSquare, Filter, X, Users, ChevronDown, ChevronUp,
 } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -49,6 +50,9 @@ const LiveRentalOrders = () => {
   const [vendorPhone, setVendorPhone] = useState("");
   const [vendorName, setVendorName] = useState("");
   const [viewOrder, setViewOrder] = useState<any>(null);
+  const [selectedVendors, setSelectedVendors] = useState<Set<string>>(new Set());
+  const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
+  const [vendorSearch, setVendorSearch] = useState("");
 
   const [newOrder, setNewOrder] = useState<RentalOrderInsert>({
     title: "", equipment_category: "General", equipment_details: "",
@@ -162,8 +166,38 @@ const LiveRentalOrders = () => {
     setSelectedOrder(order);
     setVendorPhone("");
     setVendorName("");
+    setSelectedVendors(new Set());
+    setExpandedVendors(new Set());
+    setVendorSearch("");
     setIsSendOpen(true);
   };
+
+  const toggleVendorSelection = (vendorId: string) => {
+    setSelectedVendors(prev => {
+      const next = new Set(prev);
+      if (next.has(vendorId)) next.delete(vendorId);
+      else next.add(vendorId);
+      return next;
+    });
+  };
+
+  const toggleVendorExpand = (vendorId: string) => {
+    setExpandedVendors(prev => {
+      const next = new Set(prev);
+      if (next.has(vendorId)) next.delete(vendorId);
+      else next.add(vendorId);
+      return next;
+    });
+  };
+
+  const filteredVendors = matchingVendors?.filter((v: any) => {
+    if (!vendorSearch) return true;
+    const q = vendorSearch.toLowerCase();
+    return (v.full_name || "").toLowerCase().includes(q) ||
+      (v.company_name || "").toLowerCase().includes(q) ||
+      (v.city || "").toLowerCase().includes(q) ||
+      (v.phone || "").includes(q);
+  });
 
   const stats = {
     total: orders?.length || 0,
@@ -323,9 +357,9 @@ const LiveRentalOrders = () => {
                       <Eye className="h-4 w-4" />
                     </Button>
                     {(order.status === "new" || order.status === "sent_to_vendors") && (
-                      <Button size="sm" onClick={() => openSendDialog(order)} className="bg-green-600 hover:bg-green-700 text-white">
-                        <Send className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Send via WhatsApp</span>
+                      <Button size="sm" onClick={() => openSendDialog(order)} variant="default">
+                        <Search className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Search Vendors</span>
                       </Button>
                     )}
                     {(order.status === "quoted" || order.status === "accepted") && (
@@ -344,13 +378,13 @@ const LiveRentalOrders = () => {
         </div>
       )}
 
-      {/* Send to Vendor Dialog - with Search */}
+      {/* Search Vendors Dialog */}
       <Dialog open={isSendOpen} onOpenChange={(open) => { setIsSendOpen(open); if (!open) { setSelectedOrder(null); setSelectedOrderId(null); } }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
-              Find & Send to Vendor
+              Search Vendors
             </DialogTitle>
           </DialogHeader>
 
@@ -363,87 +397,128 @@ const LiveRentalOrders = () => {
             </div>
           )}
 
-          {/* Matching Vendors */}
-          <div className="space-y-3">
+          {/* Search input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={vendorSearch}
+              onChange={(e) => setVendorSearch(e.target.value)}
+              placeholder="Search by name, company, city, phone..."
+              className="pl-9"
+            />
+          </div>
+
+          {/* Vendor list with checkboxes */}
+          <div className="space-y-2">
             <h4 className="font-semibold flex items-center gap-2 text-sm">
               <Users className="h-4 w-4" />
-              Matching Vendors
-              {matchingVendors && <Badge variant="secondary">{matchingVendors.length} found</Badge>}
+              Vendors
+              {filteredVendors && <Badge variant="secondary">{filteredVendors.length} found</Badge>}
+              {selectedVendors.size > 0 && <Badge>{selectedVendors.size} selected</Badge>}
             </h4>
 
             {vendorsLoading ? (
               <p className="text-sm text-muted-foreground text-center py-4">Searching vendors...</p>
-            ) : !matchingVendors?.length ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No vendors found. Enter details manually below.</p>
+            ) : !filteredVendors?.length ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No vendors found.</p>
             ) : (
-              <div className="max-h-[300px] overflow-y-auto space-y-2">
-                {matchingVendors.map((vendor: any) => (
-                  <div
-                    key={vendor.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                      vendorPhone === vendor.phone ? "border-primary bg-primary/5" : "hover:bg-muted/50"
-                    }`}
-                    onClick={() => selectVendorFromList(vendor)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-sm">{vendor.full_name || vendor.company_name || "Unnamed"}</p>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                          {vendor.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{vendor.phone}</span>}
-                          {(vendor as any).city && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{(vendor as any).city}</span>}
+              <div className="max-h-[400px] overflow-y-auto space-y-2">
+                {filteredVendors.map((vendor: any) => {
+                  const isSelected = selectedVendors.has(vendor.user_id);
+                  const isExpanded = expandedVendors.has(vendor.user_id);
+                  return (
+                    <div key={vendor.id} className={`rounded-lg border transition-colors ${isSelected ? "border-primary bg-primary/5" : ""}`}>
+                      <div className="p-3 flex items-start gap-3">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => toggleVendorSelection(vendor.user_id)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-sm">{vendor.full_name || vendor.company_name || "Unnamed Vendor"}</p>
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-1">
+                                {vendor.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{vendor.phone}</span>}
+                                {vendor.city && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{vendor.city}</span>}
+                                {vendor.company_name && vendor.full_name && <span>🏢 {vendor.company_name}</span>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {vendor.hasMatchingItems && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {vendor.matchingItems.length} match
+                                </Badge>
+                              )}
+                              {vendor.cityMatch && selectedOrder?.location && (
+                                <Badge variant="outline" className="text-xs">
+                                  <MapPin className="h-3 w-3 mr-1" />City
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Expandable items section */}
+                          {vendor.totalItems > 0 && (
+                            <button
+                              onClick={() => toggleVendorExpand(vendor.user_id)}
+                              className="flex items-center gap-1 text-xs text-primary mt-2 hover:underline"
+                            >
+                              <Package className="h-3 w-3" />
+                              {vendor.totalItems} item{vendor.totalItems > 1 ? "s" : ""} in catalog
+                              {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                            </button>
+                          )}
+
+                          {isExpanded && (
+                            <div className="mt-2 space-y-1 pl-1">
+                              {vendor.matchingItems.length > 0 && (
+                                <p className="text-xs font-medium text-primary mb-1">Matching Items:</p>
+                              )}
+                              {vendor.matchingItems.map((item: any) => (
+                                <div key={item.id} className="flex items-center justify-between text-xs p-1.5 bg-primary/5 rounded">
+                                  <span>{item.name}</span>
+                                  <span className="text-muted-foreground">Qty: {item.quantity} {item.price_per_day ? `• ₹${item.price_per_day}/day` : ""}</span>
+                                </div>
+                              ))}
+                              {/* Show non-matching items too */}
+                              {(() => {
+                                const otherItems = ((matchingVendors || []).find((v: any) => v.user_id === vendor.user_id) as any)?.totalItems > vendor.matchingItems.length;
+                                return null;
+                              })()}
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {vendor.hasMatchingItems && (
-                          <Badge className="bg-emerald-100 text-emerald-800 text-xs">
-                            {vendor.matchingItems.length} matching items
-                          </Badge>
-                        )}
-                        {vendor.cityMatch && selectedOrder?.location && (
-                          <Badge className="bg-blue-100 text-blue-800 text-xs">
-                            <MapPin className="h-3 w-3 mr-1" />City match
-                          </Badge>
-                        )}
-                        {!vendor.hasMatchingItems && !vendor.cityMatch && (
-                          <Badge variant="outline" className="text-xs">No match</Badge>
-                        )}
-                      </div>
                     </div>
-                    {vendor.matchingItems.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {vendor.matchingItems.slice(0, 3).map((item: any) => (
-                          <Badge key={item.id} variant="outline" className="text-xs">
-                            {item.name} (Qty: {item.quantity})
-                          </Badge>
-                        ))}
-                        {vendor.matchingItems.length > 3 && (
-                          <Badge variant="outline" className="text-xs">+{vendor.matchingItems.length - 3} more</Badge>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Manual entry */}
-          <div className="border-t pt-4 space-y-3">
-            <h4 className="font-semibold text-sm">Send Details</h4>
-            <div>
-              <Label>Vendor WhatsApp Number *</Label>
-              <Input value={vendorPhone} onChange={(e) => setVendorPhone(e.target.value)} placeholder="919876543210 (with country code)" />
-              <p className="text-xs text-muted-foreground mt-1">Include country code without + (e.g. 919876543210)</p>
+          {/* Send to selected vendors */}
+          {selectedVendors.size > 0 && (
+            <div className="border-t pt-4">
+              <Button
+                onClick={() => {
+                  // Send to first selected vendor (could be extended for bulk)
+                  const firstVendor = filteredVendors?.find((v: any) => selectedVendors.has(v.user_id));
+                  if (firstVendor && selectedOrderId) {
+                    sendToVendor.mutate(
+                      { orderId: selectedOrderId, vendorPhone: firstVendor.phone || "", vendorName: firstVendor.full_name || firstVendor.company_name || "" },
+                      { onSuccess: () => { setIsSendOpen(false); setSelectedOrder(null); setSelectedOrderId(null); } }
+                    );
+                  }
+                }}
+                disabled={sendToVendor.isPending}
+                className="w-full"
+              >
+                <Send className="mr-2 h-4 w-4" />
+                {sendToVendor.isPending ? "Sending..." : `Send to ${selectedVendors.size} Vendor${selectedVendors.size > 1 ? "s" : ""} via WhatsApp`}
+              </Button>
             </div>
-            <div>
-              <Label>Vendor Name</Label>
-              <Input value={vendorName} onChange={(e) => setVendorName(e.target.value)} placeholder="Optional" />
-            </div>
-            <Button onClick={handleSendToVendor} disabled={sendToVendor.isPending || !vendorPhone} className="w-full bg-green-600 hover:bg-green-700">
-              <Phone className="mr-2 h-4 w-4" />
-              {sendToVendor.isPending ? "Sending..." : "Send via WhatsApp"}
-            </Button>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
 

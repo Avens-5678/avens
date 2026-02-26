@@ -6,26 +6,60 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, UserPlus, ArrowLeft } from "lucide-react";
+import { Loader2, UserPlus, ArrowLeft, Building2, User } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
-const registerSchema = z.object({
+const baseSchema = {
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
   fullName: z.string().min(2, "Full name is required"),
   phone: z.string().optional(),
-  companyName: z.string().optional(),
   role: z.enum(["client", "vendor"], {
     required_error: "Please select a role",
   }),
-}).refine((data) => data.password === data.confirmPassword, {
+  // Client fields
+  eventInterest: z.string().optional(),
+  // Vendor fields
+  companyName: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  gstNumber: z.string().optional(),
+  godownAddress: z.string().optional(),
+};
+
+const registerSchema = z.object(baseSchema).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
+}).refine((data) => {
+  if (data.role === "vendor") {
+    return !!data.phone && data.phone.length >= 10;
+  }
+  return true;
+}, {
+  message: "Phone number is required for vendors",
+  path: ["phone"],
+}).refine((data) => {
+  if (data.role === "vendor") {
+    return !!data.companyName && data.companyName.length >= 2;
+  }
+  return true;
+}, {
+  message: "Company name is required for vendors",
+  path: ["companyName"],
+}).refine((data) => {
+  if (data.role === "vendor") {
+    return !!data.address && data.address.length >= 5;
+  }
+  return true;
+}, {
+  message: "Address is required for vendors",
+  path: ["address"],
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -44,15 +78,21 @@ const Register = () => {
       fullName: "",
       phone: "",
       companyName: "",
-      role: "client",
+      address: "",
+      city: "",
+      gstNumber: "",
+      godownAddress: "",
+      eventInterest: "",
+      role: undefined as any,
     },
   });
+
+  const selectedRole = form.watch("role");
 
   const onSubmit = async (values: RegisterForm) => {
     setIsLoading(true);
 
     try {
-      // Sign up the user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -67,7 +107,6 @@ const Register = () => {
       if (signUpError) throw signUpError;
 
       if (authData.user) {
-        // Create profile
         const { error: profileError } = await supabase
           .from("profiles")
           .insert({
@@ -76,13 +115,16 @@ const Register = () => {
             full_name: values.fullName,
             phone: values.phone || null,
             company_name: values.companyName || null,
+            address: values.address || null,
+            city: values.city || null,
+            gst_number: values.gstNumber || null,
+            godown_address: values.godownAddress || null,
           });
 
         if (profileError) {
           console.error("Profile creation error:", profileError);
         }
 
-        // Assign role
         const { error: roleError } = await supabase
           .from("user_roles")
           .insert({
@@ -115,7 +157,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <Link
@@ -129,35 +171,50 @@ const Register = () => {
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Create Account
           </CardTitle>
-          <p className="text-muted-foreground">Join the Evnting Platform</p>
+          <p className="text-muted-foreground">Join the Avens Platform</p>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              {/* Step 1: Role Selection - always visible first */}
               <FormField
                 control={form.control}
                 name="role"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>I am a...</FormLabel>
+                    <FormLabel className="text-base font-semibold">I am a...</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="flex gap-4"
+                        value={field.value}
+                        className="grid grid-cols-2 gap-4"
                       >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="client" id="client" />
-                          <label htmlFor="client" className="text-sm font-medium cursor-pointer">
-                            Client (Request Events)
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="vendor" id="vendor" />
-                          <label htmlFor="vendor" className="text-sm font-medium cursor-pointer">
-                            Vendor (Provide Services)
-                          </label>
-                        </div>
+                        <label
+                          htmlFor="client"
+                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                            field.value === "client"
+                              ? "border-primary bg-primary/5 shadow-md"
+                              : "border-border hover:border-primary/30"
+                          }`}
+                        >
+                          <RadioGroupItem value="client" id="client" className="sr-only" />
+                          <User className={`h-8 w-8 ${field.value === "client" ? "text-primary" : "text-muted-foreground"}`} />
+                          <span className="font-semibold text-sm">Customer</span>
+                          <span className="text-xs text-muted-foreground text-center">Request Events</span>
+                        </label>
+                        <label
+                          htmlFor="vendor"
+                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                            field.value === "vendor"
+                              ? "border-primary bg-primary/5 shadow-md"
+                              : "border-border hover:border-primary/30"
+                          }`}
+                        >
+                          <RadioGroupItem value="vendor" id="vendor" className="sr-only" />
+                          <Building2 className={`h-8 w-8 ${field.value === "vendor" ? "text-primary" : "text-muted-foreground"}`} />
+                          <span className="font-semibold text-sm">Vendor</span>
+                          <span className="text-xs text-muted-foreground text-center">Provide Services</span>
+                        </label>
                       </RadioGroup>
                     </FormControl>
                     <FormMessage />
@@ -165,101 +222,197 @@ const Register = () => {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your full name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              {/* Step 2: Role-specific fields appear after selection */}
+              <AnimatePresence mode="wait">
+                {selectedRole && (
+                  <motion.div
+                    key={selectedRole}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4 overflow-hidden"
+                  >
+                    {/* Common fields */}
+                    <FormField
+                      control={form.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your full name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Address *</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="Enter your email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number {selectedRole === "vendor" ? "*" : "(Optional)"}</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+91 XXXXX XXXXX" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Client-specific fields */}
+                    {selectedRole === "client" && (
+                      <FormField
+                        control={form.control}
+                        name="eventInterest"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>What type of event are you planning? (Optional)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., Wedding, Corporate Event, Exhibition" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {/* Vendor-specific fields */}
+                    {selectedRole === "vendor" && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="companyName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Company / Business Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Your business name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Business Address *</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Full business address" className="min-h-[80px]" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="e.g., Hyderabad" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="gstNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>GST Number</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="22AAAAA0000A1Z5" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="godownAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Godown / Warehouse Address (Optional)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Warehouse or storage location" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
+
+                    {/* Password fields */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password *</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Min 8 characters" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirm Password *</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Repeat password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-primary to-accent text-lg py-5"
+                      disabled={isLoading}
+                    >
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <UserPlus className="mr-2 h-5 w-5" />
+                      {selectedRole === "client" ? "Create Customer Account" : "Register as Vendor"}
+                    </Button>
+                  </motion.div>
                 )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="Enter your email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+91..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="companyName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Company name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Create a password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Confirm your password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-primary to-accent"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <UserPlus className="mr-2 h-4 w-4" />
-                Create Account
-              </Button>
+              </AnimatePresence>
             </form>
           </Form>
         </CardContent>

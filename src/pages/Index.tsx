@@ -1,10 +1,11 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useAboutContent } from "@/hooks/useData";
-import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { GradientText } from "@/components/ui/animated-text";
 import Layout from "@/components/Layout/Layout";
@@ -44,6 +45,7 @@ const CardSkeleton = () => (
 );
 
 const Index = () => {
+  const isMobile = useIsMobile();
   // Core data - only essential for above-the-fold
   const { data: heroBanners, isLoading: loadingBanners } = useHeroBanners();
   const { data: services, isLoading: loadingServices } = useServices();
@@ -55,6 +57,10 @@ const Index = () => {
   const [inquiryDialogOpen, setInquiryDialogOpen] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [showBannerFallback, setShowBannerFallback] = useState(false);
+
+  // Touch swipe for mobile hero carousel
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   // Filter data
   const homeServices = services?.filter(s => s.show_on_home && s.is_active) || [];
@@ -88,7 +94,42 @@ const Index = () => {
       <HeroSection 
         backgroundImage={currentBanner?.image_url} 
         className="relative overflow-hidden"
+        onTouchStart={(e: React.TouchEvent) => { touchStartX.current = e.changedTouches[0].screenX; }}
+        onTouchEnd={(e: React.TouchEvent) => {
+          touchEndX.current = e.changedTouches[0].screenX;
+          if (touchStartX.current !== null && activeBanners.length > 1) {
+            const diff = touchStartX.current - touchEndX.current;
+            if (Math.abs(diff) > 50) {
+              if (diff > 0) {
+                setCurrentBannerIndex(prev => prev === activeBanners.length - 1 ? 0 : prev + 1);
+              } else {
+                setCurrentBannerIndex(prev => prev === 0 ? activeBanners.length - 1 : prev - 1);
+              }
+            }
+          }
+          touchStartX.current = null;
+        }}
       >
+        {/* Desktop/Tablet navigation arrows */}
+        {!isMobile && activeBanners.length > 1 && (
+          <>
+            <button
+              onClick={() => setCurrentBannerIndex(prev => prev === 0 ? activeBanners.length - 1 : prev - 1)}
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-200"
+              aria-label="Previous banner"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={() => setCurrentBannerIndex(prev => prev === activeBanners.length - 1 ? 0 : prev + 1)}
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-200"
+              aria-label="Next banner"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </>
+        )}
+
         <div className="container mx-auto px-4 text-center relative z-20">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight animate-fade-in">
             <GradientText className="block">
@@ -123,22 +164,25 @@ const Index = () => {
               </Link>
             </Button>
           </div>
-
-          {/* Simple banner navigation */}
-          {activeBanners.length > 1 && (
-            <div className="flex justify-center gap-2 mt-8">
-              {activeBanners.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentBannerIndex(idx)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    idx === currentBannerIndex ? 'bg-primary scale-125' : 'bg-white/50 hover:bg-white/70'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
         </div>
+
+        {/* Navigation dots at the bottom of hero container */}
+        {activeBanners.length > 1 && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2.5">
+            {activeBanners.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentBannerIndex(idx)}
+                className={`rounded-full transition-all duration-300 ${
+                  idx === currentBannerIndex 
+                    ? 'w-8 h-3 bg-white' 
+                    : 'w-3 h-3 bg-white/40 hover:bg-white/60'
+                }`}
+                aria-label={`Go to banner ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </HeroSection>
 
       {/* Stats Section - Static, no animations */}

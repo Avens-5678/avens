@@ -249,7 +249,7 @@ const LiveRentalOrders = () => {
     }
 
     // City filter
-    if (cityFilter) {
+    if (cityFilter && cityFilter !== "all") {
       const cityMatch = (v.city || "").toLowerCase().includes(cityFilter.toLowerCase());
       if (!cityMatch) return false;
     }
@@ -481,7 +481,7 @@ const LiveRentalOrders = () => {
                 <Select value={cityFilter} onValueChange={setCityFilter}>
                   <SelectTrigger className="h-9"><SelectValue placeholder="All Cities" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Cities</SelectItem>
+                    <SelectItem value="all">All Cities</SelectItem>
                     {availableCities.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -496,8 +496,8 @@ const LiveRentalOrders = () => {
                 />
               </div>
             </div>
-            {(cityFilter || localityFilter || vendorSearch) && (
-              <Button variant="ghost" size="sm" onClick={() => { setCityFilter(""); setLocalityFilter(""); setVendorSearch(""); }}>
+            {((cityFilter && cityFilter !== "all") || localityFilter || vendorSearch) && (
+              <Button variant="ghost" size="sm" onClick={() => { setCityFilter("all"); setLocalityFilter(""); setVendorSearch(""); }}>
                 <X className="h-3 w-3 mr-1" />Clear Filters
               </Button>
             )}

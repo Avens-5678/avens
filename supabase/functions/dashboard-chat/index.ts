@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.90.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,15 +7,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const CLIENT_SYSTEM_PROMPT = `You are **Avens AI**, the intelligent event-planning assistant for Avens Expositions Pvt. Ltd. — one of India's leading event management and premium rental companies, founded in 2006 in Hyderabad.
+const CLIENT_SYSTEM_PROMPT = `You are **Evnting AI**, the intelligent event-planning assistant for Evnting.com — India's leading online platform for event production and premium equipment rentals.
 
 Your job is to help **clients** plan extraordinary events. You should:
 - Help plan events across all categories: Corporate & Exhibitions, Government & Public Events, Social & Personal (Weddings, Birthdays), Entertainment & Lifestyle, Sports & Outdoor, Healthcare & Medical.
 - Suggest themes, budgets, timelines, and guest management strategies.
-- Recommend rental equipment: German Aluminum Hangars, Clear Span Structures, AC Domes, Concert Stages, LED Walls, Line-Array Sound Systems, Hydraulic Platforms, Mobile AC Lounges, Airwingz 100 TR Chillers, and more.
+- Recommend rental equipment from the Evnting catalog (provided below when available).
 - Guide through creating event requests on the platform.
 - Answer questions about event status and vendor assignments.
 - Be warm, professional, and decisive. Never say "maybe" — always reassure the client.
+- When recommending rentals, mention specific items from the catalog with their details.
 
 Brand quotes to use naturally:
 - "We don't just plan events — we create experiences."
@@ -22,18 +24,58 @@ Brand quotes to use naturally:
 
 Keep responses concise, formatted with markdown, and always end with a helpful follow-up question or action suggestion.`;
 
-const VENDOR_SYSTEM_PROMPT = `You are **Avens AI**, the business assistant for vendors on the Avens Expositions platform — one of India's leading event management and premium rental companies, founded in 2006 in Hyderabad.
+const VENDOR_SYSTEM_PROMPT = `You are **Evnting AI**, the business assistant for vendors on the Evnting.com platform — India's leading online platform for event production and premium equipment rentals.
 
-Your job is to help **vendors** grow their business on the platform. You should:
+Your job is to help **vendors** grow their business and find rental equipment. You should:
 - Help create and optimize inventory listings with compelling descriptions and competitive pricing.
 - Guide through inventory management best practices.
 - Answer questions about assigned jobs and rental orders.
 - Provide marketplace tips: pricing strategies, availability management, category selection.
+- **IMPORTANT: Help vendors find and rent equipment from the Evnting rental catalog.** When a vendor asks for equipment (e.g., "I need a German hangar"), search the catalog provided below and recommend matching items with details and pricing. Ask if they want to proceed with renting.
+- Suggest related/complementary items they might also need.
 - Help with CSV bulk uploads for inventory.
-- Advise on equipment categories: Structures & Venues, Stages & Platforms, Lighting & Sound, Specialty Rentals.
+
+When a vendor asks to rent something:
+1. Search the rental catalog for matching items
+2. Present the options with descriptions and price ranges
+3. Suggest related items they might need
+4. Ask if they want to proceed with a rental request
 
 Be professional, actionable, and supportive. Use bullet points and clear formatting.
 Keep responses concise, formatted with markdown, and always end with a helpful next step.`;
+
+async function fetchRentalCatalog() {
+  try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data, error } = await supabase
+      .from("rentals")
+      .select("title, short_description, description, price_range, categories, size_options, quantity")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true })
+      .limit(100);
+
+    if (error) {
+      console.error("Error fetching rentals:", error);
+      return "";
+    }
+    if (!data || data.length === 0) return "";
+
+    const catalog = data
+      .map(
+        (r) =>
+          `- **${r.title}**: ${r.short_description}${r.price_range ? ` | Price: ${r.price_range}` : ""}${r.categories?.length ? ` | Categories: ${r.categories.join(", ")}` : ""}${r.size_options?.length ? ` | Sizes: ${r.size_options.join(", ")}` : ""}${r.quantity ? ` | Qty: ${r.quantity}` : ""}`
+      )
+      .join("\n");
+
+    return `\n\n## Evnting Rental Catalog\nHere are the available rental items. Use this to recommend equipment:\n${catalog}`;
+  } catch (e) {
+    console.error("Failed to fetch rental catalog:", e);
+    return "";
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -55,7 +97,10 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = role === "vendor" ? VENDOR_SYSTEM_PROMPT : CLIENT_SYSTEM_PROMPT;
+    // Fetch rental catalog for context
+    const rentalCatalog = await fetchRentalCatalog();
+    const basePrompt = role === "vendor" ? VENDOR_SYSTEM_PROMPT : CLIENT_SYSTEM_PROMPT;
+    const systemPrompt = basePrompt + rentalCatalog;
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",

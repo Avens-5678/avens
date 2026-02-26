@@ -32,6 +32,16 @@ const Navbar = () => {
     { href: "/about", label: "About" },
   ];
 
+  const mobileNavLinks = [
+    { href: "/services", label: "Services" },
+    { href: "/portfolio", label: "Portfolio" },
+    { href: "/ecommerce", label: "Shop" },
+    { href: "/about", label: "About" },
+    { href: "/blog", label: "Blog" },
+    { href: "/faq", label: "FAQ" },
+    { href: "/team", label: "Team" },
+  ];
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -138,7 +148,7 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-white/8 animate-fade-in">
             <div className="flex flex-col space-y-1">
-              {navLinks.map((link) => (
+              {mobileNavLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}

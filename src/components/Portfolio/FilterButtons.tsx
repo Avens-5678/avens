@@ -39,24 +39,43 @@ const FilterButtons = ({ activeFilter, onFilterChange }: FilterButtonsProps) => 
   console.log('FilterButtons debug:', { events: events?.length, eventTypes, filters, activeFilter });
 
   return (
-    <div className="flex flex-wrap justify-center gap-3 mb-12">
-      {filters.map((filter) => (
-        <Button
-          key={filter.key}
-          variant={activeFilter === filter.key ? "default" : "outline"}
-          onClick={() => onFilterChange(filter.key)}
-          className={`
-            px-6 py-2 font-medium transition-all duration-300
-            ${activeFilter === filter.key 
-              ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-elegant" 
-              : "border-border hover:border-hover hover:bg-hover/10 hover:text-hover"
-            }
-          `}
-        >
-          {filter.label}
-        </Button>
-      ))}
-    </div>
+    <>
+      {/* Mobile: horizontal scroll */}
+      <div className="flex md:hidden overflow-x-auto scrollbar-hide gap-2 mb-8 pb-1">
+        {filters.map((filter) => (
+          <button
+            key={filter.key}
+            onClick={() => onFilterChange(filter.key)}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-colors whitespace-nowrap ${
+              activeFilter === filter.key
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-border text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+      {/* Desktop: wrap */}
+      <div className="hidden md:flex flex-wrap justify-center gap-3 mb-12">
+        {filters.map((filter) => (
+          <Button
+            key={filter.key}
+            variant={activeFilter === filter.key ? "default" : "outline"}
+            onClick={() => onFilterChange(filter.key)}
+            className={`
+              px-6 py-2 font-medium transition-all duration-300
+              ${activeFilter === filter.key 
+                ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-elegant" 
+                : "border-border hover:border-hover hover:bg-hover/10 hover:text-hover"
+              }
+            `}
+          >
+            {filter.label}
+          </Button>
+        ))}
+      </div>
+    </>
   );
 };
 

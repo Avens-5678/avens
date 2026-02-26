@@ -416,8 +416,8 @@ const Ecommerce = () => {
                                 className="bg-primary text-primary-foreground text-[11px] h-8"
                                 onClick={() => setSelectedRental(rental)}
                               >
-                                <ShoppingCart className="mr-1 h-3 w-3" />
-                                Enquire
+                                <ShoppingCart className={`h-3 w-3 ${mobileView === "two" ? "" : "mr-1"}`} />
+                                <span className={mobileView === "two" ? "hidden" : ""}>Enquire</span>
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">

@@ -6,7 +6,7 @@ import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import CartModal from "@/components/Cart/CartModal";
-import { Package, ShoppingCart, Plus, Check, Search, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Package, ShoppingCart, Plus, Check, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
@@ -25,6 +25,7 @@ const Ecommerce = () => {
     price: false,
   });
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
 
   // Extract unique categories from rentals
   const categories = useMemo(() => {
@@ -223,6 +224,63 @@ const Ecommerce = () => {
             </Button>
           </div>
         </div>
+
+        {/* Mobile: Horizontal Category Scroll + View Toggle */}
+        <div className="lg:hidden container mx-auto px-4 py-2 flex items-center gap-2">
+          {/* View toggle buttons */}
+          <div className="flex items-center border border-border rounded-lg overflow-hidden flex-shrink-0">
+            <button
+              onClick={() => setMobileView("list")}
+              className={`p-2 transition-colors ${mobileView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+              aria-label="List view"
+            >
+              <List className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setMobileView("two")}
+              className={`p-2 transition-colors ${mobileView === "two" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+              aria-label="Two column view"
+            >
+              <Grid2X2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setMobileView("one")}
+              className={`p-2 transition-colors ${mobileView === "one" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+              aria-label="Single column view"
+            >
+              <Square className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Horizontal scrollable categories */}
+          <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-2 pb-1">
+              <button
+                onClick={() => setSelectedCategories([])}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  selectedCategories.length === 0
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                All
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => toggleCategory(cat)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap ${
+                    selectedCategories.includes(cat)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Main Content: Sidebar + Grid */}
@@ -263,14 +321,26 @@ const Ecommerce = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                <div className={`grid gap-4 sm:gap-6 ${
+                  mobileView === "list" 
+                    ? "grid-cols-1" 
+                    : mobileView === "two" 
+                      ? "grid-cols-2" 
+                      : "grid-cols-1"
+                } sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4`}>
                   {filteredRentals.map((rental) => (
                     <Card
                       key={rental.id}
-                      className="group overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow duration-300 rounded-2xl"
+                      className={`group overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow duration-300 rounded-2xl ${
+                        mobileView === "list" ? "flex flex-row sm:flex-col" : ""
+                      }`}
                     >
                       {/* Image */}
-                      <div className="aspect-square overflow-hidden bg-muted">
+                      <div className={`overflow-hidden bg-muted relative ${
+                        mobileView === "list" 
+                          ? "w-28 h-28 flex-shrink-0 sm:w-full sm:h-auto sm:aspect-square" 
+                          : "aspect-square"
+                      }`}>
                         {rental.image_urls && rental.image_urls.length > 0 ? (
                           <MultiImageCarousel
                             images={rental.image_urls}

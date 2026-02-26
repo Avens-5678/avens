@@ -61,6 +61,8 @@ const Index = () => {
   // Touch swipe for mobile hero carousel
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const [showArrows, setShowArrows] = useState(true);
+  const arrowTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Filter data
   const homeServices = services?.filter(s => s.show_on_home && s.is_active) || [];
@@ -69,6 +71,18 @@ const Index = () => {
   const activeBanners = heroBanners?.filter(b => b.is_active) || [];
 
   const currentBanner = activeBanners[currentBannerIndex];
+
+  // Auto-hide arrows after 3s of inactivity
+  const resetArrowTimer = useCallback(() => {
+    setShowArrows(true);
+    if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current);
+    arrowTimeoutRef.current = setTimeout(() => setShowArrows(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    resetArrowTimer();
+    return () => { if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current); };
+  }, [resetArrowTimer]);
 
   useEffect(() => {
     if (!loadingBanners) {
@@ -94,6 +108,7 @@ const Index = () => {
       <HeroSection 
         backgroundImage={currentBanner?.image_url} 
         className="relative overflow-hidden"
+        onMouseMove={resetArrowTimer}
         onTouchStart={(e: React.TouchEvent) => { touchStartX.current = e.changedTouches[0].screenX; }}
         onTouchEnd={(e: React.TouchEvent) => {
           touchEndX.current = e.changedTouches[0].screenX;
@@ -110,19 +125,19 @@ const Index = () => {
           touchStartX.current = null;
         }}
       >
-        {/* Desktop/Tablet navigation arrows */}
+        {/* Desktop/Tablet navigation arrows - auto-hide on inactivity */}
         {!isMobile && activeBanners.length > 1 && (
           <>
             <button
-              onClick={() => setCurrentBannerIndex(prev => prev === 0 ? activeBanners.length - 1 : prev - 1)}
-              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-200"
+              onClick={() => { setCurrentBannerIndex(prev => prev === 0 ? activeBanners.length - 1 : prev - 1); resetArrowTimer(); }}
+              className={`absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-500 ${showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               aria-label="Previous banner"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
-              onClick={() => setCurrentBannerIndex(prev => prev === activeBanners.length - 1 ? 0 : prev + 1)}
-              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-200"
+              onClick={() => { setCurrentBannerIndex(prev => prev === activeBanners.length - 1 ? 0 : prev + 1); resetArrowTimer(); }}
+              className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-500 ${showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               aria-label="Next banner"
             >
               <ChevronRight className="h-6 w-6" />

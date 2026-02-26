@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const baseUrl = req.headers.get("origin") || "https://avens.lovable.app";
+      const baseUrl = req.headers.get("origin") || "https://evnting.com";
       const acceptUrl = `${baseUrl}/vendor/action?token=${order.action_token}&action=accept`;
       const quoteUrl = `${baseUrl}/vendor/action?token=${order.action_token}&action=quote`;
 

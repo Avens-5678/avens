@@ -72,7 +72,7 @@ const EquipmentRental = () => {
       eventType="equipment"
       eventTitle="Equipment Rental"
       heroSubtitle="Professional Grade Event Equipment"
-      description="At Avens Events, we provide top-tier professional equipment rentals with full-service support. From audio-visual systems to staging and lighting, we ensure your event has the technical excellence it deserves."
+      description="At Evnting, we provide top-tier professional equipment rentals with full-service support. From audio-visual systems to staging and lighting, we ensure your event has the technical excellence it deserves."
       heroImage={equipmentHero}
       eventIcon={Package}
       eventSpecialties={equipmentCategories}

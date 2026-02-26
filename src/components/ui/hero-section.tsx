@@ -33,6 +33,17 @@ export function HeroSection({
       } : undefined}
       {...props}
     >
+      {/* Hidden img for LCP preload discovery + fetchpriority */}
+      {resolvedImage && (
+        <img
+          src={resolvedImage}
+          alt=""
+          fetchPriority="high"
+          aria-hidden="true"
+          className="absolute w-0 h-0 opacity-0 pointer-events-none"
+        />
+      )}
+
       {/* Gradient overlay */}
       {gradient && !resolvedImage && (
         <div className="absolute inset-0 bg-gradient-to-br from-primary/6 to-secondary/4" />

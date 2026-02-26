@@ -226,11 +226,11 @@ const Index = () => {
 
           
           {loadingServices ?
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 [&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6 lg:gap-8 [&>*:nth-child(n+5)]:hidden sm:[&>*:nth-child(n+5)]:hidden lg:[&>*:nth-child(n+5)]:block">
               {homeServices.map((service) =>
             <GlassmorphismCard
               key={service.id}
@@ -317,11 +317,11 @@ const Index = () => {
 
           
           {loadingRentals ?
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 [&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6 lg:gap-8 [&>*:nth-child(n+5)]:hidden sm:[&>*:nth-child(n+5)]:hidden lg:[&>*:nth-child(n+5)]:block">
               {homeRentals.slice(0, 6).map((rental) =>
             <GlassmorphismCard
               key={rental.id}

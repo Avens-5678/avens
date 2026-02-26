@@ -2,3 +2,9 @@ project_id = "zbcnepczdenymvfeuoaj"
 
 [functions.check-user-type]
 verify_jwt = false
+
+[functions.wati-whatsapp]
+verify_jwt = false
+
+[functions.vendor-action]
+verify_jwt = false

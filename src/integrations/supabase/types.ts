@@ -592,6 +592,75 @@ export type Database = {
         }
         Relationships: []
       }
+      rental_orders: {
+        Row: {
+          action_token: string | null
+          assigned_vendor_id: string | null
+          budget: string | null
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
+          created_at: string
+          equipment_category: string
+          equipment_details: string | null
+          event_date: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          status: string
+          title: string
+          updated_at: string
+          vendor_quote_amount: number | null
+          vendor_responded_at: string | null
+          vendor_response: string | null
+          whatsapp_sent_at: string | null
+        }
+        Insert: {
+          action_token?: string | null
+          assigned_vendor_id?: string | null
+          budget?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          created_at?: string
+          equipment_category?: string
+          equipment_details?: string | null
+          event_date?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          vendor_quote_amount?: number | null
+          vendor_responded_at?: string | null
+          vendor_response?: string | null
+          whatsapp_sent_at?: string | null
+        }
+        Update: {
+          action_token?: string | null
+          assigned_vendor_id?: string | null
+          budget?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          created_at?: string
+          equipment_category?: string
+          equipment_details?: string | null
+          event_date?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          vendor_quote_amount?: number | null
+          vendor_responded_at?: string | null
+          vendor_response?: string | null
+          whatsapp_sent_at?: string | null
+        }
+        Relationships: []
+      }
       rentals: {
         Row: {
           categories: string[] | null

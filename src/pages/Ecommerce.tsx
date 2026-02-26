@@ -361,7 +361,7 @@ const Ecommerce = () => {
                         )}
 
                         {/* Category badges overlaid on image */}
-                        {rental.categories && rental.categories.length > 0 && (
+                        {rental.categories && rental.categories.length > 0 && mobileView !== "list" && (
                           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
                             {rental.categories.slice(0, 2).map((cat) => (
                               <Badge

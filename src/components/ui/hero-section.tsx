@@ -1,6 +1,5 @@
 import { ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { resolveImageUrl } from "@/utils/imageAssets"
 
 interface HeroSectionProps extends React.HTMLAttributes<HTMLElement> {
   children: ReactNode
@@ -18,7 +17,7 @@ export function HeroSection({
   gradient = true,
   ...props
 }: HeroSectionProps) {
-  const resolvedImage = backgroundImage ? resolveImageUrl(backgroundImage) : undefined;
+  const resolvedImage = backgroundImage;
   
   return (
     <section 
@@ -35,19 +34,19 @@ export function HeroSection({
       {...props}
     >
       {/* Gradient overlay */}
-      {gradient && (
-        <div className="absolute inset-0 gradient-hero opacity-60" />
+      {gradient && !resolvedImage && (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/6 to-secondary/4" />
       )}
       
-      {/* Dark overlay for readability */}
+      {/* Dark overlay for readability over images */}
       {overlay && resolvedImage && (
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/50 to-foreground/70" />
       )}
       
-      {/* Animated background elements */}
+      {/* Ambient decoration — subtle, not distracting */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-secondary/4 rounded-full blur-[100px]" />
       </div>
       
       {/* Content */}

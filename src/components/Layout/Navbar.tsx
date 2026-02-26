@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Menu, X, LogIn, User, LogOut, Mail } from "lucide-react";
+import { Menu, X, LogIn, User, LogOut, Mail, ChevronRight } from "lucide-react";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -18,85 +18,90 @@ const Navbar = () => {
 
   const getDashboardPath = () => {
     switch (role) {
-      case "admin":return "/admin";
-      case "client":return "/client/dashboard";
-      case "vendor":return "/vendor/dashboard";
-      default:return "/";
+      case "admin": return "/admin";
+      case "client": return "/client/dashboard";
+      case "vendor": return "/vendor/dashboard";
+      default: return "/";
     }
   };
 
   const navLinks = [
-  { href: "/services", label: "Services" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/ecommerce", label: "Shop" },
-  { href: "/about", label: "About" }];
-
+    { href: "/services", label: "Services" },
+    { href: "/portfolio", label: "Portfolio" },
+    { href: "/ecommerce", label: "Shop" },
+    { href: "/about", label: "About" },
+  ];
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-foreground sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        {/* Desktop layout: 3-column grid for perfect centering */}
-        <div className="hidden md:grid grid-cols-3 items-center h-14">
+    <nav className="glass-dark sticky top-0 z-50">
+      <div className="container mx-auto px-5 sm:px-6">
+        {/* Desktop layout: 3-column grid */}
+        <div className="hidden md:grid grid-cols-3 items-center h-16">
           {/* Left: Nav Links */}
-          <div className="flex items-center gap-5">
-            {navLinks.map((link) =>
-            <Link
-              key={link.href}
-              to={link.href}
-              className={`text-sm font-medium transition-colors ${
-              isActive(link.href) ?
-              "text-primary-foreground" :
-              "text-primary-foreground/50 hover:text-primary-foreground/80"}`
-              }>
-
+          <div className="flex items-center gap-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={`text-[13px] font-medium tracking-wide uppercase transition-all duration-300 ${
+                  isActive(link.href)
+                    ? "text-white"
+                    : "text-white/50 hover:text-white/85"
+                }`}
+              >
                 {link.label}
               </Link>
-            )}
+            ))}
           </div>
 
           {/* Center: Logo */}
           <Link to="/" className="flex items-center justify-center">
-            <span className="text-primary-foreground text-xl font-bold tracking-tight">Evnting.com</span>
+            <span className="text-white text-xl font-display font-bold tracking-tight">
+              Evnting<span className="text-secondary">.com</span>
+            </span>
           </Link>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-2 justify-end">
-            {user ?
-            <DropdownMenu>
+          <div className="flex items-center gap-3 justify-end">
+            {user ? (
+              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
+                  <Button variant="ghost" size="sm" className="gap-2 text-white/55 hover:text-white hover:bg-white/8 rounded-xl">
                     <User className="h-4 w-4" />
                     Dashboard
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate(getDashboardPath())}>
+                <DropdownMenuContent align="end" className="rounded-xl">
+                  <DropdownMenuItem onClick={() => navigate(getDashboardPath())} className="rounded-lg">
                     <User className="h-4 w-4 mr-2" />
                     My Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => signOut()}>
+                  <DropdownMenuItem onClick={() => signOut()} className="rounded-lg">
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu> :
-
-            <Link to="/auth">
-                <Button variant="ghost" size="sm" className="gap-1.5 text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="sm" className="gap-1.5 text-white/55 hover:text-white hover:bg-white/8 rounded-xl">
                   <LogIn className="h-4 w-4" />
                   Sign In
                 </Button>
               </Link>
-            }
+            )}
             <Dialog>
               <DialogTrigger asChild>
-                <Button size="sm" className="rounded-full bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 hover:bg-primary-foreground/20 px-4">
+                <Button
+                  size="sm"
+                  className="rounded-full bg-secondary hover:bg-secondary/90 text-white border-0 px-5 font-semibold text-[13px] shadow-md hover:shadow-lg transition-all duration-300"
+                >
                   Contact Us
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-[90vw] lg:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+              <DialogContent className="max-w-[90vw] lg:max-w-2xl max-h-[90vh] overflow-y-auto p-0 rounded-2xl">
                 <div className="p-6">
                   <DialogTitle>Contact Us</DialogTitle>
                   <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
@@ -114,77 +119,83 @@ const Navbar = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="text-primary-foreground hover:bg-primary-foreground/10"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}>
-
+            className="text-white hover:bg-white/8 rounded-xl"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
 
           <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-            <span className="text-primary-foreground text-lg font-bold tracking-tight">     Evnting.com</span>
+            <span className="text-white text-lg font-display font-bold tracking-tight">
+              Evnting<span className="text-secondary">.com</span>
+            </span>
           </Link>
 
           <div className="w-10" aria-hidden="true" />
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen &&
-        <div className="md:hidden py-3 border-t border-primary-foreground/10">
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-white/8 animate-fade-in">
             <div className="flex flex-col space-y-1">
-              {navLinks.map((link) =>
-            <Link
-              key={link.href}
-              to={link.href}
-              className={`text-sm font-medium transition-colors px-3 py-2 rounded-lg ${
-              isActive(link.href) ?
-              "text-primary-foreground bg-primary-foreground/10" :
-              "text-primary-foreground/50 hover:text-primary-foreground hover:bg-primary-foreground/5"}`
-              }
-              onClick={() => setIsMenuOpen(false)}>
-
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={`flex items-center justify-between text-sm font-medium transition-all px-4 py-3 rounded-xl ${
+                    isActive(link.href)
+                      ? "text-white bg-white/10"
+                      : "text-white/55 hover:text-white hover:bg-white/5"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   {link.label}
+                  <ChevronRight className="h-4 w-4 opacity-40" />
                 </Link>
-            )}
-              <div className="border-t border-primary-foreground/10 pt-2 mt-1 space-y-1">
+              ))}
+              <div className="border-t border-white/8 pt-3 mt-2 space-y-1">
                 <button
-                className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  setIsMobileContactOpen(true);
-                }}>
-
+                  className="w-full flex items-center gap-3 text-sm text-white/55 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 transition-all"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsMobileContactOpen(true);
+                  }}
+                >
                   <Mail className="h-4 w-4" />
                   Contact Us
                 </button>
 
-                {user ?
-              <>
+                {user ? (
+                  <>
                     <Link to={getDashboardPath()} onClick={() => setIsMenuOpen(false)}>
-                      <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5">
+                      <button className="w-full flex items-center gap-3 text-sm text-white/55 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 transition-all">
                         <User className="h-4 w-4" />
                         My Dashboard
                       </button>
                     </Link>
-                    <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5" onClick={() => {signOut();setIsMenuOpen(false);}}>
+                    <button
+                      className="w-full flex items-center gap-3 text-sm text-white/55 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 transition-all"
+                      onClick={() => { signOut(); setIsMenuOpen(false); }}
+                    >
                       <LogOut className="h-4 w-4" />
                       Sign Out
                     </button>
-                  </> :
-
-              <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                    <button className="w-full flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary-foreground/5">
+                  </>
+                ) : (
+                  <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                    <button className="w-full flex items-center gap-3 text-sm text-white/55 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 transition-all">
                       <LogIn className="h-4 w-4" />
                       Sign In
                     </button>
                   </Link>
-              }
+                )}
               </div>
             </div>
           </div>
-        }
+        )}
 
         <Dialog open={isMobileContactOpen} onOpenChange={setIsMobileContactOpen}>
-          <DialogContent className="w-[calc(100%-1rem)] max-w-md max-h-[90dvh] overflow-y-auto p-0">
+          <DialogContent className="w-[calc(100%-1rem)] max-w-md max-h-[90dvh] overflow-y-auto p-0 rounded-2xl">
             <div className="p-5 sm:p-6">
               <DialogTitle>Contact Us</DialogTitle>
               <DialogDescription>Get in touch with us for your event planning needs</DialogDescription>
@@ -195,8 +206,8 @@ const Navbar = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </nav>);
-
+    </nav>
+  );
 };
 
 export default Navbar;

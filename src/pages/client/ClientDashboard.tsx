@@ -4,22 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus } from "lucide-react";
+import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot } from "lucide-react";
 import { Link } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
 import EventTracker from "@/components/client/EventTracker";
 import ClientProfileSettings from "@/components/client/ClientProfileSettings";
+import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 
 const sidebarItems: SidebarItem[] = [
+  { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: FileText, label: "My Events", value: "tracker" },
   { icon: Plus, label: "New Request", value: "request" },
   { icon: User, label: "Profile", value: "profile" },
 ];
 
 const ClientDashboard = () => {
-  const [activeTab, setActiveTab] = useState("tracker");
+  const [activeTab, setActiveTab] = useState("ai");
   const { user, signOut } = useAuth();
   const { toast } = useToast();
 
@@ -71,6 +73,8 @@ const ClientDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "ai":
+        return <DashboardChatbot role="client" userName={user?.user_metadata?.full_name || user?.email || ""} />;
       case "tracker":
         return <EventTracker />;
       case "request":

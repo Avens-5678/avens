@@ -71,7 +71,7 @@ const GovernmentEvents = () => {
       eventType="government"
       eventTitle="Government Events"
       heroSubtitle="Official Events With Distinction"
-      description={event?.description || "At Avens Events, we specialize in government and official events that require the highest standards of protocol, security, and professionalism. From state ceremonies to diplomatic functions, we ensure every detail meets official requirements."}
+      description={event?.description || "At Evnting, we specialize in government and official events that require the highest standards of protocol, security, and professionalism. From state ceremonies to diplomatic functions, we ensure every detail meets official requirements."}
       heroImage={governmentHero}
       eventIcon={Building}
       eventSpecialties={eventSpecialties}

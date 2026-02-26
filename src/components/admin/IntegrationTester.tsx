@@ -57,7 +57,7 @@ const IntegrationTester = () => {
       const testData = {
         submissionId: null,
         name: 'Test Contact (Admin)',
-        email: `test-${Date.now()}@avens-test.com`,
+        email: `test-${Date.now()}@evnting-test.com`,
         phone: '+1234567890',
         message: 'This is a test contact from the admin integration tester.',
         formType: 'contact',
@@ -121,8 +121,8 @@ const IntegrationTester = () => {
           <CardContent className="space-y-4">
             <div className="text-sm text-muted-foreground">
               <p><strong>Measurement ID:</strong> G-5RKKBP5M5S</p>
-              <p><strong>Stream:</strong> Avens Expositions</p>
-              <p><strong>URL:</strong> https://avens.lovable.app/</p>
+              <p><strong>Stream:</strong> Evnting</p>
+              <p><strong>URL:</strong> https://evnting.com/</p>
             </div>
             
             <div className="space-y-2">

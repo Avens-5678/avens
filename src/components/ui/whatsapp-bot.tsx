@@ -59,7 +59,7 @@ export const WhatsAppBot = () => {
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       addBotMessage(
-        "👋 Hi, welcome to Avens! I'm here to help you with Events, Rentals, or answer any questions. What can I assist you with today?",
+        "👋 Hi, welcome to Evnting! I'm here to help you with Events, Rentals, or answer any questions. What can I assist you with today?",
         ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ General Questions']
       );
     }
@@ -368,7 +368,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
         summary += `🔧 Setup: ${customerData.needsSetup === 'yes' ? 'Yes' : 'No'}\n`;
       }
 
-      summary += `\n✅ Our team will contact you within 24 hours with detailed information!\n\nThank you for choosing Avens Events! 🙏`;
+      summary += `\n✅ Our team will contact you within 24 hours with detailed information!\n\nThank you for choosing Evnting! 🙏`;
 
       addBotMessage(summary);
 
@@ -380,7 +380,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
     } catch (error) {
       console.error('Error submitting to HubSpot:', error);
       addBotMessage(
-        "✅ I've saved your information! There was a minor issue with our system, but don't worry - our team has your details and will contact you soon.\n\nThank you for choosing Avens Events!"
+        "✅ I've saved your information! There was a minor issue with our system, but don't worry - our team has your details and will contact you soon.\n\nThank you for choosing Evnting!"
       );
       
       toast({
@@ -432,7 +432,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
                 <MessageCircle className="h-5 w-5" />
               </div>
               <div>
-                <DialogTitle className="text-white font-semibold">Avens Events Bot</DialogTitle>
+                <DialogTitle className="text-white font-semibold">Evnting Bot</DialogTitle>
                 <p className="text-green-100 text-xs">● Online now</p>
               </div>
             </div>

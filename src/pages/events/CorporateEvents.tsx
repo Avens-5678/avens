@@ -70,7 +70,7 @@ const CorporateEvents = () => {
       eventType="corporate"
       eventTitle="Corporate Events"
       heroSubtitle="Elevating Business Connections"
-      description={event?.description || "At Avens Events, we pride ourselves in being an extension of your organization. Our team of experts service a wide variety of corporate events. Let us help you plan, design, and produce your next business gathering."}
+      description={event?.description || "At Evnting, we pride ourselves in being an extension of your organization. Our team of experts service a wide variety of corporate events. Let us help you plan, design, and produce your next business gathering."}
       heroImage={corporateHero}
       eventIcon={Briefcase}
       eventSpecialties={eventSpecialties}

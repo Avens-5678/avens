@@ -171,7 +171,7 @@ const Register = () => {
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Create Account
           </CardTitle>
-          <p className="text-muted-foreground">Join the Avens Platform</p>
+          <p className="text-muted-foreground">Join the Evnting Platform</p>
         </CardHeader>
         <CardContent className="px-6 pb-8">
           <Form {...form}>

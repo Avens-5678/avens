@@ -3,16 +3,18 @@ import { Button } from "@/components/ui/button";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Briefcase, Package, ShoppingBag, User, ArrowLeft } from "lucide-react";
+import { LogOut, Briefcase, Package, ShoppingBag, User, ArrowLeft, Bot } from "lucide-react";
 import { Link } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import JobBoard from "@/components/vendor/JobBoard";
 import InventoryManager from "@/components/vendor/InventoryManager";
 import Marketplace from "@/components/vendor/Marketplace";
 import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
+import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 
 const sidebarItems: SidebarItem[] = [
+  { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: Briefcase, label: "Job Board", value: "jobs" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: ShoppingBag, label: "Marketplace", value: "marketplace" },
@@ -20,7 +22,7 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const VendorDashboard = () => {
-  const [activeTab, setActiveTab] = useState("jobs");
+  const [activeTab, setActiveTab] = useState("ai");
   const { user, signOut } = useAuth();
   const { toast } = useToast();
 
@@ -72,6 +74,8 @@ const VendorDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "ai":
+        return <DashboardChatbot role="vendor" userName={user?.user_metadata?.full_name || user?.email || ""} />;
       case "jobs":
         return <JobBoard />;
       case "inventory":

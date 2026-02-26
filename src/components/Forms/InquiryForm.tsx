@@ -103,9 +103,9 @@ const InquiryForm = ({
         }
       }
 
-      // Send to HubSpot CRM
+      // Send to Zoho CRM
       try {
-        const hubspotResponse = await supabase.functions.invoke('hubspot-integration', {
+        const zohoResponse = await supabase.functions.invoke('zoho-crm', {
           body: {
             submissionId: submission.id,
             name: values.name,
@@ -120,13 +120,13 @@ const InquiryForm = ({
           },
         });
 
-        if (hubspotResponse.error) {
-          console.error('HubSpot sync error:', hubspotResponse.error);
+        if (zohoResponse.error) {
+          console.error('Zoho CRM sync error:', zohoResponse.error);
         } else {
-          console.log('Successfully synced to HubSpot');
+          console.log('Successfully synced to Zoho CRM');
         }
-      } catch (hubspotError) {
-        console.error('HubSpot integration failed:', hubspotError);
+      } catch (zohoError) {
+        console.error('Zoho CRM integration failed:', zohoError);
         // Continue anyway - form is saved locally
       }
 

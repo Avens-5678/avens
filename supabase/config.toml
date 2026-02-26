@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.vendor-action]
 verify_jwt = false
+
+[functions.zoho-crm]
+verify_jwt = false

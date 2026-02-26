@@ -267,12 +267,12 @@ export const WhatsAppBot = () => {
         addBotMessage("Finally, what's your city/event location?");
       } else {
         setCurrentStep('submit');
-        await submitToHubSpot();
+        await submitToZohoCRM();
       }
     } else if (currentStep === 'get_location') {
       setCustomerData(prev => ({ ...prev, location: text }));
       setCurrentStep('submit');
-      await submitToHubSpot();
+      await submitToZohoCRM();
     } else if (currentStep === 'faq') {
       const faqResponse = handleFAQ(text);
       addBotMessage(faqResponse);
@@ -285,7 +285,7 @@ export const WhatsAppBot = () => {
     }
   };
 
-  const submitToHubSpot = async () => {
+  const submitToZohoCRM = async () => {
     try {
       let message = '';
       if (customerData.intent === 'event') {
@@ -326,7 +326,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
 
       if (error) throw error;
 
-      const hubspotData = {
+      const zohoData = {
         submissionId: submission.id,
         name: customerData.name,
         email: customerData.email,
@@ -335,19 +335,12 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
         formType: formData.form_type,
         eventType: customerData.eventType,
         eventDate: customerData.eventDate,
-        hasVenue: customerData.hasVenue,
-        venueName: customerData.venueName,
-        servicesNeeded: customerData.servicesNeeded?.join(', '),
-        rentalCategory: customerData.rentalCategory,
         rentalTitle: customerData.rentalItems,
-        quantity: customerData.quantity,
-        needsSetup: customerData.needsSetup,
         location: customerData.location,
-        intent: customerData.intent
       };
 
-      await supabase.functions.invoke('hubspot-integration', {
-        body: hubspotData,
+      await supabase.functions.invoke('zoho-crm', {
+        body: zohoData,
       });
 
       let summary = `🎉 Perfect! I've collected all your information:\n\n`;
@@ -378,7 +371,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
       });
 
     } catch (error) {
-      console.error('Error submitting to HubSpot:', error);
+      console.error('Error submitting to Zoho CRM:', error);
       addBotMessage(
         "✅ I've saved your information! There was a minor issue with our system, but don't worry - our team has your details and will contact you soon.\n\nThank you for choosing Evnting!"
       );

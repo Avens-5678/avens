@@ -1025,6 +1025,51 @@ export type Database = {
       }
     }
     Views: {
+      admin_users_safe: {
+        Row: {
+          account_locked_until: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          is_active: boolean | null
+          last_failed_login: string | null
+          last_login: string | null
+          login_attempts: number | null
+          password_changed_at: string | null
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_locked_until?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          last_failed_login?: string | null
+          last_login?: string | null
+          login_attempts?: number | null
+          password_changed_at?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_locked_until?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          last_failed_login?: string | null
+          last_login?: string | null
+          login_attempts?: number | null
+          password_changed_at?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       portfolio_view: {
         Row: {
           album_url: string | null

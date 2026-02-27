@@ -46,11 +46,20 @@ const IntegrationTester = () => {
         setGaStatus('success');
         toast({ title: "Google Analytics Test", description: "Test event sent successfully! Check your GA dashboard." });
       } else {
-        throw new Error('Google Analytics not loaded after 6s');
+        // Check if the script tag exists but gtag didn't init (blocked)
+        const gaScript = document.querySelector('script[src*="googletagmanager.com"]');
+        setGaStatus('error');
+        toast({
+          title: "Google Analytics",
+          description: gaScript
+            ? "GA script is present but blocked (ad-blocker or preview sandbox). It will work on your published domain (evnting.com)."
+            : "GA script tag not found in the page.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       setGaStatus('error');
-      toast({ title: "Google Analytics Error", description: "GA not properly loaded. Ensure ad-blockers are disabled.", variant: "destructive" });
+      toast({ title: "Google Analytics Error", description: "Unexpected error testing GA.", variant: "destructive" });
     } finally {
       setIsTestingGA(false);
     }

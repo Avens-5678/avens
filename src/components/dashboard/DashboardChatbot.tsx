@@ -189,7 +189,18 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
   // ─── Welcome Home Screen ───
   if (!showChat && messages.length === 0) {
     return (
-      <div className="flex flex-col h-full min-h-[70vh] lg:min-h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <div className="flex flex-col h-full min-h-[70vh] lg:min-h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] relative overflow-hidden">
+        {/* Mesh gradient background */}
+        <div className="absolute inset-0 -z-0" style={{
+          background: `
+            radial-gradient(ellipse at 20% 0%, hsl(222 65% 42% / 0.25) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 0%, hsl(222 75% 55% / 0.18) 0%, transparent 45%),
+            radial-gradient(ellipse at 50% 50%, hsl(24 90% 52% / 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse at 20% 100%, hsl(24 90% 52% / 0.22) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 100%, hsl(222 65% 42% / 0.20) 0%, transparent 45%),
+            linear-gradient(to bottom, hsl(40 20% 99%), hsl(40 15% 97%))
+          `
+        }} />
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 lg:pt-14 pb-4">
             <motion.div
@@ -289,7 +300,18 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
 
   // ─── Chat View ───
   return (
-    <div className="flex flex-col h-full min-h-[70vh] lg:min-h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] bg-gradient-to-br from-primary/5 via-background to-accent/5">
+    <div className="flex flex-col h-full min-h-[70vh] lg:min-h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] relative overflow-hidden">
+      {/* Mesh gradient background */}
+      <div className="absolute inset-0 -z-0" style={{
+        background: `
+          radial-gradient(ellipse at 20% 0%, hsl(222 65% 42% / 0.25) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 0%, hsl(222 75% 55% / 0.18) 0%, transparent 45%),
+          radial-gradient(ellipse at 50% 50%, hsl(24 90% 52% / 0.12) 0%, transparent 50%),
+          radial-gradient(ellipse at 20% 100%, hsl(24 90% 52% / 0.22) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 100%, hsl(222 65% 42% / 0.20) 0%, transparent 45%),
+          linear-gradient(to bottom, hsl(40 20% 99%), hsl(40 15% 97%))
+        `
+      }} />
       {/* Chat header */}
       <div className="flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-border/30">
         <button

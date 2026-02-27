@@ -12,6 +12,7 @@ export interface VendorInventoryItem {
   price_per_day: number | null;
   image_url: string | null;
   is_available: boolean;
+  address: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -23,6 +24,7 @@ export interface VendorInventoryInsert {
   price_per_day?: number;
   image_url?: string;
   is_available?: boolean;
+  address?: string;
 }
 
 // Fetch vendor's own inventory

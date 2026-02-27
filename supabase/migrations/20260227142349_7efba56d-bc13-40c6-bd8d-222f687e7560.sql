@@ -1,0 +1,1 @@
+ALTER TABLE public.vendor_inventory ADD COLUMN address text NULL;

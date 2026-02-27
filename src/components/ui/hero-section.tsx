@@ -20,50 +20,53 @@ export function HeroSection({
   const resolvedImage = backgroundImage;
   
   return (
-    <section 
-      className={cn(
-        "relative min-h-screen flex items-center justify-center overflow-hidden",
-        className
-      )}
-      style={resolvedImage ? { 
-        backgroundImage: `url(${resolvedImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      } : undefined}
-      {...props}
-    >
-      {/* Hidden img for LCP preload discovery + fetchpriority */}
-      {resolvedImage && (
-        <img
-          src={resolvedImage}
-          alt=""
-          fetchPriority="high"
-          aria-hidden="true"
-          className="absolute w-0 h-0 opacity-0 pointer-events-none"
-        />
-      )}
+    <div className="md:contents p-3 pt-4 sm:p-0">
+      <section 
+        className={cn(
+          "relative flex items-center justify-center overflow-hidden",
+          "min-h-[70vh] rounded-2xl md:rounded-none md:min-h-screen",
+          className
+        )}
+        style={resolvedImage ? { 
+          backgroundImage: `url(${resolvedImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        } : undefined}
+        {...props}
+      >
+        {/* Hidden img for LCP preload discovery + fetchpriority */}
+        {resolvedImage && (
+          <img
+            src={resolvedImage}
+            alt=""
+            fetchPriority="high"
+            aria-hidden="true"
+            className="absolute w-0 h-0 opacity-0 pointer-events-none"
+          />
+        )}
 
-      {/* Gradient overlay */}
-      {gradient && !resolvedImage && (
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/6 to-secondary/4" />
-      )}
-      
-      {/* Dark overlay for readability over images */}
-      {overlay && resolvedImage && (
-        <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/50 to-foreground/70" />
-      )}
-      
-      {/* Ambient decoration — subtle, not distracting */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-secondary/4 rounded-full blur-[100px]" />
-      </div>
-      
-      {/* Content */}
-      <div className="relative z-10 w-full">
-        {children}
-      </div>
-    </section>
+        {/* Gradient overlay */}
+        {gradient && !resolvedImage && (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/6 to-secondary/4 rounded-2xl md:rounded-none" />
+        )}
+        
+        {/* Dark overlay for readability over images */}
+        {overlay && resolvedImage && (
+          <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/50 to-foreground/70 rounded-2xl md:rounded-none" />
+        )}
+        
+        {/* Ambient decoration — subtle, not distracting */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-2xl md:rounded-none">
+          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+          <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-secondary/4 rounded-full blur-[100px]" />
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10 w-full">
+          {children}
+        </div>
+      </section>
+    </div>
   )
 }

@@ -9,7 +9,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
-import { Search, ShoppingCart, Plus, Minus, Star, Filter, Eye, Grid3X3, Grid2X2, Columns2, Rows3 } from "lucide-react";
+import { Search, ShoppingCart, Plus, Minus, Star, Filter, Eye, Grid3X3, Grid2X2, Columns2, Rows3, MapPin } from "lucide-react";
 import { AnimatedViewToggle } from "@/components/ui/animated-view-toggle";
 import Layout from "@/components/Layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
@@ -19,6 +19,7 @@ import { ProductImageCarousel } from "@/components/ui/product-image-carousel";
 const EnhancedEcommerce = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCity, setSelectedCity] = useState("All");
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -44,15 +45,27 @@ const EnhancedEcommerce = () => {
     return ["All", ...uniqueCategories];
   }, [rentals]);
 
-  // Filter rentals based on search and category
+  // Extract unique cities from rental addresses
+  const cities = useMemo(() => {
+    if (!rentals) return ["All"];
+    const uniqueCities = Array.from(new Set(
+      rentals
+        .map(rental => rental.address?.trim())
+        .filter(Boolean)
+    )) as string[];
+    return ["All", ...uniqueCities.sort()];
+  }, [rentals]);
+
+  // Filter rentals based on search, category, and city
   const filteredRentals = useMemo(() => {
     if (!rentals) return [];
     return rentals.filter(rental => {
       const matchesSearch = rental.title.toLowerCase().includes(searchTerm.toLowerCase()) || rental.description.toLowerCase().includes(searchTerm.toLowerCase()) || rental.search_keywords && rental.search_keywords.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === "All" || rental.categories && rental.categories.includes(selectedCategory);
-      return matchesSearch && matchesCategory && rental.is_active;
+      const matchesCity = selectedCity === "All" || (rental.address?.trim() === selectedCity);
+      return matchesSearch && matchesCategory && matchesCity && rental.is_active;
     });
-  }, [rentals, searchTerm, selectedCategory]);
+  }, [rentals, searchTerm, selectedCategory, selectedCity]);
   const handleQuantityChange = (rentalId: string, change: number) => {
     setQuantities(prev => ({
       ...prev,
@@ -177,7 +190,7 @@ const EnhancedEcommerce = () => {
                     {/* Bottom Row: Category Filter and View Toggle */}
                     <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                       {/* Category Filter */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <Filter className="h-4 w-4 text-muted-foreground" />
                         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                           <SelectTrigger className="w-48 h-12 border-0 bg-muted/50">
@@ -186,6 +199,18 @@ const EnhancedEcommerce = () => {
                           <SelectContent>
                             {categories.map(category => <SelectItem key={category} value={category}>
                                 {category}
+                              </SelectItem>)}
+                          </SelectContent>
+                        </Select>
+
+                        <Select value={selectedCity} onValueChange={setSelectedCity}>
+                          <SelectTrigger className="w-48 h-12 border-0 bg-muted/50">
+                            <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <SelectValue placeholder="All Cities" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {cities.map(city => <SelectItem key={city} value={city}>
+                                {city}
                               </SelectItem>)}
                           </SelectContent>
                         </Select>

@@ -45,7 +45,8 @@ async function getAccessToken(): Promise<string> {
     throw new Error('Zoho CRM credentials not configured');
   }
 
-  const tokenUrl = `https://accounts.zoho.com/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`;
+  // Use .in domain for India-based Zoho accounts
+  const tokenUrl = `https://accounts.zoho.in/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`;
 
   const res = await fetch(tokenUrl, { method: 'POST' });
   const data = await res.json();
@@ -117,7 +118,7 @@ serve(async (req: Request): Promise<Response> => {
     // Get access token and create lead
     const accessToken = await getAccessToken();
 
-    const zohoResponse = await fetch('https://www.zohoapis.com/crm/v2/Leads', {
+    const zohoResponse = await fetch('https://www.zohoapis.in/crm/v2/Leads', {
       method: 'POST',
       headers: {
         'Authorization': `Zoho-oauthtoken ${accessToken}`,

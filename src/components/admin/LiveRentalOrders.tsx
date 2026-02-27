@@ -28,6 +28,7 @@ const STATUS_COLORS: Record<string, string> = {
   sent_to_vendors: "bg-yellow-100 text-yellow-800",
   quoted: "bg-purple-100 text-purple-800",
   accepted: "bg-green-100 text-green-800",
+  declined: "bg-red-100 text-red-800",
   confirmed: "bg-emerald-100 text-emerald-800",
   completed: "bg-gray-100 text-gray-800",
   cancelled: "bg-red-100 text-red-800",
@@ -64,6 +65,23 @@ const LiveRentalOrders = () => {
 
   const { data: orders, isLoading } = useRentalOrders({
     status: statusFilter, category: categoryFilter, location: locationSearch,
+  });
+
+  // Fetch vendor profiles for assigned orders
+  const vendorIds = [...new Set((orders || []).filter(o => o.assigned_vendor_id).map(o => o.assigned_vendor_id!))];
+  const { data: vendorProfiles } = useQuery({
+    queryKey: ["vendor_profiles_for_orders", vendorIds],
+    queryFn: async () => {
+      if (vendorIds.length === 0) return {};
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, company_name, phone, city")
+        .in("user_id", vendorIds);
+      const map: Record<string, any> = {};
+      (data || []).forEach((p: any) => { map[p.user_id] = p; });
+      return map;
+    },
+    enabled: vendorIds.length > 0,
   });
 
   const createOrder = useCreateRentalOrder();
@@ -272,6 +290,7 @@ const LiveRentalOrders = () => {
     sent: orders?.filter((o) => o.status === "sent_to_vendors").length || 0,
     quoted: orders?.filter((o) => o.status === "quoted").length || 0,
     accepted: orders?.filter((o) => o.status === "accepted").length || 0,
+    declined: orders?.filter((o) => o.status === "declined").length || 0,
   };
 
   return (
@@ -318,13 +337,14 @@ const LiveRentalOrders = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
         {[
           { label: "Total", value: stats.total, icon: Package },
           { label: "New", value: stats.new, icon: Clock },
           { label: "Sent", value: stats.sent, icon: Send },
           { label: "Quoted", value: stats.quoted, icon: MessageSquare },
           { label: "Accepted", value: stats.accepted, icon: CheckCircle },
+          { label: "Declined", value: stats.declined, icon: X },
         ].map(({ label, value, icon: Icon }) => (
           <Card key={label}>
             <CardContent className="flex items-center gap-3 p-4">
@@ -349,6 +369,7 @@ const LiveRentalOrders = () => {
                   <SelectItem value="sent_to_vendors">Sent to Vendors</SelectItem>
                   <SelectItem value="quoted">Quoted</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="declined">Declined</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -412,10 +433,46 @@ const LiveRentalOrders = () => {
                       {order.budget && <span>💰 {order.budget}</span>}
                       {order.client_name && <span>👤 {order.client_name}</span>}
                     </div>
+
+                    {/* Assigned Vendor Info */}
+                    {order.assigned_vendor_id && vendorProfiles?.[order.assigned_vendor_id] && (
+                      <div className="mt-2 flex items-center gap-2 text-sm">
+                        <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="font-medium">
+                          {vendorProfiles[order.assigned_vendor_id].full_name || vendorProfiles[order.assigned_vendor_id].company_name || "Vendor"}
+                        </span>
+                        {vendorProfiles[order.assigned_vendor_id].phone && (
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Phone className="h-3 w-3" />{vendorProfiles[order.assigned_vendor_id].phone}
+                          </span>
+                        )}
+                        {vendorProfiles[order.assigned_vendor_id].city && (
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />{vendorProfiles[order.assigned_vendor_id].city}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Vendor Response */}
                     {order.vendor_response && (
-                      <div className="mt-2 p-2 bg-muted rounded text-sm">
-                        <strong>Vendor Response:</strong> {order.vendor_response}
-                        {order.vendor_quote_amount && <span className="ml-2 font-bold">₹{order.vendor_quote_amount.toLocaleString()}</span>}
+                      <div className={`mt-2 p-2 rounded text-sm border ${
+                        order.status === "accepted" ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800" :
+                        order.status === "declined" ? "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800" :
+                        "bg-muted border-border"
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          {order.status === "accepted" && <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />}
+                          {order.status === "declined" && <X className="h-4 w-4 text-red-600 shrink-0" />}
+                          <strong>{order.status === "accepted" ? "Accepted" : order.status === "declined" ? "Declined" : "Response"}:</strong>
+                          <span>{order.vendor_response}</span>
+                          {order.vendor_quote_amount && <span className="ml-2 font-bold">₹{order.vendor_quote_amount.toLocaleString()}</span>}
+                        </div>
+                        {order.vendor_responded_at && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Responded: {new Date(order.vendor_responded_at).toLocaleString()}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -423,10 +480,10 @@ const LiveRentalOrders = () => {
                     <Button variant="outline" size="sm" onClick={() => setViewOrder(order)}>
                       <Eye className="h-4 w-4" />
                     </Button>
-                    {(order.status === "new" || order.status === "sent_to_vendors") && (
+                    {(order.status === "new" || order.status === "sent_to_vendors" || order.status === "declined") && (
                       <Button size="sm" onClick={() => openSendDialog(order)} variant="default">
                         <Search className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Search Vendors</span>
+                        <span className="hidden sm:inline">{order.status === "declined" ? "Resend" : "Search Vendors"}</span>
                       </Button>
                     )}
                     {(order.status === "quoted" || order.status === "accepted") && (

@@ -196,7 +196,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
     return (
       <div className="flex flex-col h-full min-h-[70vh] lg:min-h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] relative overflow-hidden">
         {/* Mesh gradient background */}
-        <div className="absolute inset-0 -z-0" style={{
+        <div className="absolute inset-0" style={{
           background: `
             radial-gradient(ellipse at 20% 0%, hsl(222 65% 42% / 0.25) 0%, transparent 50%),
             radial-gradient(ellipse at 80% 0%, hsl(222 75% 55% / 0.18) 0%, transparent 45%),
@@ -206,7 +206,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
             linear-gradient(to bottom, hsl(40 20% 99%), hsl(40 15% 97%))
           `
         }} />
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto relative z-10">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 lg:pt-14 pb-4">
             <motion.div
               initial={hasAnimated.current ? false : { opacity: 0, y: 16 }}
@@ -297,7 +297,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
         </div>
 
         {/* Input Bar */}
-        <div className="px-4 lg:px-8 pb-4 pt-2">
+        <div className="px-4 lg:px-8 pb-4 pt-2 relative z-10">
           <div className="max-w-3xl mx-auto">{InputBar}</div>
         </div>
       </div>
@@ -308,7 +308,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
   return (
     <div className="flex flex-col h-full min-h-[70vh] lg:min-h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] relative overflow-hidden">
       {/* Mesh gradient background */}
-      <div className="absolute inset-0 -z-0" style={{
+      <div className="absolute inset-0" style={{
         background: `
           radial-gradient(ellipse at 20% 0%, hsl(222 65% 42% / 0.25) 0%, transparent 50%),
           radial-gradient(ellipse at 80% 0%, hsl(222 75% 55% / 0.18) 0%, transparent 45%),
@@ -319,7 +319,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
         `
       }} />
       {/* Chat header */}
-      <div className="flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-border/30">
+      <div className="flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-border/30 relative z-10">
         <button
           onClick={() => { setShowChat(false); setMessages([]); }}
           className="h-8 w-8 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
@@ -335,7 +335,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4 relative z-10">
         <div className="max-w-3xl mx-auto space-y-4">
           <AnimatePresence>
             {messages.map((msg, i) => (
@@ -391,7 +391,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
       </div>
 
       {/* Input */}
-      <div className="border-t border-border/30 px-4 sm:px-6 lg:px-8 py-3">
+      <div className="border-t border-border/30 px-4 sm:px-6 lg:px-8 py-3 relative z-10">
         <div className="max-w-3xl mx-auto">{InputBar}</div>
       </div>
     </div>

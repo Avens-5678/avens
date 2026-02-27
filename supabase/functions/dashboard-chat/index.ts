@@ -149,6 +149,27 @@ async function fetchRentalCatalog() {
   }
 }
 
+async function syncToZoho(endpoint: string, body: Record<string, unknown>) {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const url = `${supabaseUrl}/functions/v1/${endpoint}`;
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${serviceKey}`,
+        "apikey": serviceKey,
+      },
+      body: JSON.stringify(body),
+    });
+    const result = await resp.json();
+    console.log(`Zoho sync (${endpoint}):`, result?.message || result);
+  } catch (e) {
+    console.error(`Zoho sync (${endpoint}) failed:`, e);
+  }
+}
+
 async function executeToolCall(functionName: string, args: Record<string, unknown>, vendorId?: string) {
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -178,6 +199,21 @@ async function executeToolCall(functionName: string, args: Record<string, unknow
         console.error("Error creating rental order:", error);
         return { success: false, error: error.message };
       }
+
+      // Sync to Zoho CRM Products (fire-and-forget)
+      syncToZoho("zoho-crm-inventory", {
+        action: "create",
+        item: {
+          name: `Order: ${args.title || "Chatbot Inquiry"}`,
+          description: `Category: ${args.equipment_category || ""}\nDetails: ${args.equipment_details || ""}\nClient: ${args.client_name || ""}\nPhone: ${args.client_phone || ""}\nEmail: ${args.client_email || ""}\nBudget: ${args.budget || ""}`,
+          price_value: 0,
+          quantity: 1,
+          category: args.equipment_category,
+          is_available: true,
+          address: args.location,
+        },
+      });
+
       return { success: true, id: data.id, type: "rental_order" };
     }
 
@@ -201,6 +237,21 @@ async function executeToolCall(functionName: string, args: Record<string, unknow
         console.error("Error creating form submission:", error);
         return { success: false, error: error.message };
       }
+
+      // Sync to Zoho CRM Form_Submissions module (fire-and-forget)
+      syncToZoho("zoho-crm-requests", {
+        requestType: "event_request",
+        data: {
+          client_name: args.name || "Chatbot User",
+          client_email: args.email || "via-chatbot@evnting.com",
+          client_phone: args.phone,
+          event_type: args.event_type,
+          event_date: args.event_date,
+          location: args.location,
+          requirements: args.message || "Inquiry via AI chatbot",
+        },
+      });
+
       return { success: true, id: data.id, type: "form_submission" };
     }
 
@@ -225,6 +276,19 @@ async function executeToolCall(functionName: string, args: Record<string, unknow
         console.error("Error creating vendor listing:", error);
         return { success: false, error: error.message };
       }
+
+      // Sync to Zoho CRM Products (fire-and-forget)
+      syncToZoho("zoho-crm-inventory", {
+        action: "create",
+        item: {
+          name: args.name || "New Item",
+          description: args.description,
+          category: args.category || "General",
+          price_value: args.price_per_day,
+          quantity: args.quantity || 1,
+        },
+      });
+
       return { success: true, id: data.id, type: "vendor_listing" };
     }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -298,6 +298,18 @@ const LiveRentalOrders = () => {
       return next;
     });
   };
+
+  // Auto-expand vendors with matching items when results load
+  useEffect(() => {
+    if (matchingVendors && matchingVendors.length > 0) {
+      const vendorsWithItems = new Set(
+        matchingVendors
+          .filter((v: any) => v.totalItems > 0)
+          .map((v: any) => v.user_id)
+      );
+      setExpandedVendors(vendorsWithItems);
+    }
+  }, [matchingVendors]);
 
   // Get unique cities from vendors for filter dropdown
   const availableCities = [...new Set(

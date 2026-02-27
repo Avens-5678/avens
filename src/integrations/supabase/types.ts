@@ -676,17 +676,76 @@ export type Database = {
         }
         Relationships: []
       }
+      rental_variants: {
+        Row: {
+          attribute_type: string
+          attribute_value: string
+          created_at: string
+          display_order: number | null
+          id: string
+          image_url: string | null
+          image_urls: string[] | null
+          is_active: boolean | null
+          price_value: number | null
+          pricing_unit: string | null
+          rental_id: string
+          stock_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          attribute_type?: string
+          attribute_value: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          price_value?: number | null
+          pricing_unit?: string | null
+          rental_id: string
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          attribute_type?: string
+          attribute_value?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          price_value?: number | null
+          pricing_unit?: string | null
+          rental_id?: string
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_variants_rental_id_fkey"
+            columns: ["rental_id"]
+            isOneToOne: false
+            referencedRelation: "rentals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rentals: {
         Row: {
           categories: string[] | null
           created_at: string
           description: string
           display_order: number | null
+          has_variants: boolean | null
           id: string
           image_url: string | null
           image_urls: string[] | null
           is_active: boolean | null
           price_range: string | null
+          price_value: number | null
+          pricing_unit: string | null
           quantity: number | null
           rating: number | null
           search_keywords: string | null
@@ -701,11 +760,14 @@ export type Database = {
           created_at?: string
           description: string
           display_order?: number | null
+          has_variants?: boolean | null
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
           is_active?: boolean | null
           price_range?: string | null
+          price_value?: number | null
+          pricing_unit?: string | null
           quantity?: number | null
           rating?: number | null
           search_keywords?: string | null
@@ -720,11 +782,14 @@ export type Database = {
           created_at?: string
           description?: string
           display_order?: number | null
+          has_variants?: boolean | null
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
           is_active?: boolean | null
           price_range?: string | null
+          price_value?: number | null
+          pricing_unit?: string | null
           quantity?: number | null
           rating?: number | null
           search_keywords?: string | null

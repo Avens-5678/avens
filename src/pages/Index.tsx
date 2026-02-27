@@ -234,12 +234,12 @@ const Index = () => {
               {homeServices.map((service) =>
             <GlassmorphismCard
               key={service.id}
-              className="group p-4 md:p-6 hover:shadow-lg transition-shadow duration-300 min-w-[72vw] sm:min-w-[55vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+              className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 min-w-[75vw] sm:min-w-[55vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
               variant="subtle">
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {service.image_url &&
-                <div className="relative overflow-hidden rounded-lg aspect-[16/10] md:aspect-video">
+                <div className="relative overflow-hidden rounded-lg aspect-[4/3] md:aspect-video">
                         <OptimizedImage
                     src={service.image_url}
                     alt={service.title}
@@ -325,11 +325,11 @@ const Index = () => {
               {homeRentals.slice(0, 6).map((rental) =>
             <GlassmorphismCard
               key={rental.id}
-              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[72vw] sm:min-w-[55vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
+              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[75vw] sm:min-w-[55vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
 
                   <div className="relative">
                     {rental.image_url ?
-                <div className="aspect-[16/10] md:aspect-video relative overflow-hidden">
+                <div className="aspect-[4/3] md:aspect-video relative overflow-hidden">
                         <OptimizedImage
                     src={rental.image_url}
                     alt={rental.title}
@@ -338,7 +338,7 @@ const Index = () => {
 
                       </div> :
 
-                <div className="aspect-[16/10] md:aspect-video bg-muted flex items-center justify-center">
+                <div className="aspect-[4/3] md:aspect-video bg-muted flex items-center justify-center">
                         <Award className="h-12 w-12 text-muted-foreground" />
                       </div>
                 }

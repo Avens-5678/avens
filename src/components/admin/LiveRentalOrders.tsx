@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -299,17 +299,10 @@ const LiveRentalOrders = () => {
     });
   };
 
-  // Auto-expand vendors with matching items when results load
-  useEffect(() => {
-    if (matchingVendors && matchingVendors.length > 0) {
-      const vendorsWithItems = new Set(
-        matchingVendors
-          .filter((v: any) => v.totalItems > 0)
-          .map((v: any) => v.user_id)
-      );
-      setExpandedVendors(vendorsWithItems);
-    }
-  }, [matchingVendors]);
+  // Collect all matching admin rentals from vendor results
+  const adminCatalogItems = matchingVendors?.length
+    ? matchingVendors[0]?.matchingAdminRentals || []
+    : [];
 
   // Get unique cities from vendors for filter dropdown
   const availableCities = [...new Set(
@@ -624,6 +617,32 @@ const LiveRentalOrders = () => {
               </Button>
             )}
           </div>
+
+          {/* Admin In-House Catalog */}
+          {adminCatalogItems.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-semibold flex items-center gap-2 text-sm">
+                <Package className="h-4 w-4" />
+                Admin In-House Catalog
+                <Badge variant="secondary">{adminCatalogItems.length} match</Badge>
+              </h4>
+              <div className="space-y-1">
+                {adminCatalogItems.map((item: any) => (
+                  <div key={item.id} className="flex items-center justify-between text-xs p-2 bg-accent/30 rounded-lg border border-accent">
+                    <div>
+                      <span className="font-medium">{item.title}</span>
+                      {item.short_description && <span className="text-muted-foreground ml-2">— {item.short_description}</span>}
+                    </div>
+                    <span className="text-muted-foreground whitespace-nowrap">
+                      {item.price_value ? `₹${item.price_value}` : item.price_range || ""}
+                      {item.pricing_unit ? `/${item.pricing_unit}` : ""}
+                      {item.quantity ? ` • Qty: ${item.quantity}` : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Vendor list with checkboxes */}
           <div className="space-y-2">

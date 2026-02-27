@@ -114,7 +114,7 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
     setVariantRows([]);
     setAttributeType("Size");
     setFormData({
-      title: '', short_description: '', description: '',
+      title: '', short_description: '', description: '', address: '',
       price_value: '', pricing_unit: 'Per Day', price_range: '',
       categories: [], search_keywords: '', display_order: 0,
       rating: 4.5, quantity: 1, is_active: true, show_on_home: true,
@@ -220,6 +220,7 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
         show_on_home: formData.show_on_home !== false,
         image_url: formData.image_url || null,
         image_urls: formData.image_urls || [],
+        address: formData.address || null,
       };
 
       let rentalId: string;
@@ -358,6 +359,10 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
                 <div className="space-y-1">
                   <Label>Full Description *</Label>
                   <Textarea value={formData.description || ''} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} rows={3} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Address / Location</Label>
+                  <Input value={formData.address || ''} onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))} placeholder="e.g. Warehouse 5, HITEC City, Hyderabad" />
                 </div>
                 <div className="space-y-1">
                   <Label>Categories</Label>

@@ -58,7 +58,7 @@ export const useRentalOrders = (filters?: {
         query = query.eq("equipment_category", filters.category);
       }
       if (filters?.location && filters.location !== "") {
-        query = query.ilike("location", `%${filters.location}%`);
+        query = query.or(`location.ilike.%${filters.location}%,equipment_details.ilike.%${filters.location}%`);
       }
 
       const { data, error } = await query;

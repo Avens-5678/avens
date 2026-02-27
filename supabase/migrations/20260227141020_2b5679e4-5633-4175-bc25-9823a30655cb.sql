@@ -1,0 +1,1 @@
+ALTER TABLE public.rentals ADD COLUMN address text NULL;

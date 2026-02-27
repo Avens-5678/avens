@@ -95,14 +95,21 @@ const LiveRentalOrders = () => {
     queryFn: async () => {
       if (!selectedOrder) return [];
 
-      // Get all vendor user IDs
+      // Get only vendor user IDs (exclude admin roles)
       const { data: roles } = await supabase
         .from("user_roles")
         .select("user_id")
         .eq("role", "vendor");
       if (!roles || roles.length === 0) return [];
 
-      const vendorIds = roles.map((r) => r.user_id);
+      // Exclude users who also have admin role
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+      const adminUserIds = new Set((adminRoles || []).map((r) => r.user_id));
+      const vendorIds = roles.map((r) => r.user_id).filter(id => !adminUserIds.has(id));
+      if (vendorIds.length === 0) return [];
 
       // Get vendor profiles
       const { data: profiles } = await supabase
@@ -116,12 +123,47 @@ const LiveRentalOrders = () => {
         .select("*")
         .eq("is_available", true);
 
+      // Also fetch admin's in-house rentals catalog
+      const { data: adminRentals } = await supabase
+        .from("rentals")
+        .select("*")
+        .eq("is_active", true);
+
+      // Fuzzy matching utility - Levenshtein-based similarity
+      const fuzzyMatch = (source: string, target: string): boolean => {
+        const s = source.toLowerCase();
+        const t = target.toLowerCase();
+        if (s.includes(t) || t.includes(s)) return true;
+        // Check if any word in source fuzzy-matches any word in target
+        const sWords = s.split(/[\s,\-–()/]+/).filter(w => w.length > 2);
+        const tWords = t.split(/[\s,\-–()/]+/).filter(w => w.length > 2);
+        for (const sw of sWords) {
+          for (const tw of tWords) {
+            if (levenshteinDistance(sw, tw) <= Math.max(1, Math.floor(Math.min(sw.length, tw.length) / 3))) return true;
+          }
+        }
+        return false;
+      };
+
+      const levenshteinDistance = (a: string, b: string): number => {
+        const matrix: number[][] = [];
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+        for (let i = 1; i <= b.length; i++) {
+          for (let j = 1; j <= a.length; j++) {
+            matrix[i][j] = b[i - 1] === a[j - 1]
+              ? matrix[i - 1][j - 1]
+              : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+          }
+        }
+        return matrix[b.length][a.length];
+      };
+
       // Smart keyword extraction from order title + category
       const orderTitle = (selectedOrder.title || "").toLowerCase();
       const orderCategory = (selectedOrder.equipment_category || "").toLowerCase();
       const orderDetails = (selectedOrder.equipment_details || "").toLowerCase();
       
-      // Extract meaningful keywords (remove common words)
       const stopWords = new Set(["the", "a", "an", "for", "and", "or", "of", "in", "to", "with", "is", "at", "on", "by", "-", "–", ""]);
       const extractKeywords = (text: string) =>
         text.split(/[\s,\-–()/]+/)
@@ -132,38 +174,49 @@ const LiveRentalOrders = () => {
       const detailKeywords = extractKeywords(orderDetails);
       const allKeywords = [...new Set([...titleKeywords, ...detailKeywords])];
 
-      // Filter vendors with smart matching
+      // Filter vendors with fuzzy matching
       const results = (profiles || []).map((profile: any) => {
         const vendorItems = (inventory || []).filter(
           (i) => i.vendor_id === profile.user_id
         );
 
-        // Smart match: item name contains ANY keyword from order title/details
+        // Fuzzy match: item name fuzzy-matches keywords from order
         const matchingItems = vendorItems.filter((item) => {
           const itemName = (item.name || "").toLowerCase();
           const itemCategory = (item.category || "").toLowerCase();
           const itemDesc = (item.description || "").toLowerCase();
+          const itemKeywords = (item.search_keywords || "").toLowerCase();
 
-          // Category match
           if (orderCategory !== "general" && itemCategory === orderCategory) return true;
 
-          // Keyword match against item name/description
           return allKeywords.some(kw =>
-            itemName.includes(kw) || itemDesc.includes(kw)
+            fuzzyMatch(itemName, kw) || fuzzyMatch(itemDesc, kw) || fuzzyMatch(itemKeywords, kw)
           );
         });
 
-        const cityMatch = !selectedOrder.location ||
-          (profile.city || "").toLowerCase().includes(selectedOrder.location.toLowerCase());
+        // Also find matching admin rentals
+        const matchingAdminRentals = (adminRentals || []).filter((rental: any) => {
+          const rentalName = (rental.title || "").toLowerCase();
+          const rentalDesc = (rental.description || "").toLowerCase();
+          const rentalKeywords = (rental.search_keywords || "").toLowerCase();
+          return allKeywords.some(kw =>
+            fuzzyMatch(rentalName, kw) || fuzzyMatch(rentalDesc, kw) || fuzzyMatch(rentalKeywords, kw)
+          );
+        });
 
-        const addressMatch = !selectedOrder.location ||
-          (profile.address || "").toLowerCase().includes(selectedOrder.location.toLowerCase()) ||
-          (profile.godown_address || "").toLowerCase().includes(selectedOrder.location.toLowerCase());
+        // Fuzzy city/location matching
+        const orderLoc = (selectedOrder.location || "").toLowerCase();
+        const cityMatch = !orderLoc ||
+          fuzzyMatch(profile.city || "", orderLoc);
+        const addressMatch = !orderLoc ||
+          fuzzyMatch(profile.address || "", orderLoc) ||
+          fuzzyMatch(profile.godown_address || "", orderLoc);
 
         return {
           ...profile,
           allItems: vendorItems,
           matchingItems,
+          matchingAdminRentals,
           totalItems: vendorItems.length,
           cityMatch: cityMatch || addressMatch,
           hasMatchingItems: matchingItems.length > 0,

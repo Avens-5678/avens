@@ -5,54 +5,51 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, ShieldCheck, Search, Package, IndianRupee, Users, Eye, Phone,
-  MapPin, Building2, Edit, Trash2, Plus, Send, FileText, X
+  MapPin, Building2, Edit, Trash2, Plus, FileText
 } from "lucide-react";
-
-const CATEGORIES = [
-  "General", "Structures & Venues", "Stages & Platforms", "Lighting & Sound",
-  "AC & Climate Control", "Furniture & Decor", "Catering Equipment",
-  "AV Equipment", "Power & Generators", "Transport & Logistics",
-];
+import RentalItemFormDialog from "./RentalItemFormDialog";
 
 const VendorInventoryAdmin = () => {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("vendors");
   const [selectedVendor, setSelectedVendor] = useState<any>(null);
-  const [isAddItemOpen, setIsAddItemOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [addForVendorId, setAddForVendorId] = useState<string | null>(null);
-  const [newItem, setNewItem] = useState({ name: "", description: "", quantity: 1, price_per_day: 0, category: "General", image_url: "" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch all vendor profiles
+  // Fetch all vendor profiles (excluding admins)
   const { data: vendors, isLoading: vendorsLoading } = useQuery({
     queryKey: ["admin_vendors"],
     queryFn: async () => {
-      const { data: roles, error: rolesError } = await supabase
+      const { data: roles } = await supabase
         .from("user_roles")
         .select("user_id")
         .eq("role", "vendor");
-      if (rolesError) throw rolesError;
-
       if (!roles || roles.length === 0) return [];
 
-      const vendorIds = roles.map((r) => r.user_id);
-      const { data: profiles, error: profilesError } = await supabase
+      // Exclude admin users
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+      const adminUserIds = new Set((adminRoles || []).map((r) => r.user_id));
+      const vendorIds = roles.map((r) => r.user_id).filter(id => !adminUserIds.has(id));
+      if (vendorIds.length === 0) return [];
+
+      const { data: profiles, error } = await supabase
         .from("profiles")
         .select("*")
         .in("user_id", vendorIds);
-      if (profilesError) throw profilesError;
-
+      if (error) throw error;
       return profiles || [];
     },
   });
@@ -98,35 +95,6 @@ const VendorInventoryAdmin = () => {
     },
   });
 
-  // Create item for vendor
-  const createItem = useMutation({
-    mutationFn: async (data: any) => {
-      const { error } = await supabase.from("vendor_inventory").insert(data);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin_vendor_inventory"] });
-      toast({ title: "Item Added", description: "Catalog item added successfully." });
-      setIsAddItemOpen(false);
-      setNewItem({ name: "", description: "", quantity: 1, price_per_day: 0, category: "General", image_url: "" });
-    },
-    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
-  });
-
-  // Update item
-  const updateItem = useMutation({
-    mutationFn: async ({ id, ...data }: any) => {
-      const { error } = await supabase.from("vendor_inventory").update(data).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin_vendor_inventory"] });
-      toast({ title: "Item Updated" });
-      setEditItem(null);
-    },
-    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
-  });
-
   // Delete item
   const deleteItem = useMutation({
     mutationFn: async (id: string) => {
@@ -140,7 +108,88 @@ const VendorInventoryAdmin = () => {
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
-  // Get vendor stats
+  // Save handler for the shared form (create or update vendor inventory item)
+  const handleFormSave = async (data: Record<string, any>, variants: { attributeType: string; rows: any[] } | null) => {
+    const vendorId = addForVendorId || editItem?.vendor_id;
+    if (!vendorId) throw new Error("No vendor selected");
+
+    const itemData: Record<string, any> = {
+      name: data.title,
+      short_description: data.short_description,
+      description: data.description,
+      address: data.address || null,
+      categories: data.categories || [],
+      search_keywords: data.search_keywords || null,
+      display_order: data.display_order || 0,
+      quantity: data.quantity || 1,
+      is_available: data.is_active !== false,
+      has_variants: data.has_variants || false,
+      price_value: data.price_value,
+      pricing_unit: data.pricing_unit,
+      image_url: data.image_url || null,
+      image_urls: data.image_urls || [],
+      vendor_id: vendorId,
+    };
+
+    let itemId: string;
+
+    if (editItem) {
+      const { error } = await supabase.from("vendor_inventory").update(itemData).eq("id", editItem.id);
+      if (error) throw error;
+      itemId = editItem.id;
+    } else {
+      const { data: inserted, error } = await supabase.from("vendor_inventory").insert(itemData as any).select("id").single();
+      if (error) throw error;
+      itemId = inserted.id;
+    }
+
+    // Save variants
+    if (variants && variants.rows.length > 0) {
+      // Delete existing variants
+      await supabase.from("vendor_inventory_variants").delete().eq("inventory_item_id", itemId);
+      // Insert new
+      const variantInserts = variants.rows.map((v, i) => ({
+        inventory_item_id: itemId,
+        attribute_type: variants.attributeType,
+        attribute_value: v.attribute_value,
+        price_value: v.price_value,
+        pricing_unit: v.pricing_unit,
+        stock_quantity: v.stock_quantity,
+        image_url: v.image_url,
+        display_order: i,
+      }));
+      const { error: vErr } = await supabase.from("vendor_inventory_variants").insert(variantInserts);
+      if (vErr) throw vErr;
+    } else if (editItem?.has_variants && !data.has_variants) {
+      // Clear variants if toggled off
+      await supabase.from("vendor_inventory_variants").delete().eq("inventory_item_id", itemId);
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["admin_vendor_inventory"] });
+    toast({ title: editItem ? "Item Updated" : "Item Added", description: "Catalog item saved successfully." });
+    setEditItem(null);
+    setAddForVendorId(null);
+  };
+
+  const openAddForm = (vendorId: string) => {
+    setAddForVendorId(vendorId);
+    setEditItem(null);
+    setIsFormOpen(true);
+  };
+
+  const openEditForm = (item: any) => {
+    setEditItem({
+      ...item,
+      title: item.name,
+      short_description: item.short_description || "",
+      is_active: item.is_available,
+      _variantTable: "vendor_inventory_variants",
+    });
+    setAddForVendorId(null);
+    setIsFormOpen(true);
+  };
+
+  // Stats helpers
   const getVendorItemCount = (vendorId: string) =>
     inventory?.filter((i) => i.vendor_id === vendorId).length || 0;
 
@@ -219,26 +268,16 @@ const VendorInventoryAdmin = () => {
                         )}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                        {vendor.phone && (
-                          <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{vendor.phone}</span>
-                        )}
-                        {vendor.email && (
-                          <span className="flex items-center gap-1 truncate">✉️ {vendor.email}</span>
-                        )}
-                        {(vendor as any).city && (
-                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{(vendor as any).city}</span>
-                        )}
+                        {vendor.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{vendor.phone}</span>}
+                        {vendor.email && <span className="flex items-center gap-1 truncate">✉️ {vendor.email}</span>}
+                        {(vendor as any).city && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{(vendor as any).city}</span>}
                         {(vendor as any).godown_address && (
                           <span className="flex items-center gap-1 col-span-2 sm:col-span-1">
                             🏭 Godown: {(vendor as any).godown_address.slice(0, 50)}{(vendor as any).godown_address.length > 50 ? "..." : ""}
                           </span>
                         )}
-                        {(vendor as any).gst_number && (
-                          <span className="flex items-center gap-1"><FileText className="h-3 w-3" />GST: {(vendor as any).gst_number}</span>
-                        )}
-                        {(vendor as any).pan_number && (
-                          <span className="flex items-center gap-1"><FileText className="h-3 w-3" />PAN: {(vendor as any).pan_number}</span>
-                        )}
+                        {(vendor as any).gst_number && <span className="flex items-center gap-1"><FileText className="h-3 w-3" />GST: {(vendor as any).gst_number}</span>}
+                        {(vendor as any).pan_number && <span className="flex items-center gap-1"><FileText className="h-3 w-3" />PAN: {(vendor as any).pan_number}</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -258,10 +297,7 @@ const VendorInventoryAdmin = () => {
                         <Button variant="outline" size="sm" onClick={() => setSelectedVendor(vendor)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => {
-                          setAddForVendorId(vendor.user_id);
-                          setIsAddItemOpen(true);
-                        }}>
+                        <Button variant="outline" size="sm" onClick={() => openAddForm(vendor.user_id)}>
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
@@ -331,7 +367,7 @@ const VendorInventoryAdmin = () => {
                           <span className="text-xs text-muted-foreground">Verified</span>
                         </div>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => setEditItem(item)}>
+                          <Button variant="ghost" size="sm" onClick={() => openEditForm(item)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => deleteItem.mutate(item.id)}>
@@ -379,10 +415,7 @@ const VendorInventoryAdmin = () => {
               <div className="border-t pt-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-semibold">Catalog Items ({getVendorItemCount(selectedVendor.user_id)})</h4>
-                  <Button size="sm" onClick={() => {
-                    setAddForVendorId(selectedVendor.user_id);
-                    setIsAddItemOpen(true);
-                  }}>
+                  <Button size="sm" onClick={() => openAddForm(selectedVendor.user_id)}>
                     <Plus className="h-4 w-4 mr-1" />Add Item
                   </Button>
                 </div>
@@ -401,7 +434,7 @@ const VendorInventoryAdmin = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           {(item as any).is_verified && <Badge className="bg-emerald-500 text-white text-xs"><ShieldCheck className="h-3 w-3" /></Badge>}
-                          <Button variant="ghost" size="sm" onClick={() => setEditItem(item)}><Edit className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => openEditForm(item)}><Edit className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="sm" onClick={() => deleteItem.mutate(item.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                         </div>
                       </div>
@@ -414,96 +447,18 @@ const VendorInventoryAdmin = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Add Item Dialog */}
-      <Dialog open={isAddItemOpen} onOpenChange={(open) => { setIsAddItemOpen(open); if (!open) setAddForVendorId(null); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Catalog Item</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Item Name *</Label>
-              <Input value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} placeholder="e.g. Round Tables" />
-            </div>
-            <div>
-              <Label>Category</Label>
-              <Select value={newItem.category} onValueChange={(v) => setNewItem({ ...newItem, category: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Description</Label>
-              <Textarea value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Quantity</Label><Input type="number" value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })} /></div>
-              <div><Label>Price/Day (₹)</Label><Input type="number" value={newItem.price_per_day} onChange={(e) => setNewItem({ ...newItem, price_per_day: parseFloat(e.target.value) || 0 })} /></div>
-            </div>
-            <div><Label>Image URL</Label><Input value={newItem.image_url} onChange={(e) => setNewItem({ ...newItem, image_url: e.target.value })} placeholder="https://..." /></div>
-            <Button
-              className="w-full"
-              disabled={!newItem.name || !addForVendorId}
-              onClick={() => createItem.mutate({ ...newItem, vendor_id: addForVendorId, is_available: true })}
-            >
-              {createItem.isPending ? "Adding..." : "Add Item"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Item Dialog */}
-      <Dialog open={!!editItem} onOpenChange={() => setEditItem(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Catalog Item</DialogTitle>
-          </DialogHeader>
-          {editItem && (
-            <div className="space-y-4">
-              <div>
-                <Label>Item Name *</Label>
-                <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} />
-              </div>
-              <div>
-                <Label>Category</Label>
-                <Select value={editItem.category || "General"} onValueChange={(v) => setEditItem({ ...editItem, category: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Description</Label>
-                <Textarea value={editItem.description || ""} onChange={(e) => setEditItem({ ...editItem, description: e.target.value })} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Quantity</Label><Input type="number" value={editItem.quantity} onChange={(e) => setEditItem({ ...editItem, quantity: parseInt(e.target.value) || 1 })} /></div>
-                <div><Label>Price/Day (₹)</Label><Input type="number" value={editItem.price_per_day || 0} onChange={(e) => setEditItem({ ...editItem, price_per_day: parseFloat(e.target.value) || 0 })} /></div>
-              </div>
-              <div><Label>Image URL</Label><Input value={editItem.image_url || ""} onChange={(e) => setEditItem({ ...editItem, image_url: e.target.value })} /></div>
-              <div className="flex items-center gap-2">
-                <Switch checked={editItem.is_available} onCheckedChange={(v) => setEditItem({ ...editItem, is_available: v })} />
-                <Label>Available</Label>
-              </div>
-              <Button
-                className="w-full"
-                disabled={!editItem.name}
-                onClick={() => updateItem.mutate({
-                  id: editItem.id,
-                  name: editItem.name,
-                  description: editItem.description,
-                  quantity: editItem.quantity,
-                  price_per_day: editItem.price_per_day,
-                  category: editItem.category,
-                  image_url: editItem.image_url,
-                  is_available: editItem.is_available,
-                })}
-              >
-                {updateItem.isPending ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Shared Rental Item Form Dialog */}
+      <RentalItemFormDialog
+        open={isFormOpen}
+        onOpenChange={(open) => {
+          setIsFormOpen(open);
+          if (!open) { setEditItem(null); setAddForVendorId(null); }
+        }}
+        editingItem={editItem}
+        onSave={handleFormSave}
+        title={editItem ? "Edit Catalog Item" : "Add Catalog Item"}
+        vendorMode
+      />
     </div>
   );
 };

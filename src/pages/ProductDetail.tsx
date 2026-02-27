@@ -7,7 +7,7 @@ import { useAllRentals } from "@/hooks/useData";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingCart, ArrowLeft, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Check, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const ProductDetail = () => {
@@ -15,7 +15,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { data: rentals, isLoading } = useAllRentals();
   const { data: variants } = useRentalVariants(id);
-  const { addItem, isInCart } = useCart();
+  const { addItem, removeItem, isInCart, getItemCount } = useCart();
   const { toast } = useToast();
 
   const [selectedVariant, setSelectedVariant] = useState<RentalVariant | null>(null);
@@ -107,14 +107,23 @@ const ProductDetail = () => {
 
   return (
     <Layout>
-      {/* Breadcrumb */}
-      <section className="pt-6 pb-4 border-b border-border">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <button onClick={() => navigate("/ecommerce")} className="hover:text-foreground transition-colors">Shop</button>
-            <span>/</span>
-            <span className="text-foreground font-medium line-clamp-1">{rental.title}</span>
+      {/* Top Bar */}
+      <section className="pt-4 pb-3 border-b border-border sticky top-0 z-20 bg-background/95 backdrop-blur-sm">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/ecommerce")} className="rounded-full">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <button onClick={() => navigate("/ecommerce")} className="hover:text-foreground transition-colors">Shop</button>
+              <span>/</span>
+              <span className="text-foreground font-medium line-clamp-1">{rental.title}</span>
+            </div>
           </div>
+          <Button variant="outline" size="sm" onClick={() => navigate("/cart")} className="gap-2">
+            <ShoppingCart className="h-4 w-4" />
+            Cart ({getItemCount()})
+          </Button>
         </div>
       </section>
 
@@ -204,9 +213,23 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <Button onClick={handleAddToCart} size="lg" className="w-full text-base" disabled={inCart}>
-                {inCart ? <><Check className="mr-2 h-5 w-5" />Added to Cart</> : <><ShoppingCart className="mr-2 h-5 w-5" />Add to Cart</>}
-              </Button>
+              {inCart ? (
+                <div className="flex gap-3">
+                  <Button onClick={() => navigate("/cart")} size="lg" className="flex-1 text-base">
+                    <ShoppingCart className="mr-2 h-5 w-5" />View Cart
+                  </Button>
+                  <Button
+                    onClick={() => { removeItem(id!, variantId); toast({ title: "Removed", description: "Item removed from cart." }); }}
+                    size="lg" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </div>
+              ) : (
+                <Button onClick={handleAddToCart} size="lg" className="w-full text-base">
+                  <ShoppingCart className="mr-2 h-5 w-5" />Add to Cart
+                </Button>
+              )}
 
               <div className="space-y-3 pt-4 border-t border-border">
                 <h3 className="text-lg font-semibold text-foreground">Description</h3>

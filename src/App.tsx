@@ -34,6 +34,8 @@ const DynamicEventPage = lazy(() => import("./pages/events/DynamicEventPage"));
 const Team = lazy(() => import("./pages/Team"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 
 const queryClient = new QueryClient();
 
@@ -63,6 +65,8 @@ const App = () => (
               <Route path="/ecommerce" element={<Ecommerce />} />
               <Route path="/ecommerce/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
               
               {/* Auth Routes */}
               <Route path="/auth" element={<Auth />} />

@@ -110,8 +110,8 @@ const Footer = () => {
             © 2026 Evnting. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-xs text-white/30 hover:text-white/60 transition-colors">Privacy Policy</a>
-            <a href="#" className="text-xs text-white/30 hover:text-white/60 transition-colors">Terms of Service</a>
+            <Link to="/privacy-policy" className="text-xs text-white/30 hover:text-white/60 transition-colors">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="text-xs text-white/30 hover:text-white/60 transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>

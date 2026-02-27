@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
+import { syncInventoryToZoho } from "@/utils/zohoSync";
 
 export interface VendorInventoryItem {
   id: string;
@@ -101,12 +102,14 @@ export const useCreateInventoryItem = () => {
       if (error) throw error;
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["vendor_inventory"] });
       toast({
         title: "Item Added",
         description: "Inventory item has been added successfully.",
       });
+      // Sync to Zoho CRM
+      syncInventoryToZoho('create', result);
     },
     onError: (error) => {
       toast({
@@ -135,12 +138,14 @@ export const useUpdateInventoryItem = () => {
       if (error) throw error;
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["vendor_inventory"] });
       toast({
         title: "Item Updated",
         description: "Inventory item has been updated.",
       });
+      // Sync to Zoho CRM
+      syncInventoryToZoho('update', result);
     },
     onError: (error) => {
       toast({

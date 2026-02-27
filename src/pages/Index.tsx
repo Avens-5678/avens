@@ -265,7 +265,17 @@ const Index = () => {
                   </div>
                 </GlassmorphismCard>
             )}
-            </ServiceScrollContainer>
+          </ServiceScrollContainer>
+          }
+
+          {homeServices.length > 0 &&
+          <div className="text-center mt-12">
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/services">
+                  View All Services <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
           }
         </div>
       </Section>
@@ -413,7 +423,7 @@ const Index = () => {
                 {[...activeClients, ...activeClients].map((client, i) =>
                   <div
                     key={`${client.id}-${i}`}
-                    className="flex-shrink-0 grayscale hover:grayscale-0 transition-all duration-300 px-2">
+                    className="flex-shrink-0 hover:opacity-80 transition-all duration-300 px-2">
                     <OptimizedImage
                       src={client.logo_url}
                       alt={client.name}

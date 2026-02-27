@@ -6,10 +6,11 @@ import Layout from "@/components/Layout/Layout";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { Package, ShoppingCart, Plus, Check, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square, Trash2 } from "lucide-react";
+import { Package, ShoppingCart, Plus, Check, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square, Trash2, ArrowRight } from "lucide-react";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import ecommerceBanner from "@/assets/ecommerce-banner.jpg";
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
@@ -148,19 +149,35 @@ const Ecommerce = () => {
 
   return (
     <Layout>
-      {/* Hero Header */}
-      <section className="pt-12 sm:pt-16 lg:pt-20 pb-6 sm:pb-8 border-b border-border">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-4">
-          <Badge variant="secondary" className="mb-4">
-            <Package className="mr-2 h-4 w-4" />
-            Equipment Rental
-          </Badge>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-            Premium Event Rentals
-          </h1>
-          <p className="text-base sm:text-lg text-muted-foreground mt-3 max-w-2xl">
-            Browse our extensive collection of high-quality equipment and decor for your special event.
-          </p>
+      {/* Hero Banner */}
+      <section className="relative overflow-hidden">
+        <div className="relative h-[280px] sm:h-[320px] lg:h-[360px]">
+          <img
+            src={ecommerceBanner}
+            alt="Premium Event Rentals"
+            className="w-full h-full object-cover"
+            fetchPriority="high"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/50 to-transparent" />
+          <div className="absolute inset-0 flex items-center">
+            <div className="container mx-auto px-6 sm:px-8 lg:px-4">
+              <Badge variant="secondary" className="mb-4 bg-secondary/90 backdrop-blur-sm">
+                <Package className="mr-2 h-4 w-4" />
+                Equipment Rental
+              </Badge>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
+                Premium Event Rentals
+              </h1>
+              <p className="text-base sm:text-lg text-white/80 mt-3 max-w-2xl">
+                Browse our extensive collection of high-quality equipment and decor for your special event.
+              </p>
+              <Button className="mt-6 bg-secondary hover:bg-secondary/90 text-white" asChild>
+                <a href="#products">
+                  Browse Equipment <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -239,7 +256,7 @@ const Ecommerce = () => {
       </section>
 
       {/* Main Content */}
-      <section className="py-8 sm:py-10">
+      <section id="products" className="py-8 sm:py-10">
         <div className="container mx-auto px-6 sm:px-8 lg:px-4">
           <div className="flex gap-8">
             <aside className="hidden lg:block w-60 flex-shrink-0">

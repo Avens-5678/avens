@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Sparkles, ArrowLeft, Plus, Calendar, Package, Briefcase, TrendingUp, Search, Star, LayoutGrid } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import FloatingRobot from "./FloatingRobot";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -39,6 +40,7 @@ const VENDOR_FEATURES = [
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dashboard-chat`;
 
 export default function DashboardChatbot({ role, userName }: DashboardChatbotProps) {
+  const { toast } = useToast();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -108,6 +110,20 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
           if (jsonStr === "[DONE]") break;
           try {
             const parsed = JSON.parse(jsonStr);
+            // Handle action markers from tool calls
+            if (parsed.action) {
+              const action = parsed.action;
+              if (action.success) {
+                const msgs: Record<string, string> = {
+                  rental_order: "🎉 Rental inquiry submitted! Check Admin Orders.",
+                  form_submission: "🎉 Inquiry submitted successfully!",
+                  vendor_listing: "🎉 Listing created! Check your Vendor Inventory.",
+                };
+                toast({ title: "Action Completed", description: msgs[action.type] || "Done!" });
+              } else if (action.error) {
+                toast({ title: "Action Failed", description: action.error, variant: "destructive" });
+              }
+            }
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
               assistantSoFar += content;

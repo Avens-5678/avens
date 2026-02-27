@@ -7,6 +7,70 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "create_rental_order",
+      description: "Create a rental order / inquiry from a client. Call this as soon as the client confirms they want to proceed with renting equipment.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Short title for the order, e.g. 'German Hangar Rental'" },
+          equipment_category: { type: "string", description: "Category like Event Structures, Climate Control, Event Production Equipment, Branding & Décor, etc." },
+          equipment_details: { type: "string", description: "Detailed description of what is needed" },
+          location: { type: "string", description: "Event location" },
+          event_date: { type: "string", description: "Event date in YYYY-MM-DD format" },
+          client_name: { type: "string", description: "Client's name" },
+          client_email: { type: "string", description: "Client's email" },
+          client_phone: { type: "string", description: "Client's phone number" },
+          budget: { type: "string", description: "Budget range if mentioned" },
+          notes: { type: "string", description: "Any special requirements or notes" },
+        },
+        required: ["title", "equipment_category"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_form_submission",
+      description: "Submit a general inquiry or event planning request from a client. Call this when the client wants to submit an event planning inquiry.",
+      parameters: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Client's name" },
+          email: { type: "string", description: "Client's email" },
+          phone: { type: "string", description: "Client's phone" },
+          event_type: { type: "string", description: "Type of event" },
+          event_date: { type: "string", description: "Event date in YYYY-MM-DD format" },
+          location: { type: "string", description: "Event location" },
+          message: { type: "string", description: "Details about the inquiry" },
+        },
+        required: ["name", "email", "message"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_vendor_listing",
+      description: "Create a new inventory listing for a vendor. Call this when the vendor confirms they want to add a new item to their inventory.",
+      parameters: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Item name" },
+          description: { type: "string", description: "Item description" },
+          category: { type: "string", description: "Category like Event Structures, Exhibition & Stalls, Climate Control, Event Production Equipment, Branding & Décor" },
+          price_per_day: { type: "number", description: "Price per day in INR" },
+          quantity: { type: "integer", description: "Quantity available" },
+        },
+        required: ["name", "category"],
+      },
+    },
+  },
+];
+
 const CLIENT_SYSTEM_PROMPT = `You are **Evnting AI**, the intelligent event-planning assistant for Evnting.com — India's leading online platform for event production and premium equipment rentals.
 
 Your job is to help **clients** plan extraordinary events. You should:
@@ -18,13 +82,12 @@ Your job is to help **clients** plan extraordinary events. You should:
 - Be warm, professional, and decisive. Never say "maybe" — always reassure the client.
 - When recommending rentals, mention specific items from the catalog with their details.
 
-**IMPORTANT - Rental Inquiries:** When a client wants to rent equipment or make an inquiry through you, collect the following details:
-- Equipment/item name
-- Event date
-- Location
-- Their name, email, and phone (if not already known)
-- Any special requirements
-Then confirm the details and let them know their request has been submitted. The system will automatically create an order in the admin dashboard.
+**CRITICAL - Taking Action Immediately:**
+You have tools to create rental orders and form submissions. As soon as the client provides enough information and says "yes" or confirms, IMMEDIATELY call the appropriate tool. Do NOT wait for more messages. Do NOT ask "shall I proceed?" after they already confirmed.
+
+- For rental inquiries: Call create_rental_order with whatever details you have. Missing fields are okay.
+- For event planning inquiries: Call create_form_submission with whatever details you have.
+- If you only have partial info (e.g. just the item name), still call the tool — partial data is fine.
 
 Brand quotes to use naturally:
 - "We don't just plan events — we create experiences."
@@ -39,23 +102,16 @@ Your job is to help **vendors** grow their business and find rental equipment. Y
 - Guide through inventory management best practices.
 - Answer questions about assigned jobs and rental orders.
 - Provide marketplace tips: pricing strategies, availability management, category selection.
-- **IMPORTANT: Help vendors find and rent equipment from the Evnting rental catalog.** When a vendor asks for equipment (e.g., "I need a German hangar"), search the catalog provided below and recommend matching items with details and pricing. Ask if they want to proceed with renting.
+- Help vendors find and rent equipment from the Evnting rental catalog.
 - Suggest related/complementary items they might also need.
 - Help with CSV bulk uploads for inventory.
 
-**IMPORTANT - New Vendor Listings:** When a vendor wants to add a new inventory listing through you, collect:
-- Item name
-- Description
-- Category (e.g., Event Structures, Exhibition & Stalls, Climate Control, Event Production Equipment, Branding & Décor)
-- Price per day
-- Quantity available
-Then confirm and let them know the listing will appear in their Vendor Inventory section.
+**CRITICAL - Taking Action Immediately:**
+You have tools to create vendor listings and rental orders. As soon as the vendor provides enough information and confirms, IMMEDIATELY call the appropriate tool. Do NOT wait. Do NOT ask "shall I proceed?" after they already said yes.
 
-When a vendor asks to rent something:
-1. Search the rental catalog for matching items
-2. Present the options with descriptions and price ranges
-3. Suggest related items they might need
-4. Ask if they want to proceed with a rental request
+- For new listings: Call create_vendor_listing with whatever details you have.
+- For rental requests: Call create_rental_order with the details.
+- Partial data is fine — call the tool right away.
 
 Be professional, actionable, and supportive. Use bullet points and clear formatting.
 Keep responses concise, formatted with markdown, and always end with a helpful next step.`;
@@ -93,6 +149,90 @@ async function fetchRentalCatalog() {
   }
 }
 
+async function executeToolCall(functionName: string, args: Record<string, unknown>, vendorId?: string) {
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  switch (functionName) {
+    case "create_rental_order": {
+      const { data, error } = await supabase
+        .from("rental_orders")
+        .insert({
+          title: (args.title as string) || "Chatbot Inquiry",
+          equipment_category: (args.equipment_category as string) || "General",
+          equipment_details: args.equipment_details as string,
+          location: args.location as string,
+          event_date: args.event_date as string,
+          client_name: args.client_name as string,
+          client_email: args.client_email as string,
+          client_phone: args.client_phone as string,
+          budget: args.budget as string,
+          notes: `[Via AI Chatbot] ${args.notes || ""}`.trim(),
+        })
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("Error creating rental order:", error);
+        return { success: false, error: error.message };
+      }
+      return { success: true, id: data.id, type: "rental_order" };
+    }
+
+    case "create_form_submission": {
+      const { data, error } = await supabase
+        .from("form_submissions")
+        .insert({
+          form_type: "chatbot_inquiry",
+          name: (args.name as string) || "Chatbot User",
+          email: (args.email as string) || "via-chatbot@evnting.com",
+          phone: args.phone as string,
+          event_type: args.event_type as string,
+          event_date: args.event_date as string,
+          location: args.location as string,
+          message: (args.message as string) || "Inquiry submitted via AI chatbot",
+        })
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("Error creating form submission:", error);
+        return { success: false, error: error.message };
+      }
+      return { success: true, id: data.id, type: "form_submission" };
+    }
+
+    case "create_vendor_listing": {
+      if (!vendorId) {
+        return { success: false, error: "Vendor ID not available" };
+      }
+      const { data, error } = await supabase
+        .from("vendor_inventory")
+        .insert({
+          vendor_id: vendorId,
+          name: (args.name as string) || "New Item",
+          description: args.description as string,
+          category: (args.category as string) || "General",
+          price_per_day: args.price_per_day as number,
+          quantity: (args.quantity as number) || 1,
+        })
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("Error creating vendor listing:", error);
+        return { success: false, error: error.message };
+      }
+      return { success: true, id: data.id, type: "vendor_listing" };
+    }
+
+    default:
+      return { success: false, error: "Unknown function" };
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -113,11 +253,29 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Extract user ID from auth token for vendor operations
+    let userId: string | undefined;
+    const authHeader = req.headers.get("authorization");
+    if (authHeader) {
+      try {
+        const supabase = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY")!
+        );
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user } } = await supabase.auth.getUser(token);
+        userId = user?.id;
+      } catch (e) {
+        console.error("Error extracting user:", e);
+      }
+    }
+
     // Fetch rental catalog for context
     const rentalCatalog = await fetchRentalCatalog();
     const basePrompt = role === "vendor" ? VENDOR_SYSTEM_PROMPT : CLIENT_SYSTEM_PROMPT;
     const systemPrompt = basePrompt + rentalCatalog;
 
+    // First call: may return tool calls or content
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
@@ -132,7 +290,8 @@ serve(async (req) => {
             { role: "system", content: systemPrompt },
             ...messages,
           ],
-          stream: true,
+          tools: TOOLS,
+          stream: false, // Non-streaming for tool call detection
         }),
       }
     );
@@ -158,7 +317,141 @@ serve(async (req) => {
       );
     }
 
-    return new Response(response.body, {
+    const result = await response.json();
+    const choice = result.choices?.[0];
+    const assistantMessage = choice?.message;
+
+    // Check if there are tool calls
+    if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
+      const toolResults: Array<{ name: string; result: unknown }> = [];
+
+      for (const toolCall of assistantMessage.tool_calls) {
+        const fnName = toolCall.function.name;
+        let fnArgs: Record<string, unknown>;
+        try {
+          fnArgs = JSON.parse(toolCall.function.arguments);
+        } catch {
+          fnArgs = {};
+        }
+
+        console.log(`Executing tool: ${fnName}`, fnArgs);
+        const toolResult = await executeToolCall(fnName, fnArgs, userId);
+        toolResults.push({ name: fnName, result: toolResult });
+      }
+
+      // Build tool result messages for the follow-up
+      const toolMessages = assistantMessage.tool_calls.map((tc: any, i: number) => ({
+        role: "tool",
+        tool_call_id: tc.id,
+        content: JSON.stringify(toolResults[i].result),
+      }));
+
+      // Second call: get the final response after tool execution (streaming)
+      const followUpResponse = await fetch(
+        "https://ai.gateway.lovable.dev/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...messages,
+              assistantMessage,
+              ...toolMessages,
+            ],
+            stream: true,
+          }),
+        }
+      );
+
+      if (!followUpResponse.ok) {
+        // Fallback: return a simple confirmation
+        const confirmations = toolResults.map(tr => {
+          const r = tr.result as any;
+          if (r.success) {
+            if (r.type === "rental_order") return "✅ **Rental inquiry submitted successfully!** Our team will review it shortly.";
+            if (r.type === "form_submission") return "✅ **Inquiry submitted successfully!** We'll get back to you soon.";
+            if (r.type === "vendor_listing") return "✅ **Listing created successfully!** Check your Vendor Inventory to see it.";
+          }
+          return `⚠️ Could not complete action: ${r.error}`;
+        });
+
+        // Return as SSE format for frontend compatibility
+        const text = confirmations.join("\n\n");
+        const sseData = `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\ndata: [DONE]\n\n`;
+        return new Response(sseData, {
+          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+        });
+      }
+
+      // Prepend action markers before the stream so frontend knows what happened
+      const actionMarkers = toolResults.map(tr => {
+        const r = tr.result as any;
+        return `data: ${JSON.stringify({ choices: [{ delta: { content: "" } }], action: { type: r.type, success: r.success, id: r.id, error: r.error } })}\n\n`;
+      }).join("");
+
+      // Create a combined stream: action markers + AI response stream
+      const encoder = new TextEncoder();
+      const markerBytes = encoder.encode(actionMarkers);
+      
+      const combinedStream = new ReadableStream({
+        async start(controller) {
+          // Send action markers first
+          controller.enqueue(markerBytes);
+          
+          // Then pipe the AI response
+          const reader = followUpResponse.body!.getReader();
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              controller.enqueue(value);
+            }
+          } finally {
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(combinedStream, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
+    }
+
+    // No tool calls — stream a regular response
+    const streamResponse = await fetch(
+      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages,
+          ],
+          stream: true,
+        }),
+      }
+    );
+
+    if (!streamResponse.ok) {
+      const text = await streamResponse.text();
+      console.error("AI stream error:", streamResponse.status, text);
+      return new Response(
+        JSON.stringify({ error: "AI service unavailable." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    return new Response(streamResponse.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {

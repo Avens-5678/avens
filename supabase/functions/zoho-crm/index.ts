@@ -49,11 +49,22 @@ async function getAccessToken(): Promise<string> {
   const tokenUrl = `https://accounts.zoho.in/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`;
 
   const res = await fetch(tokenUrl, { method: 'POST' });
-  const data = await res.json();
+  const rawText = await res.text();
+  
+  console.log('Zoho token response status:', res.status);
+  console.log('Zoho token response body:', rawText.substring(0, 500));
+
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch {
+    console.error('Zoho returned non-JSON response (likely HTML redirect)');
+    throw new Error(`Zoho token endpoint returned non-JSON (status ${res.status})`);
+  }
 
   if (!data.access_token) {
     console.error('Zoho token error:', data);
-    throw new Error('Failed to obtain Zoho access token');
+    throw new Error(`Failed to obtain Zoho access token: ${JSON.stringify(data)}`);
   }
 
   return data.access_token;

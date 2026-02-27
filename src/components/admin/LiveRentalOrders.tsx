@@ -117,19 +117,20 @@ const LiveRentalOrders = () => {
         .select("*")
         .eq("is_active", true);
 
-      // Fuzzy matching utility - Levenshtein-based similarity
-      const fuzzyMatch = (source: string, target: string): boolean => {
-        const s = source.toLowerCase();
-        const t = target.toLowerCase();
-        if (s.includes(t) || t.includes(s)) return true;
-        const sWords = s.split(/[\s,\-–()/]+/).filter(w => w.length >= 2);
-        const tWords = t.split(/[\s,\-–()/]+/).filter(w => w.length >= 2);
-        for (const sw of sWords) {
-          for (const tw of tWords) {
-            if (levenshteinDistance(sw, tw) <= Math.max(1, Math.floor(Math.min(sw.length, tw.length) / 3))) return true;
-          }
-        }
-        return false;
+      // Word-level exact match: check if keyword matches a whole word in text
+      const exactWordMatch = (text: string, keyword: string): boolean => {
+        const words = text.toLowerCase().split(/[\s,\-–()/]+/).filter(w => w.length >= 1);
+        return words.some(w => w === keyword);
+      };
+
+      // Fuzzy matching (Levenshtein) — only for keywords with 4+ chars
+      const fuzzyWordMatch = (text: string, keyword: string): boolean => {
+        const words = text.toLowerCase().split(/[\s,\-–()/]+/).filter(w => w.length >= 2);
+        return words.some(w => {
+          if (w === keyword || w.includes(keyword) || keyword.includes(w)) return true;
+          const dist = levenshteinDistance(w, keyword);
+          return dist <= Math.max(1, Math.floor(Math.min(w.length, keyword.length) / 3));
+        });
       };
 
       const levenshteinDistance = (a: string, b: string): number => {
@@ -146,7 +147,16 @@ const LiveRentalOrders = () => {
         return matrix[b.length][a.length];
       };
 
-      // Extract item-name keywords ONLY from title (strip numbers, common words like "rental", city names)
+      // Matching function: short keywords (< 4 chars) use exact word match only,
+      // long keywords (4+ chars) use fuzzy match
+      const itemMatchesKeyword = (text: string, kw: string): boolean => {
+        if (kw.length < 4) {
+          return exactWordMatch(text, kw);
+        }
+        return fuzzyWordMatch(text, kw);
+      };
+
+      // Extract item-name keywords from title only
       const orderTitle = (selectedOrder.title || "").toLowerCase();
       const orderLocation = (selectedOrder.location || "").toLowerCase();
       
@@ -156,7 +166,7 @@ const LiveRentalOrders = () => {
         "-", "–", "", "x", "day", "days", "event", "per",
       ]);
 
-      // Also treat location words as stop words so they don't pollute item matching
+      // Treat location words as stop words
       const locationWords = orderLocation.split(/[\s,\-–()/]+/).map(w => w.trim().toLowerCase()).filter(w => w.length >= 2);
       locationWords.forEach(w => stopWords.add(w));
 
@@ -165,42 +175,43 @@ const LiveRentalOrders = () => {
           .map(w => w.trim().toLowerCase().replace(/[^a-z]/g, ''))
           .filter(w => w.length >= 2 && !stopWords.has(w));
 
-      const titleKeywords = extractKeywords(orderTitle);
-      // Remove pure numbers
-      const allKeywords = [...new Set(titleKeywords.filter(w => !/^\d+$/.test(w)))];
+      const allKeywords = [...new Set(extractKeywords(orderTitle).filter(w => !/^\d+$/.test(w)))];
 
-      // Filter vendors with fuzzy matching on item name only
+      // Match items: ALL keywords must match (AND logic) for precision
+      const itemMatchesAllKeywords = (name: string, keywords: string): boolean => {
+        const searchText = `${name} ${keywords}`;
+        return allKeywords.every(kw => itemMatchesKeyword(searchText, kw));
+      };
+
+      // Filter vendors with precise matching
       const results = (profiles || []).map((profile: any) => {
         const vendorItems = (inventory || []).filter(
           (i) => i.vendor_id === profile.user_id
         );
 
-        // Fuzzy match: item name fuzzy-matches keywords from order title
         const matchingItems = vendorItems.filter((item) => {
-          const itemName = (item.name || "").toLowerCase();
-          const itemKeywords = (item.search_keywords || "").toLowerCase();
-
-          return allKeywords.some(kw =>
-            fuzzyMatch(itemName, kw) || fuzzyMatch(itemKeywords, kw)
+          return itemMatchesAllKeywords(
+            item.name || "",
+            item.search_keywords || ""
           );
         });
 
         // Also find matching admin rentals
         const matchingAdminRentals = (adminRentals || []).filter((rental: any) => {
-          const rentalName = (rental.title || "").toLowerCase();
-          const rentalKeywords = (rental.search_keywords || "").toLowerCase();
-          return allKeywords.some(kw =>
-            fuzzyMatch(rentalName, kw) || fuzzyMatch(rentalKeywords, kw)
+          return itemMatchesAllKeywords(
+            rental.title || "",
+            rental.search_keywords || ""
           );
         });
 
-        // Fuzzy city/location matching
+        // City/location matching (fuzzy for location)
         const orderLoc = orderLocation;
-        const cityMatch = !orderLoc ||
-          fuzzyMatch(profile.city || "", orderLoc);
-        const addressMatch = !orderLoc ||
-          fuzzyMatch(profile.address || "", orderLoc) ||
-          fuzzyMatch(profile.godown_address || "", orderLoc);
+        const cityMatchFn = (text: string) => {
+          if (!orderLoc) return true;
+          const t = text.toLowerCase();
+          if (t.includes(orderLoc) || orderLoc.includes(t)) return true;
+          return locationWords.some(w => w.length >= 3 && t.includes(w));
+        };
 
         return {
           ...profile,
@@ -208,7 +219,7 @@ const LiveRentalOrders = () => {
           matchingItems,
           matchingAdminRentals,
           totalItems: vendorItems.length,
-          cityMatch: cityMatch || addressMatch,
+          cityMatch: cityMatchFn(profile.city || "") || cityMatchFn(profile.address || "") || cityMatchFn(profile.godown_address || ""),
           hasMatchingItems: matchingItems.length > 0,
         };
       });

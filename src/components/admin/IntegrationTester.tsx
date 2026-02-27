@@ -21,33 +21,36 @@ const IntegrationTester = () => {
   const [watiStatus, setWatiStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { toast } = useToast();
 
+  const waitForGtag = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (typeof window.gtag === 'function') return resolve(true);
+      let elapsed = 0;
+      const interval = setInterval(() => {
+        elapsed += 500;
+        if (typeof window.gtag === 'function') { clearInterval(interval); resolve(true); }
+        else if (elapsed >= 6000) { clearInterval(interval); resolve(false); }
+      }, 500);
+    });
+  };
+
   const testGoogleAnalytics = async () => {
     setIsTestingGA(true);
     try {
-      // Check if gtag is loaded
-      if (typeof window.gtag === 'function') {
-        // Send a test event
+      const loaded = await waitForGtag();
+      if (loaded) {
         window.gtag('event', 'admin_test', {
           event_category: 'Admin',
           event_label: 'Integration Test',
           value: 1
         });
-        
         setGaStatus('success');
-        toast({
-          title: "Google Analytics Test",
-          description: "Test event sent successfully! Check your GA dashboard.",
-        });
+        toast({ title: "Google Analytics Test", description: "Test event sent successfully! Check your GA dashboard." });
       } else {
-        throw new Error('Google Analytics not loaded');
+        throw new Error('Google Analytics not loaded after 6s');
       }
     } catch (error) {
       setGaStatus('error');
-      toast({
-        title: "Google Analytics Error",
-        description: "GA not properly loaded or configured.",
-        variant: "destructive"
-      });
+      toast({ title: "Google Analytics Error", description: "GA not properly loaded. Ensure ad-blockers are disabled.", variant: "destructive" });
     } finally {
       setIsTestingGA(false);
     }

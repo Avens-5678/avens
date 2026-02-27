@@ -6,14 +6,14 @@ import Layout from "@/components/Layout/Layout";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { Package, ShoppingCart, Plus, Check, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square } from "lucide-react";
+import { Package, ShoppingCart, Plus, Check, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square, Trash2 } from "lucide-react";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
-  const { items, addItem, isInCart } = useCart();
+  const { items, addItem, removeItem, isInCart } = useCart();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -328,30 +328,46 @@ const Ecommerce = () => {
 
                         {/* Action Buttons */}
                         <div className="flex gap-1.5 pt-1.5">
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addItem({
-                                id: rental.id,
-                                title: rental.title,
-                                price_value: rental.price_value,
-                                pricing_unit: rental.pricing_unit,
-                                price_range: rental.price_range,
-                                image_url: rental.image_url,
-                                quantity: 1,
-                              });
-                            }}
-                            variant={isInCart(rental.id) ? "secondary" : "outline"}
-                            size="sm"
-                            className="flex-1 text-[11px] h-8"
-                            disabled={isInCart(rental.id)}
-                          >
-                            {isInCart(rental.id) ? (
-                              <><Check className="mr-1 h-3 w-3" />Added</>
-                            ) : (
-                              <><Plus className="mr-1 h-3 w-3" />Add</>
-                            )}
-                          </Button>
+                          {isInCart(rental.id) ? (
+                            <>
+                              <Button
+                                onClick={(e) => { e.stopPropagation(); navigate("/cart"); }}
+                                variant="secondary"
+                                size="sm"
+                                className="flex-1 text-[11px] h-8"
+                              >
+                                <Check className="mr-1 h-3 w-3" />Added
+                              </Button>
+                              <Button
+                                onClick={(e) => { e.stopPropagation(); removeItem(rental.id); }}
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-destructive border-destructive/30 hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addItem({
+                                  id: rental.id,
+                                  title: rental.title,
+                                  price_value: rental.price_value,
+                                  pricing_unit: rental.pricing_unit,
+                                  price_range: rental.price_range,
+                                  image_url: rental.image_url,
+                                  quantity: 1,
+                                });
+                              }}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-[11px] h-8"
+                            >
+                              <Plus className="mr-1 h-3 w-3" />Add
+                            </Button>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

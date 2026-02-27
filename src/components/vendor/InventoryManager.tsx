@@ -33,10 +33,11 @@ const InventoryManager = () => {
     quantity: 1,
     price_per_day: 0,
     image_url: "",
+    address: "",
   });
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", quantity: 1, price_per_day: 0, image_url: "" });
+    setFormData({ name: "", description: "", quantity: 1, price_per_day: 0, image_url: "", address: "" });
     setEditingItem(null);
   };
 
@@ -61,6 +62,7 @@ const InventoryManager = () => {
       quantity: item.quantity,
       price_per_day: item.price_per_day || 0,
       image_url: item.image_url || "",
+      address: item.address || "",
     });
     setIsDialogOpen(true);
   };
@@ -151,6 +153,15 @@ const InventoryManager = () => {
                     value={formData.image_url}
                     onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                     placeholder="https://..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address / Location</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="e.g. Warehouse 5, HITEC City, Hyderabad"
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isCreating || isUpdating}>

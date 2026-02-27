@@ -1042,6 +1042,7 @@ export type Database = {
       }
       vendor_inventory: {
         Row: {
+          address: string | null
           category: string | null
           created_at: string
           description: string | null
@@ -1058,6 +1059,7 @@ export type Database = {
           verified_by: string | null
         }
         Insert: {
+          address?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -1074,6 +1076,7 @@ export type Database = {
           verified_by?: string | null
         }
         Update: {
+          address?: string | null
           category?: string | null
           created_at?: string
           description?: string | null

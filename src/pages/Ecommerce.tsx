@@ -19,8 +19,10 @@ const Ecommerce = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     categories: true,
+    city: false,
     price: false,
   });
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -33,6 +35,15 @@ const Ecommerce = () => {
     return Array.from(cats).sort();
   }, [rentals]);
 
+  const cities = useMemo(() => {
+    if (!rentals) return [];
+    const citySet = new Set<string>();
+    rentals.forEach(r => {
+      if (r.address?.trim()) citySet.add(r.address.trim());
+    });
+    return Array.from(citySet).sort();
+  }, [rentals]);
+
   const filteredRentals = useMemo(() => {
     if (!rentals) return [];
     return rentals.filter((rental) => {
@@ -41,9 +52,11 @@ const Ecommerce = () => {
         rental.short_description?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategories.length === 0 ||
         rental.categories?.some(c => selectedCategories.includes(c));
-      return matchesSearch && matchesCategory;
+      const matchesCity = selectedCities.length === 0 ||
+        (rental.address?.trim() && selectedCities.includes(rental.address.trim()));
+      return matchesSearch && matchesCategory && matchesCity;
     });
-  }, [rentals, searchTerm, selectedCategories]);
+  }, [rentals, searchTerm, selectedCategories, selectedCities]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -57,7 +70,15 @@ const Ecommerce = () => {
     );
   };
 
-  const activeFilterCount = selectedCategories.length;
+  const toggleCity = (city: string) => {
+    setSelectedCities(prev =>
+      prev.includes(city)
+        ? prev.filter(c => c !== city)
+        : [...prev, city]
+    );
+  };
+
+  const activeFilterCount = selectedCategories.length + selectedCities.length;
 
   const formatPrice = (rental: any) => {
     if (rental.price_value != null) {
@@ -90,7 +111,7 @@ const Ecommerce = () => {
         </div>
         {activeFilterCount > 0 && (
           <button
-            onClick={() => setSelectedCategories([])}
+            onClick={() => { setSelectedCategories([]); setSelectedCities([]); }}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             Clear all
@@ -117,6 +138,33 @@ const Ecommerce = () => {
                 />
                 <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                   {category}
+                </span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+      <Separator />
+      {/* City Filter */}
+      <div className="py-3">
+        <button
+          onClick={() => toggleSection("city")}
+          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-2"
+        >
+          <span>City</span>
+          {expandedSections.city ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </button>
+        {expandedSections.city && cities.length > 0 && (
+          <div className="space-y-2.5 pt-2 pl-1">
+            {cities.map((city) => (
+              <label key={city} className="flex items-center gap-3 cursor-pointer group">
+                <Checkbox
+                  checked={selectedCities.includes(city)}
+                  onCheckedChange={() => toggleCity(city)}
+                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                />
+                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                  {city}
                 </span>
               </label>
             ))}

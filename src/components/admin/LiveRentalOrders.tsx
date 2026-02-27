@@ -95,33 +95,21 @@ const LiveRentalOrders = () => {
     queryFn: async () => {
       if (!selectedOrder) return [];
 
-      // Get only vendor user IDs (exclude admin roles)
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "vendor");
-      if (!roles || roles.length === 0) return [];
-
-      // Exclude users who also have admin role
-      const { data: adminRoles } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "admin");
-      const adminUserIds = new Set((adminRoles || []).map((r) => r.user_id));
-      const vendorIds = roles.map((r) => r.user_id).filter(id => !adminUserIds.has(id));
-      if (vendorIds.length === 0) return [];
-
-      // Get vendor profiles
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("*")
-        .in("user_id", vendorIds);
-
-      // Get all available vendor inventory
+      // Get ALL vendor inventory (don't filter by vendor role — show anyone with inventory)
       const { data: inventory } = await supabase
         .from("vendor_inventory")
         .select("*")
         .eq("is_available", true);
+
+      // Get unique vendor IDs from inventory
+      const inventoryVendorIds = [...new Set((inventory || []).map(i => i.vendor_id))];
+      if (inventoryVendorIds.length === 0) return [];
+
+      // Get profiles for all vendors who have inventory
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("*")
+        .in("user_id", inventoryVendorIds);
 
       // Also fetch admin's in-house rentals catalog
       const { data: adminRentals } = await supabase
@@ -134,7 +122,6 @@ const LiveRentalOrders = () => {
         const s = source.toLowerCase();
         const t = target.toLowerCase();
         if (s.includes(t) || t.includes(s)) return true;
-        // Check if any word in source fuzzy-matches any word in target
         const sWords = s.split(/[\s,\-–()/]+/).filter(w => w.length >= 2);
         const tWords = t.split(/[\s,\-–()/]+/).filter(w => w.length >= 2);
         for (const sw of sWords) {
@@ -159,53 +146,56 @@ const LiveRentalOrders = () => {
         return matrix[b.length][a.length];
       };
 
-      // Smart keyword extraction from order title + category
+      // Extract item-name keywords ONLY from title (strip numbers, common words like "rental", city names)
       const orderTitle = (selectedOrder.title || "").toLowerCase();
-      const orderCategory = (selectedOrder.equipment_category || "").toLowerCase();
-      const orderDetails = (selectedOrder.equipment_details || "").toLowerCase();
+      const orderLocation = (selectedOrder.location || "").toLowerCase();
       
-      const stopWords = new Set(["the", "a", "an", "for", "and", "or", "of", "in", "to", "with", "is", "at", "on", "by", "-", "–", ""]);
+      const stopWords = new Set([
+        "the", "a", "an", "for", "and", "or", "of", "in", "to", "with", "is", "at", "on", "by",
+        "rental", "rentals", "order", "orders", "units", "unit", "nos", "set", "sets", "pcs",
+        "-", "–", "", "x", "day", "days", "event", "per",
+      ]);
+
+      // Also treat location words as stop words so they don't pollute item matching
+      const locationWords = orderLocation.split(/[\s,\-–()/]+/).map(w => w.trim().toLowerCase()).filter(w => w.length >= 2);
+      locationWords.forEach(w => stopWords.add(w));
+
       const extractKeywords = (text: string) =>
         text.split(/[\s,\-–()/]+/)
-          .map(w => w.trim().toLowerCase())
+          .map(w => w.trim().toLowerCase().replace(/[^a-z]/g, ''))
           .filter(w => w.length >= 2 && !stopWords.has(w));
 
       const titleKeywords = extractKeywords(orderTitle);
-      const detailKeywords = extractKeywords(orderDetails);
-      const allKeywords = [...new Set([...titleKeywords, ...detailKeywords])];
+      // Remove pure numbers
+      const allKeywords = [...new Set(titleKeywords.filter(w => !/^\d+$/.test(w)))];
 
-      // Filter vendors with fuzzy matching
+      // Filter vendors with fuzzy matching on item name only
       const results = (profiles || []).map((profile: any) => {
         const vendorItems = (inventory || []).filter(
           (i) => i.vendor_id === profile.user_id
         );
 
-        // Fuzzy match: item name fuzzy-matches keywords from order
+        // Fuzzy match: item name fuzzy-matches keywords from order title
         const matchingItems = vendorItems.filter((item) => {
           const itemName = (item.name || "").toLowerCase();
-          const itemCategory = (item.category || "").toLowerCase();
-          const itemDesc = (item.description || "").toLowerCase();
           const itemKeywords = (item.search_keywords || "").toLowerCase();
 
-          if (orderCategory !== "general" && itemCategory === orderCategory) return true;
-
           return allKeywords.some(kw =>
-            fuzzyMatch(itemName, kw) || fuzzyMatch(itemDesc, kw) || fuzzyMatch(itemKeywords, kw)
+            fuzzyMatch(itemName, kw) || fuzzyMatch(itemKeywords, kw)
           );
         });
 
         // Also find matching admin rentals
         const matchingAdminRentals = (adminRentals || []).filter((rental: any) => {
           const rentalName = (rental.title || "").toLowerCase();
-          const rentalDesc = (rental.description || "").toLowerCase();
           const rentalKeywords = (rental.search_keywords || "").toLowerCase();
           return allKeywords.some(kw =>
-            fuzzyMatch(rentalName, kw) || fuzzyMatch(rentalDesc, kw) || fuzzyMatch(rentalKeywords, kw)
+            fuzzyMatch(rentalName, kw) || fuzzyMatch(rentalKeywords, kw)
           );
         });
 
         // Fuzzy city/location matching
-        const orderLoc = (selectedOrder.location || "").toLowerCase();
+        const orderLoc = orderLocation;
         const cityMatch = !orderLoc ||
           fuzzyMatch(profile.city || "", orderLoc);
         const addressMatch = !orderLoc ||
@@ -223,11 +213,12 @@ const LiveRentalOrders = () => {
         };
       });
 
-      // Sort: matching items + city first
+      // Sort: matching items + city first, then by total items
       return results.sort((a: any, b: any) => {
         const scoreA = (a.hasMatchingItems ? 2 : 0) + (a.cityMatch ? 1 : 0);
         const scoreB = (b.hasMatchingItems ? 2 : 0) + (b.cityMatch ? 1 : 0);
-        return scoreB - scoreA;
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return b.totalItems - a.totalItems;
       });
     },
     enabled: isSendOpen && !!selectedOrder,

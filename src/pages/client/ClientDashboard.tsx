@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -71,10 +71,12 @@ const ClientDashboard = () => {
     </header>
   );
 
+  const userName = useMemo(() => user?.user_metadata?.full_name || user?.email || "", [user?.user_metadata?.full_name, user?.email]);
+
   const renderContent = () => {
     switch (activeTab) {
       case "ai":
-        return <DashboardChatbot role="client" userName={user?.user_metadata?.full_name || user?.email || ""} />;
+        return null; // Rendered persistently below
       case "tracker":
         return <EventTracker />;
       case "request":
@@ -108,7 +110,10 @@ const ClientDashboard = () => {
       onTabChange={setActiveTab}
       headerContent={headerContent}
     >
-      {renderContent()}
+      <div className={activeTab === "ai" ? "h-full" : "hidden"}>
+        <DashboardChatbot role="client" userName={userName} />
+      </div>
+      {activeTab !== "ai" && renderContent()}
     </DashboardShell>
   );
 };

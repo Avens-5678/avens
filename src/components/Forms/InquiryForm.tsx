@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,6 +14,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { SuccessAnimation } from "@/components/ui/success-animation";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CalendarIcon, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -43,6 +45,8 @@ const InquiryForm = ({
 }: InquiryFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const {
     toast
   } = useToast();
@@ -59,6 +63,17 @@ const InquiryForm = ({
     }
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Gate: require authentication
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in or sign up to submit this form.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
     setIsLoading(true);
     
     try {

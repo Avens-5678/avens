@@ -173,9 +173,9 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
   // ─── Welcome Home Screen ───
   if (!showChat && messages.length === 0) {
     return (
-      <div className="flex flex-col h-full min-h-[70vh] max-h-[calc(100vh-120px)]">
+      <div className="flex flex-col h-full min-h-[70vh] lg:min-h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 lg:pt-14 pb-4">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -264,8 +264,8 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
         </div>
 
         {/* Input Bar */}
-        <div className="px-4 pb-4 pt-2">
-          <div className="max-w-2xl mx-auto">{InputBar}</div>
+        <div className="px-4 lg:px-8 pb-4 pt-2">
+          <div className="max-w-3xl mx-auto">{InputBar}</div>
         </div>
       </div>
     );
@@ -273,7 +273,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
 
   // ─── Chat View ───
   return (
-    <div className="flex flex-col h-full min-h-[70vh] max-h-[calc(100vh-120px)]">
+    <div className="flex flex-col h-full min-h-[70vh] lg:min-h-[calc(100vh-120px)] max-h-[calc(100vh-120px)] bg-gradient-to-br from-primary/5 via-background to-accent/5">
       {/* Chat header */}
       <div className="flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-border/30">
         <button
@@ -291,8 +291,8 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
-        <div className="max-w-2xl mx-auto space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
+        <div className="max-w-3xl mx-auto space-y-4">
           <AnimatePresence>
             {messages.map((msg, i) => (
               <motion.div
@@ -347,8 +347,8 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
       </div>
 
       {/* Input */}
-      <div className="border-t border-border/30 px-4 sm:px-6 py-3">
-        <div className="max-w-2xl mx-auto">{InputBar}</div>
+      <div className="border-t border-border/30 px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-3xl mx-auto">{InputBar}</div>
       </div>
     </div>
   );

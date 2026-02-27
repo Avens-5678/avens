@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -72,10 +72,12 @@ const VendorDashboard = () => {
     </header>
   );
 
+  const userName = useMemo(() => user?.user_metadata?.full_name || user?.email || "", [user?.user_metadata?.full_name, user?.email]);
+
   const renderContent = () => {
     switch (activeTab) {
       case "ai":
-        return <DashboardChatbot role="vendor" userName={user?.user_metadata?.full_name || user?.email || ""} />;
+        return null; // Rendered persistently below
       case "jobs":
         return <JobBoard />;
       case "inventory":
@@ -96,7 +98,11 @@ const VendorDashboard = () => {
       onTabChange={setActiveTab}
       headerContent={headerContent}
     >
-      {renderContent()}
+      {/* Keep chatbot always mounted, toggle visibility */}
+      <div className={activeTab === "ai" ? "h-full" : "hidden"}>
+        <DashboardChatbot role="vendor" userName={userName} />
+      </div>
+      {activeTab !== "ai" && renderContent()}
     </DashboardShell>
   );
 };

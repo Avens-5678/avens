@@ -4,7 +4,6 @@ import Footer from "./Footer";
 
 // Lazy load non-critical UI elements
 const AudioControls = lazy(() => import("@/components/Audio/AudioControls"));
-const WhatsAppBot = lazy(() => import("@/components/ui/whatsapp-bot"));
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,7 +17,6 @@ const Layout = ({ children }: LayoutProps) => {
       <Footer />
       <Suspense fallback={null}>
         <AudioControls />
-        <WhatsAppBot />
       </Suspense>
     </div>
   );

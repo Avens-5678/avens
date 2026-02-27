@@ -267,7 +267,7 @@ const LiveRentalOrders = () => {
     setSelectedVendors(new Set());
     setExpandedVendors(new Set());
     setVendorSearch("");
-    setCityFilter(order.location || "");
+    setCityFilter("");
     setLocalityFilter("");
     setIsSendOpen(true);
   };
@@ -315,9 +315,12 @@ const LiveRentalOrders = () => {
       if (!textMatch) return false;
     }
 
-    // City filter
+    // City filter - bidirectional and word-level matching
     if (cityFilter && cityFilter !== "all") {
-      const cityMatch = (v.city || "").toLowerCase().includes(cityFilter.toLowerCase());
+      const cf = cityFilter.toLowerCase();
+      const vc = (v.city || "").toLowerCase();
+      const cityMatch = vc.includes(cf) || cf.includes(vc) ||
+        cf.split(/[\s,]+/).some(w => w.length >= 2 && vc.includes(w));
       if (!cityMatch) return false;
     }
 

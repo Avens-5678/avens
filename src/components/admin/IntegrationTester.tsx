@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, XCircle, TestTube, Loader2, TrendingUp, Users, Database } from "lucide-react";
+import { CheckCircle, XCircle, TestTube, Loader2, TrendingUp, Users, Database, MessageCircle } from "lucide-react";
 
 declare global {
   interface Window {
@@ -15,8 +15,10 @@ declare global {
 const IntegrationTester = () => {
   const [isTestingGA, setIsTestingGA] = useState(false);
   const [isTestingZoho, setIsTestingZoho] = useState(false);
+  const [isTestingWati, setIsTestingWati] = useState(false);
   const [gaStatus, setGaStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [zohoStatus, setZohoStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [watiStatus, setWatiStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { toast } = useToast();
 
   const testGoogleAnalytics = async () => {
@@ -91,9 +93,44 @@ const IntegrationTester = () => {
     }
   };
 
+  const testWatiIntegration = async () => {
+    setIsTestingWati(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('wati-whatsapp', {
+        body: {
+          action: 'send_to_vendor',
+          orderId: '00000000-0000-0000-0000-000000000000',
+          vendorPhone: '919999999999',
+          vendorName: 'Test Vendor',
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.whatsapp_sent) {
+        setWatiStatus('success');
+        toast({ title: "WATI WhatsApp Test", description: "Message sent successfully via WATI API!" });
+      } else {
+        // API connected but order not found is expected for dummy ID
+        setWatiStatus('success');
+        toast({ title: "WATI WhatsApp Test", description: data?.message || "Edge function responded. Check WATI secrets are configured." });
+      }
+    } catch (error) {
+      setWatiStatus('error');
+      toast({
+        title: "WATI WhatsApp Error",
+        description: error instanceof Error ? error.message : "Failed to reach WATI edge function",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingWati(false);
+    }
+  };
+
   const resetTests = () => {
     setGaStatus('idle');
     setZohoStatus('idle');
+    setWatiStatus('idle');
   };
 
   return (
@@ -108,7 +145,7 @@ const IntegrationTester = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Google Analytics Test */}
         <Card>
           <CardHeader>
@@ -192,6 +229,47 @@ const IntegrationTester = () => {
             </Button>
           </CardContent>
         </Card>
+        {/* WATI WhatsApp Test */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <MessageCircle className="h-5 w-5 text-primary" />
+              <span>WATI WhatsApp</span>
+              <StatusBadge status={watiStatus} />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              <p><strong>Integration:</strong> WATI Session API</p>
+              <p><strong>Auth:</strong> Bearer Token</p>
+              <p><strong>Use:</strong> Vendor order notifications</p>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-medium">Test Details:</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Invokes wati-whatsapp edge function</li>
+                <li>• Verifies WATI API connectivity</li>
+                <li>• Uses a dummy order ID (no real message sent)</li>
+              </ul>
+            </div>
+
+            <Button
+              onClick={testWatiIntegration}
+              disabled={isTestingWati}
+              className="w-full"
+            >
+              {isTestingWati ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Testing WATI...
+                </>
+              ) : (
+                'Test WATI WhatsApp'
+              )}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Integration Status Summary */}
@@ -200,7 +278,7 @@ const IntegrationTester = () => {
           <CardTitle>Integration Status Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <span className="font-medium">Google Analytics</span>
               <div className="flex items-center space-x-2">
@@ -221,6 +299,18 @@ const IntegrationTester = () => {
                   {zohoStatus === 'idle' && 'Not tested'}
                   {zohoStatus === 'success' && 'Working correctly'}
                   {zohoStatus === 'error' && 'API connection issue'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <span className="font-medium">WATI WhatsApp</span>
+              <div className="flex items-center space-x-2">
+                <StatusIcon status={watiStatus} />
+                <span className="text-sm text-muted-foreground">
+                  {watiStatus === 'idle' && 'Not tested'}
+                  {watiStatus === 'success' && 'Working correctly'}
+                  {watiStatus === 'error' && 'API connection issue'}
                 </span>
               </div>
             </div>

@@ -230,16 +230,16 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 pb-4 md:pb-0">
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 pb-4 md:pb-0">
               {homeServices.map((service) =>
             <GlassmorphismCard
               key={service.id}
-              className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 min-w-[75vw] sm:min-w-[55vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+              className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 min-w-[70vw] max-w-[320px] sm:min-w-[55vw] md:min-w-0 md:max-w-none snap-center flex-shrink-0 md:flex-shrink"
               variant="subtle">
 
-                  <div className="space-y-3 md:space-y-4">
+                  <div className="space-y-2.5 md:space-y-4">
                     {service.image_url &&
-                <div className="relative overflow-hidden rounded-lg aspect-[4/3] md:aspect-video">
+                <div className="relative overflow-hidden rounded-lg aspect-[16/9] md:aspect-video">
                         <OptimizedImage
                     src={service.image_url}
                     alt={service.title}
@@ -321,15 +321,15 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 pb-4 md:pb-0">
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 pb-4 md:pb-0">
               {homeRentals.slice(0, 6).map((rental) =>
             <GlassmorphismCard
               key={rental.id}
-              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[75vw] sm:min-w-[55vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
+              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[70vw] max-w-[320px] sm:min-w-[55vw] md:min-w-0 md:max-w-none snap-center flex-shrink-0 md:flex-shrink">
 
                   <div className="relative">
                     {rental.image_url ?
-                <div className="aspect-[4/3] md:aspect-video relative overflow-hidden">
+                <div className="aspect-[16/9] md:aspect-video relative overflow-hidden">
                         <OptimizedImage
                     src={rental.image_url}
                     alt={rental.title}
@@ -338,7 +338,7 @@ const Index = () => {
 
                       </div> :
 
-                <div className="aspect-[4/3] md:aspect-video bg-muted flex items-center justify-center">
+                <div className="aspect-[16/9] md:aspect-video bg-muted flex items-center justify-center">
                         <Award className="h-12 w-12 text-muted-foreground" />
                       </div>
                 }

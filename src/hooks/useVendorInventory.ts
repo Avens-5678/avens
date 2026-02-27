@@ -8,9 +8,17 @@ export interface VendorInventoryItem {
   vendor_id: string;
   name: string;
   description: string | null;
+  short_description: string | null;
   quantity: number;
   price_per_day: number | null;
+  price_value: number | null;
+  pricing_unit: string | null;
+  has_variants: boolean | null;
   image_url: string | null;
+  image_urls: string[] | null;
+  categories: string[] | null;
+  search_keywords: string | null;
+  display_order: number | null;
   is_available: boolean;
   address: string | null;
   created_at: string;
@@ -20,9 +28,17 @@ export interface VendorInventoryItem {
 export interface VendorInventoryInsert {
   name: string;
   description?: string;
+  short_description?: string;
   quantity?: number;
   price_per_day?: number;
+  price_value?: number;
+  pricing_unit?: string;
+  has_variants?: boolean;
   image_url?: string;
+  image_urls?: string[];
+  categories?: string[];
+  search_keywords?: string;
+  display_order?: number;
   is_available?: boolean;
   address?: string;
 }
@@ -185,6 +201,86 @@ export const useToggleAvailability = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendor_inventory"] });
+    },
+  });
+};
+
+// Vendor inventory variants hooks
+export interface VendorInventoryVariant {
+  id: string;
+  inventory_item_id: string;
+  attribute_type: string;
+  attribute_value: string;
+  price_value: number | null;
+  pricing_unit: string | null;
+  stock_quantity: number | null;
+  image_url: string | null;
+  image_urls: string[] | null;
+  display_order: number | null;
+  is_active: boolean | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const useVendorInventoryVariants = (itemId?: string) => {
+  return useQuery({
+    queryKey: ["vendor_inventory_variants", itemId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vendor_inventory_variants" as any)
+        .select("*")
+        .eq("inventory_item_id", itemId!)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      return (data as any[]) as VendorInventoryVariant[];
+    },
+    enabled: !!itemId,
+  });
+};
+
+export const useSaveVendorVariants = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({
+      itemId,
+      variants,
+    }: {
+      itemId: string;
+      variants: Partial<VendorInventoryVariant>[];
+    }) => {
+      // Delete existing variants
+      await (supabase.from("vendor_inventory_variants" as any) as any).delete().eq("inventory_item_id", itemId);
+
+      if (variants.length === 0) return;
+
+      const rows = variants.map((v, i) => ({
+        inventory_item_id: itemId,
+        attribute_type: v.attribute_type || "Size",
+        attribute_value: v.attribute_value || "",
+        price_value: v.price_value ?? null,
+        pricing_unit: v.pricing_unit || "Per Day",
+        stock_quantity: v.stock_quantity ?? 1,
+        image_url: v.image_url || null,
+        image_urls: v.image_urls || [],
+        display_order: i,
+        is_active: v.is_active !== false,
+      }));
+
+      const { error } = await (supabase.from("vendor_inventory_variants" as any) as any).insert(rows);
+      if (error) throw error;
+    },
+    onSuccess: (_, { itemId }) => {
+      queryClient.invalidateQueries({ queryKey: ["vendor_inventory_variants", itemId] });
+      queryClient.invalidateQueries({ queryKey: ["vendor_inventory_variants"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error saving variants",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 };

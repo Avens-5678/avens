@@ -38,18 +38,6 @@ async function getAccessToken(): Promise<string> {
   return data.access_token;
 }
 
-function mapLeadSource(requestType: string): string {
-  const mapping: Record<string, string> = {
-    'event_request': 'Event Booking',
-    'rental_order': 'Rental Request',
-    'inquiry': 'Event Booking',
-    'contact': 'Contact Form',
-    'rental': 'Rental Request',
-    'general': 'General Inquiry',
-  };
-  return mapping[requestType] || 'Website';
-}
-
 serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -74,91 +62,63 @@ serve(async (req: Request): Promise<Response> => {
 
     const accessToken = await getAccessToken();
 
-    let leadData: Record<string, unknown> = {};
+    // Event requests sync to Zoho CRM Form_Submissions custom module
+    const recordData: Record<string, unknown> = {};
 
     if (requestType === 'event_request') {
-      // Event request from client
       const clientName = data.client_name || 'Unknown';
-      const nameParts = clientName.trim().split(' ');
-      leadData = {
-        First_Name: nameParts[0],
-        Last_Name: nameParts.slice(1).join(' ') || '-',
-        Email: data.client_email || '',
-        Phone: data.client_phone || '',
-        Lead_Source: mapLeadSource(requestType),
-        Description: data.requirements || '',
-        City: data.location || '',
-        Event_Type: data.event_type || '',
-      };
-      if (data.event_date) leadData.Event_Date = data.event_date;
-      if (data.budget) leadData.Budget = data.budget;
-      if (data.guest_count) leadData.No_of_Employees = data.guest_count;
-
-    } else if (requestType === 'rental_order') {
-      // Rental order from admin
-      const clientName = data.client_name || 'Unknown';
-      const nameParts = clientName.trim().split(' ');
-      leadData = {
-        First_Name: nameParts[0],
-        Last_Name: nameParts.slice(1).join(' ') || '-',
-        Email: data.client_email || '',
-        Phone: data.client_phone || '',
-        Lead_Source: mapLeadSource(requestType),
-        Description: `Equipment: ${data.title || ''}\nCategory: ${data.equipment_category || ''}\nDetails: ${data.equipment_details || ''}\nNotes: ${data.notes || ''}`,
-        City: data.location || '',
-        Rental_Items: data.title || '',
-      };
-      if (data.event_date) leadData.Event_Date = data.event_date;
-      if (data.budget) leadData.Budget = data.budget;
-
-    } else if (requestType === 'rental_order_update') {
-      // Rental order status update
-      const clientName = data.client_name || 'Unknown';
-      const nameParts = clientName.trim().split(' ');
-      leadData = {
-        First_Name: nameParts[0],
-        Last_Name: nameParts.slice(1).join(' ') || '-',
-        Email: data.client_email || '',
-        Phone: data.client_phone || '',
-        Lead_Source: 'Rental Update',
-        Description: `Status: ${data.status || ''}\nEquipment: ${data.title || ''}\nCategory: ${data.equipment_category || ''}\nDetails: ${data.equipment_details || ''}\nVendor Response: ${data.vendor_response || ''}\nNotes: ${data.notes || ''}`,
-        City: data.location || '',
-        Rental_Items: data.title || '',
-      };
-      if (data.event_date) leadData.Event_Date = data.event_date;
+      recordData.Name = clientName;
+      recordData.Email = data.client_email || '';
+      recordData.Phone = data.client_phone || '';
+      recordData.Form_Type = 'Event Request';
+      recordData.Message = data.requirements || '';
+      recordData.City = data.location || '';
+      recordData.Event_Type = data.event_type || '';
+      if (data.event_date) recordData.Event_Date = data.event_date;
+      if (data.budget) recordData.Budget = data.budget;
+      if (data.guest_count) recordData.Guest_Count = data.guest_count;
     }
 
-    const zohoResponse = await fetch('https://www.zohoapis.in/crm/v2/Leads', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Zoho-oauthtoken ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ data: [leadData] }),
-    });
+    // Only event requests go to Form_Submissions module
+    if (requestType === 'event_request') {
+      const zohoResponse = await fetch('https://www.zohoapis.in/crm/v2/Form_Submissions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Zoho-oauthtoken ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: [recordData] }),
+      });
 
-    let zohoResult;
-    try {
-      zohoResult = await zohoResponse.json();
-    } catch {
-      zohoResult = { data: [{ status: 'error' }] };
+      let zohoResult;
+      try {
+        zohoResult = await zohoResponse.json();
+      } catch {
+        zohoResult = { data: [{ status: 'error' }] };
+      }
+
+      const isSuccess = zohoResult?.data?.[0]?.status === 'success';
+      const zohoRecordId = zohoResult?.data?.[0]?.details?.id || null;
+
+      if (isSuccess) {
+        console.log('Successfully created Zoho CRM Form_Submissions record:', zohoRecordId);
+      } else {
+        console.error('Zoho CRM API error:', JSON.stringify(zohoResult));
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: isSuccess,
+          zohoRecordId,
+          message: isSuccess ? 'Request synced to Zoho CRM Form_Submissions' : 'CRM sync failed',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const isSuccess = zohoResult?.data?.[0]?.status === 'success';
-    const zohoLeadId = zohoResult?.data?.[0]?.details?.id || null;
-
-    if (isSuccess) {
-      console.log('Successfully created Zoho CRM lead from request:', zohoLeadId);
-    } else {
-      console.error('Zoho CRM API error:', JSON.stringify(zohoResult));
-    }
-
+    // Rental orders and updates are no longer handled here - they go to Products via zoho-crm-inventory
     return new Response(
-      JSON.stringify({
-        success: isSuccess,
-        zohoLeadId,
-        message: isSuccess ? 'Request synced to Zoho CRM' : 'CRM sync failed',
-      }),
+      JSON.stringify({ success: true, message: 'Request type not handled by this function' }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

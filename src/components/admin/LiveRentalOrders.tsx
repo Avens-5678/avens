@@ -135,8 +135,8 @@ const LiveRentalOrders = () => {
         const t = target.toLowerCase();
         if (s.includes(t) || t.includes(s)) return true;
         // Check if any word in source fuzzy-matches any word in target
-        const sWords = s.split(/[\s,\-–()/]+/).filter(w => w.length > 2);
-        const tWords = t.split(/[\s,\-–()/]+/).filter(w => w.length > 2);
+        const sWords = s.split(/[\s,\-–()/]+/).filter(w => w.length >= 2);
+        const tWords = t.split(/[\s,\-–()/]+/).filter(w => w.length >= 2);
         for (const sw of sWords) {
           for (const tw of tWords) {
             if (levenshteinDistance(sw, tw) <= Math.max(1, Math.floor(Math.min(sw.length, tw.length) / 3))) return true;
@@ -168,7 +168,7 @@ const LiveRentalOrders = () => {
       const extractKeywords = (text: string) =>
         text.split(/[\s,\-–()/]+/)
           .map(w => w.trim().toLowerCase())
-          .filter(w => w.length > 2 && !stopWords.has(w));
+          .filter(w => w.length >= 2 && !stopWords.has(w));
 
       const titleKeywords = extractKeywords(orderTitle);
       const detailKeywords = extractKeywords(orderDetails);

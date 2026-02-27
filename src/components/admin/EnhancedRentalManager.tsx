@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { cleanupRecordFiles } from "@/utils/storageUtils";
 import { useSaveVariants } from "@/hooks/useRentalVariants";
+import { syncRentalToZohoProducts } from "@/utils/zohoSync";
 
 interface EnhancedRentalManagerProps {
   rentals: any[];
@@ -254,6 +255,8 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
       }
 
       toast({ title: "Success", description: editingItem ? "Item updated" : "Item created" });
+      // Sync to Zoho CRM Products
+      syncRentalToZohoProducts(editingItem ? 'update' : 'create', { ...rentalData, id: rentalId });
       await queryClient.invalidateQueries({ queryKey: ['rentals'] });
       await queryClient.invalidateQueries({ queryKey: ['all-rentals'] });
       handleCancel();

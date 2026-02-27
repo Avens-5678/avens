@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
-import { syncRequestToZoho } from "@/utils/zohoSync";
+import { syncRentalOrderToZohoProducts } from "@/utils/zohoSync";
 
 export interface RentalOrder {
   id: string;
@@ -87,8 +87,8 @@ export const useCreateRentalOrder = () => {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["rental_orders"] });
       toast({ title: "Order Created", description: "Rental order has been created." });
-      // Sync to Zoho CRM
-      syncRequestToZoho('rental_order', result);
+      // Sync to Zoho CRM Products
+      syncRentalOrderToZohoProducts('create', result);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -115,8 +115,8 @@ export const useUpdateRentalOrder = () => {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["rental_orders"] });
       toast({ title: "Order Updated", description: "Rental order has been updated." });
-      // Sync to Zoho CRM
-      syncRequestToZoho('rental_order_update', result);
+      // Sync to Zoho CRM Products
+      syncRentalOrderToZohoProducts('update', result);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

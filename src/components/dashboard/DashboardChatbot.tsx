@@ -61,8 +61,13 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isStreaming) return;
     const userMsg: Msg = { role: "user", content: text.trim() };
-    const allMessages = [...messages, userMsg];
-    setMessages(allMessages);
+    
+    // Use functional updater to avoid stale closure over messages
+    let allMessages: Msg[] = [];
+    setMessages(prev => {
+      allMessages = [...prev, userMsg];
+      return allMessages;
+    });
     setInput("");
     setShowChat(true);
     setIsStreaming(true);
@@ -110,7 +115,6 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
           if (jsonStr === "[DONE]") break;
           try {
             const parsed = JSON.parse(jsonStr);
-            // Handle action markers from tool calls
             if (parsed.action) {
               const action = parsed.action;
               if (action.success) {
@@ -147,7 +151,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
     } finally {
       setIsStreaming(false);
     }
-  }, [messages, isStreaming, role]);
+  }, [isStreaming, role, toast]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

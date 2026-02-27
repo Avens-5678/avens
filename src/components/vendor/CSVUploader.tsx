@@ -18,7 +18,7 @@ interface ParsedRow {
   address: string;
 }
 
-const VALID_PRICING_UNITS = ["Per Hour", "Per Day", "Per Week", "Per Event", "Fixed Price"];
+const VALID_PRICING_UNITS = ["Per Hour", "Per Day", "Per Week", "Per Event", "Fixed Price", "Per Sq.Ft", "Per Sq.M"];
 
 const CSVUploader = () => {
   const [parsedRows, setParsedRows] = useState<ParsedRow[]>([]);
@@ -177,7 +177,7 @@ const CSVUploader = () => {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Template columns: name, short_description, description, quantity, price_value, pricing_unit (Per Hour/Per Day/Per Week/Per Event/Fixed Price), category, address, image_url
+          Template columns: name, short_description, description, quantity, price_value, pricing_unit (Per Hour/Per Day/Per Week/Per Event/Fixed Price/Per Sq.Ft/Per Sq.M), category, address, image_url
         </p>
 
         {errors.length > 0 && (

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
+import { syncRequestToZoho } from "@/utils/zohoSync";
 
 export interface EventRequest {
   id: string;
@@ -100,11 +101,17 @@ export const useCreateEventRequest = () => {
       if (error) throw error;
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["event_requests"] });
       toast({
         title: "Request Submitted",
         description: "Your event request has been submitted successfully.",
+      });
+      // Sync to Zoho CRM
+      syncRequestToZoho('event_request', {
+        ...result,
+        client_name: user?.email || '',
+        client_email: user?.email || '',
       });
     },
     onError: (error) => {

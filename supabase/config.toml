@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.dashboard-chat]
 verify_jwt = false
+
+[functions.zoho-crm-inventory]
+verify_jwt = false
+
+[functions.zoho-crm-requests]
+verify_jwt = false

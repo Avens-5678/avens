@@ -230,11 +230,11 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6 lg:gap-8 [&>*:nth-child(n+5)]:hidden sm:[&>*:nth-child(n+5)]:hidden lg:[&>*:nth-child(n+5)]:block">
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 pb-4 md:pb-0">
               {homeServices.map((service) =>
             <GlassmorphismCard
               key={service.id}
-              className="group p-6 hover:shadow-lg transition-shadow duration-300"
+              className="group p-6 hover:shadow-lg transition-shadow duration-300 min-w-[80vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
               variant="subtle">
 
                   <div className="space-y-4">
@@ -321,11 +321,11 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6 lg:gap-8 [&>*:nth-child(n+5)]:hidden sm:[&>*:nth-child(n+5)]:hidden lg:[&>*:nth-child(n+5)]:block">
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 pb-4 md:pb-0">
               {homeRentals.slice(0, 6).map((rental) =>
             <GlassmorphismCard
               key={rental.id}
-              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[80vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
 
                   <div className="relative">
                     {rental.image_url ?

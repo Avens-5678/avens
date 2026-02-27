@@ -1043,16 +1043,24 @@ export type Database = {
       vendor_inventory: {
         Row: {
           address: string | null
+          categories: string[] | null
           category: string | null
           created_at: string
           description: string | null
+          display_order: number | null
+          has_variants: boolean | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
           is_available: boolean
           is_verified: boolean | null
           name: string
           price_per_day: number | null
+          price_value: number | null
+          pricing_unit: string | null
           quantity: number
+          search_keywords: string | null
+          short_description: string | null
           updated_at: string
           vendor_id: string
           verified_at: string | null
@@ -1060,16 +1068,24 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          categories?: string[] | null
           category?: string | null
           created_at?: string
           description?: string | null
+          display_order?: number | null
+          has_variants?: boolean | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           is_available?: boolean
           is_verified?: boolean | null
           name: string
           price_per_day?: number | null
+          price_value?: number | null
+          pricing_unit?: string | null
           quantity?: number
+          search_keywords?: string | null
+          short_description?: string | null
           updated_at?: string
           vendor_id: string
           verified_at?: string | null
@@ -1077,22 +1093,86 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          categories?: string[] | null
           category?: string | null
           created_at?: string
           description?: string | null
+          display_order?: number | null
+          has_variants?: boolean | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           is_available?: boolean
           is_verified?: boolean | null
           name?: string
           price_per_day?: number | null
+          price_value?: number | null
+          pricing_unit?: string | null
           quantity?: number
+          search_keywords?: string | null
+          short_description?: string | null
           updated_at?: string
           vendor_id?: string
           verified_at?: string | null
           verified_by?: string | null
         }
         Relationships: []
+      }
+      vendor_inventory_variants: {
+        Row: {
+          attribute_type: string
+          attribute_value: string
+          created_at: string
+          display_order: number | null
+          id: string
+          image_url: string | null
+          image_urls: string[] | null
+          inventory_item_id: string
+          is_active: boolean | null
+          price_value: number | null
+          pricing_unit: string | null
+          stock_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          attribute_type?: string
+          attribute_value: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          image_urls?: string[] | null
+          inventory_item_id: string
+          is_active?: boolean | null
+          price_value?: number | null
+          pricing_unit?: string | null
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          attribute_type?: string
+          attribute_value?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          image_urls?: string[] | null
+          inventory_item_id?: string
+          is_active?: boolean | null
+          price_value?: number | null
+          pricing_unit?: string | null
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_inventory_variants_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

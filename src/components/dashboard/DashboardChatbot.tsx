@@ -45,6 +45,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const hasAnimated = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -208,9 +209,10 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 lg:pt-14 pb-4">
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={hasAnimated.current ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
+              onAnimationComplete={() => { hasAnimated.current = true; }}
             >
               {/* Top bar */}
               <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -230,7 +232,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
               {/* Robot + Greeting side by side on desktop */}
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-8">
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={hasAnimated.current ? false : { opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2, duration: 0.5 }}
                   className="shrink-0"
@@ -260,7 +262,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
                 {features.map((feat, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 12 }}
+                    initial={hasAnimated.current ? false : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 + i * 0.1 }}
                     className={`rounded-2xl bg-gradient-to-br ${feat.color} border border-border/30 p-5 cursor-default hover:border-primary/20 transition-colors`}
@@ -279,7 +281,7 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
                 {chips.map((chip, i) => (
                   <motion.button
                     key={i}
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={hasAnimated.current ? false : { opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.45 + i * 0.06 }}
                     onClick={() => sendMessage(chip.prompt)}

@@ -9,11 +9,16 @@ import { useToast } from "@/hooks/use-toast";
 interface ParsedRow {
   name: string;
   description: string;
+  short_description: string;
   quantity: number;
-  price_per_day: number;
+  price_value: number;
+  pricing_unit: string;
   category: string;
   image_url: string;
+  address: string;
 }
+
+const VALID_PRICING_UNITS = ["Per Hour", "Per Day", "Per Week", "Per Event", "Fixed Price"];
 
 const CSVUploader = () => {
   const [parsedRows, setParsedRows] = useState<ParsedRow[]>([]);
@@ -25,8 +30,8 @@ const CSVUploader = () => {
   const { toast } = useToast();
 
   const downloadTemplate = () => {
-    const headers = "name,description,quantity,price_per_day,category,image_url";
-    const sample = 'LED Stage Light,Professional 200W LED light,10,500,Lighting,https://example.com/light.jpg';
+    const headers = "name,short_description,description,quantity,price_value,pricing_unit,category,address,image_url";
+    const sample = '"LED Stage Light","Professional 200W LED","High-quality LED stage light for events",10,500,Per Day,Event Production Equipment,"Warehouse 5, HITEC City",https://example.com/light.jpg';
     const csv = `${headers}\n${sample}`;
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -44,7 +49,7 @@ const CSVUploader = () => {
       return;
     }
 
-    const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+    const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/"/g, ""));
     const requiredHeaders = ["name"];
     const missing = requiredHeaders.filter((h) => !headers.includes(h));
     if (missing.length) {
@@ -56,11 +61,16 @@ const CSVUploader = () => {
     const rowErrors: string[] = [];
 
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(",").map((v) => v.trim());
-      if (values.length < headers.length) {
-        rowErrors.push(`Row ${i}: not enough columns`);
-        continue;
+      // Basic CSV parsing that handles quoted fields
+      const values: string[] = [];
+      let current = "";
+      let inQuotes = false;
+      for (const char of lines[i]) {
+        if (char === '"') { inQuotes = !inQuotes; continue; }
+        if (char === ',' && !inQuotes) { values.push(current.trim()); current = ""; continue; }
+        current += char;
       }
+      values.push(current.trim());
 
       const row: any = {};
       headers.forEach((h, idx) => {
@@ -72,13 +82,18 @@ const CSVUploader = () => {
         continue;
       }
 
+      const pricingUnit = row.pricing_unit || "Per Day";
+
       rows.push({
         name: row.name,
+        short_description: row.short_description || "",
         description: row.description || "",
         quantity: parseInt(row.quantity) || 1,
-        price_per_day: parseFloat(row.price_per_day) || 0,
+        price_value: parseFloat(row.price_value) || parseFloat(row.price_per_day) || 0,
+        pricing_unit: VALID_PRICING_UNITS.includes(pricingUnit) ? pricingUnit : "Per Day",
         category: row.category || "General",
         image_url: row.image_url || "",
+        address: row.address || "",
       });
     }
 
@@ -106,9 +121,13 @@ const CSVUploader = () => {
         await createItem({
           name: row.name,
           description: row.description,
+          short_description: row.short_description || undefined,
           quantity: row.quantity,
-          price_per_day: row.price_per_day,
+          price_value: row.price_value || undefined,
+          pricing_unit: row.pricing_unit || undefined,
           image_url: row.image_url || undefined,
+          address: row.address || undefined,
+          categories: row.category ? [row.category] : [],
         });
         count++;
         setUploadedCount(count);
@@ -157,6 +176,10 @@ const CSVUploader = () => {
           />
         </div>
 
+        <p className="text-xs text-muted-foreground">
+          Template columns: name, short_description, description, quantity, price_value, pricing_unit (Per Hour/Per Day/Per Week/Per Event/Fixed Price), category, address, image_url
+        </p>
+
         {errors.length > 0 && (
           <div className="space-y-1">
             {errors.map((err, i) => (
@@ -192,7 +215,8 @@ const CSVUploader = () => {
                   <tr>
                     <th className="p-2 text-left">Name</th>
                     <th className="p-2 text-left">Qty</th>
-                    <th className="p-2 text-left">₹/day</th>
+                    <th className="p-2 text-left">Price</th>
+                    <th className="p-2 text-left">Unit</th>
                     <th className="p-2 text-left">Category</th>
                   </tr>
                 </thead>
@@ -201,7 +225,8 @@ const CSVUploader = () => {
                     <tr key={i} className="border-t">
                       <td className="p-2">{row.name}</td>
                       <td className="p-2">{row.quantity}</td>
-                      <td className="p-2">{row.price_per_day}</td>
+                      <td className="p-2">₹{row.price_value}</td>
+                      <td className="p-2 text-xs">{row.pricing_unit}</td>
                       <td className="p-2">
                         <Badge variant="secondary">{row.category}</Badge>
                       </td>

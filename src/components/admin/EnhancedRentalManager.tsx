@@ -28,7 +28,7 @@ const RENTAL_CATEGORIES = [
   "Branding & Décor"
 ];
 
-const PRICING_UNITS = ["Per Hour", "Per Day", "Per Week", "Per Event", "Fixed Price"];
+const PRICING_UNITS = ["Per Hour", "Per Day", "Per Week", "Per Event", "Fixed Price", "Per Sq.Ft", "Per Sq.M"];
 
 interface VariantRow {
   attribute_value: string;

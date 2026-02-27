@@ -1,14 +1,12 @@
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
-import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
 import { Package, ShoppingCart, Plus, Check, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square } from "lucide-react";
-import { useState, useMemo } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -17,7 +15,6 @@ const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
   const { items, addItem, isInCart } = useCart();
   const navigate = useNavigate();
-  const [selectedRental, setSelectedRental] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -27,7 +24,6 @@ const Ecommerce = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
 
-  // Extract unique categories from rentals
   const categories = useMemo(() => {
     if (!rentals) return [];
     const cats = new Set<string>();
@@ -35,7 +31,6 @@ const Ecommerce = () => {
     return Array.from(cats).sort();
   }, [rentals]);
 
-  // Filter rentals
   const filteredRentals = useMemo(() => {
     if (!rentals) return [];
     return rentals.filter((rental) => {
@@ -62,6 +57,14 @@ const Ecommerce = () => {
 
   const activeFilterCount = selectedCategories.length;
 
+  const formatPrice = (rental: any) => {
+    if (rental.price_value != null) {
+      return `₹${rental.price_value.toLocaleString()} / ${rental.pricing_unit || 'Per Day'}`;
+    }
+    if (rental.price_range) return `₹${rental.price_range}`;
+    return null;
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -74,7 +77,6 @@ const Ecommerce = () => {
 
   const SidebarContent = () => (
     <div className="space-y-1">
-      {/* Filter Header */}
       <div className="flex items-center justify-between pb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold text-foreground">Filters</h3>
@@ -93,29 +95,19 @@ const Ecommerce = () => {
           </button>
         )}
       </div>
-
       <Separator />
-
-      {/* Categories Section */}
       <div className="py-3">
         <button
           onClick={() => toggleSection("categories")}
           className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-2"
         >
           <span>Category</span>
-          {expandedSections.categories ? (
-            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          )}
+          {expandedSections.categories ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
         {expandedSections.categories && categories.length > 0 && (
           <div className="space-y-2.5 pt-2 pl-1">
             {categories.map((category) => (
-              <label
-                key={category}
-                className="flex items-center gap-3 cursor-pointer group"
-              >
+              <label key={category} className="flex items-center gap-3 cursor-pointer group">
                 <Checkbox
                   checked={selectedCategories.includes(category)}
                   onCheckedChange={() => toggleCategory(category)}
@@ -129,21 +121,14 @@ const Ecommerce = () => {
           </div>
         )}
       </div>
-
       <Separator />
-
-      {/* Price Section */}
       <div className="py-3">
         <button
           onClick={() => toggleSection("price")}
           className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-2"
         >
           <span>Price</span>
-          {expandedSections.price ? (
-            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          )}
+          {expandedSections.price ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
         {expandedSections.price && (
           <div className="space-y-2.5 pt-2 pl-1">
@@ -183,7 +168,6 @@ const Ecommerce = () => {
       <section className="border-b border-border bg-background sticky top-0 z-20">
         <div className="container mx-auto px-6 sm:px-8 lg:px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1">
-            {/* Mobile filter toggle */}
             <button
               onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
               className="lg:hidden flex items-center gap-2 text-sm font-medium text-foreground border border-border rounded-lg px-3 py-2 hover:bg-muted transition-colors"
@@ -195,8 +179,6 @@ const Ecommerce = () => {
                 </span>
               )}
             </button>
-
-            {/* Search */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -208,17 +190,11 @@ const Ecommerce = () => {
               />
             </div>
           </div>
-
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground hidden sm:inline">
               {filteredRentals.length} product{filteredRentals.length !== 1 ? "s" : ""}
             </span>
-            <Button
-              onClick={() => navigate("/cart")}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
+            <Button onClick={() => navigate("/cart")} variant="outline" size="sm" className="gap-2">
               <ShoppingCart className="h-4 w-4" />
               Cart ({items.length})
             </Button>
@@ -227,52 +203,31 @@ const Ecommerce = () => {
 
         {/* Mobile: Horizontal Category Scroll + View Toggle */}
         <div className="lg:hidden container mx-auto px-4 py-2 flex items-center gap-2">
-          {/* View toggle buttons */}
           <div className="flex items-center border border-border rounded-lg overflow-hidden flex-shrink-0">
-            <button
-              onClick={() => setMobileView("list")}
-              className={`p-2 transition-colors ${mobileView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
-              aria-label="List view"
-            >
+            <button onClick={() => setMobileView("list")} className={`p-2 transition-colors ${mobileView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`} aria-label="List view">
               <List className="h-4 w-4" />
             </button>
-            <button
-              onClick={() => setMobileView("two")}
-              className={`p-2 transition-colors ${mobileView === "two" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
-              aria-label="Two column view"
-            >
+            <button onClick={() => setMobileView("two")} className={`p-2 transition-colors ${mobileView === "two" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`} aria-label="Two column view">
               <Grid2X2 className="h-4 w-4" />
             </button>
-            <button
-              onClick={() => setMobileView("one")}
-              className={`p-2 transition-colors ${mobileView === "one" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
-              aria-label="Single column view"
-            >
+            <button onClick={() => setMobileView("one")} className={`p-2 transition-colors ${mobileView === "one" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`} aria-label="Single column view">
               <Square className="h-4 w-4" />
             </button>
           </div>
-
-          {/* Horizontal scrollable categories */}
           <div className="flex-1 overflow-x-auto scrollbar-hide">
             <div className="flex gap-2 pb-1">
               <button
                 onClick={() => setSelectedCategories([])}
                 className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                  selectedCategories.length === 0
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-border text-muted-foreground hover:bg-muted"
+                  selectedCategories.length === 0 ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"
                 }`}
               >
                 All
               </button>
               {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => toggleCategory(cat)}
+                <button key={cat} onClick={() => toggleCategory(cat)}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap ${
-                    selectedCategories.includes(cat)
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "border-border text-muted-foreground hover:bg-muted"
+                    selectedCategories.includes(cat) ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"
                   }`}
                 >
                   {cat}
@@ -283,18 +238,16 @@ const Ecommerce = () => {
         </div>
       </section>
 
-      {/* Main Content: Sidebar + Grid */}
+      {/* Main Content */}
       <section className="py-8 sm:py-10">
         <div className="container mx-auto px-6 sm:px-8 lg:px-4">
           <div className="flex gap-8">
-            {/* Desktop Sidebar */}
             <aside className="hidden lg:block w-60 flex-shrink-0">
               <div className="sticky top-20">
                 <SidebarContent />
               </div>
             </aside>
 
-            {/* Mobile Sidebar Overlay */}
             {mobileSidebarOpen && (
               <div className="fixed inset-0 z-50 lg:hidden">
                 <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarOpen(false)} />
@@ -310,7 +263,6 @@ const Ecommerce = () => {
               </div>
             )}
 
-            {/* Product Grid */}
             <div className="flex-1 min-w-0">
               {filteredRentals.length === 0 ? (
                 <div className="text-center py-20">
@@ -322,52 +274,37 @@ const Ecommerce = () => {
                 </div>
               ) : (
                 <div className={`grid gap-3 sm:gap-4 ${
-                  mobileView === "list" 
-                    ? "grid-cols-1" 
-                    : mobileView === "two" 
-                      ? "grid-cols-2" 
-                      : "grid-cols-1"
+                  mobileView === "list" ? "grid-cols-1"
+                    : mobileView === "two" ? "grid-cols-2"
+                    : "grid-cols-1"
                 } sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5`}>
                   {filteredRentals.map((rental) => (
                     <Card
                       key={rental.id}
-                      className={`group overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow duration-300 rounded-xl ${
+                      className={`group overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow duration-300 rounded-xl cursor-pointer ${
                         mobileView === "list" ? "flex flex-row sm:flex-col" : ""
                       }`}
+                      onClick={() => navigate(`/ecommerce/${rental.id}`)}
                     >
                       {/* Image */}
                       <div className={`overflow-hidden bg-muted relative ${
-                        mobileView === "list" 
-                          ? "w-28 h-28 flex-shrink-0 sm:w-full sm:h-auto sm:aspect-square" 
+                        mobileView === "list"
+                          ? "w-28 h-28 flex-shrink-0 sm:w-full sm:h-auto sm:aspect-square"
                           : "aspect-square"
                       }`}>
                         {rental.image_urls && rental.image_urls.length > 0 ? (
-                          <MultiImageCarousel
-                            images={rental.image_urls}
-                            title={rental.title}
-                            className="!aspect-square !rounded-none"
-                          />
+                          <MultiImageCarousel images={rental.image_urls} title={rental.title} className="!aspect-square !rounded-none" />
                         ) : rental.image_url ? (
-                          <img
-                            src={rental.image_url}
-                            alt={rental.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            loading="lazy"
-                          />
+                          <img src={rental.image_url} alt={rental.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <span className="text-muted-foreground text-sm">No Image</span>
                           </div>
                         )}
-
-                        {/* Category badges overlaid on image */}
                         {rental.categories && rental.categories.length > 0 && mobileView !== "list" && (
                           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
                             {rental.categories.slice(0, 2).map((cat) => (
-                              <Badge
-                                key={cat}
-                                className="bg-foreground text-background text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm"
-                              >
+                              <Badge key={cat} className="bg-foreground text-background text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
                                 {cat}
                               </Badge>
                             ))}
@@ -383,21 +320,27 @@ const Ecommerce = () => {
                         <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-2">
                           {rental.short_description}
                         </p>
-                        {rental.price_range && (
+                        {formatPrice(rental) && (
                           <p className="text-xs sm:text-sm font-semibold text-foreground">
-                            ₹{rental.price_range}
+                            {formatPrice(rental)}
                           </p>
                         )}
 
                         {/* Action Buttons */}
                         <div className="flex gap-1.5 pt-1.5">
                           <Button
-                            onClick={() => addItem({
-                              id: rental.id,
-                              title: rental.title,
-                              price_range: rental.price_range,
-                              image_url: rental.image_url
-                            })}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addItem({
+                                id: rental.id,
+                                title: rental.title,
+                                price_value: rental.price_value,
+                                pricing_unit: rental.pricing_unit,
+                                price_range: rental.price_range,
+                                image_url: rental.image_url,
+                                quantity: 1,
+                              });
+                            }}
                             variant={isInCart(rental.id) ? "secondary" : "outline"}
                             size="sm"
                             className="flex-1 text-[11px] h-8"
@@ -409,28 +352,6 @@ const Ecommerce = () => {
                               <><Plus className="mr-1 h-3 w-3" />Add</>
                             )}
                           </Button>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                className="bg-primary text-primary-foreground text-[11px] h-8"
-                                onClick={() => setSelectedRental(rental)}
-                              >
-                                <ShoppingCart className={`h-3 w-3 ${mobileView === "two" ? "" : "mr-1"}`} />
-                                <span className={mobileView === "two" ? "hidden" : ""}>Enquire</span>
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="w-[90vw] max-w-sm sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col p-0">
-                              <div className="overflow-y-auto flex-1 p-4 sm:p-6">
-                                <InquiryForm
-                                  formType="rental"
-                                  rentalId={selectedRental?.id}
-                                  rentalTitle={selectedRental?.title}
-                                  title="Equipment Inquiry"
-                                />
-                              </div>
-                            </DialogContent>
-                          </Dialog>
                         </div>
                       </CardContent>
                     </Card>
@@ -445,11 +366,7 @@ const Ecommerce = () => {
       {/* Floating Cart Button */}
       {items.length > 0 && (
         <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
-          <Button
-            onClick={() => navigate("/cart")}
-            size="lg"
-            className="rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl transition-all duration-300"
-          >
+          <Button onClick={() => navigate("/cart")} size="lg" className="rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl transition-all duration-300">
             <ShoppingCart className="mr-2 h-5 w-5" />
             Cart ({items.length})
           </Button>

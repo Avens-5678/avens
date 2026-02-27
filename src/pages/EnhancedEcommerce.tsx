@@ -62,8 +62,13 @@ const EnhancedEcommerce = () => {
   const handleAddToCart = (rental: any) => {
     const quantity = quantities[rental.id] || 1;
     addItem({
-      ...rental,
-      quantity
+      id: rental.id,
+      title: rental.title,
+      price_value: rental.price_value,
+      pricing_unit: rental.pricing_unit,
+      price_range: rental.price_range,
+      image_url: rental.image_url,
+      quantity,
     });
     toast({
       title: "Added to Cart",

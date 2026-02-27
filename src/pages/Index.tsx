@@ -234,12 +234,12 @@ const Index = () => {
               {homeServices.map((service) =>
             <GlassmorphismCard
               key={service.id}
-              className="group p-6 hover:shadow-lg transition-shadow duration-300 min-w-[80vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+              className="group p-4 md:p-6 hover:shadow-lg transition-shadow duration-300 min-w-[72vw] sm:min-w-[55vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
               variant="subtle">
 
                   <div className="space-y-4">
                     {service.image_url &&
-                <div className="relative overflow-hidden rounded-lg aspect-video">
+                <div className="relative overflow-hidden rounded-lg aspect-[16/10] md:aspect-video">
                         <OptimizedImage
                     src={service.image_url}
                     alt={service.title}
@@ -248,11 +248,11 @@ const Index = () => {
 
                       </div>
                 }
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+                    <div className="space-y-2 md:space-y-3">
+                      <h3 className="text-base md:text-xl font-bold group-hover:text-primary transition-colors line-clamp-1">
                         {service.title}
                       </h3>
-                      <p className="text-muted-foreground leading-relaxed">
+                      <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-none">
                         {service.short_description}
                       </p>
                       <Button variant="ghost" className="p-0 h-auto font-semibold" asChild>
@@ -325,11 +325,11 @@ const Index = () => {
               {homeRentals.slice(0, 6).map((rental) =>
             <GlassmorphismCard
               key={rental.id}
-              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[80vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
+              className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[72vw] sm:min-w-[55vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
 
                   <div className="relative">
                     {rental.image_url ?
-                <div className="aspect-video relative overflow-hidden">
+                <div className="aspect-[16/10] md:aspect-video relative overflow-hidden">
                         <OptimizedImage
                     src={rental.image_url}
                     alt={rental.title}
@@ -338,23 +338,23 @@ const Index = () => {
 
                       </div> :
 
-                <div className="aspect-video bg-muted flex items-center justify-center">
+                <div className="aspect-[16/10] md:aspect-video bg-muted flex items-center justify-center">
                         <Award className="h-12 w-12 text-muted-foreground" />
                       </div>
                 }
                   </div>
                   
-                  <div className="p-6 space-y-4">
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+                  <div className="p-4 md:p-6 space-y-3 md:space-y-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <h3 className="text-base md:text-xl font-bold group-hover:text-primary transition-colors line-clamp-1">
                         {rental.title}
                       </h3>
                       {rental.price_range &&
-                  <Badge variant="secondary" className="font-medium">
+                  <Badge variant="secondary" className="font-medium text-xs md:text-sm">
                           {rental.price_range}
                         </Badge>
                   }
-                      <p className="text-muted-foreground leading-relaxed">
+                      <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-none">
                         {rental.short_description}
                       </p>
                     </div>

@@ -16,6 +16,7 @@ import { GlassmorphismCard } from "@/components/ui/glassmorphism-card";
 import { StatsContainer, StatCard } from "@/components/ui/elegant-stats";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ServiceScrollContainer } from "@/components/ui/service-scroll-container";
 
 // Lazy load heavy/below-fold components
 const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));
@@ -230,7 +231,7 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 pb-4 md:pb-0">
+          <ServiceScrollContainer items={homeServices}>
               {homeServices.map((service) =>
             <GlassmorphismCard
               key={service.id}
@@ -264,7 +265,7 @@ const Index = () => {
                   </div>
                 </GlassmorphismCard>
             )}
-            </div>
+            </ServiceScrollContainer>
           }
         </div>
       </Section>
@@ -321,7 +322,7 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 pb-4 md:pb-0">
+          <ServiceScrollContainer items={homeRentals.slice(0, 6)}>
               {homeRentals.slice(0, 6).map((rental) =>
             <GlassmorphismCard
               key={rental.id}
@@ -378,7 +379,7 @@ const Index = () => {
                   </div>
                 </GlassmorphismCard>
             )}
-            </div>
+            </ServiceScrollContainer>
           }
 
           {homeRentals.length > 0 &&

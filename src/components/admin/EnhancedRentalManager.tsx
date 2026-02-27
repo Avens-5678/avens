@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Save, X, Upload, ImageIcon, Star } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Upload, ImageIcon, Star, Search, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { cleanupRecordFiles } from "@/utils/storageUtils";
@@ -33,8 +33,27 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const multipleFileInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredRentals = useMemo(() => {
+    if (!rentals) return [];
+    return rentals.filter((item) => {
+      const matchesSearch = !searchQuery || 
+        item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.short_description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.price_range?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = filterCategory === "all" || 
+        (item.categories && item.categories.includes(filterCategory));
+      const matchesStatus = filterStatus === "all" ||
+        (filterStatus === "active" && item.is_active) ||
+        (filterStatus === "inactive" && !item.is_active);
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [rentals, searchQuery, filterCategory, filterStatus]);
 
   const handleEdit = (item: any) => {
     setEditingItem(item);
@@ -300,6 +319,47 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
         </Button>
       </div>
 
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search rentals by title, description, or price..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {RENTAL_CATEGORIES.map((cat) => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-full sm:w-[140px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {searchQuery || filterCategory !== "all" || filterStatus !== "all" ? (
+        <p className="text-sm text-muted-foreground">
+          Showing {filteredRentals.length} of {rentals?.length || 0} items
+        </p>
+      ) : null}
+
       {/* Create/Edit Form Modal */}
       <Dialog open={isCreating || !!editingItem} onOpenChange={(open) => !open && handleCancel()}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -536,7 +596,7 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
 
       {/* Rental Items Grid */}
       <div className="grid gap-4">
-        {rentals && rentals.length > 0 ? rentals.map((item) => (
+        {filteredRentals && filteredRentals.length > 0 ? filteredRentals.map((item) => (
           <Card key={item.id}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
@@ -597,7 +657,11 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
           </Card>
         )) : (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No rental items found</p>
+            <p className="text-muted-foreground">
+              {searchQuery || filterCategory !== "all" || filterStatus !== "all" 
+                ? "No rental items match your filters" 
+                : "No rental items found"}
+            </p>
           </div>
         )}
       </div>

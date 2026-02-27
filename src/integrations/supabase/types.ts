@@ -734,6 +734,7 @@ export type Database = {
       }
       rentals: {
         Row: {
+          address: string | null
           categories: string[] | null
           created_at: string
           description: string
@@ -756,6 +757,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           categories?: string[] | null
           created_at?: string
           description: string
@@ -778,6 +780,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           categories?: string[] | null
           created_at?: string
           description?: string

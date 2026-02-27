@@ -2,12 +2,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useEventRequests, useUpdateEventStatus, EventRequest } from "@/hooks/useEventRequests";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Calendar, MapPin, Users, Briefcase, Bell, Package } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Calendar, MapPin, Users, Briefcase, Bell, Package, CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
+import { useState } from "react";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -20,6 +23,7 @@ const statusColors: Record<string, string> = {
   quoted: "bg-purple-500/10 text-purple-600 border-purple-500/20",
   accepted: "bg-green-500/10 text-green-600 border-green-500/20",
   confirmed: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  declined: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 const statusLabels: Record<string, string> = {
@@ -33,6 +37,7 @@ const statusLabels: Record<string, string> = {
   quoted: "Quoted",
   accepted: "Accepted",
   confirmed: "Confirmed",
+  declined: "Declined",
 };
 
 const generateGoogleCalendarUrl = (title: string, date: string | null, location: string | null) => {
@@ -55,8 +60,40 @@ const generateGoogleCalendarUrl = (title: string, date: string | null, location:
 
 const JobBoard = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: jobs, isLoading, error } = useEventRequests();
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateEventStatus();
+  const [respondingOrder, setRespondingOrder] = useState<string | null>(null);
+  const [declineNote, setDeclineNote] = useState("");
+
+  const respondToOrder = useMutation({
+    mutationFn: async ({ orderId, action, note }: { orderId: string; action: "accepted" | "declined"; note?: string }) => {
+      const { error } = await supabase
+        .from("rental_orders")
+        .update({
+          status: action,
+          vendor_response: note || (action === "accepted" ? "Accepted" : "Declined"),
+          vendor_responded_at: new Date().toISOString(),
+        })
+        .eq("id", orderId);
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["vendor_rental_orders"] });
+      toast({
+        title: variables.action === "accepted" ? "Order Accepted" : "Order Declined",
+        description: variables.action === "accepted"
+          ? "The Evnting team will be in touch to finalize details."
+          : "The order has been declined.",
+      });
+      setRespondingOrder(null);
+      setDeclineNote("");
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
 
   // Fetch rental orders assigned to this vendor
   const { data: rentalOrders, isLoading: rentalLoading } = useQuery({
@@ -191,6 +228,66 @@ const JobBoard = () => {
                 <div className="bg-muted/50 p-3 rounded-md">
                   <p className="text-sm font-medium mb-1">Equipment Details:</p>
                   <p className="text-sm text-muted-foreground">{order.equipment_details}</p>
+                </div>
+              )}
+
+              {/* Accept / Decline Controls */}
+              {order.status === "sent_to_vendors" && (
+                <div className="border-t pt-3 space-y-3">
+                  {respondingOrder === order.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={declineNote}
+                        onChange={(e) => setDeclineNote(e.target.value)}
+                        placeholder="Reason for declining (optional)..."
+                        className="text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          disabled={respondToOrder.isPending}
+                          onClick={() => respondToOrder.mutate({ orderId: order.id, action: "declined", note: declineNote })}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          {respondToOrder.isPending ? "Declining..." : "Confirm Decline"}
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setRespondingOrder(null); setDeclineNote(""); }}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        disabled={respondToOrder.isPending}
+                        onClick={() => respondToOrder.mutate({ orderId: order.id, action: "accepted" })}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setRespondingOrder(order.id)}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />Decline
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Show response if already responded */}
+              {(order.status === "accepted" || order.status === "declined") && (
+                <div className={`border-t pt-3 p-3 rounded-md text-sm ${order.status === "accepted" ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"}`}>
+                  <p className="font-medium flex items-center gap-1">
+                    {order.status === "accepted" ? <CheckCircle className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-red-600" />}
+                    {order.status === "accepted" ? "You accepted this order" : "You declined this order"}
+                  </p>
+                  {order.vendor_response && <p className="text-muted-foreground mt-1">{order.vendor_response}</p>}
                 </div>
               )}
             </CardContent>

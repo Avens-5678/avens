@@ -3,10 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useAllRentals } from "@/hooks/useData";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
+import { isMeasurableUnit } from "@/utils/pricingUtils";
 import { ShoppingCart, ArrowLeft, Check, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -203,14 +205,30 @@ const ProductDetail = () => {
                 </div>
               ))}
 
-              {/* Quantity */}
+              {/* Quantity — dynamic based on pricing unit */}
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Quantity</h3>
-                <div className="flex items-center gap-3">
-                  <Button variant="outline" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</Button>
-                  <span className="w-12 text-center font-semibold text-lg">{quantity}</span>
-                  <Button variant="outline" size="icon" onClick={() => setQuantity(q => q + 1)}>+</Button>
-                </div>
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                  {isMeasurableUnit(displayPrice && 'unit' in displayPrice ? displayPrice.unit : undefined)
+                    ? `Measurement (${displayPrice && 'unit' in displayPrice ? displayPrice.unit : ""})`
+                    : "Quantity"}
+                </h3>
+                {isMeasurableUnit(displayPrice && 'unit' in displayPrice ? displayPrice.unit : undefined) ? (
+                  <Input
+                    type="number"
+                    min={1}
+                    step="any"
+                    value={quantity}
+                    onChange={e => setQuantity(parseFloat(e.target.value) || 1)}
+                    placeholder="e.g. 500"
+                    className="max-w-[200px]"
+                  />
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</Button>
+                    <span className="w-12 text-center font-semibold text-lg">{quantity}</span>
+                    <Button variant="outline" size="icon" onClick={() => setQuantity(q => q + 1)}>+</Button>
+                  </div>
+                )}
               </div>
 
               {inCart ? (

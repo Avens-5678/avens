@@ -12,6 +12,7 @@ import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { isMeasurableUnit, calculateCartTotal } from "@/utils/pricingUtils";
 import { ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus, CalendarDays } from "lucide-react";
 
 const Cart = () => {
@@ -137,15 +138,32 @@ const Cart = () => {
                             <h3 className="font-semibold text-foreground text-sm sm:text-base line-clamp-2">{item.title}</h3>
                             {item.variant_label && <Badge variant="outline" className="mt-1 text-xs">{item.variant_label}</Badge>}
                             <p className="text-primary font-bold text-base sm:text-lg mt-1">{formatItemPrice(item)}</p>
-                            {/* Quantity controls */}
+                            {/* Quantity controls — dynamic based on pricing unit */}
                             <div className="flex items-center gap-2 mt-2">
-                              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity - 1, item.variant_id)}>
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                              <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
-                              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity + 1, item.variant_id)}>
-                                <Plus className="h-3 w-3" />
-                              </Button>
+                              {isMeasurableUnit(item.pricing_unit) ? (
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  step="any"
+                                  value={item.quantity}
+                                  onChange={e => updateQuantity(item.id, parseFloat(e.target.value) || 1, item.variant_id)}
+                                  className="h-7 w-24 text-sm"
+                                  placeholder="e.g. 500"
+                                />
+                              ) : (
+                                <>
+                                  <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity - 1, item.variant_id)}>
+                                    <Minus className="h-3 w-3" />
+                                  </Button>
+                                  <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
+                                  <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity + 1, item.variant_id)}>
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </>
+                              )}
+                              {isMeasurableUnit(item.pricing_unit) && (
+                                <span className="text-xs text-muted-foreground">{item.pricing_unit}</span>
+                              )}
                             </div>
                           </div>
                           <Button variant="ghost" size="sm" onClick={() => removeItem(item.id, item.variant_id)} className="text-muted-foreground hover:text-destructive flex-shrink-0">
@@ -224,14 +242,14 @@ const Cart = () => {
                 ) : (
                   <Card className="rounded-2xl sticky top-24">
                     <CardContent className="p-5 sm:p-6 space-y-5">
-                      <h3 className="text-lg font-bold text-foreground">Order Summary</h3>
+                       <h3 className="text-lg font-bold text-foreground">Order Summary</h3>
                       <Separator />
                       <div className="space-y-3">
                         {items.map((item) => (
                           <div key={`${item.id}-${item.variant_id || ''}`} className="flex justify-between items-start gap-3">
                             <div className="flex-1 min-w-0">
                               <span className="text-sm text-muted-foreground line-clamp-1">{item.title}</span>
-                              <span className="text-xs text-muted-foreground"> × {item.quantity}</span>
+                              <span className="text-xs text-muted-foreground"> × {item.quantity}{isMeasurableUnit(item.pricing_unit) ? ` ${item.pricing_unit}` : ""}</span>
                             </div>
                             <span className="text-sm font-medium text-foreground flex-shrink-0">
                               {item.price_value != null ? `₹${(item.price_value * item.quantity).toLocaleString()}` : "TBD"}
@@ -240,10 +258,26 @@ const Cart = () => {
                         ))}
                       </div>
                       <Separator />
-                      <div className="flex justify-between items-center">
-                        <span className="text-base font-bold text-foreground">Total Items</span>
-                        <Badge variant="secondary" className="text-sm font-bold">{items.reduce((s, i) => s + i.quantity, 0)}</Badge>
-                      </div>
+                      {(() => {
+                        const { calculatedTotal, hasQuoteItems } = calculateCartTotal(items);
+                        return (
+                          <>
+                            {calculatedTotal > 0 && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-base font-bold text-foreground">Estimated Total</span>
+                                <span className="text-lg font-bold text-primary">₹{calculatedTotal.toLocaleString()}</span>
+                              </div>
+                            )}
+                            {hasQuoteItems && (
+                              <p className="text-xs text-muted-foreground">* Some items require a quote. Final price will be confirmed by our team.</p>
+                            )}
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">Total Items</span>
+                              <Badge variant="secondary" className="text-sm font-bold">{items.reduce((s, i) => s + i.quantity, 0)}</Badge>
+                            </div>
+                          </>
+                        );
+                      })()}
                       <Button onClick={() => {
                         if (!user && !authLoading) {
                           toast({ title: "Please log in", description: "Sign in to send your enquiry.", variant: "destructive" });

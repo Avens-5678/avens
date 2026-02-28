@@ -43,6 +43,8 @@ import EventCenter from "@/components/admin/EventCenter";
 import UserManagement from "@/components/admin/UserManagement";
 import VendorInventoryAdmin from "@/components/admin/VendorInventoryAdmin";
 import LiveRentalOrders from "@/components/admin/LiveRentalOrders";
+import LiveServiceOrders from "@/components/admin/LiveServiceOrders";
+import QuoteMaker from "@/components/admin/QuoteMaker";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 
@@ -56,7 +58,9 @@ const sidebarItems: SidebarItem[] = [
   { icon: ClipboardList, label: "Event Center", value: "events-center" },
   { icon: UsersRound, label: "Users", value: "users" },
   { icon: ShieldCheck, label: "Vendors", value: "vendor-inventory" },
-  { icon: Truck, label: "Orders", value: "rental-orders" },
+  { icon: Truck, label: "Rental Orders", value: "rental-orders" },
+  { icon: Calendar, label: "Service Orders", value: "service-orders" },
+  { icon: ClipboardList, label: "Quote Maker", value: "quote-maker" },
   { icon: Home, label: "Banners", value: "banners" },
   { icon: Calendar, label: "Services", value: "services" },
   { icon: Calendar, label: "Events", value: "events" },
@@ -73,7 +77,7 @@ const sidebarItems: SidebarItem[] = [
   { icon: UserCircle, label: "Profile", value: "profile" },
 ];
 
-const mobilePrimaryItems = ["overview", "events-center", "users", "rental-orders", "forms"];
+const mobilePrimaryItems = ["overview", "events-center", "users", "rental-orders", "service-orders", "forms"];
 
 const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -258,6 +262,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <VendorInventoryAdmin />;
       case "rental-orders":
         return <LiveRentalOrders />;
+      case "service-orders":
+        return <LiveServiceOrders />;
+      case "quote-maker":
+        return <QuoteMaker />;
       case "banners":
         return (
           <CrudInterface

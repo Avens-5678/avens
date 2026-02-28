@@ -607,6 +607,122 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_line_items: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          item_description: string
+          quantity: number
+          quote_id: string
+          total_price: number
+          unit: string | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          item_description: string
+          quantity?: number
+          quote_id: string
+          total_price?: number
+          unit?: string | null
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          item_description?: string
+          quantity?: number
+          quote_id?: string
+          total_price?: number
+          unit?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_line_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          created_by: string | null
+          discount_amount: number | null
+          discount_type: string | null
+          discount_value: number | null
+          gst_amount: number | null
+          gst_percent: number | null
+          id: string
+          notes: string | null
+          quote_number: string
+          sent_at: string | null
+          sent_via: string | null
+          source_order_id: string | null
+          source_type: string
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name: string
+          client_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_amount?: number | null
+          discount_type?: string | null
+          discount_value?: number | null
+          gst_amount?: number | null
+          gst_percent?: number | null
+          id?: string
+          notes?: string | null
+          quote_number?: string
+          sent_at?: string | null
+          sent_via?: string | null
+          source_order_id?: string | null
+          source_type?: string
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_amount?: number | null
+          discount_type?: string | null
+          discount_value?: number | null
+          gst_amount?: number | null
+          gst_percent?: number | null
+          id?: string
+          notes?: string | null
+          quote_number?: string
+          sent_at?: string | null
+          sent_via?: string | null
+          source_order_id?: string | null
+          source_type?: string
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rental_orders: {
         Row: {
           action_token: string | null
@@ -840,6 +956,66 @@ export type Database = {
           table_name?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      service_orders: {
+        Row: {
+          admin_notes: string | null
+          budget: string | null
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
+          created_at: string
+          event_date: string | null
+          event_end_date: string | null
+          guest_count: number | null
+          id: string
+          location: string | null
+          notes: string | null
+          service_details: string | null
+          service_type: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          budget?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_end_date?: string | null
+          guest_count?: number | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          service_details?: string | null
+          service_type?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          budget?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_end_date?: string | null
+          guest_count?: number | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          service_details?: string | null
+          service_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -156,14 +156,25 @@ const LiveRentalOrders = () => {
         return fuzzyWordMatch(text, kw);
       };
 
-      // Extract item-name keywords from title only
-      const orderTitle = (selectedOrder.title || "").toLowerCase();
+      // Extract item-name keywords from title (and cart item titles for Cart Orders)
+      let orderTitle = (selectedOrder.title || "").toLowerCase();
       const orderLocation = (selectedOrder.location || "").toLowerCase();
+
+      // For cart orders, extract actual item titles from equipment_details JSON
+      if (selectedOrder.equipment_category === "Cart Order" && selectedOrder.equipment_details) {
+        try {
+          const parsed = JSON.parse(selectedOrder.equipment_details);
+          const cartItemTitles = (parsed.cart_items || []).map((ci: any) => ci.title || "").join(" ");
+          if (cartItemTitles) {
+            orderTitle = cartItemTitles.toLowerCase();
+          }
+        } catch {}
+      }
       
       const stopWords = new Set([
         "the", "a", "an", "for", "and", "or", "of", "in", "to", "with", "is", "at", "on", "by",
         "rental", "rentals", "order", "orders", "units", "unit", "nos", "set", "sets", "pcs",
-        "-", "–", "", "x", "day", "days", "event", "per",
+        "-", "–", "", "x", "day", "days", "event", "per", "cart", "enquiry", "items", "item",
       ]);
 
       // Treat location words as stop words

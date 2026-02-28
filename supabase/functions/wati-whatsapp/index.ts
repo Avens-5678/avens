@@ -77,6 +77,7 @@ Deno.serve(async (req) => {
       const message = `🎪 *New Rental Order from Evnting*\n\nHi ${vendorName || "Vendor"},\n\n📦 *Order:* ${order.title}\n📁 *Category:* ${order.equipment_category}\n📍 *Location:* ${order.location || "TBD"}\n📅 *Event Date:* ${order.event_date || "TBD"}\n💰 *Budget:* ${order.budget || "Negotiable"}\n\n📋 *Details:* ${order.equipment_details || "See order for details"}\n\n👉 *Accept this order:*\n${acceptUrl}\n\n💬 *Send a quote:*\n${quoteUrl}\n\nThank you for partnering with Evnting!`;
 
       let whatsappSent = false;
+      let watiError = "";
 
       // Send via Wati API if configured
       if (watiApiKey && watiApiUrl) {
@@ -96,11 +97,16 @@ Deno.serve(async (req) => {
           if (watiResponse.ok) {
             whatsappSent = true;
           } else {
-            console.error("Wati API error:", await watiResponse.text());
+            const errText = await watiResponse.text();
+            console.error("Wati API error:", errText);
+            watiError = `WATI API returned ${watiResponse.status}: ${errText || "empty response"}`;
           }
-        } catch (watiError) {
-          console.error("Wati API call failed:", watiError);
+        } catch (err) {
+          console.error("Wati API call failed:", err);
+          watiError = `WATI API call failed: ${err.message || String(err)}`;
         }
+      } else {
+        watiError = "WATI_API_KEY and WATI_API_URL not configured.";
       }
 
       // Update order status
@@ -118,7 +124,7 @@ Deno.serve(async (req) => {
           whatsapp_sent: whatsappSent,
           message: whatsappSent
             ? "WhatsApp message sent successfully"
-            : "Order updated. Configure WATI_API_KEY and WATI_API_URL to enable WhatsApp messaging.",
+            : `Order updated but WhatsApp failed. ${watiError}`,
           accept_url: acceptUrl,
           quote_url: quoteUrl,
         }),

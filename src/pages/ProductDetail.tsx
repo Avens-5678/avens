@@ -4,12 +4,13 @@ import Layout from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAllRentals } from "@/hooks/useData";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
-import { ShoppingCart, ArrowLeft, Check, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const ProductDetail = () => {
@@ -23,6 +24,8 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState<RentalVariant | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [length, setLength] = useState<number>(0);
+  const [breadth, setBreadth] = useState<number>(0);
 
   const rental = useMemo(() => rentals?.find(r => r.id === id), [rentals, id]);
 
@@ -63,6 +66,9 @@ const ProductDetail = () => {
     return null;
   }, [rental, selectedVariant]);
 
+  const currentUnit = displayPrice && 'unit' in displayPrice ? displayPrice.unit : undefined;
+  const isMeasurable = isMeasurableUnit(currentUnit);
+
   const variantGroups = useMemo(() => {
     if (!variants?.length) return {};
     const groups: Record<string, RentalVariant[]> = {};
@@ -76,8 +82,16 @@ const ProductDetail = () => {
   const variantId = selectedVariant?.id;
   const inCart = isInCart(id!, variantId);
 
+  // Computed area for measurable items
+  const computedArea = isMeasurable ? (length || 0) * (breadth || 0) : quantity;
+
   const handleAddToCart = () => {
     if (!rental) return;
+    const finalQuantity = isMeasurable ? computedArea : quantity;
+    if (isMeasurable && finalQuantity <= 0) {
+      toast({ title: "Enter dimensions", description: "Please enter valid Length and Breadth.", variant: "destructive" });
+      return;
+    }
     addItem({
       id: rental.id,
       title: rental.title + (selectedVariant ? ` - ${selectedVariant.attribute_value}` : ""),
@@ -85,9 +99,11 @@ const ProductDetail = () => {
       pricing_unit: selectedVariant?.pricing_unit ?? (rental as any).pricing_unit ?? "Per Day",
       price_range: rental.price_range,
       image_url: displayImages[0] || rental.image_url,
-      quantity,
+      quantity: finalQuantity,
       variant_id: selectedVariant?.id,
       variant_label: selectedVariant?.attribute_value,
+      length: isMeasurable ? length : undefined,
+      breadth: isMeasurable ? breadth : undefined,
     });
     toast({ title: "Added to Cart", description: `${rental.title} added successfully.` });
   };
@@ -205,29 +221,57 @@ const ProductDetail = () => {
                 </div>
               ))}
 
-              {/* Quantity — dynamic based on pricing unit */}
+              {/* Quantity / Dimensions — dynamic based on pricing unit */}
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
-                  {isMeasurableUnit(displayPrice && 'unit' in displayPrice ? displayPrice.unit : undefined)
-                    ? `Measurement (${displayPrice && 'unit' in displayPrice ? displayPrice.unit : ""})`
-                    : "Quantity"}
-                </h3>
-                {isMeasurableUnit(displayPrice && 'unit' in displayPrice ? displayPrice.unit : undefined) ? (
-                  <Input
-                    type="number"
-                    min={1}
-                    step="any"
-                    value={quantity}
-                    onChange={e => setQuantity(parseFloat(e.target.value) || 1)}
-                    placeholder="e.g. 500"
-                    className="max-w-[200px]"
-                  />
+                {isMeasurable ? (
+                  <>
+                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                      Dimensions ({currentUnit})
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3 max-w-[300px]">
+                      <div className="space-y-1">
+                        <Label htmlFor="pdp-length" className="text-xs text-muted-foreground">Length (ft/m)</Label>
+                        <Input
+                          id="pdp-length"
+                          type="number"
+                          min={0}
+                          step="any"
+                          value={length || ""}
+                          onChange={e => setLength(parseFloat(e.target.value) || 0)}
+                          placeholder="e.g. 50"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="pdp-breadth" className="text-xs text-muted-foreground">Breadth (ft/m)</Label>
+                        <Input
+                          id="pdp-breadth"
+                          type="number"
+                          min={0}
+                          step="any"
+                          value={breadth || ""}
+                          onChange={e => setBreadth(parseFloat(e.target.value) || 0)}
+                          placeholder="e.g. 30"
+                        />
+                      </div>
+                    </div>
+                    {length > 0 && breadth > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        Total Area: <span className="font-semibold text-foreground">{computedArea.toLocaleString()} {currentUnit?.replace("Per ", "")}</span>
+                        {displayPrice && 'value' in displayPrice && (
+                          <> — Estimated: <span className="font-semibold text-primary">₹{(computedArea * displayPrice.value).toLocaleString()}</span></>
+                        )}
+                      </p>
+                    )}
+                  </>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <Button variant="outline" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</Button>
-                    <span className="w-12 text-center font-semibold text-lg">{quantity}</span>
-                    <Button variant="outline" size="icon" onClick={() => setQuantity(q => q + 1)}>+</Button>
-                  </div>
+                  <>
+                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Quantity</h3>
+                    <div className="flex items-center gap-3">
+                      <Button variant="outline" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</Button>
+                      <span className="w-12 text-center font-semibold text-lg">{quantity}</span>
+                      <Button variant="outline" size="icon" onClick={() => setQuantity(q => q + 1)}>+</Button>
+                    </div>
+                  </>
                 )}
               </div>
 

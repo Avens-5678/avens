@@ -71,9 +71,9 @@ export const WhatsAppBot = () => {
       text,
       isBot: true,
       timestamp: new Date(),
-      options,
+      options
     };
-    setMessages(prev => [...prev, message]);
+    setMessages((prev) => [...prev, message]);
   };
 
   const addUserMessage = (text: string) => {
@@ -81,13 +81,13 @@ export const WhatsAppBot = () => {
       id: Date.now().toString(),
       text,
       isBot: false,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
-    setMessages(prev => [...prev, message]);
+    setMessages((prev) => [...prev, message]);
   };
 
   const handleFAQ = (query: string) => {
-    const faqResponses: { [key: string]: string } = {
+    const faqResponses: {[key: string]: string;} = {
       'services': "🏢 We provide comprehensive event management including:\n• Event Planning & Coordination\n• Venue Setup (Hangars, Pagodas, Stages)\n• Décor & Branding\n• Audio Visual & Lighting\n• Air Conditioning (Airwingz)\n• Catering Support\n• Equipment Rentals",
       'rentals': "📋 Our rental categories include:\n• Event Structures & Venues\n• Exhibition Stalls\n• Climate Control (Airwingz ACs)\n• Event Production Equipment\n• Branding & Décor\n• Furniture & Seating",
       'weddings': "💒 Absolutely! We specialize in weddings including venue decoration, lighting, sound systems, climate control, and complete event coordination.",
@@ -112,24 +112,24 @@ export const WhatsAppBot = () => {
 
   const handleOptionClick = async (option: string) => {
     addUserMessage(option);
-    
+
     if (currentStep === 'welcome') {
       if (option.includes('Plan an Event')) {
-        setCustomerData(prev => ({ ...prev, intent: 'event' }));
+        setCustomerData((prev) => ({ ...prev, intent: 'event' }));
         setCurrentStep('event_type');
         addBotMessage(
           "Great choice! What type of event are you planning?",
           ['💒 Wedding', '🏢 Corporate Event', '🎪 Exhibition', '🎉 Social Party', '🏛️ Government Event', '🎭 Other']
         );
       } else if (option.includes('Rent Equipment')) {
-        setCustomerData(prev => ({ ...prev, intent: 'rental' }));
+        setCustomerData((prev) => ({ ...prev, intent: 'rental' }));
         setCurrentStep('rental_category');
         addBotMessage(
           "Perfect! What would you like to rent?",
           ['🏗️ Event Structures & Venues', '🎪 Exhibition Stalls', '❄️ Climate Control (Airwingz ACs)', '🎵 Event Production Equipment', '🎨 Branding & Décor']
         );
       } else {
-        setCustomerData(prev => ({ ...prev, intent: 'general' }));
+        setCustomerData((prev) => ({ ...prev, intent: 'general' }));
         setCurrentStep('faq');
         addBotMessage(
           "I'm here to help! What would you like to know about?",
@@ -138,23 +138,23 @@ export const WhatsAppBot = () => {
       }
     } else if (currentStep === 'event_type') {
       let eventType = '';
-      if (option.includes('Wedding')) eventType = 'wedding';
-      else if (option.includes('Corporate')) eventType = 'corporate';
-      else if (option.includes('Exhibition')) eventType = 'exhibition';
-      else if (option.includes('Social')) eventType = 'social';
-      else if (option.includes('Government')) eventType = 'government';
-      else eventType = 'other';
+      if (option.includes('Wedding')) eventType = 'wedding';else
+      if (option.includes('Corporate')) eventType = 'corporate';else
+      if (option.includes('Exhibition')) eventType = 'exhibition';else
+      if (option.includes('Social')) eventType = 'social';else
+      if (option.includes('Government')) eventType = 'government';else
+      eventType = 'other';
 
-      setCustomerData(prev => ({ ...prev, eventType }));
+      setCustomerData((prev) => ({ ...prev, eventType }));
       setCurrentStep('event_date');
       addBotMessage(`Excellent! When are you planning your ${eventType} event? (Please provide expected date/month)`);
     } else if (currentStep === 'event_venue') {
       if (option.includes('Yes')) {
-        setCustomerData(prev => ({ ...prev, hasVenue: 'yes' }));
+        setCustomerData((prev) => ({ ...prev, hasVenue: 'yes' }));
         setCurrentStep('venue_name');
         addBotMessage("Great! What's the name and location of your venue?");
       } else {
-        setCustomerData(prev => ({ ...prev, hasVenue: 'no' }));
+        setCustomerData((prev) => ({ ...prev, hasVenue: 'no' }));
         setCurrentStep('event_services');
         addBotMessage(
           "No problem! We can help with venue suggestions. Which services do you need help with?",
@@ -164,16 +164,16 @@ export const WhatsAppBot = () => {
     } else if (currentStep === 'event_services') {
       const services = customerData.servicesNeeded || [];
       let service = '';
-      
-      if (option.includes('Venue Setup')) service = 'Venue Setup';
-      else if (option.includes('Décor')) service = 'Décor & Branding';
-      else if (option.includes('Audio')) service = 'Audio Visual & Lighting';
-      else if (option.includes('Air Conditioning')) service = 'Air Conditioning';
-      else if (option.includes('Catering')) service = 'Catering Support';
-      else if (option.includes('Full Event')) service = 'Full Event Management';
+
+      if (option.includes('Venue Setup')) service = 'Venue Setup';else
+      if (option.includes('Décor')) service = 'Décor & Branding';else
+      if (option.includes('Audio')) service = 'Audio Visual & Lighting';else
+      if (option.includes('Air Conditioning')) service = 'Air Conditioning';else
+      if (option.includes('Catering')) service = 'Catering Support';else
+      if (option.includes('Full Event')) service = 'Full Event Management';
 
       services.push(service);
-      setCustomerData(prev => ({ ...prev, servicesNeeded: services }));
+      setCustomerData((prev) => ({ ...prev, servicesNeeded: services }));
       setCurrentStep('quote_request');
       addBotMessage(
         `Perfect! You've selected: ${services.join(', ')}.\n\nWould you like us to share a custom proposal/quote?`,
@@ -181,17 +181,17 @@ export const WhatsAppBot = () => {
       );
     } else if (currentStep === 'rental_category') {
       let category = '';
-      if (option.includes('Event Structures')) category = 'Event Structures & Venues';
-      else if (option.includes('Exhibition')) category = 'Exhibition Stalls';
-      else if (option.includes('Climate')) category = 'Climate Control (Airwingz ACs)';
-      else if (option.includes('Production')) category = 'Event Production Equipment';
-      else if (option.includes('Branding')) category = 'Branding & Décor';
+      if (option.includes('Event Structures')) category = 'Event Structures & Venues';else
+      if (option.includes('Exhibition')) category = 'Exhibition Stalls';else
+      if (option.includes('Climate')) category = 'Climate Control (Airwingz ACs)';else
+      if (option.includes('Production')) category = 'Event Production Equipment';else
+      if (option.includes('Branding')) category = 'Branding & Décor';
 
-      setCustomerData(prev => ({ ...prev, rentalCategory: category }));
+      setCustomerData((prev) => ({ ...prev, rentalCategory: category }));
       setCurrentStep('rental_items');
       addBotMessage(`Great choice! Please tell me specifically what items you need from ${category}:`);
     } else if (currentStep === 'rental_setup') {
-      setCustomerData(prev => ({ ...prev, needsSetup: option.includes('Yes') ? 'yes' : 'no' }));
+      setCustomerData((prev) => ({ ...prev, needsSetup: option.includes('Yes') ? 'yes' : 'no' }));
       setCurrentStep('quote_request');
       addBotMessage(
         "Perfect! Would you like us to send a quotation?",
@@ -208,7 +208,7 @@ export const WhatsAppBot = () => {
     } else if (currentStep === 'faq') {
       const faqResponse = handleFAQ(option);
       addBotMessage(faqResponse);
-      
+
       addBotMessage(
         "Is there anything else you'd like to know, or would you like to discuss an event or rental?",
         ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
@@ -222,46 +222,46 @@ export const WhatsAppBot = () => {
 
     addUserMessage(text);
     setInputValue('');
-    
+
     if (currentStep === 'event_date') {
-      setCustomerData(prev => ({ ...prev, eventDate: text }));
+      setCustomerData((prev) => ({ ...prev, eventDate: text }));
       setCurrentStep('event_venue');
       addBotMessage(
         "Perfect! Do you already have a venue?",
         ['✅ Yes, I have a venue', '❌ No, I need venue suggestions']
       );
     } else if (currentStep === 'venue_name') {
-      setCustomerData(prev => ({ ...prev, venueName: text }));
+      setCustomerData((prev) => ({ ...prev, venueName: text }));
       setCurrentStep('event_services');
       addBotMessage(
         "Great! Which services do you need help with?",
         ['🏗️ Venue Setup (Hangars, Pagodas, Stages)', '🎨 Décor & Branding', '🎵 Audio Visual & Lighting', '❄️ Air Conditioning (Airwingz)', '🍽️ Catering Support', '🎯 Full Event Management']
       );
     } else if (currentStep === 'rental_items') {
-      setCustomerData(prev => ({ ...prev, rentalItems: text }));
+      setCustomerData((prev) => ({ ...prev, rentalItems: text }));
       setCurrentStep('rental_quantity');
       addBotMessage("How many units/quantity do you need?");
     } else if (currentStep === 'rental_quantity') {
-      setCustomerData(prev => ({ ...prev, quantity: text }));
+      setCustomerData((prev) => ({ ...prev, quantity: text }));
       setCurrentStep('rental_date');
       addBotMessage("What's the event date & location for delivery/setup?");
     } else if (currentStep === 'rental_date') {
-      setCustomerData(prev => ({ ...prev, location: text }));
+      setCustomerData((prev) => ({ ...prev, location: text }));
       setCurrentStep('rental_setup');
       addBotMessage(
         "Do you need setup & dismantling service?",
         ['✅ Yes, include setup service', '❌ No, just delivery']
       );
     } else if (currentStep === 'get_name') {
-      setCustomerData(prev => ({ ...prev, name: text }));
+      setCustomerData((prev) => ({ ...prev, name: text }));
       setCurrentStep('get_phone');
       addBotMessage(`Nice to meet you, ${text}! What's your phone/WhatsApp number?`);
     } else if (currentStep === 'get_phone') {
-      setCustomerData(prev => ({ ...prev, phone: text }));
+      setCustomerData((prev) => ({ ...prev, phone: text }));
       setCurrentStep('get_email');
       addBotMessage("Perfect! What's your email address?");
     } else if (currentStep === 'get_email') {
-      setCustomerData(prev => ({ ...prev, email: text }));
+      setCustomerData((prev) => ({ ...prev, email: text }));
       if (!customerData.location) {
         setCurrentStep('get_location');
         addBotMessage("Finally, what's your city/event location?");
@@ -270,13 +270,13 @@ export const WhatsAppBot = () => {
         await submitToZohoCRM();
       }
     } else if (currentStep === 'get_location') {
-      setCustomerData(prev => ({ ...prev, location: text }));
+      setCustomerData((prev) => ({ ...prev, location: text }));
       setCurrentStep('submit');
       await submitToZohoCRM();
     } else if (currentStep === 'faq') {
       const faqResponse = handleFAQ(text);
       addBotMessage(faqResponse);
-      
+
       addBotMessage(
         "Is there anything else you'd like to know?",
         ['🎉 Plan an Event', '🏢 Rent Equipment', '❓ Ask another question']
@@ -311,18 +311,18 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
         email: customerData.email,
         phone: customerData.phone,
         message: message,
-        form_type: customerData.intent === 'event' ? 'inquiry' : (customerData.intent === 'rental' ? 'rental' : 'contact'),
+        form_type: customerData.intent === 'event' ? 'inquiry' : customerData.intent === 'rental' ? 'rental' : 'contact',
         event_type: customerData.eventType || null,
         rental_title: customerData.rentalItems || null,
         location: customerData.location,
         status: 'new'
       };
 
-      const { data: submission, error } = await supabase
-        .from('form_submissions')
-        .insert(formData)
-        .select()
-        .single();
+      const { data: submission, error } = await supabase.
+      from('form_submissions').
+      insert(formData).
+      select().
+      single();
 
       if (error) throw error;
 
@@ -336,11 +336,11 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
         eventType: customerData.eventType,
         eventDate: customerData.eventDate,
         rentalTitle: customerData.rentalItems,
-        location: customerData.location,
+        location: customerData.location
       };
 
       await supabase.functions.invoke('zoho-crm', {
-        body: zohoData,
+        body: zohoData
       });
 
       let summary = `🎉 Perfect! I've collected all your information:\n\n`;
@@ -348,7 +348,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
       summary += `📧 Email: ${customerData.email}\n`;
       summary += `📱 Phone: ${customerData.phone}\n`;
       summary += `📍 Location: ${customerData.location}\n`;
-      
+
       if (customerData.intent === 'event') {
         summary += `🎉 Event: ${customerData.eventType}\n`;
         summary += `📅 Date: ${customerData.eventDate}\n`;
@@ -367,7 +367,7 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
 
       toast({
         title: "Information Submitted Successfully!",
-        description: "Our team will contact you within 24 hours.",
+        description: "Our team will contact you within 24 hours."
       });
 
     } catch (error) {
@@ -375,10 +375,10 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
       addBotMessage(
         "✅ I've saved your information! There was a minor issue with our system, but don't worry - our team has your details and will contact you soon.\n\nThank you for choosing Evnting!"
       );
-      
+
       toast({
         title: "Information Saved",
-        description: "Our team will contact you soon!",
+        description: "Our team will contact you soon!"
       });
     }
   };
@@ -408,13 +408,13 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
   return (
     <>
       {/* Floating WhatsApp Button */}
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110"
-        size="icon"
-      >
-        <MessageCircle className="h-6 w-6 text-white" />
-      </Button>
+      
+
+
+
+
+
+
 
       {/* Chat Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -429,94 +429,94 @@ Event Date: ${customerData.eventDate || 'Not specified'}`;
                 <p className="text-green-100 text-xs">● Online now</p>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsOpen(false)}
-              className="text-white hover:bg-white/20 rounded-full"
-            >
+              className="text-white hover:bg-white/20 rounded-full">
+
               <X className="h-4 w-4" />
             </Button>
           </DialogHeader>
 
           {/* Chat Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-96 bg-gradient-to-b from-gray-50 to-white">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}
-              >
+            {messages.map((message) =>
+            <div
+              key={message.id}
+              className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}>
+
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl ${
-                    message.isBot
-                      ? 'bg-white border border-gray-200 shadow-sm rounded-bl-md'
-                      : 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-sm rounded-br-md'
-                  }`}
-                >
+                className={`max-w-[85%] p-3 rounded-2xl ${
+                message.isBot ?
+                'bg-white border border-gray-200 shadow-sm rounded-bl-md' :
+                'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-sm rounded-br-md'}`
+                }>
+
                   <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
-                  {message.options && (
-                    <div className="mt-3 space-y-2">
-                      {message.options.map((option, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          size="sm"
-                          className="w-full justify-start text-left h-auto py-2.5 px-3 rounded-xl border-gray-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
-                          onClick={() => handleOptionClick(option)}
-                        >
+                  {message.options &&
+                <div className="mt-3 space-y-2">
+                      {message.options.map((option, index) =>
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start text-left h-auto py-2.5 px-3 rounded-xl border-gray-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
+                    onClick={() => handleOptionClick(option)}>
+
                           {option}
                         </Button>
-                      ))}
-                    </div>
                   )}
+                    </div>
+                }
                 </div>
               </div>
-            ))}
+            )}
           </div>
 
           {/* Input Area */}
-          {currentStep !== 'submit' && (
-            <div className="p-4 border-t bg-white">
+          {currentStep !== 'submit' &&
+          <div className="p-4 border-t bg-white">
               <div className="flex space-x-2">
                 <Input
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Type your message..."
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleTextInput(inputValue);
-                    }
-                  }}
-                  className="flex-1 rounded-full border-gray-200"
-                />
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Type your message..."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleTextInput(inputValue);
+                  }
+                }}
+                className="flex-1 rounded-full border-gray-200" />
+
                 <Button
-                  onClick={() => handleTextInput(inputValue)}
-                  disabled={!inputValue.trim()}
-                  size="icon"
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-full"
-                >
+                onClick={() => handleTextInput(inputValue)}
+                disabled={!inputValue.trim()}
+                size="icon"
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-full">
+
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
 
-              {messages.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={resetChat}
-                  className="mt-2 text-gray-500 hover:text-gray-700 rounded-full"
-                >
+              {messages.length > 0 &&
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetChat}
+              className="mt-2 text-gray-500 hover:text-gray-700 rounded-full">
+
                   <ArrowLeft className="h-4 w-4 mr-1" />
                   Start Over
                 </Button>
-              )}
+            }
             </div>
-          )}
+          }
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>);
+
 };
 
 export default WhatsAppBot;

@@ -16,7 +16,7 @@ import { isMeasurableUnit, calculateCartTotal } from "@/utils/pricingUtils";
 import { ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus, CalendarDays } from "lucide-react";
 
 const Cart = () => {
-  const { items, removeItem, updateQuantity, clearCart } = useCart();
+  const { items, removeItem, updateQuantity, updateDimensions, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -56,18 +56,18 @@ const Cart = () => {
 
     setSubmitting(true);
     try {
-      // Build the order payload
       const cartPayload = items.map(item => ({
         rental_id: item.id,
         title: item.title,
         variant_id: item.variant_id || null,
         variant_label: item.variant_label || null,
         quantity: item.quantity,
+        length: item.length || null,
+        breadth: item.breadth || null,
         price_value: item.price_value,
         pricing_unit: item.pricing_unit,
       }));
 
-      // Insert as rental order
       const { error } = await supabase.from("rental_orders").insert({
         title: `Cart Enquiry - ${items.length} item(s)`,
         equipment_category: "Cart Order",
@@ -126,7 +126,7 @@ const Cart = () => {
                   <CardContent className="p-0">
                     {items.map((item, index) => (
                       <div key={`${item.id}-${item.variant_id || ''}`}>
-                        <div className="flex items-center gap-4 sm:gap-6 p-5 sm:p-6">
+                        <div className="flex items-start gap-4 sm:gap-6 p-5 sm:p-6">
                           {item.image_url ? (
                             <img src={item.image_url} alt={item.title} className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-border flex-shrink-0" />
                           ) : (
@@ -139,19 +139,46 @@ const Cart = () => {
                             {item.variant_label && <Badge variant="outline" className="mt-1 text-xs">{item.variant_label}</Badge>}
                             <p className="text-primary font-bold text-base sm:text-lg mt-1">{formatItemPrice(item)}</p>
                             {/* Quantity controls — dynamic based on pricing unit */}
-                            <div className="flex items-center gap-2 mt-2">
+                            <div className="mt-2">
                               {isMeasurableUnit(item.pricing_unit) ? (
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  step="any"
-                                  value={item.quantity}
-                                  onChange={e => updateQuantity(item.id, parseFloat(e.target.value) || 1, item.variant_id)}
-                                  className="h-7 w-24 text-sm"
-                                  placeholder="e.g. 500"
-                                />
+                                <div className="space-y-2">
+                                  <div className="grid grid-cols-2 gap-2 max-w-[220px]">
+                                    <div className="space-y-1">
+                                      <Label className="text-[10px] text-muted-foreground">Length</Label>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        step="any"
+                                        value={item.length || ""}
+                                        onChange={e => updateDimensions(item.id, parseFloat(e.target.value) || 0, item.breadth || 0, item.variant_id)}
+                                        className="h-7 text-sm"
+                                        placeholder="L"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-[10px] text-muted-foreground">Breadth</Label>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        step="any"
+                                        value={item.breadth || ""}
+                                        onChange={e => updateDimensions(item.id, item.length || 0, parseFloat(e.target.value) || 0, item.variant_id)}
+                                        className="h-7 text-sm"
+                                        placeholder="B"
+                                      />
+                                    </div>
+                                  </div>
+                                  {(item.length || 0) > 0 && (item.breadth || 0) > 0 && (
+                                    <p className="text-xs text-muted-foreground">
+                                      Area: {item.quantity.toLocaleString()} {item.pricing_unit?.replace("Per ", "")}
+                                      {item.price_value != null && (
+                                        <> = <span className="font-semibold text-foreground">₹{(item.price_value * item.quantity).toLocaleString()}</span></>
+                                      )}
+                                    </p>
+                                  )}
+                                </div>
                               ) : (
-                                <>
+                                <div className="flex items-center gap-2">
                                   <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity - 1, item.variant_id)}>
                                     <Minus className="h-3 w-3" />
                                   </Button>
@@ -159,10 +186,7 @@ const Cart = () => {
                                   <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity + 1, item.variant_id)}>
                                     <Plus className="h-3 w-3" />
                                   </Button>
-                                </>
-                              )}
-                              {isMeasurableUnit(item.pricing_unit) && (
-                                <span className="text-xs text-muted-foreground">{item.pricing_unit}</span>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -193,7 +217,6 @@ const Cart = () => {
                         <h3 className="text-lg font-bold text-foreground">Event Details</h3>
                       </div>
                       <Separator />
-
                       <div className="space-y-3">
                         <div className="space-y-1">
                           <Label htmlFor="customer_name">Full Name *</Label>
@@ -230,7 +253,6 @@ const Cart = () => {
                           <Textarea id="notes" value={eventDetails.notes} onChange={e => setEventDetails(p => ({ ...p, notes: e.target.value }))} placeholder="Any special requirements..." rows={3} />
                         </div>
                       </div>
-
                       <div className="flex gap-2 pt-2">
                         <Button onClick={handleSendEnquiry} className="flex-1" disabled={submitting}>
                           <Send className="mr-2 h-4 w-4" />{submitting ? "Sending..." : "Send Enquiry"}
@@ -249,7 +271,11 @@ const Cart = () => {
                           <div key={`${item.id}-${item.variant_id || ''}`} className="flex justify-between items-start gap-3">
                             <div className="flex-1 min-w-0">
                               <span className="text-sm text-muted-foreground line-clamp-1">{item.title}</span>
-                              <span className="text-xs text-muted-foreground"> × {item.quantity}{isMeasurableUnit(item.pricing_unit) ? ` ${item.pricing_unit}` : ""}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {isMeasurableUnit(item.pricing_unit)
+                                  ? ` — ${item.length || 0} × ${item.breadth || 0} = ${item.quantity} ${item.pricing_unit?.replace("Per ", "")}`
+                                  : ` × ${item.quantity}`}
+                              </span>
                             </div>
                             <span className="text-sm font-medium text-foreground flex-shrink-0">
                               {item.price_value != null ? `₹${(item.price_value * item.quantity).toLocaleString()}` : "TBD"}
@@ -273,7 +299,7 @@ const Cart = () => {
                             )}
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-muted-foreground">Total Items</span>
-                              <Badge variant="secondary" className="text-sm font-bold">{items.reduce((s, i) => s + i.quantity, 0)}</Badge>
+                              <Badge variant="secondary" className="text-sm font-bold">{items.length}</Badge>
                             </div>
                           </>
                         );

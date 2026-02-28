@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { WhatsAppBot } from "@/components/ui/whatsapp-bot";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -104,6 +105,7 @@ const Index = () => {
   }
 
   return (
+    <>
     <Layout>
       {/* Hero Section - Simple, no heavy animations */}
       <HeroSection
@@ -510,7 +512,9 @@ const Index = () => {
 
         </DialogContent>
       </Dialog>
-    </Layout>);
+    </Layout>
+    <WhatsAppBot />
+    </>);
 
 };
 

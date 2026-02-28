@@ -11,6 +11,10 @@ export interface CartItem {
   quantity: number;
   variant_id?: string;
   variant_label?: string;
+  /** For measurable items (sq.ft/sq.m): length dimension */
+  length?: number;
+  /** For measurable items (sq.ft/sq.m): breadth dimension */
+  breadth?: number;
 }
 
 interface CartStore {
@@ -18,6 +22,7 @@ interface CartStore {
   addItem: (item: CartItem) => void;
   removeItem: (id: string, variant_id?: string) => void;
   updateQuantity: (id: string, quantity: number, variant_id?: string) => void;
+  updateDimensions: (id: string, length: number, breadth: number, variant_id?: string) => void;
   clearCart: () => void;
   isInCart: (id: string, variant_id?: string) => boolean;
   getItemCount: () => number;
@@ -63,6 +68,17 @@ export const useCart = create<CartStore>()(
           });
         }
       },
+      updateDimensions: (id, length, breadth, variant_id) => {
+        const { items } = get();
+        const key = getCartKey(id, variant_id);
+        set({
+          items: items.map(i =>
+            getCartKey(i.id, i.variant_id) === key
+              ? { ...i, length, breadth, quantity: length * breadth }
+              : i
+          ),
+        });
+      },
       clearCart: () => set({ items: [] }),
       isInCart: (id, variant_id) => {
         const { items } = get();
@@ -71,7 +87,7 @@ export const useCart = create<CartStore>()(
       },
       getItemCount: () => {
         const { items } = get();
-        return items.reduce((sum, i) => sum + i.quantity, 0);
+        return items.length;
       },
     }),
     {

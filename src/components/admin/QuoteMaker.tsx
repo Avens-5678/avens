@@ -49,6 +49,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
         setClientName(order.client_name || "");
         setClientEmail(order.client_email || "");
         setClientPhone(order.client_phone || "");
+        if (order.budget) setNotes(prev => prev ? prev : `Budget: ${order.budget}`);
         // Parse equipment details if cart items exist
         try {
           const details = JSON.parse(order.equipment_details || "{}");
@@ -85,6 +86,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
         setClientName(order.client_name || "");
         setClientEmail(order.client_email || "");
         setClientPhone(order.client_phone || "");
+        if (order.budget) setNotes(prev => prev ? prev : `Budget: ${order.budget}`);
         setLineItems([{
           item_description: order.title,
           quantity: 1,

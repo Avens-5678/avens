@@ -83,10 +83,19 @@ Deno.serve(async (req) => {
           const phone = profile.phone.replace(/[^0-9]/g, "");
 
           try {
-            const response = await fetch(`${watiApiUrl}/api/v1/sendTemplateMessage/${phone}`, {
+            // Fix 1: Remove any trailing slashes from the environment variable
+            const cleanBaseUrl = watiApiUrl.replace(/\/$/, "");
+
+            // Fix 2: WATI expects the phone number as a query parameter
+            const endpoint = `${cleanBaseUrl}/api/v1/sendTemplateMessage?whatsappNumber=${phone}`;
+
+            // Fix 3: Ensure we don't send "Bearer Bearer xxx" if the key already includes it
+            const watiAuthToken = watiApiKey.startsWith("Bearer ") ? watiApiKey : `Bearer ${watiApiKey}`;
+
+            const response = await fetch(endpoint, {
               method: "POST",
               headers: {
-                Authorization: `Bearer ${watiApiKey}`,
+                Authorization: watiAuthToken,
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
@@ -100,8 +109,13 @@ Deno.serve(async (req) => {
               results.push({ vendor: profileName, phone, success: true });
             } else {
               const errText = await response.text();
-              console.error(`WATI error for ${phone}:`, errText);
-              results.push({ vendor: profileName, phone, success: false, error: errText });
+              console.error(`WATI error for ${phone} (${response.status}):`, errText);
+              results.push({
+                vendor: profileName,
+                phone,
+                success: false,
+                error: `${response.status}: ${errText || "empty response"}`,
+              });
             }
           } catch (err) {
             console.error(`Failed to send to ${phone}:`, err);

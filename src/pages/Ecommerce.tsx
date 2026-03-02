@@ -210,10 +210,10 @@ const Ecommerce = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/50 to-transparent" />
           <div className="absolute inset-0 flex items-center">
             <div className="container mx-auto px-6 sm:px-8 lg:px-4">
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight text-center lg:text-lg">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight lg:text-lg text-left">
                 Premium Event Rentals
               </h1>
-              <p className="text-base sm:text-lg text-white/80 mt-3 max-w-2xl text-center">
+              <p className="text-base sm:text-lg text-white/80 mt-3 max-w-2xl text-left">
                 Browse our extensive collection of high-quality equipment and decor for your special event.
               </p>
             </div>

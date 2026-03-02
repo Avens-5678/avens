@@ -149,15 +149,27 @@ const Index = () => {
           }
 
         <div className="container mx-auto px-5 sm:px-6 text-center relative z-20">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-[1.05] animate-fade-in text-white">
+          <h1 
+            key={`title-${currentBannerIndex}`}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-[1.05] text-white animate-fade-in-up"
+            style={{ animationDuration: '0.8s' }}
+          >
             {currentBanner?.title || "Creating Extraordinary Experiences"}
           </h1>
 
-          <p className="text-lg sm:text-xl lg:text-2xl font-body mb-12 max-w-3xl mx-auto leading-relaxed text-white/80">
+          <p 
+            key={`subtitle-${currentBannerIndex}`}
+            className="text-lg sm:text-xl lg:text-2xl font-body mb-12 max-w-3xl mx-auto leading-relaxed text-white/80 animate-fade-in-up opacity-0"
+            style={{ animationDelay: '0.3s', animationDuration: '0.8s', animationFillMode: 'forwards' }}
+          >
             {currentBanner?.subtitle || "Where vision meets execution. We transform your dreams into unforgettable moments."}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div 
+            key={`cta-${currentBannerIndex}`}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up opacity-0"
+            style={{ animationDelay: '0.6s', animationDuration: '0.8s', animationFillMode: 'forwards' }}
+          >
             <Button
                 size="lg"
                 className="bg-secondary hover:bg-secondary/90 text-white px-8 py-4 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl"
@@ -415,12 +427,11 @@ const Index = () => {
 
             <div className="overflow-hidden relative">
               {/* Fade edges */}
-              <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
               
               <div className="flex animate-marquee w-max items-center gap-12 lg:gap-16 py-4">
-                {/* Duplicate the list for seamless loop */}
-                {[...activeClients, ...activeClients].map((client, i) =>
+                {[...activeClients, ...activeClients, ...activeClients].map((client, i) =>
                 <div
                   key={`${client.id}-${i}`}
                   className="flex-shrink-0 hover:opacity-80 transition-all duration-300 px-2">

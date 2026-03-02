@@ -10,6 +10,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 const TestimonialsSection = () => {
   const { data: testimonials, isLoading } = useTestimonials();
@@ -67,6 +68,7 @@ const TestimonialsSection = () => {
         <div className="max-w-6xl mx-auto">
           <Carousel
             opts={{ align: "start", loop: true }}
+            plugins={[Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })]}
             className="w-full"
           >
             <CarouselContent className="-ml-3 md:-ml-4">

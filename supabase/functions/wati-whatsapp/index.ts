@@ -82,15 +82,34 @@ Deno.serve(async (req) => {
       // Send via Wati API if configured
       if (watiApiKey && watiApiUrl) {
         try {
+          const phone = vendorPhone.replace(/[^0-9]/g, "");
           const watiResponse = await fetch(
-            `${watiApiUrl}/api/v1/sendSessionMessage/${vendorPhone}`,
+            `${watiApiUrl}/api/v2/sendTemplateMessage`,
             {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${watiApiKey}`,
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ messageText: message }),
+              body: JSON.stringify({
+                template_name: "vendor_order_notification",
+                broadcast_name: `order_${orderId}`,
+                recipients: [
+                  {
+                    phone_number: phone,
+                    custom_params: [
+                      { name: "vendor_name", value: vendorName || "Vendor" },
+                      { name: "order_title", value: order.title },
+                      { name: "category", value: order.equipment_category },
+                      { name: "location", value: order.location || "TBD" },
+                      { name: "event_date", value: order.event_date || "TBD" },
+                      { name: "budget", value: order.budget || "Negotiable" },
+                      { name: "accept_url", value: acceptUrl },
+                      { name: "quote_url", value: quoteUrl },
+                    ],
+                  },
+                ],
+              }),
             }
           );
 

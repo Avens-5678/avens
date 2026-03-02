@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
 
           try {
             const response = await fetch(
-              `${watiApiUrl}/api/v1/sendTemplateMessage/${phone}`,
+              `${watiApiUrl}/api/v2/sendTemplateMessage`,
               {
                 method: "POST",
                 headers: {
@@ -92,10 +92,15 @@ Deno.serve(async (req) => {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  broadcast_name: "vendor_new_request_reminder",
                   template_name: "reminder",
-                  parameters: [
-                    { name: "1", value: vendorName },
+                  broadcast_name: "vendor_new_request_reminder",
+                  recipients: [
+                    {
+                      phone_number: phone,
+                      custom_params: [
+                        { name: "1", value: vendorName },
+                      ],
+                    },
                   ],
                 }),
               }

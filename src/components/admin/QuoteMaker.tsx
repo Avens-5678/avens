@@ -12,7 +12,8 @@ import { useServiceOrders } from "@/hooks/useServiceOrders";
 import { useCreateQuote, type QuoteLineItem } from "@/hooks/useQuotes";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Calculator, Send, Mail, MessageSquare } from "lucide-react";
+import { Plus, Trash2, Calculator, Send, Mail, MessageSquare, Download } from "lucide-react";
+import { downloadQuoteAsPDF } from "./QuotePrintTemplate";
 
 interface QuoteMakerProps {
   prefillOrderId?: string | null;
@@ -136,6 +137,23 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       return;
     }
 
+    // Download the quote as PDF
+    downloadQuoteAsPDF({
+      clientName,
+      clientEmail,
+      clientPhone,
+      lineItems,
+      subtotal: calculations.subtotal,
+      discountType,
+      discountValue,
+      discountAmount: calculations.discountAmount,
+      gstPercent,
+      gstAmount: calculations.gstAmount,
+      total: calculations.total,
+      notes,
+    });
+
+    // Also save to database
     createQuote.mutate({
       quote: {
         source_type: selectedSourceType,
@@ -381,8 +399,9 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Button onClick={handleSave} disabled={createQuote.isPending} className="flex-1">
-          {createQuote.isPending ? "Saving..." : "Save Quote"}
+        <Button onClick={handleSave} disabled={createQuote.isPending} className="flex-1 gap-2">
+          <Download className="h-4 w-4" />
+          {createQuote.isPending ? "Saving..." : "Save & Download Quote"}
         </Button>
         <Button variant="outline" onClick={() => handleSendVia("email")} disabled={sending} className="flex-1 gap-2">
           <Mail className="h-4 w-4" />Send via Email

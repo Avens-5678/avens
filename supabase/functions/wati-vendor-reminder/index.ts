@@ -61,61 +61,51 @@ Deno.serve(async (req) => {
             success: false,
             error: "WATI_API_KEY and WATI_API_URL not configured.",
           }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
-      // Fetch vendor profiles
-      const { data: vendors, error: vendorError } = await supabaseAdmin
+      // Fetch profiles (Works for clients or vendors based on user_ids passed)
+      const { data: profiles, error: profileError } = await supabaseAdmin
         .from("profiles")
         .select("user_id, full_name, company_name, phone")
         .in("user_id", vendor_ids || []);
 
-      if (vendorError) throw vendorError;
+      if (profileError) throw profileError;
 
       const results: Array<{ vendor: string; phone: string; success: boolean; error?: string }> = [];
 
       // Send template messages concurrently
-      const promises = (vendors || [])
+      const promises = (profiles || [])
         .filter((v: any) => v.phone)
-        .map(async (vendor: any) => {
-          const vendorName = vendor.full_name || vendor.company_name || "Vendor";
-          const phone = vendor.phone.replace(/[^0-9]/g, "");
+        .map(async (profile: any) => {
+          const profileName = profile.full_name || profile.company_name || "User";
+          const phone = profile.phone.replace(/[^0-9]/g, "");
 
           try {
-            const response = await fetch(
-              `${watiApiUrl}/api/v2/sendTemplateMessage`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${watiApiKey}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  template_name: "reminder",
-                  broadcast_name: "vendor_new_request_reminder",
-                  recipients: [
-                    {
-                      phone_number: phone,
-                      custom_params: [
-                        { name: "1", value: vendorName },
-                      ],
-                    },
-                  ],
-                }),
-              }
-            );
+            const response = await fetch(`${watiApiUrl}/api/v1/sendTemplateMessage/${phone}`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${watiApiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                broadcast_name: "vendor_new_request_reminder",
+                template_name: "reminder",
+                parameters: [{ name: "1", value: profileName }],
+              }),
+            });
 
             if (response.ok) {
-              results.push({ vendor: vendorName, phone, success: true });
+              results.push({ vendor: profileName, phone, success: true });
             } else {
               const errText = await response.text();
               console.error(`WATI error for ${phone}:`, errText);
-              results.push({ vendor: vendorName, phone, success: false, error: errText });
+              results.push({ vendor: profileName, phone, success: false, error: errText });
             }
           } catch (err) {
             console.error(`Failed to send to ${phone}:`, err);
-            results.push({ vendor: vendorName, phone, success: false, error: String(err) });
+            results.push({ vendor: profileName, phone, success: false, error: String(err) });
           }
         });
 
@@ -130,7 +120,7 @@ Deno.serve(async (req) => {
           total: results.length,
           results,
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -138,11 +128,11 @@ Deno.serve(async (req) => {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: error.message || "Internal server error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

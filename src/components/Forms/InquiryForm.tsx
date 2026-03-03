@@ -98,6 +98,22 @@ const InquiryForm = ({
 
       if (error) throw error;
 
+      // Auto-create an event request so it appears in admin Event Center
+      if (user) {
+        try {
+          await supabase.from("event_requests").insert({
+            client_id: user.id,
+            event_type: values.eventType || eventType || "General Inquiry",
+            event_date: values.eventDate ? values.eventDate.toISOString().split('T')[0] : null,
+            location: values.location || null,
+            requirements: values.message,
+            status: "pending",
+          });
+        } catch (eventReqErr) {
+          console.error("Failed to create event request:", eventReqErr);
+        }
+      }
+
       // Auto-create a rental order when form type is rental
       if (formType === "rental") {
         try {

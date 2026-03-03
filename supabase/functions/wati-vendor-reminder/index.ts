@@ -83,27 +83,31 @@ Deno.serve(async (req) => {
           const phone = profile.phone.replace(/[^0-9]/g, "");
 
           try {
-            // Fix 1: Remove any trailing slashes from the environment variable
-            const cleanBaseUrl = watiApiUrl.replace(/\/$/, "");
-
-            // Fix 2: WATI expects the phone number as a query parameter
-            const endpoint = `${cleanBaseUrl}/api/v1/sendTemplateMessage?whatsappNumber=${phone}`;
-
-            // Fix 3: Ensure we don't send "Bearer Bearer xxx" if the key already includes it
+            const cleanBaseUrl = watiApiUrl.replace(/\/+$/, "");
             const watiAuthToken = watiApiKey.startsWith("Bearer ") ? watiApiKey : `Bearer ${watiApiKey}`;
 
-            const response = await fetch(endpoint, {
-              method: "POST",
-              headers: {
-                Authorization: watiAuthToken,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                broadcast_name: "vendor_new_request_reminder",
-                template_name: "reminder",
-                parameters: [{ name: "1", value: profileName }],
-              }),
-            });
+            const response = await fetch(
+              `${cleanBaseUrl}/api/v2/sendTemplateMessage`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: watiAuthToken,
+                  "Content-Type": "application/json-patch+json",
+                },
+                body: JSON.stringify({
+                  template_name: "reminder",
+                  broadcast_name: "vendor_new_request_reminder",
+                  recipients: [
+                    {
+                      phone_number: phone,
+                      custom_params: [
+                        { name: "1", value: profileName },
+                      ],
+                    },
+                  ],
+                }),
+              }
+            );
 
             if (response.ok) {
               results.push({ vendor: profileName, phone, success: true });

@@ -26,7 +26,8 @@ import {
   ClipboardList,
   UsersRound,
   ShieldCheck,
-  Truck
+  Truck,
+  Briefcase
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -47,40 +48,80 @@ import LiveServiceOrders from "@/components/admin/LiveServiceOrders";
 import QuoteMaker from "@/components/admin/QuoteMaker";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface AdminDashboardProps {
   adminUser: any;
   onLogout?: () => void;
 }
 
-const sidebarItems: SidebarItem[] = [
+interface SubTab {
+  label: string;
+  value: string;
+}
+
+interface MenuGroup {
+  icon: any;
+  label: string;
+  value: string;
+  subTabs?: SubTab[];
+}
+
+const menuGroups: MenuGroup[] = [
   { icon: BarChart3, label: "Overview", value: "overview" },
-  { icon: ClipboardList, label: "Event Center", value: "events-center" },
-  { icon: UsersRound, label: "Users", value: "users" },
-  { icon: ShieldCheck, label: "Vendors", value: "vendor-inventory" },
-  { icon: Truck, label: "Rental Orders", value: "rental-orders" },
-  { icon: Calendar, label: "Service Orders", value: "service-orders" },
-  { icon: ClipboardList, label: "Quote Maker", value: "quote-maker" },
-  { icon: Home, label: "Banners", value: "banners" },
-  { icon: Calendar, label: "Services", value: "services" },
-  { icon: Calendar, label: "Events", value: "events" },
-  { icon: Calendar, label: "Rentals", value: "rentals" },
-  { icon: Image, label: "Portfolio", value: "portfolio" },
-  { icon: Users, label: "Clients", value: "clients" },
-  { icon: Star, label: "Reviews", value: "testimonials" },
-  { icon: MessageSquare, label: "Forms", value: "forms" },
-  { icon: HelpCircle, label: "FAQ", value: "faq" },
-  { icon: Settings, label: "Integrations", value: "integrations" },
-  { icon: Award, label: "Awards", value: "settings" },
-  { icon: Volume2, label: "Audio", value: "audio" },
-  { icon: UserCircle, label: "About", value: "about" },
-  { icon: UserCircle, label: "Profile", value: "profile" },
+  {
+    icon: Briefcase, label: "Operations", value: "operations",
+    subTabs: [
+      { label: "Event Center", value: "events-center" },
+      { label: "Rental Orders", value: "rental-orders" },
+      { label: "Service Orders", value: "service-orders" },
+      { label: "Quote Maker", value: "quote-maker" },
+    ],
+  },
+  {
+    icon: UsersRound, label: "Users", value: "user-mgmt",
+    subTabs: [
+      { label: "All Users", value: "users" },
+      { label: "Vendor Inventory", value: "vendor-inventory" },
+    ],
+  },
+  {
+    icon: Home, label: "Website", value: "website",
+    subTabs: [
+      { label: "Banners", value: "banners" },
+      { label: "Services", value: "services" },
+      { label: "Events", value: "events" },
+      { label: "Rentals", value: "rentals" },
+      { label: "Portfolio", value: "portfolio" },
+      { label: "Clients", value: "clients" },
+      { label: "Reviews", value: "testimonials" },
+      { label: "Forms", value: "forms" },
+      { label: "FAQ", value: "faq" },
+      { label: "About", value: "about" },
+    ],
+  },
+  {
+    icon: Settings, label: "Settings", value: "settings-group",
+    subTabs: [
+      { label: "Integrations", value: "integrations" },
+      { label: "Awards & News", value: "settings" },
+      { label: "Audio", value: "audio" },
+      { label: "Profile", value: "profile" },
+    ],
+  },
 ];
 
-const mobilePrimaryItems = ["overview", "events-center", "users", "rental-orders", "service-orders", "forms"];
+const sidebarItems: SidebarItem[] = menuGroups.map((g) => ({
+  icon: g.icon,
+  label: g.label,
+  value: g.value,
+}));
+
+const mobilePrimaryItems = ["overview", "operations", "user-mgmt", "website", "settings-group"];
 
 const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeGroup, setActiveGroup] = useState("overview");
+  const [activeSubTab, setActiveSubTab] = useState("overview");
   const [currentAdminUser, setCurrentAdminUser] = useState(adminUser);
   const { toast } = useToast();
   
@@ -97,15 +138,20 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const { data: faqs = [] } = useAllFAQ();
   const { eventTypes } = useEventTypes();
 
+  const handleGroupChange = (groupValue: string) => {
+    setActiveGroup(groupValue);
+    const group = menuGroups.find((g) => g.value === groupValue);
+    if (group?.subTabs) {
+      setActiveSubTab(group.subTabs[0].value);
+    } else {
+      setActiveSubTab(groupValue);
+    }
+  };
+
   const handleLogout = async () => {
     try {
-      if (onLogout) {
-        onLogout();
-      }
-      toast({
-        title: "Logged Out",
-        description: "Successfully logged out of admin dashboard.",
-      });
+      if (onLogout) onLogout();
+      toast({ title: "Logged Out", description: "Successfully logged out." });
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -114,6 +160,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const handleProfileUpdate = (updatedUser: any) => {
     setCurrentAdminUser(updatedUser);
   };
+
+  const currentGroup = menuGroups.find((g) => g.value === activeGroup);
 
   const headerContent = (
     <header className="bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 text-background px-4 sm:px-6 py-3">
@@ -154,7 +202,7 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   );
 
   const renderContent = () => {
-    switch (activeTab) {
+    switch (activeSubTab) {
       case "overview":
         return (
           <div className="space-y-6">
@@ -170,7 +218,6 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   <p className="text-xs opacity-80">Event types active</p>
                 </CardContent>
               </Card>
-
               <Card className="rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Form Submissions</CardTitle>
@@ -179,11 +226,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">0</div>
+                  <div className="text-2xl font-bold">{formSubmissions?.length || 0}</div>
                   <p className="text-xs text-muted-foreground">Pending inquiries</p>
                 </CardContent>
               </Card>
-
               <Card className="rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Services</CardTitle>
@@ -192,11 +238,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">5</div>
+                  <div className="text-2xl font-bold">{services?.length || 0}</div>
                   <p className="text-xs text-muted-foreground">Active services</p>
                 </CardContent>
               </Card>
-
               <Card className="rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Portfolio Items</CardTitle>
@@ -205,37 +250,28 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">11</div>
+                  <div className="text-2xl font-bold">{portfolio?.length || 0}</div>
                   <p className="text-xs text-muted-foreground">Gallery images</p>
                 </CardContent>
               </Card>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               <Card className="rounded-2xl">
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>Quick Actions</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  <Button className="w-full justify-start" variant="outline" onClick={() => setActiveTab("banners")}>
-                    <Home className="mr-2 h-4 w-4" />
-                    Manage Hero Banners
+                  <Button className="w-full justify-start" variant="outline" onClick={() => { setActiveGroup("operations"); setActiveSubTab("events-center"); }}>
+                    <ClipboardList className="mr-2 h-4 w-4" />Event Center
                   </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => setActiveTab("forms")}>
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    View Form Submissions
+                  <Button className="w-full justify-start" variant="outline" onClick={() => { setActiveGroup("website"); setActiveSubTab("forms"); }}>
+                    <MessageSquare className="mr-2 h-4 w-4" />View Form Submissions
                   </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => setActiveTab("portfolio")}>
-                    <Image className="mr-2 h-4 w-4" />
-                    Update Portfolio
+                  <Button className="w-full justify-start" variant="outline" onClick={() => { setActiveGroup("website"); setActiveSubTab("portfolio"); }}>
+                    <Image className="mr-2 h-4 w-4" />Update Portfolio
                   </Button>
                 </CardContent>
               </Card>
-
               <Card className="rounded-2xl">
-                <CardHeader>
-                  <CardTitle>System Status</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>System Status</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Website Status</span>
@@ -394,11 +430,32 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   return (
     <DashboardShell
       sidebarItems={sidebarItems}
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
+      activeTab={activeGroup}
+      onTabChange={handleGroupChange}
       headerContent={headerContent}
       mobilePrimaryItems={mobilePrimaryItems}
     >
+      {/* Sub-tabs for grouped menus */}
+      {currentGroup?.subTabs && (
+        <div className="mb-6 -mt-1">
+          <ScrollArea className="w-full">
+            <div className="flex gap-2 pb-2">
+              {currentGroup.subTabs.map((tab) => (
+                <Button
+                  key={tab.value}
+                  variant={activeSubTab === tab.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveSubTab(tab.value)}
+                  className="whitespace-nowrap flex-shrink-0 rounded-full text-xs"
+                >
+                  {tab.label}
+                </Button>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
+      )}
       {renderContent()}
     </DashboardShell>
   );

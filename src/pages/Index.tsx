@@ -312,12 +312,14 @@ const Index = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-                <Button
+              <Button
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
-                  onClick={() => setInquiryDialogOpen(true)}>
-                  Start Planning Today
-                  <Calendar className="ml-2 h-5 w-5" />
+                  asChild>
+                  <Link to="/client/dashboard?tab=request">
+                    Start Planning Today
+                    <Calendar className="ml-2 h-5 w-5" />
+                  </Link>
                 </Button>
                 <Button variant="outline" size="lg" className="px-8 py-4 text-base font-semibold" asChild>
                   <Link to="/about">
@@ -485,9 +487,11 @@ const Index = () => {
               <Button
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
-                  onClick={() => setInquiryDialogOpen(true)}>
-                Start Planning 
-                <Calendar className="ml-2 h-5 w-5" />
+                  asChild>
+                  <Link to="/client/dashboard?tab=request">
+                    Start Planning
+                    <Calendar className="ml-2 h-5 w-5" />
+                  </Link>
               </Button>
               <Button variant="outline" size="lg" className="px-8 py-4 text-base font-semibold" asChild>
                 <Link to="/portfolio">

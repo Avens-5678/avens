@@ -22,6 +22,7 @@ type EventRequestFormData = z.infer<typeof eventRequestSchema>;
 
 interface EventRequestFormProps {
   onSuccess?: () => void;
+  defaultEventType?: string;
 }
 
 const eventTypes = [
@@ -33,6 +34,9 @@ const eventTypes = [
   "Government Event",
   "Sports Event",
   "Concert",
+  "Entertainment Event",
+  "Healthcare Event",
+  "Equipment Rental",
   "Other",
 ];
 
@@ -44,13 +48,31 @@ const budgetRanges = [
   "₹10,00,000+",
 ];
 
-const EventRequestForm = ({ onSuccess }: EventRequestFormProps) => {
+// Map URL event type slugs to form values
+function mapEventTypeSlug(slug: string): string {
+  const map: Record<string, string> = {
+    "corporate-exhibitions": "Corporate Event",
+    "corporate": "Corporate Event",
+    "wedding-events": "Wedding",
+    "government-events": "Government Event",
+    "entertainment-lifestyle": "Entertainment Event",
+    "sports-outdoor": "Sports Event",
+    "healthcare-medical": "Healthcare Event",
+    "equipment-rental": "Equipment Rental",
+    "birthday-parties": "Birthday Party",
+  };
+  return map[slug] || "";
+}
+
+const EventRequestForm = ({ onSuccess, defaultEventType }: EventRequestFormProps) => {
   const { mutate: createRequest, isPending } = useCreateEventRequest();
+
+  const resolvedDefault = defaultEventType ? mapEventTypeSlug(defaultEventType) : "";
 
   const form = useForm<EventRequestFormData>({
     resolver: zodResolver(eventRequestSchema),
     defaultValues: {
-      event_type: "",
+      event_type: resolvedDefault,
       event_date: "",
       location: "",
       budget: "",
@@ -85,7 +107,7 @@ const EventRequestForm = ({ onSuccess }: EventRequestFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Event Type *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select event type" />
@@ -157,7 +179,7 @@ const EventRequestForm = ({ onSuccess }: EventRequestFormProps) => {
             render={({ field }) => (
               <FormItem className="md:col-span-2">
                 <FormLabel>Budget Range</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select budget range" />

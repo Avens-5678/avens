@@ -1,11 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
 import EventTracker from "@/components/client/EventTracker";
@@ -21,9 +20,14 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const ClientDashboard = () => {
-  const [activeTab, setActiveTab] = useState("ai");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "ai";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+
+  // Read eventType from URL params for pre-filling
+  const prefilledEventType = searchParams.get("type") || "";
 
   const handleLogout = async () => {
     await signOut();
@@ -92,7 +96,7 @@ const ClientDashboard = () => {
               </p>
             </CardHeader>
             <CardContent>
-              <EventRequestForm onSuccess={() => setActiveTab("tracker")} />
+              <EventRequestForm onSuccess={() => setActiveTab("tracker")} defaultEventType={prefilledEventType} />
             </CardContent>
           </Card>
         );

@@ -1,27 +1,30 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Briefcase, Package, User, ArrowLeft, Bot } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LogOut, Briefcase, Package, User, ArrowLeft, Bot, Plus, Calendar } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import JobBoard from "@/components/vendor/JobBoard";
 import InventoryManager from "@/components/vendor/InventoryManager";
-
 import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
+import EventRequestForm from "@/components/client/EventRequestForm";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: Briefcase, label: "Job Board", value: "jobs" },
+  { icon: Plus, label: "New Request", value: "request" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: User, label: "Profile", value: "profile" },
 ];
 
 const VendorDashboard = () => {
-  const [activeTab, setActiveTab] = useState("ai");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "ai";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
 
@@ -76,9 +79,26 @@ const VendorDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "ai":
-        return null; // Rendered persistently below
+        return null;
       case "jobs":
         return <JobBoard />;
+      case "request":
+        return (
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Request a New Event
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Fill out the form below to submit an event request. Our team will review and assign resources.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <EventRequestForm onSuccess={() => setActiveTab("jobs")} />
+            </CardContent>
+          </Card>
+        );
       case "inventory":
         return <InventoryManager />;
       case "profile":
@@ -95,7 +115,6 @@ const VendorDashboard = () => {
       onTabChange={setActiveTab}
       headerContent={headerContent}
     >
-      {/* Keep chatbot always mounted, toggle visibility */}
       <div className={activeTab === "ai" ? "h-full" : "hidden"}>
         <DashboardChatbot role="vendor" userName={userName} />
       </div>

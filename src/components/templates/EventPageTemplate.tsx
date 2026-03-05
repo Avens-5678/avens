@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import Layout from "@/components/Layout/Layout";
-import InquiryForm from "@/components/Forms/InquiryForm";
 import ScrollReveal from "@/components/ui/scroll-reveal";
 import FloatingParticles from "@/components/ui/floating-particles";
 import MagneticButton from "@/components/ui/magnetic-button";
@@ -136,28 +134,18 @@ export const EventPageTemplate = ({
               </ScrollReveal>
 
               <ScrollReveal animation="elastic" delay={600}>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <MagneticButton 
-                      size="lg" 
-                      className="button-primary px-6 md:px-8 lg:px-12 py-3 md:py-4 text-sm md:text-base lg:text-lg font-semibold rounded-full shadow-2xl"
-                      strength={15}
-                    >
-                      <EventIcon className="mr-2 h-5 w-5" />
-                      Plan My {eventTitle}
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </MagneticButton>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl glass">
-                    <DialogTitle>✨ Start Planning Your {eventTitle}</DialogTitle>
-                    <DialogDescription>Fill out this form to begin your journey</DialogDescription>
-                    <InquiryForm 
-                      formType="inquiry"
-                      eventType={eventType}
-                      title={`Plan Your ${eventTitle}`}
-                    />
-                  </DialogContent>
-                </Dialog>
+                <MagneticButton 
+                  size="lg" 
+                  className="button-primary px-6 md:px-8 lg:px-12 py-3 md:py-4 text-sm md:text-base lg:text-lg font-semibold rounded-full shadow-2xl"
+                  strength={15}
+                  asChild
+                >
+                  <Link to={`/client/dashboard?tab=request&type=${eventType.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <EventIcon className="mr-2 h-5 w-5" />
+                    Plan My {eventTitle}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </MagneticButton>
               </ScrollReveal>
             </ScrollReveal>
 
@@ -421,28 +409,18 @@ export const EventPageTemplate = ({
 
             <ScrollReveal animation="elastic" delay={600}>
               <div className="pt-8">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <MagneticButton 
-                      size="lg" 
-                      className="button-primary px-12 py-4 text-xl font-semibold rounded-full shadow-2xl"
-                      strength={20}
-                    >
-                      <EventIcon className="mr-2 h-6 w-6" />
-                      Start Planning Today
-                      <ArrowRight className="ml-2 h-6 w-6" />
-                    </MagneticButton>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl glass">
-                    <DialogTitle>✨ Let's Create Something Amazing</DialogTitle>
-                    <DialogDescription>Fill out this form to begin your {eventType} planning journey</DialogDescription>
-                    <InquiryForm 
-                      formType="inquiry"
-                      eventType={eventType}
-                      title={`Plan Your ${eventTitle}`}
-                    />
-                  </DialogContent>
-                </Dialog>
+                <MagneticButton 
+                  size="lg" 
+                  className="button-primary px-12 py-4 text-xl font-semibold rounded-full shadow-2xl"
+                  strength={20}
+                  asChild
+                >
+                  <Link to={`/client/dashboard?tab=request&type=${eventType.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <EventIcon className="mr-2 h-6 w-6" />
+                    Start Planning Today
+                    <ArrowRight className="ml-2 h-6 w-6" />
+                  </Link>
+                </MagneticButton>
               </div>
             </ScrollReveal>
           </div>

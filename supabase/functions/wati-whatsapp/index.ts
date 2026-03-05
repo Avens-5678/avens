@@ -73,9 +73,6 @@ Deno.serve(async (req) => {
       const acceptUrl = `${baseUrl}/vendor/action?token=${order.action_token}&action=accept`;
       const quoteUrl = `${baseUrl}/vendor/action?token=${order.action_token}&action=quote`;
 
-      // Build WhatsApp message
-      const message = `🎪 *New Rental Order from Evnting*\n\nHi ${vendorName || "Vendor"},\n\n📦 *Order:* ${order.title}\n📁 *Category:* ${order.equipment_category}\n📍 *Location:* ${order.location || "TBD"}\n📅 *Event Date:* ${order.event_date || "TBD"}\n💰 *Budget:* ${order.budget || "Negotiable"}\n\n📋 *Details:* ${order.equipment_details || "See order for details"}\n\n👉 *Accept this order:*\n${acceptUrl}\n\n💬 *Send a quote:*\n${quoteUrl}\n\nThank you for partnering with Evnting!`;
-
       let whatsappSent = false;
       let watiError = "";
 
@@ -84,33 +81,29 @@ Deno.serve(async (req) => {
         try {
           const phone = vendorPhone.replace(/[^0-9]/g, "");
           const cleanBaseUrl = watiApiUrl.replace(/\/+$/, "");
-          const watiAuthToken = watiApiKey.startsWith("Bearer ") ? watiApiKey : `Bearer ${watiApiKey}`;
+          const watiAuthToken = watiApiKey.startsWith("Bearer ") ? watiApiKey : watiApiKey;
 
+          // Use v1 endpoint: POST /api/v1/sendTemplateMessage/{whatsappNumber}
           const watiResponse = await fetch(
-            `${cleanBaseUrl}/api/v2/sendTemplateMessage`,
+            `${cleanBaseUrl}/api/v1/sendTemplateMessage/${phone}`,
             {
               method: "POST",
               headers: {
-                Authorization: watiAuthToken,
-                "Content-Type": "application/json-patch+json",
+                Authorization: `Bearer ${watiAuthToken}`,
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({
                 template_name: "vendor_order_notification",
                 broadcast_name: `order_${orderId}`,
-                recipients: [
-                  {
-                    phone_number: phone,
-                    custom_params: [
-                      { name: "vendor_name", value: vendorName || "Vendor" },
-                      { name: "order_title", value: order.title },
-                      { name: "category", value: order.equipment_category },
-                      { name: "location", value: order.location || "TBD" },
-                      { name: "event_date", value: order.event_date || "TBD" },
-                      { name: "budget", value: order.budget || "Negotiable" },
-                      { name: "accept_url", value: acceptUrl },
-                      { name: "quote_url", value: quoteUrl },
-                    ],
-                  },
+                parameters: [
+                  { name: "vendor_name", value: vendorName || "Vendor" },
+                  { name: "order_title", value: order.title || "New Order" },
+                  { name: "category", value: order.equipment_category || "General" },
+                  { name: "location", value: order.location || "TBD" },
+                  { name: "event_date", value: order.event_date || "TBD" },
+                  { name: "budget", value: order.budget || "Negotiable" },
+                  { name: "accept_url", value: acceptUrl },
+                  { name: "quote_url", value: quoteUrl },
                 ],
               }),
             }
@@ -120,7 +113,7 @@ Deno.serve(async (req) => {
             whatsappSent = true;
           } else {
             const errText = await watiResponse.text();
-            console.error("Wati API error:", errText);
+            console.error("Wati API error:", watiResponse.status, errText);
             watiError = `WATI API returned ${watiResponse.status}: ${errText || "empty response"}`;
           }
         } catch (err) {

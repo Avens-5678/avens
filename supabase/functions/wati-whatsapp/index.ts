@@ -81,11 +81,11 @@ Deno.serve(async (req) => {
         try {
           const phone = vendorPhone.replace(/[^0-9]/g, "");
           const cleanBaseUrl = watiApiUrl.replace(/\/+$/, "");
-          const watiAuthToken = watiApiKey.startsWith("Bearer ") ? watiApiKey : watiApiKey;
+          const watiAuthToken = watiApiKey.replace(/^Bearer\s+/i, "");
 
-          // Use v1 endpoint: POST /api/v1/sendTemplateMessage/{whatsappNumber}
+          // Use v2 API as per WATI docs
           const watiResponse = await fetch(
-            `${cleanBaseUrl}/api/v1/sendTemplateMessage/${phone}`,
+            `${cleanBaseUrl}/api/v2/sendTemplateMessage`,
             {
               method: "POST",
               headers: {
@@ -95,15 +95,20 @@ Deno.serve(async (req) => {
               body: JSON.stringify({
                 template_name: "vendor_order_notification",
                 broadcast_name: `order_${orderId}`,
-                parameters: [
-                  { name: "vendor_name", value: vendorName || "Vendor" },
-                  { name: "order_title", value: order.title || "New Order" },
-                  { name: "category", value: order.equipment_category || "General" },
-                  { name: "location", value: order.location || "TBD" },
-                  { name: "event_date", value: order.event_date || "TBD" },
-                  { name: "budget", value: order.budget || "Negotiable" },
-                  { name: "accept_url", value: acceptUrl },
-                  { name: "quote_url", value: quoteUrl },
+                recipients: [
+                  {
+                    phone_number: phone,
+                    custom_params: [
+                      { name: "vendor_name", value: vendorName || "Vendor" },
+                      { name: "order_title", value: order.title || "New Order" },
+                      { name: "category", value: order.equipment_category || "General" },
+                      { name: "location", value: order.location || "TBD" },
+                      { name: "event_date", value: order.event_date || "TBD" },
+                      { name: "budget", value: order.budget || "Negotiable" },
+                      { name: "accept_url", value: acceptUrl },
+                      { name: "quote_url", value: quoteUrl },
+                    ],
+                  },
                 ],
               }),
             }

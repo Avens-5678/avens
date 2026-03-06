@@ -84,15 +84,15 @@ Deno.serve(async (req) => {
 
           try {
             const cleanBaseUrl = watiApiUrl.replace(/\/+$/, "");
-            const watiAuthToken = watiApiKey.startsWith("Bearer ") ? watiApiKey : `Bearer ${watiApiKey}`;
+            const watiAuthToken = watiApiKey.replace(/^Bearer\s+/i, "");
 
             const response = await fetch(
               `${cleanBaseUrl}/api/v2/sendTemplateMessage`,
               {
                 method: "POST",
                 headers: {
-                  Authorization: watiAuthToken,
-                  "Content-Type": "application/json-patch+json",
+                  Authorization: `Bearer ${watiAuthToken}`,
+                  "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                   template_name: "reminder",

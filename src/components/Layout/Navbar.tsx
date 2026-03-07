@@ -21,7 +21,7 @@ const Navbar = () => {
       case "admin": return "/admin";
       case "client": return "/client/dashboard";
       case "vendor": return "/vendor/dashboard";
-      default: return "/";
+      default: return "/auth";
     }
   };
 

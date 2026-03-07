@@ -82,6 +82,8 @@ const VendorDashboard = () => {
     switch (activeTab) {
       case "ai":
         return null;
+      case "orders":
+        return <OrderTracker />;
       case "jobs":
         return <JobBoard />;
       case "request":
@@ -97,7 +99,7 @@ const VendorDashboard = () => {
               </p>
             </CardHeader>
             <CardContent>
-              <EventRequestForm onSuccess={() => setActiveTab("jobs")} />
+              <EventRequestForm onSuccess={() => setActiveTab("orders")} />
             </CardContent>
           </Card>
         );

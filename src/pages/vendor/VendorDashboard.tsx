@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Briefcase, Package, User, ArrowLeft, Bot, Plus, Calendar } from "lucide-react";
+import { LogOut, Briefcase, Package, User, ArrowLeft, Bot, Plus, Calendar, ClipboardList } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import JobBoard from "@/components/vendor/JobBoard";
@@ -12,9 +12,11 @@ import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import EventRequestForm from "@/components/client/EventRequestForm";
+import OrderTracker from "@/components/vendor/OrderTracker";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
+  { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Briefcase, label: "Job Board", value: "jobs" },
   { icon: Plus, label: "New Request", value: "request" },
   { icon: Package, label: "Inventory", value: "inventory" },
@@ -80,6 +82,8 @@ const VendorDashboard = () => {
     switch (activeTab) {
       case "ai":
         return null;
+      case "orders":
+        return <OrderTracker />;
       case "jobs":
         return <JobBoard />;
       case "request":
@@ -95,7 +99,7 @@ const VendorDashboard = () => {
               </p>
             </CardHeader>
             <CardContent>
-              <EventRequestForm onSuccess={() => setActiveTab("jobs")} />
+              <EventRequestForm onSuccess={() => setActiveTab("orders")} />
             </CardContent>
           </Card>
         );

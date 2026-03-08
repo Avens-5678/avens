@@ -290,7 +290,7 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
 <div class="content">
   <div class="parties">
     <div class="party-card"><h3>From</h3><p><strong>${s.companyName}</strong><br>${s.companyAddress}${s.gstEnabled ? `<br>GSTIN: ${s.companyGst}` : ""}</p></div>
-    <div class="party-card"><h3>To</h3><p><strong>${data.clientName}</strong>${data.clientEmail ? `<br>${data.clientEmail}` : ""}${data.clientPhone ? `<br>${data.clientPhone}` : ""}</p></div>
+    <div class="party-card"><h3>To</h3><p>${data.clientCompanyName ? `<strong>${data.clientCompanyName}</strong><br>` : ""}<strong>${data.clientName}</strong>${data.clientEmail ? `<br>${data.clientEmail}` : ""}${data.clientPhone ? `<br>${data.clientPhone}` : ""}${s.clientGstInline}</p></div>
   </div>
   <table class="items"><thead><tr><th>Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
   <div class="bottom">

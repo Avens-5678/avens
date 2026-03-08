@@ -39,6 +39,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const QuoteAcceptance = lazy(() => import("./pages/QuoteAcceptance"));
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/quote/:token" element={<QuoteAcceptance />} />
               
               {/* Auth Routes */}
               <Route path="/auth" element={<Auth />} />

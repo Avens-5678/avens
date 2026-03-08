@@ -49,9 +49,9 @@ const EventTracker = () => {
       <Card>
         <CardContent className="py-12 text-center">
           <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No Event Requests Yet</h3>
+          <h3 className="text-lg font-semibold mb-2">No Service Requests Yet</h3>
           <p className="text-muted-foreground">
-            Submit your first event request to get started!
+            Submit your first service request to get started!
           </p>
         </CardContent>
       </Card>

@@ -91,7 +91,7 @@ const EventCenter = () => {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
@@ -122,6 +122,14 @@ const EventCenter = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{rentalOrders?.length || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Service Orders</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{serviceOrders?.length || 0}</div>
           </CardContent>
         </Card>
         <Card>

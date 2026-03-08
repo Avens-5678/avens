@@ -194,7 +194,7 @@ table.items tbody td { padding:10px 14px; border-bottom:1px solid #eee; font-siz
 </style></head><body>
 <div class="header">
   <div class="logo"><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
-  <div class="meta"><div><span class="label">Quotation:</span><span class="value">${s.qNum}</span></div><div><span class="label">Date:</span><span class="value">${s.dateStr}</span></div></div>
+  <div class="meta"><div><span class="label">Quotation:</span><span class="value">${s.qNum}</span></div><div><span class="label">Date:</span><span class="value">${s.dateStr}</span></div>${s.orderRef ? `<div><span class="label">${s.orderRef}</span></div>` : ""}</div>
 </div>
 <div class="quote-badge"><span>QUOTATION</span></div>
 <div class="parties">

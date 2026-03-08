@@ -71,7 +71,9 @@ const Cart = () => {
 
       const normalizedPhone = eventDetails.contact_number ? normalizePhoneNumber(eventDetails.contact_number) : null;
 
+      const orderId = crypto.randomUUID();
       const { error } = await supabase.from("rental_orders").insert({
+        id: orderId,
         title: `Cart Enquiry - ${items.length} item(s)`,
         equipment_category: "Cart Order",
         equipment_details: JSON.stringify({ cart_items: cartPayload, event_details: eventDetails }),

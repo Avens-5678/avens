@@ -11,6 +11,8 @@ export interface QuotePrintData {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
+  clientCompanyName?: string;
+  clientGst?: string;
   lineItems: Array<{
     item_description: string;
     quantity: number;

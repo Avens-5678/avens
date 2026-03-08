@@ -210,6 +210,8 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       clientName,
       clientEmail,
       clientPhone,
+      clientCompanyName: clientCompanyName || undefined,
+      clientGst: clientGst || undefined,
       lineItems,
       subtotal: calculations.subtotal,
       discountType,

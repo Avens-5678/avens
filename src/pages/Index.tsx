@@ -75,6 +75,8 @@ const Index = () => {
   const touchEndX = useRef<number | null>(null);
   const [showArrows, setShowArrows] = useState(true);
   const arrowTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoRotateRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Filter data
   const homeServices = services?.filter((s) => s.show_on_home && s.is_active) || [];

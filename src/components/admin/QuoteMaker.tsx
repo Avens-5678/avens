@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRentalOrders } from "@/hooks/useRentalOrders";
 import { useServiceOrders } from "@/hooks/useServiceOrders";
 import { useCreateQuote, useQuotes, useQuoteVersions, type QuoteLineItem, type Quote } from "@/hooks/useQuotes";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, Calculator, Mail, MessageSquare, Download, PackageSearch, Copy, History, Palette } from "lucide-react";

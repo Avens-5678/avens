@@ -8,6 +8,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
 import EventTracker from "@/components/client/EventTracker";
+import PastOrders from "@/components/client/PastOrders";
 import ClientProfileSettings from "@/components/client/ClientProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";

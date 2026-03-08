@@ -13,6 +13,7 @@ import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import EventRequestForm from "@/components/client/EventRequestForm";
 import OrderTracker from "@/components/vendor/OrderTracker";
+import PastOrders from "@/components/client/PastOrders";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },

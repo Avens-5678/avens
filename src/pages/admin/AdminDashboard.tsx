@@ -92,6 +92,8 @@ const menuGroups: MenuGroup[] = [
       { label: "Services", value: "services" },
       { label: "Events", value: "events" },
       { label: "Rentals", value: "rentals" },
+      { label: "Promo Banners", value: "promo-banners" },
+      { label: "Trust Strip", value: "trust-strip" },
       { label: "Portfolio", value: "portfolio" },
       { label: "Clients", value: "clients" },
       { label: "Reviews", value: "testimonials" },

@@ -360,10 +360,8 @@ const Index = () => {
         </Section>
         }
 
-      <SectionDivider variant="gradient" />
-
       {/* Equipment Rental Section */}
-      <Section spacing="large" variant="muted" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_600px_at_0%_100%,hsl(var(--secondary)/0.06),transparent)] before:pointer-events-none">
+      <Section spacing="default" variant="muted" className="relative overflow-hidden">
         <BackgroundPattern variant="dots" />
         <div className="container mx-auto px-4">
           <ScrollReveal animation="fade-in-up">

@@ -3,6 +3,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 import { syncRentalOrderToZohoProducts } from "@/utils/zohoSync";
 
+const sendRentalConfirmationWhatsApp = async (order: {
+  id: string;
+  client_name?: string | null;
+  client_phone?: string | null;
+}) => {
+  if (!order.client_phone) return;
+  try {
+    await supabase.functions.invoke("wati-rental-confirmation", {
+      body: {
+        phone: order.client_phone,
+        name: order.client_name || "Customer",
+        order_id: order.id,
+      },
+    });
+  } catch (err) {
+    console.error("WhatsApp rental confirmation failed:", err);
+  }
+};
+
 export interface RentalOrder {
   id: string;
   title: string;
@@ -87,8 +106,8 @@ export const useCreateRentalOrder = () => {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["rental_orders"] });
       toast({ title: "Order Created", description: "Rental order has been created." });
-      // Sync to Zoho CRM Products
       syncRentalOrderToZohoProducts('create', result);
+      sendRentalConfirmationWhatsApp(result);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

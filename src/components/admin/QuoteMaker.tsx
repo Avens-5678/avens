@@ -287,7 +287,10 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       );
     }
 
-    const link = `${window.location.origin}/quote/${createdQuote.acceptance_token}`;
+    const baseUrl = window.location.hostname.includes("lovableproject.com") || window.location.hostname.includes("lovable.app")
+      ? "https://evnting.com"
+      : window.location.origin;
+    const link = `${baseUrl}/quote/${createdQuote.acceptance_token}`;
     await navigator.clipboard.writeText(link);
     toast({ title: "Acceptance Link Copied!", description: "Share this link with the client to accept & sign." });
   };

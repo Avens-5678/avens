@@ -78,13 +78,17 @@ const EnhancedEcommerce = () => {
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-background via-muted/10 to-primary/5">
-        {/* Hero Banner */}
+        {/* Hero Banner with Video */}
         <section className="relative w-full h-[320px] sm:h-[380px] lg:h-[420px] overflow-hidden">
-          <img
-            src={ecommerceBanner}
-            alt="Premium Event Rentals"
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
             className="absolute inset-0 w-full h-full object-cover"
-          />
+          >
+            <source src="/videos/event-hero.mp4" type="video/mp4" />
+          </video>
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
             <AnimatedText>

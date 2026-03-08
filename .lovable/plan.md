@@ -1,77 +1,105 @@
 
 
-# AI Chatbot for Client and Vendor Dashboards
+## Quote Maker Feature Assessment & Enhancement Plan
 
-## Overview
-Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
+### Current State
 
-## What the Chatbot Does
+| Feature | Status | Details |
+|---------|--------|---------|
+| **Dynamic Templates** | Missing | Only 1 hardcoded orange/Evnting template in `QuotePrintTemplate.ts` |
+| **Tax & Discount Engine** | Partial | GST % and flat/percent discount exist. No VAT, no tiered discounts |
+| **Pick-list Integration** | Missing | All line items are typed manually. No connection to `rentals` or `services` tables |
+| **Digital Signature** | Missing | No signature capability at all |
+| **Version Control** | Missing | Each save creates a new quote record; no parent/version tracking |
 
-**For Clients:**
-- Help plan events (suggest themes, budgets, timelines)
-- Guide through creating event requests
-- Answer questions about event status and vendor assignments
-- Provide rental equipment recommendations
+---
 
-**For Vendors:**
-- Help with listing creation and pricing strategies
-- Guide through inventory management
-- Answer questions about assigned jobs
-- Provide marketplace tips and best practices
+### Implementation Plan
 
-## UI Design (Reference Image Style)
+#### 1. Dynamic Professional Templates
+Add a template selector (Modern, Classic, Creative) to QuoteMaker. Each template is a different HTML layout in `QuotePrintTemplate.ts` with distinct color schemes and typography.
 
-The chat tab will feature:
-- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
-- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
-- Markdown rendering for AI responses
-- Typing indicator animation while streaming
-- Message input bar at the bottom with send button
-- Smooth token-by-token streaming display
+- **QuoteMaker.tsx**: Add template dropdown state (`modern` | `classic` | `creative`)
+- **QuotePrintTemplate.ts**: Refactor into 3 template generators sharing the same data interface but with different styles/layouts
+- Pass selected template to `downloadQuoteAsPDF()`
 
-## Technical Plan
+#### 2. Enhanced Tax & Discount Engine
+Extend the existing calculations to support:
+- GST / VAT toggle (tax type selector)
+- Tiered discounts: multiple discount rows (e.g., 10% on first 50k, 5% on rest)
 
-### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
-- Accepts `{ messages, role: "client" | "vendor" }` in the request body
-- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
-- Role-specific system prompts:
-  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
-  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
-- Returns SSE stream for token-by-token rendering
-- Handles 429/402 errors gracefully
+Changes:
+- **QuoteMaker.tsx**: Replace single discount with array of discount tiers. Add tax type selector (GST/VAT/None).
+- **Calculations memo**: Update to process tiered discounts sequentially
+- **QuotePrintTemplate.ts**: Render multiple discount rows
+- **Database**: Add `tax_type` column to `quotes` table via migration
 
-### 2. Update `supabase/config.toml`
-- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
+#### 3. Inventory/Service Pick-list
+Add a searchable product picker that pulls from the `rentals` and `services` tables to auto-fill line items.
 
-### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
-- Props: `role: "client" | "vendor"` and `userName: string`
-- **Home screen**: Greeting + quick-action chips in a card grid layout
-- **Chat view**: Scrollable message list with streaming support
-- Uses `react-markdown` (already available or will add) for rendering
-- SSE streaming via fetch to the edge function
-- Conversation stored in local React state (no persistence needed)
-- Framer Motion for message entrance animations
+Changes:
+- **QuoteMaker.tsx**: Add a "Pick from Catalog" button next to "Add Item" that opens a searchable dialog
+- New component: **QuotePicklistDialog.tsx** — fetches from `rentals` table, displays searchable list with prices, clicking adds to line items with pre-filled description, unit, and price
+- Also allow picking from `services` table
 
-### 4. Update `src/pages/client/ClientDashboard.tsx`
-- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
-- Render `<DashboardChatbot role="client" userName={...} />` when active
+#### 4. Digital Signature Integration
+Create a public quote acceptance page where clients can view and sign quotes.
 
-### 5. Update `src/pages/vendor/VendorDashboard.tsx`
-- Add same "AI Assistant" sidebar item
-- Render `<DashboardChatbot role="vendor" userName={...} />` when active
+Changes:
+- **Database migration**: Add `signature_url`, `signed_at`, `acceptance_token` columns to `quotes` table
+- **New page**: `src/pages/QuoteAcceptance.tsx` — public route `/quote/:token` that displays quote details and a "Accept & Sign" button
+- **Signature capture**: Use a canvas-based signature pad (simple HTML canvas, no external lib needed)
+- **Storage**: Save signature image to `general-uploads` bucket
+- **QuoteMaker.tsx**: Add "Copy Acceptance Link" button that generates the token URL
+- **Route**: Add to `App.tsx`
 
-## File Changes Summary
+#### 5. Version Control
+Track quote revisions so admin can see v1, v2, v3 history.
+
+Changes:
+- **Database migration**: Add `version` (int, default 1) and `parent_quote_id` (uuid, nullable, self-ref) columns to `quotes` table
+- **QuoteMaker.tsx**: Add "Revise Quote" action on existing quotes that creates a new version linked to the parent
+- **useQuotes.ts**: Add `useQuoteVersions(parentId)` hook to fetch all versions
+- **QuoteMaker.tsx**: Show version history panel when editing a quote with previous versions
+
+---
+
+### Database Migration (single migration)
+
+```sql
+ALTER TABLE quotes
+  ADD COLUMN IF NOT EXISTS tax_type text DEFAULT 'gst',
+  ADD COLUMN IF NOT EXISTS template text DEFAULT 'modern',
+  ADD COLUMN IF NOT EXISTS version integer DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS parent_quote_id uuid REFERENCES quotes(id),
+  ADD COLUMN IF NOT EXISTS acceptance_token text DEFAULT encode(gen_random_bytes(16), 'hex'),
+  ADD COLUMN IF NOT EXISTS signature_url text,
+  ADD COLUMN IF NOT EXISTS signed_at timestamptz;
+
+-- Public can view quotes by acceptance token (for signature page)
+CREATE POLICY "Public can view quote by token"
+  ON quotes FOR SELECT
+  USING (acceptance_token IS NOT NULL AND acceptance_token != '');
+
+-- Public can update signature fields by token
+CREATE POLICY "Public can sign quote by token"
+  ON quotes FOR UPDATE
+  USING (acceptance_token IS NOT NULL)
+  WITH CHECK (acceptance_token IS NOT NULL);
+```
+
+### Files to Create/Edit
 
 | File | Action |
 |------|--------|
-| `supabase/functions/dashboard-chat/index.ts` | Create |
-| `supabase/config.toml` | Edit (add function entry) |
-| `src/components/dashboard/DashboardChatbot.tsx` | Create |
-| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
-| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
+| `src/components/admin/QuoteMaker.tsx` | Major rewrite — add template selector, pick-list button, tiered discounts, version history, acceptance link |
+| `src/components/admin/QuotePrintTemplate.ts` | Refactor into 3 template layouts |
+| `src/components/admin/QuotePicklistDialog.tsx` | New — searchable catalog picker dialog |
+| `src/hooks/useQuotes.ts` | Add `useQuoteVersions`, update Quote interface with new fields |
+| `src/pages/QuoteAcceptance.tsx` | New — public quote view + signature page |
+| `src/App.tsx` | Add `/quote/:token` route |
+| Database migration | Add columns listed above |
 
-## Dependencies
-- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
-- Uses existing `framer-motion` for animations
-- Uses existing Supabase client for auth token in fetch calls
+### Scope Note
+This is a substantial enhancement (~6 files, 1 migration). The digital signature uses a simple HTML canvas approach (no external library) to keep dependencies minimal.
 

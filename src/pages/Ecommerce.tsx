@@ -57,9 +57,7 @@ const Ecommerce = () => {
     let results = rentals.filter((rental) => {
       const matchesSearch =
         !searchTerm ||
-        rental.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        rental.short_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        rental.search_keywords?.toLowerCase().includes(searchTerm.toLowerCase());
+        rental.title.toLowerCase().includes(searchTerm.toLowerCase());
       const allCats = [...selectedCategories];
       if (activeQuickCat && !allCats.includes(activeQuickCat)) allCats.push(activeQuickCat);
       if (searchCategory && !allCats.includes(searchCategory)) allCats.push(searchCategory);

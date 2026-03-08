@@ -18,6 +18,9 @@ import { StatsContainer, StatCard } from "@/components/ui/elegant-stats";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ServiceScrollContainer } from "@/components/ui/service-scroll-container";
+import { CursorTrail } from "@/components/ui/cursor-trail";
+import { MagneticButton } from "@/components/ui/magnetic-button";
+import { TiltCard } from "@/components/ui/tilt-card";
 
 // Lazy load heavy/below-fold components
 const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));
@@ -106,6 +109,7 @@ const Index = () => {
 
   return (
     <>
+    {!isMobile && <CursorTrail color="hsl(222, 65%, 42%)" size={24} duration={0.6} />}
     <Layout>
       {/* Hero Section - Simple, no heavy animations */}
       <HeroSection
@@ -170,25 +174,27 @@ const Index = () => {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up opacity-0"
             style={{ animationDelay: '0.6s', animationDuration: '0.8s', animationFillMode: 'forwards' }}
           >
-            <Button
+            <MagneticButton
                 size="lg"
+                strength={15}
                 className="bg-secondary hover:bg-secondary/90 text-white px-8 py-4 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl"
                 asChild>
               <Link to={`/events/${currentBanner?.event_type?.toLowerCase().replace(/\s+/g, '-') || 'corporate'}`}>
                 {currentBanner?.button_text || "Explore Services"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
-            </Button>
-            <Button
+            </MagneticButton>
+            <MagneticButton
                 variant="outline"
                 size="lg"
+                strength={15}
                 className="backdrop-blur-md bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white px-8 py-4 text-base font-semibold rounded-xl"
                 asChild>
               <Link to="/portfolio">
                 View Portfolio
                 <Camera className="ml-2 h-5 w-5" />
               </Link>
-            </Button>
+            </MagneticButton>
           </div>
         </div>
 
@@ -245,9 +251,9 @@ const Index = () => {
 
             <ServiceScrollContainer items={homeServices}>
               {homeServices.map((service) =>
+              <TiltCard key={service.id} tiltDegree={8} scale={1.02} glareMaxOpacity={0.15} className="h-full">
               <GlassmorphismCard
-                key={service.id}
-                className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300"
+                className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 h-full"
                 variant="subtle">
 
                   <div className="space-y-2.5 md:space-y-4">
@@ -276,6 +282,7 @@ const Index = () => {
                     </div>
                   </div>
                 </GlassmorphismCard>
+              </TiltCard>
               )}
           </ServiceScrollContainer>
             }

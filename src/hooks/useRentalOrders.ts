@@ -3,12 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 import { syncRentalOrderToZohoProducts } from "@/utils/zohoSync";
 
-const sendRentalConfirmationWhatsApp = async (order: {
-  id: string;
-  client_name?: string | null;
-  client_phone?: string | null;
-}) => {
-  if (!order.client_phone) return;
+const sendRentalConfirmationWhatsApp = async (
+  order: {
+    id: string;
+    client_name?: string | null;
+    client_phone?: string | null;
+  },
+  toastFn?: (opts: { title: string; description: string; variant?: "destructive" }) => void
+) => {
+  if (!order.client_phone) {
+    toastFn?.({ title: "WhatsApp Not Sent", description: "No client phone number provided.", variant: "destructive" });
+    return;
+  }
   try {
     await supabase.functions.invoke("wati-rental-confirmation", {
       body: {

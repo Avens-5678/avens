@@ -36,7 +36,6 @@ const baseSchema = {
 const registerSchema = z.object(baseSchema).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-});
 }).refine((data) => {
   if (data.role === "vendor") {
     return !!data.companyName && data.companyName.length >= 2;

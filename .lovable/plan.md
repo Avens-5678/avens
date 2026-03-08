@@ -1,77 +1,43 @@
 
 
-# AI Chatbot for Client and Vendor Dashboards
+# Professional Product Detail Page + Quick Cart Sidebar
 
-## Overview
-Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
+## What We're Building
 
-## What the Chatbot Does
+1. **Quick Cart Slide-out Panel** — When user clicks "Add to Cart" on the PDP, a right-side sheet slides in showing:
+   - Cart items with images, prices, quantities
+   - "You May Also Like" section with 4-6 random products from the same category
+   - Subtotal summary
+   - "View Cart & Enquire" CTA + "Continue Shopping" button
 
-**For Clients:**
-- Help plan events (suggest themes, budgets, timelines)
-- Guide through creating event requests
-- Answer questions about event status and vendor assignments
-- Provide rental equipment recommendations
+2. **Professional Product Detail Page** — Upgrade the PDP to use the same EcommerceHeader (consistent navigation), add:
+   - "You May Also Like" horizontal scroll section at the bottom
+   - Trust badges below the Add to Cart button (Free Delivery, Assured Quality, etc.)
+   - Better visual hierarchy with rating display and share button
 
-**For Vendors:**
-- Help with listing creation and pricing strategies
-- Guide through inventory management
-- Answer questions about assigned jobs
-- Provide marketplace tips and best practices
+## Files to Create/Modify
 
-## UI Design (Reference Image Style)
+### New: `src/components/ecommerce/QuickCartSheet.tsx`
+- Uses Radix Sheet (slide from right)
+- Shows cart items (image, title, price, qty, remove)
+- "Suggested Products" section: pulls 4-6 random rentals excluding current cart items
+- Each suggestion has image + title + price + "View" button that navigates to PDP
+- Footer: subtotal + "View Cart" button + "Continue Shopping" button
 
-The chat tab will feature:
-- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
-- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
-- Markdown rendering for AI responses
-- Typing indicator animation while streaming
-- Message input bar at the bottom with send button
-- Smooth token-by-token streaming display
+### Modified: `src/pages/ProductDetail.tsx`
+- Replace `<Layout>` with `<Layout hideNavbar>` + `<EcommerceHeader>` for consistent e-commerce navigation
+- Add QuickCartSheet — opens automatically after "Add to Cart"
+- Add trust badges row below CTA (Assured Quality, Free Delivery, 24/7 Support)
+- Add "You May Also Like" section at bottom with horizontal scroll of same-category products
+- Add rating display with stars if rental has rating
 
-## Technical Plan
+### Modified: `src/components/ecommerce/EnhancedProductCard.tsx`
+- No major changes, already professional
 
-### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
-- Accepts `{ messages, role: "client" | "vendor" }` in the request body
-- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
-- Role-specific system prompts:
-  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
-  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
-- Returns SSE stream for token-by-token rendering
-- Handles 429/402 errors gracefully
-
-### 2. Update `supabase/config.toml`
-- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
-
-### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
-- Props: `role: "client" | "vendor"` and `userName: string`
-- **Home screen**: Greeting + quick-action chips in a card grid layout
-- **Chat view**: Scrollable message list with streaming support
-- Uses `react-markdown` (already available or will add) for rendering
-- SSE streaming via fetch to the edge function
-- Conversation stored in local React state (no persistence needed)
-- Framer Motion for message entrance animations
-
-### 4. Update `src/pages/client/ClientDashboard.tsx`
-- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
-- Render `<DashboardChatbot role="client" userName={...} />` when active
-
-### 5. Update `src/pages/vendor/VendorDashboard.tsx`
-- Add same "AI Assistant" sidebar item
-- Render `<DashboardChatbot role="vendor" userName={...} />` when active
-
-## File Changes Summary
-
-| File | Action |
-|------|--------|
-| `supabase/functions/dashboard-chat/index.ts` | Create |
-| `supabase/config.toml` | Edit (add function entry) |
-| `src/components/dashboard/DashboardChatbot.tsx` | Create |
-| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
-| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
-
-## Dependencies
-- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
-- Uses existing `framer-motion` for animations
-- Uses existing Supabase client for auth token in fetch calls
+## Technical Details
+- QuickCartSheet receives `open`/`onOpenChange` props + `allRentals` for suggestions
+- Suggestions filtered: same category as current product, exclude items already in cart, randomized, limit 6
+- Uses existing `useCart` Zustand store
+- Sheet uses `@radix-ui/react-dialog` via the existing `sheet.tsx` component
+- Recently viewed tracking via localStorage (store last 10 product IDs)
 

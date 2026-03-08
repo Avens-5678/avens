@@ -5,6 +5,7 @@ import { useEventRequests } from "@/hooks/useEventRequests";
 import { useRentalOrders } from "@/hooks/useRentalOrders";
 import { Loader2, Calendar, MapPin, Users, Package, CheckCircle2, Clock } from "lucide-react";
 import { format } from "date-fns";
+import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",

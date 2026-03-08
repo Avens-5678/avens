@@ -227,8 +227,8 @@ const LiveServiceOrders = () => {
         <Card>
           <CardContent className="text-center py-12">
             <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">No service orders found</h3>
-            <p className="text-muted-foreground text-sm">Create your first service order or adjust filters.</p>
+             <h3 className="text-lg font-medium">No event requests found</h3>
+             <p className="text-muted-foreground text-sm">Create your first event request or adjust filters.</p>
           </CardContent>
         </Card>
       ) : (

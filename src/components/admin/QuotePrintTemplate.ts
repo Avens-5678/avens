@@ -183,7 +183,7 @@ table.items tbody td { font-size:13px; }
 </div>
 <div class="parties">
   <div class="party-box"><h3>Quotation By</h3><p><strong>${s.companyName}</strong></p><p>${s.companyAddress}</p>${s.gstPanHtml}</div>
-  <div class="party-box"><h3>Quotation To</h3><p><strong>${data.clientName}</strong></p>${data.clientEmail ? `<p>Email: ${data.clientEmail}</p>` : ""}${data.clientPhone ? `<p>Phone: ${data.clientPhone}</p>` : ""}</div>
+  <div class="party-box"><h3>Quotation To</h3>${s.clientCompanyHtml}<p><strong>${data.clientName}</strong></p>${data.clientEmail ? `<p>Email: ${data.clientEmail}</p>` : ""}${data.clientPhone ? `<p>Phone: ${data.clientPhone}</p>` : ""}${s.clientGstHtml}</div>
 </div>
 <table class="items"><thead><tr><th>Item # / Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
 <div class="bottom-section">

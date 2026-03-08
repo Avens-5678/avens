@@ -1,77 +1,57 @@
 
 
-# AI Chatbot for Client and Vendor Dashboards
+# Making /ecommerce Professional — Amazon/Flipkart Level
 
-## Overview
-Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
+## Current State
+The page already has: video hero, category strip, sidebar filters, grid/list views, search, and product cards. It's functional but lacks the polish and trust signals of major e-commerce platforms.
 
-## What the Chatbot Does
+## Proposed Improvements
 
-**For Clients:**
-- Help plan events (suggest themes, budgets, timelines)
-- Guide through creating event requests
-- Answer questions about event status and vendor assignments
-- Provide rental equipment recommendations
+### 1. Compact Header Bar with Delivery Location + Search + Account/Cart
+Replace the large video hero with a **slim, always-visible top bar** (Amazon-style):
+- Logo on left
+- Delivery location pin ("Deliver to Hyderabad")
+- Wide search bar with category dropdown inside
+- Account/Sign-in link + Orders link + Cart icon with count
+- The video hero becomes a **smaller promotional banner/carousel** below
 
-**For Vendors:**
-- Help with listing creation and pricing strategies
-- Guide through inventory management
-- Answer questions about assigned jobs
-- Provide marketplace tips and best practices
+### 2. Deals & Trust Strip
+Add a horizontal strip below the header:
+- "Free Delivery on orders above ₹10,000" | "Trusted by 500+ Events" | "24/7 Support" | "Easy Returns"
+- Uses icons + short text, single row
 
-## UI Design (Reference Image Style)
+### 3. Enhanced Product Cards (Flipkart-style)
+- **Assured/Verified badge** on products with ratings > 4
+- **Discount tag** (e.g., "20% off") if original price exists
+- **Delivery estimate** text ("Get it by Mar 12")
+- **Sponsored/Featured** label for premium items
+- Hover: subtle scale + shadow, no jarring animations
 
-The chat tab will feature:
-- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
-- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
-- Markdown rendering for AI responses
-- Typing indicator animation while streaming
-- Message input bar at the bottom with send button
-- Smooth token-by-token streaming display
+### 4. Sort Bar with Results Count
+Add sorting options to the toolbar:
+- "Relevance", "Price: Low to High", "Price: High to Low", "Newest First", "Rating"
+- Show "1-24 of 156 results for 'Lighting'"
 
-## Technical Plan
+### 5. Recently Viewed / Recommended Section
+Add a horizontal scroll section at the bottom:
+- "Recently Viewed Items" or "You May Also Like"
+- Uses localStorage to track viewed product IDs
 
-### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
-- Accepts `{ messages, role: "client" | "vendor" }` in the request body
-- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
-- Role-specific system prompts:
-  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
-  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
-- Returns SSE stream for token-by-token rendering
-- Handles 429/402 errors gracefully
+### 6. Breadcrumb Navigation
+Add breadcrumbs below the filter bar:
+- "Home > Equipment Rental > Lighting" (based on active category)
 
-### 2. Update `supabase/config.toml`
-- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
+### 7. Quick View on Hover (Desktop)
+On desktop card hover, show a small overlay with key specs and "Quick View" button that opens a modal with product summary without navigating away.
 
-### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
-- Props: `role: "client" | "vendor"` and `userName: string`
-- **Home screen**: Greeting + quick-action chips in a card grid layout
-- **Chat view**: Scrollable message list with streaming support
-- Uses `react-markdown` (already available or will add) for rendering
-- SSE streaming via fetch to the edge function
-- Conversation stored in local React state (no persistence needed)
-- Framer Motion for message entrance animations
+## Files to Modify
+- `src/pages/Ecommerce.tsx` — Major restructure: compact header, sort bar, trust strip, enhanced cards, recently viewed section
+- `src/components/ui/product-image-carousel.tsx` — May need minor tweaks for card hover states
 
-### 4. Update `src/pages/client/ClientDashboard.tsx`
-- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
-- Render `<DashboardChatbot role="client" userName={...} />` when active
+## Implementation Priority
+This is a large change. I recommend breaking it into phases:
 
-### 5. Update `src/pages/vendor/VendorDashboard.tsx`
-- Add same "AI Assistant" sidebar item
-- Render `<DashboardChatbot role="vendor" userName={...} />` when active
+**Phase 1** (this session): Compact search header, trust strip, sort functionality, enhanced product cards with delivery estimates and discount badges, breadcrumbs
 
-## File Changes Summary
-
-| File | Action |
-|------|--------|
-| `supabase/functions/dashboard-chat/index.ts` | Create |
-| `supabase/config.toml` | Edit (add function entry) |
-| `src/components/dashboard/DashboardChatbot.tsx` | Create |
-| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
-| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
-
-## Dependencies
-- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
-- Uses existing `framer-motion` for animations
-- Uses existing Supabase client for auth token in fetch calls
+**Phase 2** (next session): Recently viewed section, quick view modal, personalized recommendations
 

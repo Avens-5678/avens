@@ -108,7 +108,11 @@ function getSharedData(data: QuotePrintData) {
 
   const orderRef = data.sourceOrderId ? `Order Ref: #${data.sourceOrderId.substring(0, 8).toUpperCase()}` : "";
 
-  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef, gstEnabled, companyName, companyAddress, companyPhone, companyEmail, companyGst, companyPan, gstPanHtml, gstPanInline, logoHtml };
+  const clientCompanyHtml = data.clientCompanyName ? `<p><strong>${data.clientCompanyName}</strong></p>` : "";
+  const clientGstHtml = gstEnabled && data.clientGst ? `<p><span class="label">GSTIN</span> ${data.clientGst}</p>` : "";
+  const clientGstInline = gstEnabled && data.clientGst ? `<br>GSTIN: ${data.clientGst}` : "";
+
+  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef, gstEnabled, companyName, companyAddress, companyPhone, companyEmail, companyGst, companyPan, gstPanHtml, gstPanInline, logoHtml, clientCompanyHtml, clientGstHtml, clientGstInline };
 }
 
 function buildTerms(notes: string) {

@@ -54,6 +54,8 @@ const EventCenter = () => {
   const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateEventStatus();
   const { data: rentalOrders, isLoading: rentalsLoading } = useRentalOrders();
   const { mutate: updateRentalOrder, isPending: isUpdatingRental } = useUpdateRentalOrder();
+  const { data: serviceOrders, isLoading: servicesLoading } = useServiceOrders();
+  const { mutate: updateServiceOrder, isPending: isUpdatingService } = useUpdateServiceOrder();
   const [selectedVendor, setSelectedVendor] = useState<Record<string, string>>({});
 
   const handleAssign = (requestId: string) => {

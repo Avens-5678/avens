@@ -69,54 +69,17 @@ const TrackOrder = () => {
     setSearched(true);
 
     try {
-      // Try rental_orders first
-      const { data: rental } = await supabase
-        .from("rental_orders")
-        .select("*")
-        .eq("id", trimmed)
-        .maybeSingle();
+      const { data, error: rpcError } = await supabase.rpc("lookup_order_by_id", {
+        order_id: trimmed,
+      });
 
-      if (rental) {
-        setOrder({
-          type: "rental",
-          id: rental.id,
-          title: rental.title,
-          status: rental.status,
-          created_at: rental.created_at,
-          event_date: rental.event_date,
-          location: rental.location,
-          client_name: rental.client_name,
-          details: rental.equipment_details,
-          vendor_quote_amount: rental.vendor_quote_amount,
-        });
+      if (rpcError || !data) {
+        setError("No order found with this ID. Please check and try again.");
         setLoading(false);
         return;
       }
 
-      // Try service_orders
-      const { data: service } = await supabase
-        .from("service_orders")
-        .select("*")
-        .eq("id", trimmed)
-        .maybeSingle();
-
-      if (service) {
-        setOrder({
-          type: "service",
-          id: service.id,
-          title: service.title,
-          status: service.status,
-          created_at: service.created_at,
-          event_date: service.event_date,
-          location: service.location,
-          client_name: service.client_name,
-          details: service.service_details,
-        });
-        setLoading(false);
-        return;
-      }
-
-      setError("No order found with this ID. Please check and try again.");
+      setOrder(data as OrderResult);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

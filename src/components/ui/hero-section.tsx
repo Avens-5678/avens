@@ -53,7 +53,7 @@ export function HeroSection({
         
         {/* Dark overlay for readability over images */}
         {overlay && resolvedImage && (
-          <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/50 to-foreground/70 rounded-2xl md:rounded-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 rounded-2xl md:rounded-none" />
         )}
         
         {/* Ambient decoration — subtle, not distracting */}

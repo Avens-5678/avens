@@ -22,8 +22,6 @@ import { ServiceScrollContainer } from "@/components/ui/service-scroll-container
 import { CursorTrail } from "@/components/ui/cursor-trail";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { ScrollIndicator } from "@/components/ui/scroll-indicator";
-import { WhyChooseUs } from "@/components/ui/why-choose-us";
 import { BackgroundPattern } from "@/components/ui/background-pattern";
 import { SectionDivider } from "@/components/ui/section-divider";
 import ScrollReveal from "@/components/ui/scroll-reveal";

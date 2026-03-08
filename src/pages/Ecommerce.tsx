@@ -251,6 +251,9 @@ const Ecommerce = () => {
         </div>
       </section>
 
+      {/* Promotional Banner Carousel */}
+      <PromoBannerCarousel />
+
       {/* Trust Strip */}
       <TrustStrip />
 

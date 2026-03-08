@@ -1,77 +1,31 @@
 
 
-# AI Chatbot for Client and Vendor Dashboards
+## Problem Analysis
 
-## Overview
-Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
+The admin dashboard has two separate views under Operations:
+1. **Event Center** → reads from `event_requests` table (via `useEventRequests` hook)
+2. **Event Requests** → reads from `service_orders` table (via `LiveServiceOrders` component using `useServiceOrders` hook)
 
-## What the Chatbot Does
+When a client submits an event request, it inserts into `event_requests`. The sync to `service_orders` happens **client-side** in `useEventRequests.ts` (`syncEventRequestToServiceOrders`), which is unreliable — it can fail silently due to network issues, RLS restrictions, or race conditions.
 
-**For Clients:**
-- Help plan events (suggest themes, budgets, timelines)
-- Guide through creating event requests
-- Answer questions about event status and vendor assignments
-- Provide rental equipment recommendations
+## Plan
 
-**For Vendors:**
-- Help with listing creation and pricing strategies
-- Guide through inventory management
-- Answer questions about assigned jobs
-- Provide marketplace tips and best practices
+### 1. Create a database trigger for reliable sync
+Create a Postgres trigger on `event_requests` that automatically inserts a corresponding row into `service_orders` whenever a new event request is created. This replaces the unreliable client-side sync.
 
-## UI Design (Reference Image Style)
+```text
+event_requests (INSERT)
+  └─► trigger: sync_event_request_to_service_orders()
+        └─► INSERT INTO service_orders (title, service_type, location, event_date, budget, guest_count, ...)
+```
 
-The chat tab will feature:
-- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
-- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
-- Markdown rendering for AI responses
-- Typing indicator animation while streaming
-- Message input bar at the bottom with send button
-- Smooth token-by-token streaming display
+### 2. Sync existing unsynced records
+Run a data migration to insert any `event_requests` rows that don't yet have a matching `service_orders` entry (matching by title pattern or notes containing the event request ID).
 
-## Technical Plan
+### 3. Remove client-side sync code
+Remove the `syncEventRequestToServiceOrders` function from `useEventRequests.ts` since the database trigger now handles this reliably.
 
-### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
-- Accepts `{ messages, role: "client" | "vendor" }` in the request body
-- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
-- Role-specific system prompts:
-  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
-  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
-- Returns SSE stream for token-by-token rendering
-- Handles 429/402 errors gracefully
-
-### 2. Update `supabase/config.toml`
-- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
-
-### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
-- Props: `role: "client" | "vendor"` and `userName: string`
-- **Home screen**: Greeting + quick-action chips in a card grid layout
-- **Chat view**: Scrollable message list with streaming support
-- Uses `react-markdown` (already available or will add) for rendering
-- SSE streaming via fetch to the edge function
-- Conversation stored in local React state (no persistence needed)
-- Framer Motion for message entrance animations
-
-### 4. Update `src/pages/client/ClientDashboard.tsx`
-- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
-- Render `<DashboardChatbot role="client" userName={...} />` when active
-
-### 5. Update `src/pages/vendor/VendorDashboard.tsx`
-- Add same "AI Assistant" sidebar item
-- Render `<DashboardChatbot role="vendor" userName={...} />` when active
-
-## File Changes Summary
-
-| File | Action |
-|------|--------|
-| `supabase/functions/dashboard-chat/index.ts` | Create |
-| `supabase/config.toml` | Edit (add function entry) |
-| `src/components/dashboard/DashboardChatbot.tsx` | Create |
-| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
-| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
-
-## Dependencies
-- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
-- Uses existing `framer-motion` for animations
-- Uses existing Supabase client for auth token in fetch calls
+### 4. Files affected
+- **New migration**: Database trigger + data backfill
+- **Edit**: `src/hooks/useEventRequests.ts` — remove `syncEventRequestToServiceOrders` function and its call in `onSuccess`
 

@@ -114,7 +114,7 @@ const EcommerceOrders = () => {
     );
   }
 
-  const RENTAL_STEPS = ["new", "sent_to_vendor", "vendor_accepted", "quoted", "confirmed", "in_progress", "completed"];
+  const RENTAL_STEPS = ["new", "sent_to_vendors", "accepted", "quoted", "confirmed", "in_progress", "completed"];
   const SERVICE_STEPS = ["new", "in_progress", "quoted", "confirmed", "completed"];
 
   const getSteps = (orderType: string) => {

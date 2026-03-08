@@ -229,7 +229,7 @@ const Index = () => {
       </HeroSection>
 
       {/* Stats Section */}
-      <Section spacing="large" variant="muted" className="relative bg-gradient-to-br from-muted/60 via-muted/40 to-primary/[0.04]">
+      <Section spacing="default" variant="muted" className="relative">
         <BackgroundPattern variant="dots" />
         <StatsContainer>
           <ScrollReveal animation="fade-in-up">

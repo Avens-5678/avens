@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect, ReactNode, useCallback } from "react";
+import { useState, useRef, useEffect, ReactNode, useCallback, Children } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ServiceScrollContainerProps {
   children: ReactNode;
@@ -10,83 +12,69 @@ interface ServiceScrollContainerProps {
 
 export const ServiceScrollContainer = ({ children, items, className }: ServiceScrollContainerProps) => {
   const isMobile = useIsMobile();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const totalDots = Math.min(items.length, 6);
-  const isPausedRef = useRef(false);
-  const animationRef = useRef<number>();
+  const itemsPerPage = isMobile ? 1 : 3;
+  const childArray = Children.toArray(children);
+  const totalPages = Math.ceil(childArray.length / itemsPerPage);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const autoPlayRef = useRef<ReturnType<typeof setInterval>>();
 
-  // Infinite auto-scroll on mobile
+  const goNext = useCallback(() => {
+    setCurrentPage((prev) => (prev + 1) % totalPages);
+  }, [totalPages]);
+
+  const goPrev = useCallback(() => {
+    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+  }, [totalPages]);
+
+  // Auto-slide every 5 seconds
   useEffect(() => {
-    if (!isMobile || !scrollRef.current || items.length <= 1) return;
+    if (totalPages <= 1 || isPaused) return;
+    autoPlayRef.current = setInterval(goNext, 5000);
+    return () => clearInterval(autoPlayRef.current);
+  }, [totalPages, isPaused, goNext]);
 
-    let scrollPos = 0;
-    const speed = 0.5;
-
-    const animate = () => {
-      if (!scrollRef.current || isPausedRef.current) {
-        animationRef.current = requestAnimationFrame(animate);
-        return;
-      }
-      scrollPos += speed;
-      const maxScroll = scrollRef.current.scrollWidth / 2;
-      if (scrollPos >= maxScroll) scrollPos = 0;
-      scrollRef.current.scrollLeft = scrollPos;
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    };
-  }, [isMobile, items.length]);
-
-  const handleTouchStart = () => { isPausedRef.current = true; };
-  const handleTouchEnd = () => {
-    setTimeout(() => { isPausedRef.current = false; }, 2000);
-  };
-
-  // For mobile: triple items for seamless loop
-  const mobileChildren = isMobile
-    ? Array.from({ length: 3 }, (_, setIdx) =>
-        (Array.isArray(children) ? children : [children]).map((child, i) => (
-          <div key={`${setIdx}-${i}`} className="contents">{child}</div>
-        ))
-      ).flat()
-    : children;
+  const startIdx = currentPage * itemsPerPage;
+  const visibleChildren = childArray.slice(startIdx, startIdx + itemsPerPage);
 
   return (
-    <div>
+    <div
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div
-        ref={scrollRef}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
         className={cn(
-          isMobile
-            ? "flex gap-4 overflow-x-hidden -mx-4 px-4 pb-4"
-            : "grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8",
+          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8",
           className
         )}
-        style={isMobile ? { scrollBehavior: "auto" } : undefined}
       >
-        {mobileChildren}
+        {visibleChildren}
       </div>
 
-      {/* Navigation dots - mobile only (hidden when auto-scrolling) */}
-      {false && isMobile && totalDots > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-4 md:hidden">
-          {Array.from({ length: totalDots }).map((_, i) => (
-            <button
-              key={i}
-              className={cn(
-                "rounded-full transition-all duration-300",
-                i === activeIndex
-                  ? "w-6 h-2.5 bg-primary"
-                  : "w-2.5 h-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              )}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
+      {/* Navigation buttons below cards */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-3 mt-8">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-10 w-10"
+            onClick={goPrev}
+            aria-label="Previous items"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {currentPage + 1} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-10 w-10"
+            onClick={goNext}
+            aria-label="Next items"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
         </div>
       )}
     </div>

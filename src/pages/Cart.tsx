@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit, calculateCartTotal } from "@/utils/pricingUtils";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
-  CalendarDays, ShieldCheck, Truck, RotateCcw, Tag, ChevronRight,
+  CalendarDays, Tag, ChevronRight,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 

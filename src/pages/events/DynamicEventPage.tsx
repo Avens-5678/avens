@@ -159,27 +159,17 @@ const DynamicEventPage = () => {
                </ScrollReveal>
 
               <ScrollReveal animation="elastic" delay={600}>
-                <Dialog>
-                  <DialogTrigger asChild>
-                     <MagneticButton 
-                       size="lg" 
-                       className="button-primary px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold rounded-full shadow-2xl w-full sm:w-auto"
-                     >
-                       <Briefcase className="mr-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
-                       Plan My {event.title}
-                       <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
-                     </MagneticButton>
-                  </DialogTrigger>
-                  <DialogContent className="w-[95vw] sm:w-[90vw] max-w-2xl glass mx-4">
-                    <DialogTitle>✨ Start Planning Your {event.title}</DialogTitle>
-                    <DialogDescription>Fill out this form to begin your journey</DialogDescription>
-                    <InquiryForm 
-                      formType="inquiry"
-                      eventType={event.event_type}
-                      title={`Plan Your ${event.title}`}
-                    />
-                  </DialogContent>
-                </Dialog>
+                <MagneticButton 
+                  size="lg" 
+                  className="button-primary px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold rounded-full shadow-2xl w-full sm:w-auto"
+                  asChild
+                >
+                  <Link to={`/client/dashboard?tab=request&type=${event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <Briefcase className="mr-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
+                    Plan My {event.title}
+                    <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
+                  </Link>
+                </MagneticButton>
               </ScrollReveal>
             </ScrollReveal>
           </div>

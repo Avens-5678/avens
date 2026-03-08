@@ -1,4 +1,5 @@
 import { Search, X, User, ShoppingCart, ChevronDown } from "lucide-react";
+import logoEv from "@/assets/logo-ev.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";

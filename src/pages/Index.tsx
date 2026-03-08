@@ -138,7 +138,12 @@ const Index = () => {
           backgroundImage={currentBanner?.image_url}
           className="relative overflow-hidden"
           onMouseMove={resetArrowTimer}
-          onTouchStart={(e: React.TouchEvent) => {touchStartX.current = e.changedTouches[0].screenX;}}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={(e: React.TouchEvent) => {
+            touchStartX.current = e.changedTouches[0].screenX;
+            setIsPaused(true);
+          }}
           onTouchEnd={(e: React.TouchEvent) => {
             touchEndX.current = e.changedTouches[0].screenX;
             if (touchStartX.current !== null && activeBanners.length > 1) {
@@ -152,6 +157,7 @@ const Index = () => {
               }
             }
             touchStartX.current = null;
+            setIsPaused(false);
           }}>
 
         {/* Desktop/Tablet navigation arrows - auto-hide on inactivity */}

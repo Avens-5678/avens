@@ -11,20 +11,7 @@ import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
-// Event category icons/config for browsing
-const EVENT_CATEGORIES = [
-  { label: "All", value: "" },
-  { label: "Catering", value: "Catering" },
-  { label: "Staging", value: "Staging" },
-  { label: "Lighting", value: "Lighting" },
-  { label: "Sound", value: "Sound" },
-  { label: "Decor", value: "Decor" },
-  { label: "Furniture", value: "Furniture" },
-  { label: "Tents & Structures", value: "Tents & Structures" },
-  { label: "AV Equipment", value: "AV Equipment" },
-  { label: "Talent", value: "Talent" },
-  { label: "Photography", value: "Photography" },
-];
+// Event categories will be built dynamically from rental data
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
@@ -48,6 +35,10 @@ const Ecommerce = () => {
     rentals.forEach((r) => r.categories?.forEach((c) => cats.add(c)));
     return Array.from(cats).sort();
   }, [rentals]);
+
+  const quickBrowseCategories = useMemo(() => {
+    return [{ label: "All", value: "" }, ...categories.map(c => ({ label: c, value: c }))];
+  }, [categories]);
 
   const cities = useMemo(() => {
     if (!rentals) return [];
@@ -252,7 +243,7 @@ const Ecommerce = () => {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="overflow-x-auto scrollbar-hide py-4">
             <div className="flex gap-2 sm:gap-3 justify-start sm:justify-center min-w-max">
-              {EVENT_CATEGORIES.map((cat) => (
+              {quickBrowseCategories.map((cat) => (
                 <button
                   key={cat.value}
                   onClick={() => setActiveQuickCat(cat.value === activeQuickCat ? "" : cat.value)}

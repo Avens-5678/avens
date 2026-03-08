@@ -19,7 +19,7 @@ const baseSchema = {
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
   fullName: z.string().min(2, "Full name is required"),
-  phone: z.string().optional(),
+  phone: z.string().min(10, "Phone number is required (min 10 digits)"),
   role: z.enum(["client", "vendor"], {
     required_error: "Please select a role",
   }),
@@ -36,14 +36,6 @@ const baseSchema = {
 const registerSchema = z.object(baseSchema).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-}).refine((data) => {
-  if (data.role === "vendor") {
-    return !!data.phone && data.phone.length >= 10;
-  }
-  return true;
-}, {
-  message: "Phone number is required for vendors",
-  path: ["phone"],
 }).refine((data) => {
   if (data.role === "vendor") {
     return !!data.companyName && data.companyName.length >= 2;
@@ -267,7 +259,7 @@ const Register = () => {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Phone Number {selectedRole === "vendor" ? "*" : "(Optional)"}</FormLabel>
+                          <FormLabel>Phone Number *</FormLabel>
                           <FormControl>
                             <Input placeholder="+91 XXXXX XXXXX" {...field} />
                           </FormControl>

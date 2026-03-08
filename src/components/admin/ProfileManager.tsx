@@ -16,6 +16,7 @@ const profileSchema = z.object({
 });
 
 const passwordSchema = z.object({
+  current_password: z.string().min(1, "Current password is required"),
   new_password: z.string().min(6, "Password must be at least 6 characters"),
   confirm_password: z.string().min(1, "Please confirm your password"),
 }).refine((data) => data.new_password === data.confirm_password, {
@@ -44,6 +45,7 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
   const passwordForm = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
+      current_password: "",
       new_password: "",
       confirm_password: "",
     },
@@ -83,6 +85,22 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
     setIsPasswordLoading(true);
 
     try {
+      // First verify current password by signing in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: adminUser.email,
+        password: values.current_password,
+      });
+
+      if (signInError) {
+        toast({
+          title: "Incorrect Password",
+          description: "The current password you entered is incorrect.",
+          variant: "destructive",
+        });
+        setIsPasswordLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: values.new_password,
       });
@@ -171,6 +189,19 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
           <CardContent className="space-y-3">
             <Form {...passwordForm}>
               <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-3">
+                <FormField
+                  control={passwordForm.control}
+                  name="current_password"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-sm">Current Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter current password" {...field} className="h-9" />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={passwordForm.control}
                   name="new_password"

@@ -45,6 +45,8 @@ const statusLabels: Record<string, string> = {
 const allStatuses: EventRequest["status"][] = ["pending", "approved", "in_progress", "completed", "cancelled"];
 const rentalStatuses = ["new", "sent_to_vendor", "vendor_accepted", "vendor_declined", "quoted", "confirmed", "in_progress", "completed", "delivered", "cancelled"];
 
+const serviceStatuses = ["new", "in_progress", "quoted", "confirmed", "completed", "cancelled"];
+
 const EventCenter = () => {
   const { data: requests, isLoading: requestsLoading } = useEventRequests();
   const { data: vendors, isLoading: vendorsLoading } = useVendors();

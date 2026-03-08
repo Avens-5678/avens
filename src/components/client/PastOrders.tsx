@@ -109,6 +109,9 @@ const PastOrders = () => {
                       <p className="text-sm text-muted-foreground">{request.requirements}</p>
                     </div>
                   )}
+                  <div className="mt-3">
+                    <OrderQuoteCard orderId={request.id} />
+                  </div>
                 </CardContent>
               </Card>
             ))

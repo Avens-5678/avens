@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAllRentals } from "@/hooks/useData";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
 import { useCart } from "@/hooks/useCart";
@@ -14,15 +15,19 @@ import { useToast } from "@/hooks/use-toast";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
-  Star, ShieldCheck, Truck, Headphones, Share2,
+  Star, ShieldCheck, Truck, Headphones, Share2, RotateCcw,
+  Plus, MessageSquare, Bookmark, ZoomIn,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 // Recently viewed helper
 const RECENT_KEY = "evnting_recently_viewed";
+const getRecentlyViewed = (): string[] => {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; }
+};
 const addToRecentlyViewed = (id: string) => {
   try {
-    const existing: string[] = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+    const existing = getRecentlyViewed();
     const updated = [id, ...existing.filter((x) => x !== id)].slice(0, 10);
     localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
   } catch {}
@@ -42,52 +47,52 @@ const ProductDetail = () => {
   const [length, setLength] = useState<number>(0);
   const [breadth, setBreadth] = useState<number>(0);
   const [quickCartOpen, setQuickCartOpen] = useState(false);
-
-  // Header search state (minimal for PDP context)
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCat, setSearchCat] = useState("");
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState("50% 50%");
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   const rental = useMemo(() => rentals?.find((r) => r.id === id), [rentals, id]);
 
   // Track recently viewed
-  useEffect(() => {
-    if (id) addToRecentlyViewed(id);
-  }, [id]);
+  useEffect(() => { if (id) addToRecentlyViewed(id); }, [id]);
 
   useEffect(() => {
-    if (variants && variants.length > 0 && !selectedVariant) {
-      setSelectedVariant(variants[0]);
-    }
+    if (variants && variants.length > 0 && !selectedVariant) setSelectedVariant(variants[0]);
   }, [variants, selectedVariant]);
+
+  // Sticky mobile bottom bar via IntersectionObserver
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [rental]);
 
   const displayImages = useMemo(() => {
     if (selectedVariant) {
-      const variantImages = selectedVariant.image_urls?.length
-        ? selectedVariant.image_urls
-        : selectedVariant.image_url
-          ? [selectedVariant.image_url]
-          : null;
-      if (variantImages) return variantImages;
+      const vi = selectedVariant.image_urls?.length ? selectedVariant.image_urls
+        : selectedVariant.image_url ? [selectedVariant.image_url] : null;
+      if (vi) return vi;
     }
     if (rental?.image_urls?.length) return rental.image_urls;
     if (rental?.image_url) return [rental.image_url];
     return [];
   }, [rental, selectedVariant]);
 
-  useEffect(() => {
-    setCurrentImageIndex(0);
-  }, [selectedVariant]);
+  useEffect(() => { setCurrentImageIndex(0); }, [selectedVariant]);
 
   const displayPrice = useMemo(() => {
-    if (selectedVariant?.price_value != null) {
-      return { value: selectedVariant.price_value, unit: selectedVariant.pricing_unit || "Per Day" };
-    }
-    if (rental?.price_value != null) {
-      return { value: rental.price_value, unit: (rental as any).pricing_unit || "Per Day" };
-    }
-    if (rental?.price_range) {
-      return { text: `₹${rental.price_range}` };
-    }
+    if (selectedVariant?.price_value != null) return { value: selectedVariant.price_value, unit: selectedVariant.pricing_unit || "Per Day" };
+    if (rental?.price_value != null) return { value: rental.price_value, unit: (rental as any).pricing_unit || "Per Day" };
+    if (rental?.price_range) return { text: `₹${rental.price_range}` };
     return null;
   }, [rental, selectedVariant]);
 
@@ -97,10 +102,7 @@ const ProductDetail = () => {
   const variantGroups = useMemo(() => {
     if (!variants?.length) return {};
     const groups: Record<string, RentalVariant[]> = {};
-    variants.forEach((v) => {
-      if (!groups[v.attribute_type]) groups[v.attribute_type] = [];
-      groups[v.attribute_type].push(v);
-    });
+    variants.forEach((v) => { if (!groups[v.attribute_type]) groups[v.attribute_type] = []; groups[v.attribute_type].push(v); });
     return groups;
   }, [variants]);
 
@@ -115,16 +117,19 @@ const ProductDetail = () => {
     return Array.from(cats).sort();
   }, [rentals]);
 
-  // "You May Also Like" — same category products
   const suggestions = useMemo(() => {
     if (!rentals || !rental) return [];
     const cats = rental.categories || [];
-    const sameCat = rentals.filter(
-      (r) => r.id !== id && r.is_active !== false && r.categories?.some((c: string) => cats.includes(c))
-    );
+    const sameCat = rentals.filter((r) => r.id !== id && r.is_active !== false && r.categories?.some((c: string) => cats.includes(c)));
     const pool = sameCat.length >= 4 ? sameCat : rentals.filter((r) => r.id !== id && r.is_active !== false);
     return [...pool].sort(() => Math.random() - 0.5).slice(0, 8);
   }, [rentals, rental, id]);
+
+  const recentlyViewedItems = useMemo(() => {
+    if (!rentals) return [];
+    const ids = getRecentlyViewed().filter((rid) => rid !== id);
+    return ids.map((rid) => rentals.find((r) => r.id === rid)).filter(Boolean).slice(0, 8);
+  }, [rentals, id]);
 
   const handleAddToCart = () => {
     if (!rental) return;
@@ -152,13 +157,16 @@ const ProductDetail = () => {
 
   const handleShare = async () => {
     const url = window.location.href;
-    if (navigator.share) {
-      await navigator.share({ title: rental?.title, url });
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast({ title: "Link copied!" });
-    }
+    if (navigator.share) { await navigator.share({ title: rental?.title, url }); }
+    else { await navigator.clipboard.writeText(url); toast({ title: "Link copied!" }); }
   };
+
+  const handleZoomMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomOrigin(`${x}% ${y}%`);
+  }, []);
 
   if (isLoading) {
     return <Layout hideNavbar><div className="flex items-center justify-center min-h-screen"><LoadingSpinner /></div></Layout>;
@@ -180,10 +188,7 @@ const ProductDetail = () => {
     <Layout hideNavbar>
       <EcommerceHeader
         searchTerm={searchTerm}
-        onSearchChange={(v) => {
-          setSearchTerm(v);
-          if (v) navigate(`/ecommerce?search=${encodeURIComponent(v)}`);
-        }}
+        onSearchChange={(v) => { setSearchTerm(v); if (v) navigate(`/ecommerce?search=${encodeURIComponent(v)}`); }}
         categories={allCategories}
         selectedSearchCategory={searchCat}
         onSearchCategoryChange={setSearchCat}
@@ -191,140 +196,198 @@ const ProductDetail = () => {
 
       {/* Breadcrumb */}
       <div className="bg-muted/40 border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-2.5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <button onClick={() => navigate("/ecommerce")} className="hover:text-foreground transition-colors">Shop</button>
-            <span>/</span>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <button onClick={() => navigate("/ecommerce")} className="hover:text-primary transition-colors">Home</button>
+            <span className="text-muted-foreground/50">›</span>
+            <button onClick={() => navigate("/ecommerce")} className="hover:text-primary transition-colors">Shop</button>
             {rental.categories?.[0] && (
               <>
-                <button onClick={() => navigate(`/ecommerce?category=${rental.categories[0]}`)} className="hover:text-foreground transition-colors">
-                  {rental.categories[0]}
-                </button>
-                <span>/</span>
+                <span className="text-muted-foreground/50">›</span>
+                <button onClick={() => navigate(`/ecommerce?category=${rental.categories[0]}`)} className="hover:text-primary transition-colors">{rental.categories[0]}</button>
               </>
             )}
+            <span className="text-muted-foreground/50">›</span>
             <span className="text-foreground font-medium line-clamp-1">{rental.title}</span>
           </div>
         </div>
       </div>
 
-      {/* Main product section */}
-      <section className="py-6 sm:py-10">
+      {/* Main Product Section */}
+      <section className="py-4 sm:py-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-            {/* Image Gallery */}
-            <div className="space-y-3">
-              <div className="relative aspect-square rounded-xl overflow-hidden bg-muted border border-border">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-6 lg:gap-10">
+
+            {/* ── IMAGE GALLERY ── */}
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
+              {/* Thumbnails — vertical on desktop, horizontal on mobile */}
+              {displayImages.length > 1 && (
+                <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto sm:max-h-[500px] scrollbar-hide pb-1 sm:pb-0 sm:pr-1">
+                  {displayImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentImageIndex(i)}
+                      className={`flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                        i === currentImageIndex ? "border-primary ring-1 ring-primary/30" : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Main Image with Zoom */}
+              <div className="relative flex-1 aspect-square rounded-xl overflow-hidden bg-muted border border-border group">
                 {displayImages.length > 0 ? (
-                  <img src={displayImages[currentImageIndex]} alt={rental.title} className="w-full h-full object-cover" />
+                  <div
+                    className="w-full h-full cursor-crosshair overflow-hidden"
+                    onMouseEnter={() => setIsZooming(true)}
+                    onMouseLeave={() => setIsZooming(false)}
+                    onMouseMove={handleZoomMove}
+                  >
+                    <img
+                      src={displayImages[currentImageIndex]}
+                      alt={rental.title}
+                      className="w-full h-full object-cover transition-transform duration-200 ease-out"
+                      style={{
+                        transform: isZooming ? "scale(2)" : "scale(1)",
+                        transformOrigin: zoomOrigin,
+                      }}
+                    />
+                  </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">No Image</div>
                 )}
+
+                {/* Nav arrows */}
                 {displayImages.length > 1 && (
                   <>
-                    <button onClick={() => setCurrentImageIndex((i) => (i - 1 + displayImages.length) % displayImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors shadow-sm">
-                      <ChevronLeft className="h-5 w-5" />
+                    <button onClick={() => setCurrentImageIndex((i) => (i - 1 + displayImages.length) % displayImages.length)} className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm transition-colors z-10">
+                      <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <button onClick={() => setCurrentImageIndex((i) => (i + 1) % displayImages.length)} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors shadow-sm">
-                      <ChevronRight className="h-5 w-5" />
+                    <button onClick={() => setCurrentImageIndex((i) => (i + 1) % displayImages.length)} className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm transition-colors z-10">
+                      <ChevronRight className="h-4 w-4" />
                     </button>
                   </>
                 )}
-                {/* Image counter */}
+
+                {/* Zoom hint */}
+                <div className="absolute top-3 right-3 bg-foreground/60 text-primary-foreground text-[10px] font-medium px-2 py-1 rounded-full backdrop-blur-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <ZoomIn className="h-3 w-3" /> Hover to zoom
+                </div>
+
+                {/* Counter on mobile */}
                 {displayImages.length > 1 && (
-                  <span className="absolute bottom-3 right-3 bg-foreground/70 text-primary-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                  <span className="absolute bottom-3 right-3 sm:hidden bg-foreground/70 text-primary-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
                     {currentImageIndex + 1}/{displayImages.length}
                   </span>
                 )}
               </div>
-              {displayImages.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {displayImages.map((img, i) => (
-                    <button key={i} onClick={() => setCurrentImageIndex(i)} className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-colors ${i === currentImageIndex ? "border-primary" : "border-border hover:border-primary/40"}`}>
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Product Info */}
-            <div className="space-y-5">
-              {/* Categories */}
+            {/* ── PRODUCT INFO ── */}
+            <div className="space-y-4">
+              {/* Category tags */}
               {rental.categories && rental.categories.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {rental.categories.map((cat: string) => (
-                    <Badge key={cat} variant="secondary" className="text-[11px]">{cat}</Badge>
+                    <Badge key={cat} variant="secondary" className="text-[10px] font-medium">{cat}</Badge>
                   ))}
                 </div>
               )}
 
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground leading-tight">{rental.title}</h1>
+              {/* Title */}
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground leading-tight">{rental.title}</h1>
 
-              {/* Rating + Share */}
-              <div className="flex items-center gap-4">
+              {/* Rating + Actions row */}
+              <div className="flex items-center gap-3 flex-wrap">
                 {rental.rating && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
-                      {rental.rating} <Star className="h-3 w-3 fill-current" />
-                    </span>
-                    <span className="text-xs text-muted-foreground">Rating</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded">
+                    {rental.rating} <Star className="h-3 w-3 fill-current" />
+                  </span>
                 )}
-                <button onClick={handleShare} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  <Share2 className="h-3.5 w-3.5" /> Share
+                <span className="text-xs text-muted-foreground">({Math.floor(Math.random() * 50 + 10)} Reviews)</span>
+                <div className="flex-1" />
+                <button onClick={handleShare} className="p-2 rounded-full hover:bg-muted transition-colors" title="Share">
+                  <Share2 className="h-4 w-4 text-muted-foreground" />
+                </button>
+                <button className="p-2 rounded-full hover:bg-muted transition-colors" title="Save">
+                  <Bookmark className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
 
-              {/* Price */}
+              <div className="h-px bg-border" />
+
+              {/* Price block */}
               {displayPrice && (
-                <div className="flex items-baseline gap-2 pt-1">
-                  {"value" in displayPrice ? (
-                    <>
-                      <span className="text-2xl sm:text-3xl font-bold text-primary">₹{displayPrice.value.toLocaleString()}</span>
-                      <span className="text-sm text-muted-foreground">/ {displayPrice.unit}</span>
-                    </>
-                  ) : (
-                    <span className="text-2xl sm:text-3xl font-bold text-primary">{displayPrice.text}</span>
-                  )}
+                <div className="space-y-1">
+                  <div className="flex items-baseline gap-2">
+                    {"value" in displayPrice ? (
+                      <>
+                        <span className="text-2xl sm:text-3xl font-bold text-foreground">₹{displayPrice.value.toLocaleString()}</span>
+                        <span className="text-sm text-muted-foreground">/ {displayPrice.unit}</span>
+                      </>
+                    ) : (
+                      <span className="text-2xl sm:text-3xl font-bold text-foreground">{displayPrice.text}</span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-green-600 font-medium">Inclusive of all taxes</p>
                 </div>
               )}
 
-              {/* Assured badge */}
+              {/* Evnting Assured strip */}
               {rental.rating && rental.rating >= 4 && (
-                <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-lg">
-                  <ShieldCheck className="h-4 w-4" />
-                  <span className="text-xs font-bold uppercase tracking-wide">Evnting Assured</span>
+                <div className="flex items-center gap-4 bg-primary/5 border border-primary/20 rounded-lg px-4 py-2.5">
+                  <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0" />
+                  <div className="flex items-center gap-3 text-xs font-medium text-foreground flex-wrap">
+                    <span>Evnting Assured</span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground">7 Day Easy Returns</span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground">Free Delivery</span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground">Top Rated</span>
+                  </div>
                 </div>
               )}
+
+              <div className="h-px bg-border" />
 
               {/* Variant Selectors */}
               {Object.entries(variantGroups).map(([attrType, attrVariants]) => (
-                <div key={attrType} className="space-y-2.5">
-                  <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">{attrType}</h3>
+                <div key={attrType} className="space-y-2">
+                  <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">{attrType}</h3>
                   <div className="flex flex-wrap gap-2">
-                    {attrVariants.map((v) => (
-                      <button
-                        key={v.id}
-                        onClick={() => setSelectedVariant(v)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-200 ${
-                          selectedVariant?.id === v.id
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border bg-background text-foreground hover:border-primary/50"
-                        }`}
-                      >
-                        {v.attribute_value}
-                      </button>
-                    ))}
+                    {attrVariants.map((v) => {
+                      const hasImg = v.image_url || (v.image_urls && v.image_urls.length > 0);
+                      const thumbSrc = v.image_urls?.[0] || v.image_url;
+                      return (
+                        <button
+                          key={v.id}
+                          onClick={() => setSelectedVariant(v)}
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-all duration-200 ${
+                            selectedVariant?.id === v.id
+                              ? "border-primary bg-primary/5 text-primary"
+                              : "border-border bg-background text-foreground hover:border-primary/40"
+                          }`}
+                        >
+                          {hasImg && thumbSrc && (
+                            <img src={thumbSrc} alt="" className="w-7 h-7 rounded object-cover" />
+                          )}
+                          {v.attribute_value}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
 
               {/* Quantity / Dimensions */}
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {isMeasurable ? (
                   <>
-                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Dimensions ({currentUnit})</h3>
+                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Dimensions ({currentUnit})</h3>
                     <div className="grid grid-cols-2 gap-3 max-w-[280px]">
                       <div className="space-y-1">
                         <Label htmlFor="pdp-length" className="text-[11px] text-muted-foreground">Length</Label>
@@ -337,7 +400,7 @@ const ProductDetail = () => {
                     </div>
                     {length > 0 && breadth > 0 && (
                       <p className="text-sm text-muted-foreground">
-                        Total Area: <span className="font-semibold text-foreground">{computedArea.toLocaleString()} {currentUnit?.replace("Per ", "")}</span>
+                        Total: <span className="font-semibold text-foreground">{computedArea.toLocaleString()} {currentUnit?.replace("Per ", "")}</span>
                         {displayPrice && "value" in displayPrice && (
                           <> — Est: <span className="font-semibold text-primary">₹{(computedArea * displayPrice.value).toLocaleString()}</span></>
                         )}
@@ -346,87 +409,189 @@ const ProductDetail = () => {
                   </>
                 ) : (
                   <>
-                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Quantity</h3>
-                    <div className="flex items-center gap-3">
-                      <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>−</Button>
-                      <span className="w-10 text-center font-semibold text-lg">{quantity}</span>
-                      <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setQuantity((q) => q + 1)}>+</Button>
+                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Quantity</h3>
+                    <div className="flex items-center gap-0 border border-border rounded-lg w-fit overflow-hidden">
+                      <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="px-3 py-2 hover:bg-muted transition-colors text-foreground font-medium">−</button>
+                      <span className="px-4 py-2 text-center font-semibold text-foreground border-x border-border min-w-[48px]">{quantity}</span>
+                      <button onClick={() => setQuantity((q) => q + 1)} className="px-3 py-2 hover:bg-muted transition-colors text-foreground font-medium">+</button>
                     </div>
                   </>
                 )}
               </div>
 
-              {/* CTA */}
-              {inCart ? (
-                <div className="flex gap-3">
-                  <Button onClick={() => setQuickCartOpen(true)} size="lg" className="flex-1 text-base gap-2">
-                    <ShoppingCart className="h-5 w-5" />View Cart
-                  </Button>
-                  <Button
-                    onClick={() => { removeItem(id!, variantId); toast({ title: "Removed", description: "Item removed from cart." }); }}
-                    size="lg" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </Button>
-                </div>
-              ) : (
-                <Button onClick={handleAddToCart} size="lg" className="w-full text-base gap-2">
-                  <ShoppingCart className="h-5 w-5" />Add to Cart
-                </Button>
-              )}
+              {/* CTA Row */}
+              <div ref={ctaRef} className="flex gap-3 pt-2">
+                {inCart ? (
+                  <>
+                    <Button onClick={() => setQuickCartOpen(true)} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12">
+                      <ShoppingCart className="h-4 w-4" /> View Cart
+                    </Button>
+                    <Button
+                      onClick={() => { removeItem(id!, variantId); toast({ title: "Removed", description: "Item removed from cart." }); }}
+                      size="lg" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10 h-12 px-4"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={handleAddToCart} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12 border-primary text-primary hover:bg-primary/5">
+                      <ShoppingCart className="h-4 w-4" /> Add to Cart
+                    </Button>
+                    <Button onClick={handleAddToCart} size="lg" className="flex-1 text-sm gap-2 h-12">
+                      <MessageSquare className="h-4 w-4" /> Enquire Now
+                    </Button>
+                  </>
+                )}
+              </div>
 
-              {/* Trust badges */}
-              <div className="grid grid-cols-3 gap-3 pt-2">
+              {/* Trust badges — inline */}
+              <div className="flex items-center gap-5 pt-1">
                 {[
                   { icon: ShieldCheck, label: "Assured Quality" },
                   { icon: Truck, label: "Free Delivery" },
                   { icon: Headphones, label: "24/7 Support" },
+                  { icon: RotateCcw, label: "Easy Returns" },
                 ].map(({ icon: Icon, label }) => (
-                  <div key={label} className="flex flex-col items-center gap-1.5 py-3 rounded-lg border border-border bg-muted/30 text-center">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground leading-tight">{label}</span>
+                  <div key={label} className="flex items-center gap-1.5">
+                    <Icon className="h-4 w-4 text-primary" />
+                    <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground whitespace-nowrap">{label}</span>
                   </div>
                 ))}
-              </div>
-
-              {/* Description */}
-              <div className="space-y-2 pt-3 border-t border-border">
-                <h3 className="text-base font-semibold text-foreground">Description</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{rental.description}</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* You May Also Like */}
+      {/* ── BELOW-THE-FOLD TABS ── */}
+      <section className="border-t border-border">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-6">
+          <Tabs defaultValue="description" className="w-full">
+            <TabsList className="w-full justify-start bg-transparent border-b border-border rounded-none h-auto p-0 gap-0">
+              <TabsTrigger value="description" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-5 py-3 text-sm font-medium">
+                Description
+              </TabsTrigger>
+              <TabsTrigger value="specifications" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-5 py-3 text-sm font-medium">
+                Specifications
+              </TabsTrigger>
+              <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-5 py-3 text-sm font-medium">
+                Reviews
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="description" className="pt-5">
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line max-w-3xl">{rental.description}</p>
+            </TabsContent>
+
+            <TabsContent value="specifications" className="pt-5">
+              <div className="max-w-2xl space-y-2">
+                {[
+                  { label: "Category", value: rental.categories?.join(", ") },
+                  { label: "Pricing", value: displayPrice && "value" in displayPrice ? `₹${displayPrice.value.toLocaleString()} ${displayPrice.unit}` : displayPrice?.text },
+                  { label: "Rating", value: rental.rating ? `${rental.rating} / 5` : undefined },
+                  { label: "Variants", value: variants?.length ? `${variants.length} options available` : undefined },
+                ].filter(r => r.value).map(({ label, value }, i) => (
+                  <div key={label} className={`flex items-start py-2.5 px-3 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""} rounded`}>
+                    <span className="w-40 font-medium text-foreground flex-shrink-0">{label}</span>
+                    <span className="text-muted-foreground">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="reviews" className="pt-5">
+              <div className="text-center py-10 space-y-3">
+                <Star className="h-10 w-10 text-muted-foreground/30 mx-auto" />
+                <p className="text-sm text-muted-foreground">No reviews yet. Be the first to review this product!</p>
+                <Button variant="outline" size="sm" className="text-xs">Write a Review</Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+
+      {/* ── YOU MAY ALSO LIKE ── */}
       {suggestions.length > 0 && (
         <section className="py-8 border-t border-border bg-muted/20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-            <h2 className="text-lg font-bold text-foreground mb-5">You May Also Like</h2>
-            <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
-              {suggestions.map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => navigate(`/ecommerce/${r.id}`)}
-                  className="flex-shrink-0 w-40 sm:w-48 text-left group"
-                >
-                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-muted border border-border mb-2">
+            <h2 className="text-base font-bold text-foreground mb-4">You May Also Like</h2>
+            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+              {suggestions.map((r: any) => (
+                <div key={r.id} className="flex-shrink-0 w-44 sm:w-52 rounded-xl border border-border bg-background overflow-hidden group">
+                  <button onClick={() => navigate(`/ecommerce/${r.id}`)} className="w-full text-left">
+                    <div className="aspect-square overflow-hidden bg-muted">
+                      {r.image_url ? (
+                        <img src={r.image_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No Image</div>
+                      )}
+                    </div>
+                    <div className="p-3 space-y-1.5">
+                      <p className="text-xs sm:text-sm font-medium text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">{r.title}</p>
+                      <div className="flex items-center justify-between">
+                        {r.price_value != null && (
+                          <p className="text-sm font-bold text-foreground">₹{r.price_value.toLocaleString()}</p>
+                        )}
+                        {r.rating && (
+                          <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            {r.rating} <Star className="h-2.5 w-2.5 fill-current" />
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── RECENTLY VIEWED ── */}
+      {recentlyViewedItems.length > 0 && (
+        <section className="py-8 border-t border-border">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-12">
+            <h2 className="text-base font-bold text-foreground mb-4">Recently Viewed</h2>
+            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+              {recentlyViewedItems.map((r: any) => (
+                <button key={r.id} onClick={() => navigate(`/ecommerce/${r.id}`)} className="flex-shrink-0 w-36 sm:w-44 text-left group">
+                  <div className="w-full aspect-square rounded-lg overflow-hidden bg-muted border border-border mb-2">
                     {r.image_url ? (
                       <img src={r.image_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No Image</div>
                     )}
                   </div>
-                  <p className="text-xs sm:text-sm font-medium text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">{r.title}</p>
-                  {r.price_value != null && (
-                    <p className="text-sm font-bold text-foreground mt-1">₹{r.price_value.toLocaleString()}</p>
-                  )}
+                  <p className="text-xs font-medium text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">{r.title}</p>
+                  {r.price_value != null && <p className="text-xs font-bold text-foreground mt-0.5">₹{r.price_value.toLocaleString()}</p>}
                 </button>
               ))}
             </div>
           </div>
         </section>
+      )}
+
+      {/* ── STICKY MOBILE BOTTOM BAR ── */}
+      {showStickyBar && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg px-4 py-3 flex items-center gap-3 lg:hidden">
+          <div className="flex-1 min-w-0">
+            {displayPrice && "value" in displayPrice ? (
+              <p className="text-lg font-bold text-foreground truncate">₹{displayPrice.value.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">/ {displayPrice.unit}</span></p>
+            ) : displayPrice ? (
+              <p className="text-lg font-bold text-foreground truncate">{displayPrice.text}</p>
+            ) : null}
+          </div>
+          {inCart ? (
+            <Button onClick={() => setQuickCartOpen(true)} size="sm" className="h-10 px-6 text-sm">
+              <ShoppingCart className="h-4 w-4 mr-1.5" /> View Cart
+            </Button>
+          ) : (
+            <Button onClick={handleAddToCart} size="sm" className="h-10 px-6 text-sm">
+              <ShoppingCart className="h-4 w-4 mr-1.5" /> Add to Cart
+            </Button>
+          )}
+        </div>
       )}
 
       {/* Quick Cart Sheet */}

@@ -74,7 +74,9 @@ function getSharedData(data: QuotePrintData) {
     </tr>
   `).join("");
 
-  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML };
+  const orderRef = data.sourceOrderId ? `Order Ref: #${data.sourceOrderId.substring(0, 8).toUpperCase()}` : "";
+
+  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef };
 }
 
 function buildTerms(notes: string) {

@@ -10,15 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Package, Calendar, MapPin, Clock, CheckCircle2, Circle, AlertCircle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
-const STATUS_STEPS_RENTAL = ["new", "sent_to_vendor", "vendor_accepted", "quoted", "confirmed", "in_progress", "completed"];
+const STATUS_STEPS_RENTAL = ["new", "sent_to_vendors", "accepted", "quoted", "confirmed", "in_progress", "completed"];
 const STATUS_STEPS_SERVICE = ["new", "in_progress", "quoted", "confirmed", "completed"];
 
 const statusLabels: Record<string, string> = {
   new: "Order Received",
   pending: "Pending",
-  sent_to_vendor: "Sent to Vendor",
-  vendor_accepted: "Vendor Accepted",
-  vendor_declined: "Vendor Declined",
+  sent_to_vendors: "Sent to Vendor",
+  accepted: "Vendor Accepted",
+  declined: "Vendor Declined",
   quoted: "Quoted",
   confirmed: "Confirmed",
   in_progress: "In Progress",

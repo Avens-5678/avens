@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, Briefcase, Calendar, MapPin, Clock, ArrowLeft, LogIn, IndianRupee } from "lucide-react";
 import { format } from "date-fns";
+import { CheckCircle2, Circle } from "lucide-react";
 
 const ACTIVE_STATUSES = ["new", "sent_to_vendor", "vendor_accepted", "quoted", "confirmed", "in_progress", "pending", "approved"];
 const COMPLETED_STATUSES = ["completed", "delivered", "cancelled", "vendor_declined"];

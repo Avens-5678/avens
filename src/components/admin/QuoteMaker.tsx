@@ -13,6 +13,7 @@ import { useCreateQuote, useQuotes, useQuoteVersions, type QuoteLineItem, type Q
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, Calculator, Mail, MessageSquare, Download, PackageSearch, Copy, History, Palette } from "lucide-react";
 import { downloadQuoteAsPDF, type QuoteTemplate } from "./QuotePrintTemplate";
 import QuotePicklistDialog from "./QuotePicklistDialog";

@@ -152,7 +152,6 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
     template,
     version: currentVersion,
     parent_quote_id: parentQuoteId,
-    acceptance_token: null,
     signature_url: null,
     signed_at: null,
   });

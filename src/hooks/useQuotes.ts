@@ -40,7 +40,7 @@ export interface Quote {
   template: string | null;
   version: number | null;
   parent_quote_id: string | null;
-  acceptance_token: string | null;
+  acceptance_token?: string | null;
   signature_url: string | null;
   signed_at: string | null;
 }

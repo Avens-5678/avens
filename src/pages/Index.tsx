@@ -98,6 +98,19 @@ const Index = () => {
     return () => {if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current);};
   }, [resetArrowTimer]);
 
+  // Auto-rotate banners every 7 seconds (pause on hover)
+  useEffect(() => {
+    if (activeBanners.length <= 1 || isPaused) return;
+
+    autoRotateRef.current = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % activeBanners.length);
+    }, 7000);
+
+    return () => {
+      if (autoRotateRef.current) clearInterval(autoRotateRef.current);
+    };
+  }, [activeBanners.length, isPaused]);
+
   useEffect(() => {
     if (!loadingBanners) {
       setShowBannerFallback(false);

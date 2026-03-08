@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, UserPlus, ArrowLeft, Building2, User } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { motion, AnimatePresence } from "framer-motion";
 
 const baseSchema = {

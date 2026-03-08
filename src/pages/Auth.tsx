@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogIn, ArrowLeft, UserPlus, ArrowRight, Shield, Mail } from "lucide-react";
+import { Loader2, LogIn, ArrowLeft, UserPlus, ArrowRight, Shield, Mail, User, Building2 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -21,7 +24,7 @@ const passwordSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-type Step = "email" | "password" | "role-select" | "forgot-password";
+type Step = "email" | "password" | "role-select" | "forgot-password" | "google-onboarding";
 
 interface UserTypeInfo {
   is_admin: boolean;
@@ -36,6 +39,17 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isForgotLoading, setIsForgotLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
+  const [selectedOnboardingRole, setSelectedOnboardingRole] = useState<"client" | "vendor" | null>(null);
+  const [onboardingData, setOnboardingData] = useState({
+    fullName: "",
+    phone: "",
+    companyName: "",
+    address: "",
+    city: "",
+    gstNumber: "",
+    godownAddress: "",
+    eventInterest: "",
+  });
 
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
@@ -52,16 +66,24 @@ const Auth = () => {
     defaultValues: { password: "" },
   });
 
-  // Redirect based on user role
+  // Handle Google OAuth callback - check if user needs onboarding
   useEffect(() => {
     if (authLoading || roleLoading) return;
     if (user && role) {
+      // User has a role, redirect to dashboard
       switch (role) {
         case "admin": navigate("/admin"); break;
         case "client": navigate("/client/dashboard"); break;
         case "vendor": navigate("/vendor/dashboard"); break;
         default: navigate("/");
       }
+    } else if (user && !role && !roleLoading) {
+      // User is authenticated but has no role - needs onboarding (Google OAuth new user)
+      setStep("google-onboarding");
+      setOnboardingData(prev => ({
+        ...prev,
+        fullName: user.user_metadata?.full_name || user.user_metadata?.name || "",
+      }));
     }
   }, [user, role, authLoading, roleLoading, navigate]);
 
@@ -78,7 +100,6 @@ const Auth = () => {
       setUserTypeInfo(data);
 
       if (data.is_admin) {
-        // Redirect to admin OTP login
         navigate("/admin");
         return;
       }
@@ -119,7 +140,6 @@ const Auth = () => {
         return;
       }
 
-      // If user has multiple roles, show role selector
       if (userTypeInfo && userTypeInfo.roles && userTypeInfo.roles.length > 1) {
         setStep("role-select");
         return;
@@ -178,6 +198,71 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleOnboarding = async () => {
+    if (!user || !selectedOnboardingRole) return;
+
+    // Validate vendor fields
+    if (selectedOnboardingRole === "vendor") {
+      if (!onboardingData.phone || onboardingData.phone.length < 10) {
+        toast({ title: "Phone Required", description: "Phone number is required for vendors.", variant: "destructive" });
+        return;
+      }
+      if (!onboardingData.companyName || onboardingData.companyName.length < 2) {
+        toast({ title: "Company Required", description: "Company name is required for vendors.", variant: "destructive" });
+        return;
+      }
+      if (!onboardingData.address || onboardingData.address.length < 5) {
+        toast({ title: "Address Required", description: "Business address is required for vendors.", variant: "destructive" });
+        return;
+      }
+    }
+
+    setIsLoading(true);
+    try {
+      // Create profile
+      const { error: profileError } = await supabase.from("profiles").insert({
+        user_id: user.id,
+        email: user.email!,
+        full_name: onboardingData.fullName || user.user_metadata?.full_name || null,
+        phone: onboardingData.phone || null,
+        company_name: onboardingData.companyName || null,
+        address: onboardingData.address || null,
+        city: onboardingData.city || null,
+        gst_number: onboardingData.gstNumber || null,
+        godown_address: onboardingData.godownAddress || null,
+      });
+
+      if (profileError && !profileError.message.includes("duplicate")) {
+        console.error("Profile creation error:", profileError);
+      }
+
+      // Assign role
+      const { error: roleError } = await supabase.from("user_roles").insert({
+        user_id: user.id,
+        role: selectedOnboardingRole,
+      });
+
+      if (roleError) {
+        console.error("Role assignment error:", roleError);
+        throw roleError;
+      }
+
+      toast({ title: "Welcome!", description: "Your account is set up successfully." });
+
+      // Navigate to appropriate dashboard
+      if (selectedOnboardingRole === "client") {
+        navigate("/client/dashboard");
+      } else {
+        navigate("/vendor/dashboard");
+      }
+    } catch (error: any) {
+      console.error("Onboarding error:", error);
+      toast({ title: "Setup Failed", description: error.message || "Something went wrong.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 p-4">
       <Card className="w-full max-w-md">
@@ -196,6 +281,7 @@ const Auth = () => {
             {step === "password" && `Signing in as ${email}`}
             {step === "role-select" && "Choose your dashboard"}
             {step === "forgot-password" && "Reset your password"}
+            {step === "google-onboarding" && "Complete your profile"}
           </p>
         </CardHeader>
         <CardContent className="space-y-6 px-6 pb-8">
@@ -325,6 +411,147 @@ const Auth = () => {
                   </div>
                 </Button>
               ))}
+            </div>
+          )}
+
+          {/* Google Onboarding: Role selection + profile info for new Google users */}
+          {step === "google-onboarding" && (
+            <div className="space-y-5">
+              <p className="text-sm text-muted-foreground text-center">
+                Welcome! Please select your role and complete your profile.
+              </p>
+
+              {/* Role Selection */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setSelectedOnboardingRole("client")}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                    selectedOnboardingRole === "client"
+                      ? "border-primary bg-primary/5 shadow-md"
+                      : "border-border hover:border-primary/30"
+                  }`}
+                >
+                  <User className={`h-8 w-8 ${selectedOnboardingRole === "client" ? "text-primary" : "text-muted-foreground"}`} />
+                  <span className="font-semibold text-sm">Customer</span>
+                  <span className="text-xs text-muted-foreground text-center">Request Events</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedOnboardingRole("vendor")}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                    selectedOnboardingRole === "vendor"
+                      ? "border-primary bg-primary/5 shadow-md"
+                      : "border-border hover:border-primary/30"
+                  }`}
+                >
+                  <Building2 className={`h-8 w-8 ${selectedOnboardingRole === "vendor" ? "text-primary" : "text-muted-foreground"}`} />
+                  <span className="font-semibold text-sm">Vendor</span>
+                  <span className="text-xs text-muted-foreground text-center">Provide Services</span>
+                </button>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {selectedOnboardingRole && (
+                  <motion.div
+                    key={selectedOnboardingRole}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4 overflow-hidden"
+                  >
+                    <div>
+                      <label className="text-sm font-medium">Full Name</label>
+                      <Input
+                        value={onboardingData.fullName}
+                        onChange={(e) => setOnboardingData(prev => ({ ...prev, fullName: e.target.value }))}
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium">
+                        Phone Number {selectedOnboardingRole === "vendor" ? "*" : "(Optional)"}
+                      </label>
+                      <Input
+                        value={onboardingData.phone}
+                        onChange={(e) => setOnboardingData(prev => ({ ...prev, phone: e.target.value }))}
+                        placeholder="+91 XXXXX XXXXX"
+                      />
+                    </div>
+
+                    {selectedOnboardingRole === "client" && (
+                      <div>
+                        <label className="text-sm font-medium">What type of event are you planning? (Optional)</label>
+                        <Input
+                          value={onboardingData.eventInterest}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, eventInterest: e.target.value }))}
+                          placeholder="e.g., Wedding, Corporate Event"
+                        />
+                      </div>
+                    )}
+
+                    {selectedOnboardingRole === "vendor" && (
+                      <>
+                        <div>
+                          <label className="text-sm font-medium">Company / Business Name *</label>
+                          <Input
+                            value={onboardingData.companyName}
+                            onChange={(e) => setOnboardingData(prev => ({ ...prev, companyName: e.target.value }))}
+                            placeholder="Your business name"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Business Address *</label>
+                          <Textarea
+                            value={onboardingData.address}
+                            onChange={(e) => setOnboardingData(prev => ({ ...prev, address: e.target.value }))}
+                            placeholder="Full business address"
+                            className="min-h-[80px]"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">City</label>
+                            <Input
+                              value={onboardingData.city}
+                              onChange={(e) => setOnboardingData(prev => ({ ...prev, city: e.target.value }))}
+                              placeholder="e.g., Hyderabad"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">GST Number</label>
+                            <Input
+                              value={onboardingData.gstNumber}
+                              onChange={(e) => setOnboardingData(prev => ({ ...prev, gstNumber: e.target.value }))}
+                              placeholder="22AAAAA0000A1Z5"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Godown / Warehouse Address (Optional)</label>
+                          <Input
+                            value={onboardingData.godownAddress}
+                            onChange={(e) => setOnboardingData(prev => ({ ...prev, godownAddress: e.target.value }))}
+                            placeholder="Warehouse or storage location"
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <Button
+                      className="w-full"
+                      onClick={handleGoogleOnboarding}
+                      disabled={isLoading}
+                    >
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Complete Setup
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </CardContent>

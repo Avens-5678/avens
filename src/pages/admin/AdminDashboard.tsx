@@ -89,14 +89,19 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
+    icon: ShoppingBag, label: "Ecommerce", value: "ecommerce",
+    subTabs: [
+      { label: "Rentals", value: "rentals" },
+      { label: "Promo Banners", value: "promo-banners" },
+      { label: "Trust Strip", value: "trust-strip" },
+    ],
+  },
+  {
     icon: Home, label: "Website", value: "website",
     subTabs: [
       { label: "Banners", value: "banners" },
       { label: "Services", value: "services" },
       { label: "Events", value: "events" },
-      { label: "Rentals", value: "rentals" },
-      { label: "Promo Banners", value: "promo-banners" },
-      { label: "Trust Strip", value: "trust-strip" },
       { label: "Portfolio", value: "portfolio" },
       { label: "Clients", value: "clients" },
       { label: "Reviews", value: "testimonials" },
@@ -122,7 +127,7 @@ const sidebarItems: SidebarItem[] = menuGroups.map((g) => ({
   value: g.value,
 }));
 
-const mobilePrimaryItems = ["overview", "operations", "user-mgmt", "website", "settings-group"];
+const mobilePrimaryItems = ["overview", "operations", "user-mgmt", "ecommerce", "website", "settings-group"];
 
 const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const [activeGroup, setActiveGroup] = useState("overview");

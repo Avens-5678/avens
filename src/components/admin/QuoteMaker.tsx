@@ -81,6 +81,21 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
     }
   }, [gstEnabled]);
 
+  // Fetch client profile by email for company name & GST
+  const fetchClientProfile = async (email: string) => {
+    if (!email) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("company_name, gst_number")
+      .eq("email", email)
+      .limit(1)
+      .single();
+    if (data) {
+      setClientCompanyName(data.company_name || "");
+      setClientGst(data.gst_number || "");
+    }
+  };
+
   // Auto-populate from selected order
   useEffect(() => {
     if (!selectedOrderId) return;

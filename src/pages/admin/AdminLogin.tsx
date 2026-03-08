@@ -122,6 +122,10 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password: values.password });
       if (error) throw error;
+      
+      const isAdmin = await verifyAdminAfterAuth();
+      if (!isAdmin) return;
+      
       toast({ title: "Login Successful", description: "Welcome to the admin dashboard." });
       onLoginSuccess();
     } catch (error: any) {

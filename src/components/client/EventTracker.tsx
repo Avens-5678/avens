@@ -144,6 +144,9 @@ const EventTracker = () => {
             </div>
           )}
 
+          {/* Show linked quote */}
+          <OrderQuoteCard orderId={request.id} />
+
           {/* Show vendor info if assigned */}
           {request.assigned_vendor_id && (
             <VendorCard vendorId={request.assigned_vendor_id} />

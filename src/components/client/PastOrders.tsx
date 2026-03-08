@@ -173,6 +173,9 @@ const PastOrders = () => {
                       <p className="text-sm text-muted-foreground">{order.equipment_details}</p>
                     </div>
                   )}
+                  <div className="mt-3">
+                    <OrderQuoteCard orderId={order.id} />
+                  </div>
                 </CardContent>
               </Card>
             ))

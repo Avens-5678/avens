@@ -130,6 +130,9 @@ const OrderTracker = () => {
                     </div>
                   )}
 
+                  {/* Linked Quote */}
+                  <OrderQuoteCard orderId={request.id} />
+
                   {/* Status Update */}
                   <div className="flex items-center gap-3 pt-2 border-t">
                     <span className="text-sm font-medium">Update Status:</span>

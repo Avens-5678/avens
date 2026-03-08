@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEventRequests, useAssignVendor, useVendors, EventRequest } from "@/hooks/useEventRequests";
 import { useUpdateEventStatus } from "@/hooks/useEventRequests";
 import { useRentalOrders, useUpdateRentalOrder } from "@/hooks/useRentalOrders";
-import { Loader2, Calendar, Users as UsersIcon, MapPin, ClipboardList, Package } from "lucide-react";
+import { useServiceOrders, useUpdateServiceOrder } from "@/hooks/useServiceOrders";
+import { Loader2, Calendar, Users as UsersIcon, MapPin, ClipboardList, Package, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {

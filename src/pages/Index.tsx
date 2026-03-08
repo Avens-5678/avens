@@ -230,7 +230,7 @@ const Index = () => {
       </Section>
 
       {/* Services Section */}
-      <Section spacing="large">
+      <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">
         <div className="container mx-auto px-4">
           <SectionHeader
               badge={<Badge variant="outline"><Sparkles className="mr-2 h-4 w-4" />Premium Services</Badge>}

@@ -68,6 +68,7 @@ const App = () => (
               <Route path="/events/:eventType" element={<DynamicEventPage />} />
               <Route path="/ecommerce" element={<Ecommerce />} />
               <Route path="/ecommerce/orders" element={<EcommerceOrders />} />
+              <Route path="/ecommerce/track" element={<TrackOrder />} />
               <Route path="/ecommerce/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />

@@ -79,6 +79,58 @@ export const useEventRequestWithVendor = (requestId: string) => {
   });
 };
 
+// Sync event request to service_orders + send WhatsApp confirmation
+const syncEventRequestToServiceOrders = async (
+  eventRequest: EventRequest,
+  userEmail?: string
+) => {
+  try {
+    // Get user profile for name/phone
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, phone, email")
+      .eq("user_id", eventRequest.client_id)
+      .single();
+
+    const clientName = profile?.full_name || userEmail || "Customer";
+    const clientPhone = profile?.phone || null;
+    const clientEmail = profile?.email || userEmail || null;
+
+    // Insert into service_orders
+    const { data: serviceOrder } = await supabase
+      .from("service_orders")
+      .insert({
+        title: `${eventRequest.event_type} - Event Request`,
+        service_type: eventRequest.event_type,
+        service_details: eventRequest.requirements || "",
+        location: eventRequest.location || "",
+        event_date: eventRequest.event_date || "",
+        budget: eventRequest.budget || "",
+        guest_count: eventRequest.guest_count || undefined,
+        client_name: clientName,
+        client_phone: clientPhone || "",
+        client_email: clientEmail || "",
+        notes: `Auto-synced from Event Request #${eventRequest.id.substring(0, 8)}`,
+      })
+      .select()
+      .single();
+
+    // Send WhatsApp confirmation via WATI
+    if (clientPhone && serviceOrder) {
+      await supabase.functions.invoke("wati-service-confirmation", {
+        body: {
+          phone: clientPhone,
+          name: clientName,
+          service_type: eventRequest.event_type,
+          order_id: serviceOrder.id,
+        },
+      });
+    }
+  } catch (err) {
+    console.error("Failed to sync event request to service orders:", err);
+  }
+};
+
 // Create a new event request (for clients)
 export const useCreateEventRequest = () => {
   const queryClient = useQueryClient();
@@ -103,10 +155,13 @@ export const useCreateEventRequest = () => {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["event_requests"] });
+      queryClient.invalidateQueries({ queryKey: ["service_orders"] });
       toast({
         title: "Request Submitted",
         description: "Your event request has been submitted successfully.",
       });
+      // Sync to service_orders + WhatsApp
+      syncEventRequestToServiceOrders(result as EventRequest, user?.email || undefined);
       // Sync to Zoho CRM
       syncRequestToZoho('event_request', {
         ...result,

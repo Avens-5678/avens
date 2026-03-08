@@ -109,6 +109,7 @@ const Index = () => {
 
   return (
     <>
+    {!isMobile && <CursorTrail color="hsl(222, 65%, 42%)" size={24} duration={0.6} />}
     <Layout>
       {/* Hero Section - Simple, no heavy animations */}
       <HeroSection

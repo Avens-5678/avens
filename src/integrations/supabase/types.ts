@@ -653,6 +653,7 @@ export type Database = {
       }
       quotes: {
         Row: {
+          acceptance_token: string | null
           client_email: string | null
           client_name: string
           client_phone: string | null
@@ -665,17 +666,24 @@ export type Database = {
           gst_percent: number | null
           id: string
           notes: string | null
+          parent_quote_id: string | null
           quote_number: string
           sent_at: string | null
           sent_via: string | null
+          signature_url: string | null
+          signed_at: string | null
           source_order_id: string | null
           source_type: string
           status: string
           subtotal: number
+          tax_type: string | null
+          template: string | null
           total: number
           updated_at: string
+          version: number | null
         }
         Insert: {
+          acceptance_token?: string | null
           client_email?: string | null
           client_name: string
           client_phone?: string | null
@@ -688,17 +696,24 @@ export type Database = {
           gst_percent?: number | null
           id?: string
           notes?: string | null
+          parent_quote_id?: string | null
           quote_number?: string
           sent_at?: string | null
           sent_via?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
           source_order_id?: string | null
           source_type?: string
           status?: string
           subtotal?: number
+          tax_type?: string | null
+          template?: string | null
           total?: number
           updated_at?: string
+          version?: number | null
         }
         Update: {
+          acceptance_token?: string | null
           client_email?: string | null
           client_name?: string
           client_phone?: string | null
@@ -711,17 +726,31 @@ export type Database = {
           gst_percent?: number | null
           id?: string
           notes?: string | null
+          parent_quote_id?: string | null
           quote_number?: string
           sent_at?: string | null
           sent_via?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
           source_order_id?: string | null
           source_type?: string
           status?: string
           subtotal?: number
+          tax_type?: string | null
+          template?: string | null
           total?: number
           updated_at?: string
+          version?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quotes_parent_quote_id_fkey"
+            columns: ["parent_quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rental_orders: {
         Row: {

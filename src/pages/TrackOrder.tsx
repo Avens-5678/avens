@@ -190,32 +190,12 @@ const TrackOrder = () => {
                       </div>
                     )}
                   </div>
-                  {order.details && (() => {
-                    // Try to parse JSON cart details
-                    try {
-                      const parsed = JSON.parse(order.details);
-                      if (parsed.cart_items && Array.isArray(parsed.cart_items)) {
-                        return (
-                          <div className="border-t border-border pt-3 mt-3 space-y-2">
-                            <p className="text-sm font-medium text-foreground">Items:</p>
-                            <ul className="space-y-1">
-                              {parsed.cart_items.map((item: any, i: number) => (
-                                <li key={i} className="text-sm text-muted-foreground flex justify-between">
-                                  <span>{item.title} × {item.quantity || 1}</span>
-                                  {item.price_value && <span>₹{Number(item.price_value).toLocaleString()}</span>}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      }
-                    } catch {}
-                    return (
-                      <p className="text-sm text-muted-foreground border-t border-border pt-3 mt-3">
-                        {order.details}
-                      </p>
-                    );
-                  })()}
+                  {order.details && (
+                    <div className="border-t border-border pt-3 mt-3">
+                      <p className="text-sm font-medium text-foreground mb-2">Equipment Details</p>
+                      <EquipmentDetailsDisplay details={order.details} />
+                    </div>
+                  )}
                   {order.vendor_quote_amount != null && order.vendor_quote_amount > 0 && (
                     <div className="border-t border-border pt-3">
                       <p className="text-sm font-medium text-foreground">

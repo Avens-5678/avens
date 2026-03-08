@@ -235,7 +235,7 @@ const EcommerceOrders = () => {
                 {activeOrders.length === 0 ? (
                   <EmptyState message="No active orders right now." />
                 ) : (
-                  activeOrders.map((order) => <OrderCard key={order.id} order={order} />)
+                  activeOrders.map((order) => <OrderCard key={order.id} order={order} showStepper />)
                 )}
               </TabsContent>
 

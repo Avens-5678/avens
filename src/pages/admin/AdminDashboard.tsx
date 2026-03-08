@@ -46,6 +46,8 @@ import VendorInventoryAdmin from "@/components/admin/VendorInventoryAdmin";
 import LiveRentalOrders from "@/components/admin/LiveRentalOrders";
 import LiveServiceOrders from "@/components/admin/LiveServiceOrders";
 import QuoteMaker from "@/components/admin/QuoteMaker";
+import PromoBannerManager from "@/components/admin/PromoBannerManager";
+import TrustStripManager from "@/components/admin/TrustStripManager";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";

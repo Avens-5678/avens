@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useAboutContent } from "@/hooks/useData";
+import { useDashboardPath } from "@/hooks/useDashboardPath";
 import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import InquiryForm from "@/components/Forms/InquiryForm";
@@ -51,6 +52,7 @@ const CardSkeleton = () =>
 
 const Index = () => {
   const isMobile = useIsMobile();
+  const { getServiceRequestPath } = useDashboardPath();
   // Core data - only essential for above-the-fold
   const { data: heroBanners, isLoading: loadingBanners } = useHeroBanners();
   const { data: services, isLoading: loadingServices } = useServices();
@@ -323,7 +325,7 @@ const Index = () => {
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
                   asChild>
-                  <Link to="/client/dashboard?tab=request">
+                   <Link to={getServiceRequestPath('')}>
                     Start Planning Today
                     <Calendar className="ml-2 h-5 w-5" />
                   </Link>
@@ -495,7 +497,7 @@ const Index = () => {
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
                   asChild>
-                  <Link to="/client/dashboard?tab=request">
+                  <Link to={getServiceRequestPath('')}>
                     Start Planning
                     <Calendar className="ml-2 h-5 w-5" />
                   </Link>

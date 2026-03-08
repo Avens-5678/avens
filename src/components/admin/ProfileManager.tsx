@@ -85,6 +85,22 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
     setIsPasswordLoading(true);
 
     try {
+      // First verify current password by signing in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: adminUser.email,
+        password: values.current_password,
+      });
+
+      if (signInError) {
+        toast({
+          title: "Incorrect Password",
+          description: "The current password you entered is incorrect.",
+          variant: "destructive",
+        });
+        setIsPasswordLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: values.new_password,
       });

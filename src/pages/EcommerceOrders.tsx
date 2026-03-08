@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
+import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useRentalOrders } from "@/hooks/useRentalOrders";
 import { useServiceOrders } from "@/hooks/useServiceOrders";
@@ -8,9 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Briefcase, Calendar, MapPin, Clock, ArrowLeft, LogIn, IndianRupee } from "lucide-react";
+import {
+  Package, Briefcase, Calendar, MapPin, Clock, ArrowLeft, LogIn,
+  IndianRupee, CheckCircle2, Circle, ChevronRight, ShoppingBag, Truck,
+} from "lucide-react";
 import { format } from "date-fns";
-import { CheckCircle2, Circle } from "lucide-react";
 
 const ACTIVE_STATUSES = ["new", "sent_to_vendors", "accepted", "quoted", "confirmed", "in_progress", "pending", "approved"];
 const COMPLETED_STATUSES = ["completed", "delivered", "cancelled", "declined"];
@@ -45,6 +48,9 @@ const statusLabels: Record<string, string> = {
   cancelled: "Cancelled",
 };
 
+const RENTAL_STEPS = ["new", "sent_to_vendors", "accepted", "quoted", "confirmed", "in_progress", "completed"];
+const SERVICE_STEPS = ["new", "in_progress", "quoted", "confirmed", "completed"];
+
 const EcommerceOrders = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -53,29 +59,22 @@ const EcommerceOrders = () => {
 
   const userEmail = user?.email;
 
-  // Filter orders by user email
   const myRentalOrders = useMemo(() => {
     if (!rentalOrders || !userEmail) return [];
     return rentalOrders.filter(
-      (o) => o.client_email?.toLowerCase() === userEmail.toLowerCase() ||
-             o.assigned_vendor_id === user?.id
+      (o) => o.client_email?.toLowerCase() === userEmail.toLowerCase() || o.assigned_vendor_id === user?.id
     );
   }, [rentalOrders, userEmail, user?.id]);
 
   const myServiceOrders = useMemo(() => {
     if (!serviceOrders || !userEmail) return [];
-    return serviceOrders.filter(
-      (o) => o.client_email?.toLowerCase() === userEmail.toLowerCase()
-    );
+    return serviceOrders.filter((o) => o.client_email?.toLowerCase() === userEmail.toLowerCase());
   }, [serviceOrders, userEmail]);
 
-  // Combine and split into active/previous
   const allOrders = useMemo(() => {
     const rentals = myRentalOrders.map((o) => ({ ...o, orderType: "rental" as const }));
     const services = myServiceOrders.map((o) => ({ ...o, orderType: "service" as const }));
-    return [...rentals, ...services].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    return [...rentals, ...services].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [myRentalOrders, myServiceOrders]);
 
   const activeOrders = allOrders.filter((o) => ACTIVE_STATUSES.includes(o.status));
@@ -85,9 +84,10 @@ const EcommerceOrders = () => {
 
   if (authLoading) {
     return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      <Layout hideNavbar>
+        <EcommerceHeader searchTerm="" onSearchChange={() => {}} categories={[]} selectedSearchCategory="" onSearchCategoryChange={() => {}} />
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
         </div>
       </Layout>
     );
@@ -95,27 +95,21 @@ const EcommerceOrders = () => {
 
   if (!user) {
     return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center px-4">
-          <Card className="max-w-md w-full">
-            <CardContent className="py-12 text-center space-y-4">
-              <LogIn className="h-12 w-12 mx-auto text-muted-foreground" />
-              <h2 className="text-xl font-semibold text-foreground">Sign in to view your orders</h2>
-              <p className="text-muted-foreground text-sm">
-                You need to be logged in to see your rental and service orders.
-              </p>
-              <Button onClick={() => navigate("/auth")} className="mt-4">
-                Sign In
-              </Button>
-            </CardContent>
-          </Card>
+      <Layout hideNavbar>
+        <EcommerceHeader searchTerm="" onSearchChange={() => {}} categories={[]} selectedSearchCategory="" onSearchCategoryChange={() => {}} />
+        <div className="min-h-[60vh] flex items-center justify-center px-4">
+          <div className="max-w-sm w-full text-center space-y-5">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto">
+              <LogIn className="h-8 w-8 text-muted-foreground/50" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground">Sign in to view your orders</h2>
+            <p className="text-sm text-muted-foreground">You need to be logged in to see your rental and service orders.</p>
+            <Button onClick={() => navigate("/auth")} size="lg">Sign In</Button>
+          </div>
         </div>
       </Layout>
     );
   }
-
-  const RENTAL_STEPS = ["new", "sent_to_vendors", "accepted", "quoted", "confirmed", "in_progress", "completed"];
-  const SERVICE_STEPS = ["new", "in_progress", "quoted", "confirmed", "completed"];
 
   const getSteps = (orderType: string) => {
     const steps = orderType === "rental" ? RENTAL_STEPS : SERVICE_STEPS;
@@ -132,24 +126,32 @@ const EcommerceOrders = () => {
     const steps = getSteps(orderType);
     const currentIdx = getStepIndex(status, orderType);
     return (
-      <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide pt-3 pb-1">
+      <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide pt-4 pb-1">
         {steps.map((step, i) => {
           const isDone = i <= currentIdx;
           const isCurrent = i === currentIdx;
           return (
             <div key={step.key} className="flex items-center flex-shrink-0">
-              <div className="flex flex-col items-center gap-1">
-                {isDone ? (
-                  <CheckCircle2 className={`h-5 w-5 ${isCurrent ? "text-primary" : "text-primary/60"}`} />
-                ) : (
-                  <Circle className="h-5 w-5 text-muted-foreground/40" />
-                )}
-                <span className={`text-[10px] sm:text-xs whitespace-nowrap ${isCurrent ? "font-semibold text-primary" : isDone ? "text-foreground/70" : "text-muted-foreground/50"}`}>
+              <div className="flex flex-col items-center gap-1.5">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                  isDone
+                    ? isCurrent ? "bg-primary text-primary-foreground" : "bg-primary/20 text-primary"
+                    : "bg-muted text-muted-foreground/40"
+                }`}>
+                  {isDone ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                  ) : (
+                    <Circle className="h-4 w-4" />
+                  )}
+                </div>
+                <span className={`text-[10px] sm:text-[11px] whitespace-nowrap max-w-[60px] sm:max-w-none text-center leading-tight ${
+                  isCurrent ? "font-semibold text-primary" : isDone ? "text-foreground/70" : "text-muted-foreground/40"
+                }`}>
                   {step.label}
                 </span>
               </div>
               {i < steps.length - 1 && (
-                <div className={`w-6 sm:w-10 h-0.5 mx-1 ${i < currentIdx ? "bg-primary/60" : "bg-muted-foreground/20"}`} />
+                <div className={`w-6 sm:w-10 h-0.5 mx-0.5 sm:mx-1 rounded-full ${i < currentIdx ? "bg-primary/40" : "bg-border"}`} />
               )}
             </div>
           );
@@ -159,120 +161,140 @@ const EcommerceOrders = () => {
   };
 
   const OrderCard = ({ order, showStepper }: { order: (typeof allOrders)[0]; showStepper?: boolean }) => (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <CardContent className="p-4 sm:p-5">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-          <div className="flex-1 min-w-0 space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
+    <div className="bg-background border border-border rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
+      <div className="p-4 sm:p-5">
+        {/* Header Row */}
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+              order.orderType === "rental" ? "bg-primary/10" : "bg-accent/10"
+            }`}>
               {order.orderType === "rental" ? (
-                <Package className="h-4 w-4 text-primary flex-shrink-0" />
+                <Package className="h-4.5 w-4.5 text-primary" />
               ) : (
-                <Briefcase className="h-4 w-4 text-accent flex-shrink-0" />
-              )}
-              <h3 className="font-semibold text-foreground truncate">{order.title}</h3>
-              <Badge variant="outline" className="text-xs">
-                {order.orderType === "rental" ? "Rental" : "Service"}
-              </Badge>
-            </div>
-
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              {order.event_date && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {format(new Date(order.event_date), "dd MMM yyyy")}
-                </span>
-              )}
-              {order.location && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {order.location}
-                </span>
-              )}
-              <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" />
-                {format(new Date(order.created_at), "dd MMM yyyy")}
-              </span>
-              {order.budget && (
-                <span className="flex items-center gap-1">
-                  <IndianRupee className="h-3.5 w-3.5" />
-                  {order.budget}
-                </span>
+                <Briefcase className="h-4.5 w-4.5 text-accent" />
               )}
             </div>
-
-            {"equipment_category" in order && order.equipment_category && (
-              <p className="text-xs text-muted-foreground">
-                Category: {order.equipment_category}
-              </p>
-            )}
-            {"service_type" in order && order.service_type && (
-              <p className="text-xs text-muted-foreground">
-                Type: {order.service_type}
-              </p>
-            )}
+            <div className="min-w-0">
+              <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">{order.title}</h3>
+              <div className="flex items-center gap-2 mt-0.5">
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                  {order.orderType === "rental" ? "Rental" : "Service"}
+                </Badge>
+                <span className="text-[10px] text-muted-foreground">
+                  #{order.id.slice(0, 8).toUpperCase()}
+                </span>
+              </div>
+            </div>
           </div>
-
-          <Badge className={`flex-shrink-0 ${statusColors[order.status] || "bg-muted text-muted-foreground"}`}>
+          <Badge className={`flex-shrink-0 text-[11px] ${statusColors[order.status] || "bg-muted text-muted-foreground"}`}>
             {statusLabels[order.status] || order.status}
           </Badge>
         </div>
 
-        {showStepper && (
-          <StatusStepper status={order.status} orderType={order.orderType} />
+        {/* Meta Info */}
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+          {order.event_date && (
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {format(new Date(order.event_date), "dd MMM yyyy")}
+            </span>
+          )}
+          {order.location && (
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {order.location}
+            </span>
+          )}
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            Placed {format(new Date(order.created_at), "dd MMM yyyy")}
+          </span>
+          {order.budget && (
+            <span className="flex items-center gap-1">
+              <IndianRupee className="h-3 w-3" />
+              {order.budget}
+            </span>
+          )}
+        </div>
+
+        {"equipment_category" in order && order.equipment_category && order.equipment_category !== "Cart Order" && (
+          <p className="text-[11px] text-muted-foreground mt-2 flex items-center gap-1">
+            <Truck className="h-3 w-3" /> {order.equipment_category}
+          </p>
         )}
-      </CardContent>
-    </Card>
+
+        {/* Stepper */}
+        {showStepper && <StatusStepper status={order.status} orderType={order.orderType} />}
+      </div>
+    </div>
   );
 
-  const EmptyState = ({ message }: { message: string }) => (
-    <div className="text-center py-16">
-      <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-      <p className="text-muted-foreground">{message}</p>
+  const EmptyState = ({ message, icon: Icon }: { message: string; icon: any }) => (
+    <div className="text-center py-16 space-y-3">
+      <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto">
+        <Icon className="h-7 w-7 text-muted-foreground/40" />
+      </div>
+      <p className="text-sm text-muted-foreground">{message}</p>
+      <Button variant="outline" size="sm" onClick={() => navigate("/ecommerce")} className="gap-1.5 text-xs">
+        <ShoppingBag className="h-3.5 w-3.5" /> Browse Shop
+      </Button>
     </div>
   );
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-        {/* Header */}
-        <section className="bg-gradient-to-br from-primary/90 via-primary to-primary/80">
-          <div className="container mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-14">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/ecommerce")}
-              className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10 mb-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Shop
-            </Button>
-            <h1 className="text-3xl sm:text-4xl font-bold text-primary-foreground">My Orders</h1>
-            <p className="text-primary-foreground/80 mt-2">
-              Track your rental and service orders in one place.
-            </p>
-          </div>
-        </section>
+    <Layout hideNavbar>
+      <EcommerceHeader
+        searchTerm=""
+        onSearchChange={(v) => { if (v) navigate(`/ecommerce?search=${encodeURIComponent(v)}`); }}
+        categories={[]}
+        selectedSearchCategory=""
+        onSearchCategoryChange={() => {}}
+      />
 
-        {/* Content */}
-        <section className="container mx-auto px-6 sm:px-8 lg:px-12 py-8">
+      {/* Breadcrumb */}
+      <div className="bg-muted/40 border-b border-border">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <button onClick={() => navigate("/ecommerce")} className="hover:text-primary transition-colors">Home</button>
+            <ChevronRight className="h-3 w-3" />
+            <button onClick={() => navigate("/ecommerce")} className="hover:text-primary transition-colors">Shop</button>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground font-medium">My Orders</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Page Header */}
+      <div className="border-b border-border bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-5 sm:py-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">My Orders</h1>
+          <p className="text-sm text-muted-foreground mt-1">Track your rental and service requests in one place.</p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <section className="bg-muted/20 min-h-[50vh]">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-6">
           {isLoading ? (
             <div className="flex justify-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
             </div>
           ) : (
-            <Tabs defaultValue="active" className="space-y-6">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="active" className="gap-2">
+            <Tabs defaultValue="active" className="space-y-5">
+              <TabsList className="bg-background border border-border rounded-lg h-10 p-1">
+                <TabsTrigger value="active" className="rounded-md text-sm gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   Active
                   {activeOrders.length > 0 && (
-                    <span className="flex items-center justify-center h-5 min-w-[20px] rounded-full bg-primary text-primary-foreground text-xs font-medium px-1.5">
+                    <span className="h-5 min-w-[20px] rounded-full bg-primary-foreground/20 text-xs font-semibold px-1.5 flex items-center justify-center">
                       {activeOrders.length}
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="previous" className="gap-2">
+                <TabsTrigger value="previous" className="rounded-md text-sm gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   Previous
                   {previousOrders.length > 0 && (
-                    <span className="flex items-center justify-center h-5 min-w-[20px] rounded-full bg-muted-foreground/30 text-foreground text-xs font-medium px-1.5">
+                    <span className="h-5 min-w-[20px] rounded-full bg-muted-foreground/20 text-xs font-semibold px-1.5 flex items-center justify-center">
                       {previousOrders.length}
                     </span>
                   )}
@@ -281,7 +303,7 @@ const EcommerceOrders = () => {
 
               <TabsContent value="active" className="space-y-3">
                 {activeOrders.length === 0 ? (
-                  <EmptyState message="No active orders right now." />
+                  <EmptyState message="No active orders right now." icon={Package} />
                 ) : (
                   activeOrders.map((order) => <OrderCard key={order.id} order={order} showStepper />)
                 )}
@@ -289,15 +311,15 @@ const EcommerceOrders = () => {
 
               <TabsContent value="previous" className="space-y-3">
                 {previousOrders.length === 0 ? (
-                  <EmptyState message="No previous orders yet." />
+                  <EmptyState message="No completed orders yet." icon={CheckCircle2} />
                 ) : (
                   previousOrders.map((order) => <OrderCard key={order.id} order={order} />)
                 )}
               </TabsContent>
             </Tabs>
           )}
-        </section>
-      </div>
+        </div>
+      </section>
     </Layout>
   );
 };

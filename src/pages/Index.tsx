@@ -259,15 +259,18 @@ const Index = () => {
       </HeroSection>
 
       {/* Stats Section */}
-      <Section spacing="large" variant="muted" className="bg-gradient-to-br from-muted/60 via-muted/40 to-primary/[0.04]">
+      <Section spacing="large" variant="muted" className="relative bg-gradient-to-br from-muted/60 via-muted/40 to-primary/[0.04]">
+        <BackgroundPattern variant="dots" />
         <StatsContainer>
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
-              The only platform that creates extraordinary
-              <br />
-              <span className="text-primary">& memorable events</span> with precision
-            </h2>
-          </div>
+          <ScrollReveal animation="fade-in-up">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
+                The only platform that creates extraordinary
+                <br />
+                <span className="text-primary">& memorable events</span> with precision
+              </h2>
+            </div>
+          </ScrollReveal>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             <StatCard number="500+" label="EVENTS MANAGED" />
@@ -277,6 +280,26 @@ const Index = () => {
           </div>
         </StatsContainer>
       </Section>
+
+      <SectionDivider variant="gradient" />
+
+      {/* Why Choose Us Section */}
+      <Section spacing="large" className="relative overflow-hidden">
+        <BackgroundPattern variant="grid" />
+        <div className="container mx-auto px-4">
+          <ScrollReveal animation="fade-in-up">
+            <SectionHeader
+              badge={<Badge variant="outline"><Shield className="mr-2 h-4 w-4" />Why Choose Us</Badge>}
+              title="Your Trust, Our Commitment"
+              description="Experience excellence with our proven track record and dedicated support."
+            />
+          </ScrollReveal>
+          
+          <WhyChooseUs />
+        </div>
+      </Section>
+
+      <SectionDivider variant="gradient" />
 
       {/* Services Section */}
       <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">

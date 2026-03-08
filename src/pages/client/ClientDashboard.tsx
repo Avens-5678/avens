@@ -102,6 +102,8 @@ const ClientDashboard = () => {
             </CardContent>
           </Card>
         );
+      case "past-orders":
+        return <PastOrders />;
       case "profile":
         return <ClientProfileSettings />;
       default:

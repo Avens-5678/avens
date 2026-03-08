@@ -105,6 +105,8 @@ const VendorDashboard = () => {
             </CardContent>
           </Card>
         );
+      case "past-orders":
+        return <PastOrders />;
       case "inventory":
         return <InventoryManager />;
       case "profile":

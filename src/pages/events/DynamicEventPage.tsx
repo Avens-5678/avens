@@ -424,7 +424,7 @@ const DynamicEventPage = () => {
                 className="button-primary px-8 sm:px-10 lg:px-12 py-3 sm:py-4 text-lg sm:text-xl font-semibold rounded-full shadow-2xl w-full sm:w-auto"
                 asChild
               >
-                <Link to={`/client/dashboard?tab=request&type=${event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
+                <Link to={getServiceRequestPath(event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-'))}>
                   <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
                   {event.cta_button_text || 'Book a Consultation'}
                   <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6" />

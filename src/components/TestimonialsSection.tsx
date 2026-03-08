@@ -6,12 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Star, Quote, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const TestimonialsSection = () => {
   const { data: testimonials, isLoading } = useTestimonials();
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(0);
-  const autoPlayRef = useRef<ReturnType<typeof setInterval>>();
   const [isPaused, setIsPaused] = useState(false);
 
   const itemsPerPage = isMobile ? 1 : 3;
@@ -28,8 +28,8 @@ const TestimonialsSection = () => {
   // Auto-slide every 5 seconds
   useEffect(() => {
     if (totalPages <= 1 || isPaused) return;
-    autoPlayRef.current = setInterval(goNext, 5000);
-    return () => clearInterval(autoPlayRef.current);
+    const interval = setInterval(goNext, 5000);
+    return () => clearInterval(interval);
   }, [totalPages, isPaused, goNext]);
 
   if (isLoading) {
@@ -60,9 +60,6 @@ const TestimonialsSection = () => {
     </div>
   );
 
-  const startIdx = currentPage * itemsPerPage;
-  const visibleItems = testimonials.slice(startIdx, startIdx + itemsPerPage);
-
   return (
     <section className="py-16 lg:py-24 relative overflow-hidden">
       <div className="container mx-auto px-5 sm:px-6 relative z-10">
@@ -79,43 +76,62 @@ const TestimonialsSection = () => {
           </p>
         </div>
 
-        {/* Cards grid/slide */}
+        {/* Sliding container */}
         <div
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
+          className="overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          {visibleItems.map((testimonial) => (
-            <Card key={testimonial.id} className="h-full border-border/40 bg-card/80 hover:shadow-strong transition-all duration-400 hover:-translate-y-1">
-              <CardContent className="p-6 h-full flex flex-col">
-                <div className="mb-5">
-                  <Quote className="h-5 w-5 text-primary/40 mb-3" />
-                  <p className="text-sm leading-relaxed text-foreground/85 line-clamp-4">
-                    "{testimonial.testimonial}"
-                  </p>
+          <div
+            className="flex transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${currentPage * 100}%)` }}
+          >
+            {Array.from({ length: totalPages }).map((_, pageIdx) => {
+              const start = pageIdx * itemsPerPage;
+              const pageItems = testimonials.slice(start, start + itemsPerPage);
+              return (
+                <div
+                  key={pageIdx}
+                  className={cn(
+                    "w-full flex-shrink-0 grid gap-4 md:gap-6",
+                    isMobile ? "grid-cols-1 px-2" : "grid-cols-3"
+                  )}
+                >
+                  {pageItems.map((testimonial) => (
+                    <Card key={testimonial.id} className="h-full border-border/40 bg-card/80 hover:shadow-strong transition-all duration-400 hover:-translate-y-1">
+                      <CardContent className="p-6 h-full flex flex-col">
+                        <div className="mb-5">
+                          <Quote className="h-5 w-5 text-primary/40 mb-3" />
+                          <p className="text-sm leading-relaxed text-foreground/85 line-clamp-4">
+                            "{testimonial.testimonial}"
+                          </p>
+                        </div>
+                        <div className="mt-auto pt-5 border-t border-border/30">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={testimonial.image_url} alt={testimonial.client_name} />
+                              <AvatarFallback className="bg-primary/8 text-primary font-semibold text-xs">
+                                {testimonial.client_name.split(" ").map((n: string) => n[0]).join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-sm truncate">{testimonial.client_name}</h4>
+                              {(testimonial.position || testimonial.company) && (
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {[testimonial.position, testimonial.company].filter(Boolean).join(" at ")}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          {renderStars(testimonial.rating)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-                <div className="mt-auto pt-5 border-t border-border/30">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={testimonial.image_url} alt={testimonial.client_name} />
-                      <AvatarFallback className="bg-primary/8 text-primary font-semibold text-xs">
-                        {testimonial.client_name.split(" ").map((n: string) => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm truncate">{testimonial.client_name}</h4>
-                      {(testimonial.position || testimonial.company) && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {[testimonial.position, testimonial.company].filter(Boolean).join(" at ")}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {renderStars(testimonial.rating)}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              );
+            })}
+          </div>
         </div>
 
         {/* Navigation buttons below cards */}
@@ -130,9 +146,22 @@ const TestimonialsSection = () => {
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
-            <span className="text-sm text-muted-foreground">
-              {currentPage + 1} / {totalPages}
-            </span>
+            {/* Dot indicators */}
+            <div className="flex items-center gap-2">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i)}
+                  className={cn(
+                    "rounded-full transition-all duration-300",
+                    currentPage === i
+                      ? "w-6 h-2.5 bg-primary"
+                      : "w-2.5 h-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                  )}
+                  aria-label={`Go to page ${i + 1}`}
+                />
+              ))}
+            </div>
             <Button
               variant="outline"
               size="icon"

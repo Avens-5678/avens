@@ -18,6 +18,9 @@ import { StatsContainer, StatCard } from "@/components/ui/elegant-stats";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ServiceScrollContainer } from "@/components/ui/service-scroll-container";
+import { CursorTrail } from "@/components/ui/cursor-trail";
+import { MagneticButton } from "@/components/ui/magnetic-button";
+import { TiltCard } from "@/components/ui/tilt-card";
 
 // Lazy load heavy/below-fold components
 const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));

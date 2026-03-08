@@ -42,9 +42,12 @@ const EcommerceHeader = ({
           {/* Logo / Brand */}
           <button
             onClick={() => navigate("/")}
-            className="flex-shrink-0 text-lg sm:text-xl font-bold tracking-tight text-primary-foreground hover:text-primary-foreground/80 transition-colors"
+            className="flex-shrink-0 flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            Evnting
+            <img src={logoEv} alt="Evnting logo" className="h-8 w-auto" />
+            <span className="text-lg sm:text-xl font-bold tracking-tight text-primary-foreground">
+              Evnting
+            </span>
           </button>
 
 

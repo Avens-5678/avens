@@ -59,7 +59,6 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
       setCompanyPhone(companySettings.phone || "");
       setCompanyEmail(companySettings.email || "");
       setLogoUrl(companySettings.logo_url || "");
-      setLogoUrl(companySettings.logo_url || "");
     }
   }, [companySettings]);
 

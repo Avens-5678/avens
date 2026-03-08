@@ -93,7 +93,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         {/* Rating */}
         {rental.rating && (
           <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+            <span className="inline-flex items-center gap-0.5 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
               {rental.rating} <Star className="h-2.5 w-2.5 fill-current" />
             </span>
           </div>

@@ -74,6 +74,7 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/quote/:token" element={<QuoteAcceptance />} />
               
               {/* Auth Routes */}
               <Route path="/auth" element={<Auth />} />

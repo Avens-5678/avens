@@ -642,12 +642,12 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       )}
 
       {/* Recent Quotes for Revision */}
-      {allQuotes && allQuotes.length > 0 && !editingQuoteId && (
+      {allQuotes && allQuotes.length > 0 && !editingQuoteId && !hideRecentQuotes && (
         <Card className="rounded-2xl">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between w-full">
               <CardTitle className="text-base flex items-center gap-2"><History className="h-4 w-4" />Recent Quotes — Revise</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => { setClientName(""); setClientEmail(""); setClientPhone(""); setClientCompanyName(""); setClientGst(""); setNotes(""); setLineItems([{ item_description: "", quantity: 1, unit: "nos", unit_price: 0, total_price: 0 }]); setDiscountValue(0); }}>Clear</Button>
+              <Button size="sm" variant="outline" onClick={() => { setHideRecentQuotes(true); setClientName(""); setClientEmail(""); setClientPhone(""); setClientCompanyName(""); setClientGst(""); setNotes(""); setLineItems([{ item_description: "", quantity: 1, unit: "nos", unit_price: 0, total_price: 0 }]); setDiscountValue(0); }}>Clear</Button>
             </div>
           </CardHeader>
           <CardContent>

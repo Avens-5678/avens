@@ -289,7 +289,12 @@ const Ecommerce = () => {
               {filteredRentals.length} product{filteredRentals.length !== 1 ? "s" : ""}
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button onClick={() => navigate("/ecommerce/track")} variant="outline" size="sm" className="gap-2">
+              <MapPin className="h-4 w-4" />
+              <span className="hidden sm:inline">Track Order</span>
+              <span className="sm:hidden">Track</span>
+            </Button>
             <Button onClick={() => navigate("/ecommerce/orders")} variant="outline" size="sm" className="gap-2">
               <ClipboardList className="h-4 w-4" />
               Orders

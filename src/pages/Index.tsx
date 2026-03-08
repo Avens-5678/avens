@@ -227,18 +227,33 @@ const Index = () => {
         </div>
 
         {/* Navigation dots */}
-        {activeBanners.length > 1
+        {activeBanners.length > 1 && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+            {activeBanners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setCurrentBannerIndex(index);
+                  setIsPaused(true);
+                  setTimeout(() => setIsPaused(false), 3000);
+                }}
+                className="group relative"
+                aria-label={`Go to slide ${index + 1}`}
+              >
+                <div
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    currentBannerIndex === index
+                      ? 'w-8 bg-white'
+                      : 'w-2 bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+        )}
 
-
-
-
-
-
-
-
-
-
-          }
+        {/* Scroll indicator */}
+        <ScrollIndicator />
 
 
       </HeroSection>

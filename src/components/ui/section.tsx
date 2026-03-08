@@ -23,9 +23,9 @@ export function Section({
   }
 
   const variantClasses = {
-    default: "",
-    muted: "bg-muted/40",
-    gradient: "bg-gradient-to-br from-primary/4 via-background to-secondary/3"
+    default: "bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.06),transparent)]",
+    muted: "bg-muted/40 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--secondary)/0.05),transparent_60%)]",
+    gradient: "bg-gradient-to-br from-primary/[0.04] via-background to-secondary/[0.03] bg-[radial-gradient(circle_600px_at_70%_80%,hsl(var(--primary)/0.06),transparent)]"
   }
 
   return (

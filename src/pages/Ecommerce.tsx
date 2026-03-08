@@ -11,6 +11,7 @@ import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
+import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 

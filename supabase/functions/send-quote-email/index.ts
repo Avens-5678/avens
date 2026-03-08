@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const acceptanceLink = `https://evnting.com/quote/${acceptanceToken}`;
+    const acceptanceLink = `https://avens.lovable.app/quote/${acceptanceToken}`;
     const orderRef = sourceOrderId ? `#${sourceOrderId.substring(0, 8).toUpperCase()}` : quoteNumber;
 
     // Build HTML email

@@ -69,7 +69,9 @@ const Ecommerce = () => {
       const allCats = [...selectedCategories];
       if (activeQuickCat && !allCats.includes(activeQuickCat)) allCats.push(activeQuickCat);
       const matchesCategory =
-        allCats.length === 0 || rental.categories?.some((c) => allCats.includes(c));
+        allCats.length === 0 || rental.categories?.some((c) => 
+          allCats.some((selected) => c.toLowerCase() === selected.toLowerCase())
+        );
       const matchesCity =
         selectedCities.length === 0 ||
         (rental.address?.trim() && selectedCities.includes(rental.address.trim()));

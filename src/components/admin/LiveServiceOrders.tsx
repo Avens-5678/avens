@@ -116,8 +116,8 @@ const LiveServiceOrders = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Live Service Orders</h2>
-          <p className="text-muted-foreground text-sm">Manage event service requests & generate quotes</p>
+         <h2 className="text-2xl font-bold">Event Requests</h2>
+          <p className="text-muted-foreground text-sm">Manage event requests & generate quotes</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>

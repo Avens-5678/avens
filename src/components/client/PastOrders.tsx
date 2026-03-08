@@ -44,7 +44,7 @@ const PastOrders = () => {
       <Tabs defaultValue="services" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="services">
-            Service Requests ({allServiceRequests.length})
+            Event Requests ({allServiceRequests.length})
           </TabsTrigger>
           <TabsTrigger value="rentals">
             Rental Orders ({allRentalOrders.length})

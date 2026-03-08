@@ -13,12 +13,14 @@ import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import EventRequestForm from "@/components/client/EventRequestForm";
 import OrderTracker from "@/components/vendor/OrderTracker";
+import PastOrders from "@/components/client/PastOrders";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Briefcase, label: "Job Board", value: "jobs" },
   { icon: Plus, label: "New Request", value: "request" },
+  { icon: Calendar, label: "Past Orders", value: "past-orders" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: User, label: "Profile", value: "profile" },
 ];
@@ -92,10 +94,10 @@ const VendorDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Request a New Event
+                New Service Request
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Fill out the form below to submit an event request. Our team will review and assign resources.
+                Fill out the form below to submit a service request. Our team will review and assign resources.
               </p>
             </CardHeader>
             <CardContent>
@@ -103,6 +105,8 @@ const VendorDashboard = () => {
             </CardContent>
           </Card>
         );
+      case "past-orders":
+        return <PastOrders />;
       case "inventory":
         return <InventoryManager />;
       case "profile":

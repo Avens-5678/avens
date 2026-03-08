@@ -219,7 +219,7 @@ const EventRequestForm = ({ onSuccess, defaultEventType }: EventRequestFormProps
 
         <Button type="submit" className="w-full" disabled={isPending}>
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Submit Event Request
+          Submit Service Request
         </Button>
       </form>
     </Form>

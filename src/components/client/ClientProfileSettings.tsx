@@ -62,7 +62,7 @@ const ClientProfileSettings = () => {
         phone: profile.phone,
         company_name: profile.company_name,
         bio: profile.bio,
-      });
+      }, { onConflict: 'user_id' });
 
     if (error) {
       toast({

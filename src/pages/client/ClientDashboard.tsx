@@ -8,14 +8,16 @@ import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
 import EventTracker from "@/components/client/EventTracker";
+import PastOrders from "@/components/client/PastOrders";
 import ClientProfileSettings from "@/components/client/ClientProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
-  { icon: FileText, label: "My Events", value: "tracker" },
+  { icon: FileText, label: "My Requests", value: "tracker" },
   { icon: Plus, label: "New Request", value: "request" },
+  { icon: Calendar, label: "Past Orders", value: "past-orders" },
   { icon: User, label: "Profile", value: "profile" },
 ];
 
@@ -89,10 +91,10 @@ const ClientDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Request a New Event
+                New Service Request
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Fill out the form below to submit an event request. Our team will review and assign a vendor.
+                Fill out the form below to submit a service request. Our team will review and assign a vendor.
               </p>
             </CardHeader>
             <CardContent>
@@ -100,6 +102,8 @@ const ClientDashboard = () => {
             </CardContent>
           </Card>
         );
+      case "past-orders":
+        return <PastOrders />;
       case "profile":
         return <ClientProfileSettings />;
       default:

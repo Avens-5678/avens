@@ -90,10 +90,10 @@ const ClientDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Request a New Event
+                New Service Request
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Fill out the form below to submit an event request. Our team will review and assign a vendor.
+                Fill out the form below to submit a service request. Our team will review and assign a vendor.
               </p>
             </CardHeader>
             <CardContent>

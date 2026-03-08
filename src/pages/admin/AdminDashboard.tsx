@@ -74,7 +74,7 @@ const menuGroups: MenuGroup[] = [
     subTabs: [
       { label: "Event Center", value: "events-center" },
       { label: "Rental Orders", value: "rental-orders" },
-      { label: "Event Requests", value: "service-orders" },
+      { label: "Service Requests", value: "service-orders" },
       { label: "Quote Maker", value: "quote-maker" },
     ],
   },

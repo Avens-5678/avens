@@ -484,7 +484,7 @@ const Index = () => {
         }
 
       {/* Testimonials - Lazy loaded */}
-      <Section variant="gradient" spacing="large">
+      <Section variant="gradient" spacing="default">
         <div className="container mx-auto px-4">
           <Suspense fallback={
             <div className="text-center py-12">

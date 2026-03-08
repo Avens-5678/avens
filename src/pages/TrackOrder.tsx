@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
 import Layout from "@/components/Layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";

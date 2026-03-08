@@ -1,77 +1,40 @@
 
 
-# AI Chatbot for Client and Vendor Dashboards
+## Issues Found
 
-## Overview
-Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
+### 1. RLS Error on rental_orders
+The INSERT policy (`with_check: true`) allows everyone to insert. However, the code uses `.insert(...).select().single()` — the `.select()` requires a **SELECT** policy. Currently, only admins and assigned vendors have SELECT access. Authenticated clients have no SELECT policy, so the chained `.select()` fails.
 
-## What the Chatbot Does
+**Fix**: Remove `.select().single()` from rental_orders inserts in `Cart.tsx` and `InquiryForm.tsx` (the data isn't critical to retrieve). Alternatively, add a temporary SELECT policy, but removing the select is simpler and safer.
 
-**For Clients:**
-- Help plan events (suggest themes, budgets, timelines)
-- Guide through creating event requests
-- Answer questions about event status and vendor assignments
-- Provide rental equipment recommendations
+### 2. Phone Country Code
+Users enter 10-digit numbers without the +91 prefix. WATI requires the full international number.
 
-**For Vendors:**
-- Help with listing creation and pricing strategies
-- Guide through inventory management
-- Answer questions about assigned jobs
-- Provide marketplace tips and best practices
+**Fix**: Create a `normalizePhoneNumber` utility that auto-prepends `91` for 10-digit Indian numbers. Apply it in:
+- Registration form (on submit)
+- Cart enquiry form (on submit)
+- InquiryForm (on submit)
+- WhatsApp helper functions in hooks
 
-## UI Design (Reference Image Style)
+## Files to Change
 
-The chat tab will feature:
-- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
-- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
-- Markdown rendering for AI responses
-- Typing indicator animation while streaming
-- Message input bar at the bottom with send button
-- Smooth token-by-token streaming display
+### New: `src/utils/phoneUtils.ts`
+- `normalizePhoneNumber(phone: string): string` — strips non-digits, prepends `91` if 10 digits
 
-## Technical Plan
+### Edit: `src/pages/Cart.tsx`
+- Remove `.select().single()` from rental_orders insert (line 82)
+- Use `normalizePhoneNumber` on `contact_number` before insert and WhatsApp call
 
-### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
-- Accepts `{ messages, role: "client" | "vendor" }` in the request body
-- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
-- Role-specific system prompts:
-  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
-  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
-- Returns SSE stream for token-by-token rendering
-- Handles 429/402 errors gracefully
+### Edit: `src/components/Forms/InquiryForm.tsx`
+- Remove `.select().single()` from rental_orders insert (line 131)
+- Use `normalizePhoneNumber` on phone before insert and WhatsApp call
 
-### 2. Update `supabase/config.toml`
-- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
+### Edit: `src/hooks/useRentalOrders.ts`
+- Use `normalizePhoneNumber` in `sendRentalConfirmationWhatsApp`
 
-### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
-- Props: `role: "client" | "vendor"` and `userName: string`
-- **Home screen**: Greeting + quick-action chips in a card grid layout
-- **Chat view**: Scrollable message list with streaming support
-- Uses `react-markdown` (already available or will add) for rendering
-- SSE streaming via fetch to the edge function
-- Conversation stored in local React state (no persistence needed)
-- Framer Motion for message entrance animations
+### Edit: `src/hooks/useEventRequests.ts`
+- Use `normalizePhoneNumber` in `sendEventConfirmationWhatsApp`
 
-### 4. Update `src/pages/client/ClientDashboard.tsx`
-- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
-- Render `<DashboardChatbot role="client" userName={...} />` when active
-
-### 5. Update `src/pages/vendor/VendorDashboard.tsx`
-- Add same "AI Assistant" sidebar item
-- Render `<DashboardChatbot role="vendor" userName={...} />` when active
-
-## File Changes Summary
-
-| File | Action |
-|------|--------|
-| `supabase/functions/dashboard-chat/index.ts` | Create |
-| `supabase/config.toml` | Edit (add function entry) |
-| `src/components/dashboard/DashboardChatbot.tsx` | Create |
-| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
-| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
-
-## Dependencies
-- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
-- Uses existing `framer-motion` for animations
-- Uses existing Supabase client for auth token in fetch calls
+### Edit: `src/pages/auth/Register.tsx`
+- Normalize phone on submit before saving to profile
 

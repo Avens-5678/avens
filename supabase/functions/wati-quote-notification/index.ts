@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
       broadcast_name: `quote_${quoteNumber}`,
       parameters: [
         { name: "1", value: clientName || "Customer" },
-        { name: "2", value: quoteNumber || "N/A" },
+        { name: "2", value: sourceOrderId ? `#${sourceOrderId.substring(0, 8).toUpperCase()}` : (quoteNumber || "N/A") },
         { name: "3", value: linkPath },
       ],
     };

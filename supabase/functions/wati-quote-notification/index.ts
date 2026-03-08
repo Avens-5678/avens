@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { clientName, clientPhone, quoteNumber, acceptanceToken } = await req.json();
+    const { clientName, clientPhone, quoteNumber, acceptanceToken, sourceOrderId } = await req.json();
 
     if (!clientPhone || !acceptanceToken) {
       return new Response(JSON.stringify({ error: "clientPhone and acceptanceToken are required" }), {

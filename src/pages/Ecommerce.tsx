@@ -36,6 +36,11 @@ const Ecommerce = () => {
     return Array.from(cats).sort();
   }, [rentals]);
 
+  const quickBrowseCategories = useMemo(() => {
+    return [{ label: "All", value: "" }, ...categories.map(c => ({ label: c, value: c }))];
+  }, [categories]);
+  }, [rentals]);
+
   const cities = useMemo(() => {
     if (!rentals) return [];
     const citySet = new Set<string>();

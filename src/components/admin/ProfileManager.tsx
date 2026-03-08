@@ -173,20 +173,6 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
               <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-3">
                 <FormField
                   control={passwordForm.control}
-                  name="current_password"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-sm">Current Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter current password" {...field} className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={passwordForm.control}
                   name="new_password"
                   render={({ field }) => (
                     <FormItem className="space-y-1">

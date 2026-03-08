@@ -91,6 +91,7 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
         });
         setHasVariants(false);
         setVariantRows([]);
+        setSpecRows([]);
         setAttributeType("Size");
       }
     }

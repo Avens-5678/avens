@@ -11,6 +11,7 @@ interface PromoBanner {
   cta_text: string | null;
   gradient_from: string | null;
   gradient_to: string | null;
+  image_url: string | null;
   display_order: number | null;
 }
 

@@ -85,30 +85,25 @@ Deno.serve(async (req) => {
 
           // Use v2 API as per WATI docs
           const watiResponse = await fetch(
-            `${cleanBaseUrl}/api/v2/sendTemplateMessage`,
+            `${cleanBaseUrl}/api/v1/sendTemplateMessage/${phone}`,
             {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${watiAuthToken}`,
-                "Content-Type": "application/json",
+                "Content-Type": "application/json-patch+json",
               },
               body: JSON.stringify({
                 template_name: "vendor_order_notification",
                 broadcast_name: `order_${orderId}`,
-                recipients: [
-                  {
-                    phone_number: phone,
-                    custom_params: [
-                      { name: "vendor_name", value: vendorName || "Vendor" },
-                      { name: "order_title", value: order.title || "New Order" },
-                      { name: "category", value: order.equipment_category || "General" },
-                      { name: "location", value: order.location || "TBD" },
-                      { name: "event_date", value: order.event_date || "TBD" },
-                      { name: "budget", value: order.budget || "Negotiable" },
-                      { name: "accept_url", value: acceptUrl },
-                      { name: "quote_url", value: quoteUrl },
-                    ],
-                  },
+                parameters: [
+                  { name: "vendor_name", value: vendorName || "Vendor" },
+                  { name: "order_title", value: order.title || "New Order" },
+                  { name: "category", value: order.equipment_category || "General" },
+                  { name: "location", value: order.location || "TBD" },
+                  { name: "event_date", value: order.event_date || "TBD" },
+                  { name: "budget", value: order.budget || "Negotiable" },
+                  { name: "accept_url", value: acceptUrl },
+                  { name: "quote_url", value: quoteUrl },
                 ],
               }),
             }

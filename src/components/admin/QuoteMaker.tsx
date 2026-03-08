@@ -35,6 +35,8 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [clientCompanyName, setClientCompanyName] = useState("");
+  const [clientGst, setClientGst] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedSourceType, setSelectedSourceType] = useState<string>(prefillSourceType || "manual");
   const [selectedOrderId, setSelectedOrderId] = useState<string>(prefillOrderId || "");
@@ -78,6 +80,21 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       setTaxPercent(18);
     }
   }, [gstEnabled]);
+
+  // Fetch client profile by email for company name & GST
+  const fetchClientProfile = async (email: string) => {
+    if (!email) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("company_name, gst_number")
+      .eq("email", email)
+      .limit(1)
+      .single();
+    if (data) {
+      setClientCompanyName(data.company_name || "");
+      setClientGst(data.gst_number || "");
+    }
+  };
 
   // Auto-populate from selected order
   useEffect(() => {
@@ -193,6 +210,8 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       clientName,
       clientEmail,
       clientPhone,
+      clientCompanyName: clientCompanyName || undefined,
+      clientGst: clientGst || undefined,
       lineItems,
       subtotal: calculations.subtotal,
       discountType,
@@ -399,7 +418,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       {/* Source Selection + Template */}
       <Card className="rounded-2xl">
         <CardContent className="p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 gap-4 ${selectedSourceType !== "manual" ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
             <div>
               <Label>Source</Label>
               <Select value={selectedSourceType} onValueChange={v => { setSelectedSourceType(v); setSelectedOrderId(""); }}>
@@ -450,8 +469,12 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div><Label>Name *</Label><Input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Client name" /></div>
-            <div><Label>Email</Label><Input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="client@email.com" /></div>
+            <div><Label>Email</Label><Input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} onBlur={() => fetchClientProfile(clientEmail)} placeholder="client@email.com" /></div>
             <div><Label>Phone</Label><Input value={clientPhone} onChange={e => setClientPhone(e.target.value)} placeholder="+91 ..." /></div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><Label>Company Name</Label><Input value={clientCompanyName} onChange={e => setClientCompanyName(e.target.value)} placeholder="Client's company (optional)" /></div>
+            <div><Label>Client GSTIN</Label><Input value={clientGst} onChange={e => setClientGst(e.target.value)} placeholder="Client's GST number (optional)" /></div>
           </div>
         </CardContent>
       </Card>

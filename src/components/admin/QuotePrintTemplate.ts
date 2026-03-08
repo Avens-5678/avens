@@ -11,6 +11,8 @@ export interface QuotePrintData {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
+  clientCompanyName?: string;
+  clientGst?: string;
   lineItems: Array<{
     item_description: string;
     quantity: number;
@@ -106,7 +108,11 @@ function getSharedData(data: QuotePrintData) {
 
   const orderRef = data.sourceOrderId ? `Order Ref: #${data.sourceOrderId.substring(0, 8).toUpperCase()}` : "";
 
-  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef, gstEnabled, companyName, companyAddress, companyPhone, companyEmail, companyGst, companyPan, gstPanHtml, gstPanInline, logoHtml };
+  const clientCompanyHtml = data.clientCompanyName ? `<p><strong>${data.clientCompanyName}</strong></p>` : "";
+  const clientGstHtml = gstEnabled && data.clientGst ? `<p><span class="label">GSTIN</span> ${data.clientGst}</p>` : "";
+  const clientGstInline = gstEnabled && data.clientGst ? `<br>GSTIN: ${data.clientGst}` : "";
+
+  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef, gstEnabled, companyName, companyAddress, companyPhone, companyEmail, companyGst, companyPan, gstPanHtml, gstPanInline, logoHtml, clientCompanyHtml, clientGstHtml, clientGstInline };
 }
 
 function buildTerms(notes: string) {
@@ -177,7 +183,7 @@ table.items tbody td { font-size:13px; }
 </div>
 <div class="parties">
   <div class="party-box"><h3>Quotation By</h3><p><strong>${s.companyName}</strong></p><p>${s.companyAddress}</p>${s.gstPanHtml}</div>
-  <div class="party-box"><h3>Quotation To</h3><p><strong>${data.clientName}</strong></p>${data.clientEmail ? `<p>Email: ${data.clientEmail}</p>` : ""}${data.clientPhone ? `<p>Phone: ${data.clientPhone}</p>` : ""}</div>
+  <div class="party-box"><h3>Quotation To</h3>${s.clientCompanyHtml}<p><strong>${data.clientName}</strong></p>${data.clientEmail ? `<p>Email: ${data.clientEmail}</p>` : ""}${data.clientPhone ? `<p>Phone: ${data.clientPhone}</p>` : ""}${s.clientGstHtml}</div>
 </div>
 <table class="items"><thead><tr><th>Item # / Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
 <div class="bottom-section">
@@ -229,7 +235,7 @@ table.items tbody td { padding:10px 14px; border-bottom:1px solid #eee; font-siz
 <div class="quote-badge"><span>QUOTATION</span></div>
 <div class="parties">
   <div class="party"><h3>From</h3><p><strong>${s.companyName}</strong><br>${s.companyAddress}${s.gstPanInline}</p></div>
-  <div class="party"><h3>To</h3><p><strong>${data.clientName}</strong>${data.clientEmail ? `<br>Email: ${data.clientEmail}` : ""}${data.clientPhone ? `<br>Phone: ${data.clientPhone}` : ""}</p></div>
+  <div class="party"><h3>To</h3><p>${data.clientCompanyName ? `<strong>${data.clientCompanyName}</strong><br>` : ""}<strong>${data.clientName}</strong>${data.clientEmail ? `<br>Email: ${data.clientEmail}` : ""}${data.clientPhone ? `<br>Phone: ${data.clientPhone}` : ""}${s.clientGstInline}</p></div>
 </div>
 <table class="items"><thead><tr><th>Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
 <div class="bottom">
@@ -284,7 +290,7 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
 <div class="content">
   <div class="parties">
     <div class="party-card"><h3>From</h3><p><strong>${s.companyName}</strong><br>${s.companyAddress}${s.gstEnabled ? `<br>GSTIN: ${s.companyGst}` : ""}</p></div>
-    <div class="party-card"><h3>To</h3><p><strong>${data.clientName}</strong>${data.clientEmail ? `<br>${data.clientEmail}` : ""}${data.clientPhone ? `<br>${data.clientPhone}` : ""}</p></div>
+    <div class="party-card"><h3>To</h3><p>${data.clientCompanyName ? `<strong>${data.clientCompanyName}</strong><br>` : ""}<strong>${data.clientName}</strong>${data.clientEmail ? `<br>${data.clientEmail}` : ""}${data.clientPhone ? `<br>${data.clientPhone}` : ""}${s.clientGstInline}</p></div>
   </div>
   <table class="items"><thead><tr><th>Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
   <div class="bottom">

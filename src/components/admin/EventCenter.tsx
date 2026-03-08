@@ -155,7 +155,7 @@ const EventCenter = () => {
           </TabsTrigger>
           <TabsTrigger value="services">
             <Briefcase className="h-4 w-4 mr-2" />
-            Service Orders ({serviceOrders?.length || 0})
+            Event Requests ({serviceOrders?.length || 0})
           </TabsTrigger>
         </TabsList>
         {/* Event Requests Tab */}

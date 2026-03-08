@@ -157,7 +157,7 @@ const EventCenter = () => {
             <Briefcase className="h-4 w-4 mr-2" />
             Service Orders ({serviceOrders?.length || 0})
           </TabsTrigger>
-
+        </TabsList>
         {/* Event Requests Tab */}
         <TabsContent value="events" className="space-y-6">
           {/* Pending Requests - Priority Section */}

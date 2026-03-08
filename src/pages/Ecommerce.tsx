@@ -6,7 +6,7 @@ import Layout from "@/components/Layout/Layout";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { Package, ShoppingCart, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square, Eye } from "lucide-react";
+import { Package, ShoppingCart, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square, Eye, ClipboardList } from "lucide-react";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -281,6 +281,10 @@ const Ecommerce = () => {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <Button onClick={() => navigate("/ecommerce/orders")} variant="outline" size="sm" className="gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Orders
+            </Button>
             <Button onClick={() => navigate("/cart")} variant="outline" size="sm" className="gap-2">
               <ShoppingCart className="h-4 w-4" />
               Cart ({items.length})

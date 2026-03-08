@@ -17,6 +17,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
 const Ecommerce = lazy(() => import("./pages/Ecommerce"));
+const EcommerceOrders = lazy(() => import("./pages/EcommerceOrders"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/events/equipment-rental" element={<EquipmentRental />} />
               <Route path="/events/:eventType" element={<DynamicEventPage />} />
               <Route path="/ecommerce" element={<Ecommerce />} />
+              <Route path="/ecommerce/orders" element={<EcommerceOrders />} />
               <Route path="/ecommerce/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />

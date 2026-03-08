@@ -14,8 +14,9 @@ import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
-  { icon: FileText, label: "My Events", value: "tracker" },
+  { icon: FileText, label: "My Requests", value: "tracker" },
   { icon: Plus, label: "New Request", value: "request" },
+  { icon: Calendar, label: "Past Orders", value: "past-orders" },
   { icon: User, label: "Profile", value: "profile" },
 ];
 

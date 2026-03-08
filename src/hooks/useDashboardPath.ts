@@ -23,10 +23,11 @@ export const useDashboardPath = () => {
     }
   };
 
-  const getServiceRequestPath = (eventTypeSlug: string) => {
+  const getServiceRequestPath = (eventTypeSlug?: string) => {
     const base = getDashboardBase();
-    if (base === "/auth") return `/auth?redirect=${encodeURIComponent(`/client/dashboard?tab=request&type=${eventTypeSlug}`)}`;
-    return `${base}?tab=request&type=${eventTypeSlug}`;
+    const typeParam = eventTypeSlug ? `&type=${eventTypeSlug}` : '';
+    if (base === "/auth") return `/auth?redirect=${encodeURIComponent(`/client/dashboard?tab=request${typeParam}`)}`;
+    return `${base}?tab=request${typeParam}`;
   };
 
   return { getDashboardBase, getServiceRequestPath, role, loading };

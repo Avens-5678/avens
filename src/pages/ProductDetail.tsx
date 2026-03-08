@@ -534,7 +534,7 @@ const ProductDetail = () => {
                           <p className="text-sm font-bold text-foreground">₹{r.price_value.toLocaleString()}</p>
                         )}
                         {r.rating && (
-                          <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-0.5 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
                             {r.rating} <Star className="h-2.5 w-2.5 fill-current" />
                           </span>
                         )}

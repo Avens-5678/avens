@@ -207,7 +207,7 @@ const TrackOrder = () => {
               </Card>
 
               {/* Status Stepper */}
-              {order.status !== "cancelled" && order.status !== "vendor_declined" && (
+              {order.status !== "cancelled" && order.status !== "declined" && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">Order Progress</CardTitle>

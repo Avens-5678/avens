@@ -649,6 +649,45 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_banners: {
+        Row: {
+          created_at: string
+          cta_text: string | null
+          display_order: number | null
+          gradient_from: string | null
+          gradient_to: string | null
+          id: string
+          is_active: boolean | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta_text?: string | null
+          display_order?: number | null
+          gradient_from?: string | null
+          gradient_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta_text?: string | null
+          display_order?: number | null
+          gradient_from?: string | null
+          gradient_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quote_line_items: {
         Row: {
           created_at: string
@@ -1191,6 +1230,36 @@ export type Database = {
           photo_url?: string | null
           role?: string
           short_bio?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trust_strip_items: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          icon_name: string
+          id: string
+          is_active: boolean | null
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          icon_name?: string
+          id?: string
+          is_active?: boolean | null
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          icon_name?: string
+          id?: string
+          is_active?: boolean | null
+          text?: string
           updated_at?: string
         }
         Relationships: []

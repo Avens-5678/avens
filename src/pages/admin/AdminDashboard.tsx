@@ -46,6 +46,8 @@ import VendorInventoryAdmin from "@/components/admin/VendorInventoryAdmin";
 import LiveRentalOrders from "@/components/admin/LiveRentalOrders";
 import LiveServiceOrders from "@/components/admin/LiveServiceOrders";
 import QuoteMaker from "@/components/admin/QuoteMaker";
+import PromoBannerManager from "@/components/admin/PromoBannerManager";
+import TrustStripManager from "@/components/admin/TrustStripManager";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -92,6 +94,8 @@ const menuGroups: MenuGroup[] = [
       { label: "Services", value: "services" },
       { label: "Events", value: "events" },
       { label: "Rentals", value: "rentals" },
+      { label: "Promo Banners", value: "promo-banners" },
+      { label: "Trust Strip", value: "trust-strip" },
       { label: "Portfolio", value: "portfolio" },
       { label: "Clients", value: "clients" },
       { label: "Reviews", value: "testimonials" },
@@ -356,6 +360,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         );
       case "rentals":
         return <EnhancedRentalManager rentals={rentals || []} />;
+      case "promo-banners":
+        return <PromoBannerManager />;
+      case "trust-strip":
+        return <TrustStripManager />;
       case "portfolio":
         return <NewEnhancedPortfolioManager portfolio={portfolio || []} events={events || []} />;
       case "clients":

@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Star, ShieldCheck, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { addDays, format } from "date-fns";
+
 
 interface EnhancedProductCardProps {
   rental: any;
@@ -23,7 +23,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
   const priceInfo = formatPrice();
   const isAssured = rental.rating && rental.rating >= 4;
-  const deliveryDate = format(addDays(new Date(), 3 + Math.floor(Math.random() * 4)), "MMM d");
+  
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
 
@@ -107,10 +107,6 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
           </div>
         )}
 
-        {/* Delivery estimate */}
-        <p className="text-[10px] sm:text-[11px] text-muted-foreground">
-          Get it by <span className="font-semibold text-foreground">{deliveryDate}</span>
-        </p>
 
         {/* Location */}
         {rental.address && (

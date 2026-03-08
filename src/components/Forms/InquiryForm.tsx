@@ -117,7 +117,7 @@ const InquiryForm = ({
       // Auto-create a rental order when form type is rental
       if (formType === "rental") {
         try {
-          await supabase.from("rental_orders").insert({
+          const { data: rentalResult } = await supabase.from("rental_orders").insert({
             title: rentalTitle || `Rental Inquiry: ${values.eventType || "General"}`,
             equipment_category: values.eventType || "General",
             equipment_details: values.message,
@@ -128,7 +128,22 @@ const InquiryForm = ({
             client_email: values.email,
             notes: rentalTitle ? `Rental item: ${rentalTitle}` : null,
             status: "new",
-          });
+          }).select().single();
+
+          // Send WhatsApp rental confirmation
+          if (rentalResult?.client_phone) {
+            try {
+              await supabase.functions.invoke("wati-rental-confirmation", {
+                body: {
+                  phone: rentalResult.client_phone,
+                  name: rentalResult.client_name || "Customer",
+                  order_id: rentalResult.id,
+                },
+              });
+            } catch (whatsappErr) {
+              console.error("WhatsApp rental confirmation failed:", whatsappErr);
+            }
+          }
         } catch (rentalErr) {
           console.error("Failed to create rental order:", rentalErr);
         }

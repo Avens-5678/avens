@@ -333,7 +333,7 @@ const Index = () => {
         }
 
       {/* Equipment Rental Section */}
-      <Section spacing="large">
+      <Section spacing="large" variant="muted" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_600px_at_0%_100%,hsl(var(--secondary)/0.06),transparent)] before:pointer-events-none">
         <div className="container mx-auto px-4">
           <SectionHeader
               badge={<Badge variant="outline"><Award className="mr-2 h-4 w-4" />Premium Equipment</Badge>}

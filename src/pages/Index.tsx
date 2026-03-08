@@ -251,9 +251,9 @@ const Index = () => {
 
             <ServiceScrollContainer items={homeServices}>
               {homeServices.map((service) =>
+              <TiltCard key={service.id} tiltDegree={8} scale={1.02} glareMaxOpacity={0.15} className="h-full">
               <GlassmorphismCard
-                key={service.id}
-                className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300"
+                className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 h-full"
                 variant="subtle">
 
                   <div className="space-y-2.5 md:space-y-4">
@@ -282,6 +282,7 @@ const Index = () => {
                     </div>
                   </div>
                 </GlassmorphismCard>
+              </TiltCard>
               )}
           </ServiceScrollContainer>
             }

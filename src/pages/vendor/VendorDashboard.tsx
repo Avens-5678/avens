@@ -19,6 +19,7 @@ const sidebarItems: SidebarItem[] = [
   { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Briefcase, label: "Job Board", value: "jobs" },
   { icon: Plus, label: "New Request", value: "request" },
+  { icon: Calendar, label: "Past Orders", value: "past-orders" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: User, label: "Profile", value: "profile" },
 ];

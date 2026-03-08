@@ -271,7 +271,6 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
 }
 
 export function downloadQuoteAsPDF(data: QuotePrintData) {
-  // Backwards compatibility: map old gstPercent/gstAmount fields
   const normalizedData: QuotePrintData = {
     ...data,
     taxType: data.taxType || "gst",
@@ -287,9 +286,42 @@ export function downloadQuoteAsPDF(data: QuotePrintData) {
     default: html = modernTemplate(normalizedData);
   }
 
-  const printWindow = window.open("", "_blank");
-  if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-  }
+  // Remove the auto-print script and replace with auto-print + auto-close
+  const htmlWithAutoPrint = html.replace(
+    `<script>window.onload=function(){window.print();}</script>`,
+    `<script>
+      window.onload = function() {
+        window.print();
+        window.onafterprint = function() { window.close(); };
+      };
+    </script>`
+  );
+
+  const blob = new Blob([htmlWithAutoPrint], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  
+  // Create a hidden iframe to trigger print dialog directly
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "none";
+  document.body.appendChild(iframe);
+
+  iframe.src = url;
+  iframe.onload = () => {
+    try {
+      iframe.contentWindow?.print();
+    } catch {
+      // Fallback: open in new tab if iframe print fails
+      window.open(url, "_blank");
+    }
+    // Clean up after a delay
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      URL.revokeObjectURL(url);
+    }, 60000);
+  };
 }

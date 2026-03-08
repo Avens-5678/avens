@@ -72,8 +72,11 @@ const EventCenter = () => {
   const handleRentalStatusChange = (orderId: string, status: string) => {
     updateRentalOrder({ id: orderId, status });
   };
+  const handleServiceStatusChange = (orderId: string, status: string) => {
+    updateServiceOrder({ id: orderId, status });
+  };
 
-  if (requestsLoading || vendorsLoading || rentalsLoading) {
+  if (requestsLoading || vendorsLoading || rentalsLoading || servicesLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

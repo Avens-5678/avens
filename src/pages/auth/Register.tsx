@@ -260,7 +260,7 @@ const Register = () => {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Phone Number {selectedRole === "vendor" ? "*" : "(Optional)"}</FormLabel>
+                          <FormLabel>Phone Number *</FormLabel>
                           <FormControl>
                             <Input placeholder="+91 XXXXX XXXXX" {...field} />
                           </FormControl>

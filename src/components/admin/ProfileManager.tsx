@@ -84,21 +84,23 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
     setIsPasswordLoading(true);
 
     try {
-      // In a real app, you would validate the current password and update it in the database
-      // For now, we'll simulate the password change
-      
+      const { error } = await supabase.auth.updateUser({
+        password: values.new_password,
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Password Changed",
         description: "Your password has been successfully updated.",
       });
 
-      // Clear the form
       passwordForm.reset();
     } catch (error: any) {
       console.error("Password change error:", error);
       toast({
         title: "Password Change Failed",
-        description: "Failed to change password. Please try again.",
+        description: error.message || "Failed to change password. Please try again.",
         variant: "destructive",
       });
     } finally {

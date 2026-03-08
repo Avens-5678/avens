@@ -95,7 +95,7 @@ const Cart = () => {
             body: {
               phone: normalizedPhone,
               name: eventDetails.customer_name || "Customer",
-              order_id: "CART",
+              order_id: orderId,
             },
           });
         } catch (whatsappErr) {

@@ -5,6 +5,7 @@ import { useEventRequests } from "@/hooks/useEventRequests";
 import { useRentalOrders } from "@/hooks/useRentalOrders";
 import { Loader2, Calendar, MapPin, Users, Package, CheckCircle2, Clock } from "lucide-react";
 import { format } from "date-fns";
+import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -108,6 +109,9 @@ const PastOrders = () => {
                       <p className="text-sm text-muted-foreground">{request.requirements}</p>
                     </div>
                   )}
+                  <div className="mt-3">
+                    <OrderQuoteCard orderId={request.id} />
+                  </div>
                 </CardContent>
               </Card>
             ))
@@ -169,6 +173,9 @@ const PastOrders = () => {
                       <p className="text-sm text-muted-foreground">{order.equipment_details}</p>
                     </div>
                   )}
+                  <div className="mt-3">
+                    <OrderQuoteCard orderId={order.id} />
+                  </div>
                 </CardContent>
               </Card>
             ))

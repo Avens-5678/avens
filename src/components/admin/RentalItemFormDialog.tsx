@@ -199,7 +199,7 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
     setSaving(true);
     try {
       await onSave(
-        { ...formData, has_variants: hasVariants, price_value: hasVariants ? null : (formData.price_value ? parseFloat(formData.price_value) : null), pricing_unit: hasVariants ? null : (formData.pricing_unit || 'Per Day') },
+        { ...formData, has_variants: hasVariants, specifications: specRows, price_value: hasVariants ? null : (formData.price_value ? parseFloat(formData.price_value) : null), pricing_unit: hasVariants ? null : (formData.pricing_unit || 'Per Day') },
         hasVariants && variantRows.length > 0 ? { attributeType, rows: variantRows } : null
       );
       onOpenChange(false);

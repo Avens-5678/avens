@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
           const cleanBaseUrl = watiApiUrl.replace(/\/+$/, "");
           const watiAuthToken = watiApiKey.replace(/^Bearer\s+/i, "");
 
-          const watiUrl = `${cleanBaseUrl}/api/v1/sendTemplateMessage/${phone}`;
+          const watiUrl = `${cleanBaseUrl}/api/v1/sendTemplateMessage?whatsappNumber=${phone}`;
           const watiBody = {
             template_name: "reminder",
             broadcast_name: `order_${orderId}`,

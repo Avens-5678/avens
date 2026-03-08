@@ -233,7 +233,7 @@ const Index = () => {
         <BackgroundPattern variant="dots" />
         <StatsContainer>
           <ScrollReveal animation="fade-in-up">
-            <div className="text-center mb-14">
+            <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
                 The only platform that creates extraordinary
                 <br />

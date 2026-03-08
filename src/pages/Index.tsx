@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useAboutContent } from "@/hooks/useData";
 import { useDashboardPath } from "@/hooks/useDashboardPath";
-import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight, Shield } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { GradientText } from "@/components/ui/animated-text";
@@ -22,8 +22,6 @@ import { ServiceScrollContainer } from "@/components/ui/service-scroll-container
 import { CursorTrail } from "@/components/ui/cursor-trail";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { ScrollIndicator } from "@/components/ui/scroll-indicator";
-import { WhyChooseUs } from "@/components/ui/why-choose-us";
 import { BackgroundPattern } from "@/components/ui/background-pattern";
 import { SectionDivider } from "@/components/ui/section-divider";
 import ScrollReveal from "@/components/ui/scroll-reveal";
@@ -226,34 +224,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Navigation dots */}
-        {activeBanners.length > 1 && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
-            {activeBanners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setCurrentBannerIndex(index);
-                  setIsPaused(true);
-                  setTimeout(() => setIsPaused(false), 3000);
-                }}
-                className="group relative"
-                aria-label={`Go to slide ${index + 1}`}
-              >
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    currentBannerIndex === index
-                      ? 'w-8 bg-white'
-                      : 'w-2 bg-white/40 hover:bg-white/60'
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Scroll indicator */}
-        <ScrollIndicator />
 
 
       </HeroSection>
@@ -283,23 +253,6 @@ const Index = () => {
 
       <SectionDivider variant="gradient" />
 
-      {/* Why Choose Us Section */}
-      <Section spacing="large" className="relative overflow-hidden">
-        <BackgroundPattern variant="grid" />
-        <div className="container mx-auto px-4">
-          <ScrollReveal animation="fade-in-up">
-            <SectionHeader
-              badge={<Badge variant="outline"><Shield className="mr-2 h-4 w-4" />Why Choose Us</Badge>}
-              title="Your Trust, Our Commitment"
-              description="Experience excellence with our proven track record and dedicated support."
-            />
-          </ScrollReveal>
-          
-          <WhyChooseUs />
-        </div>
-      </Section>
-
-      <SectionDivider variant="gradient" />
 
       {/* Services Section */}
       <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">

@@ -100,7 +100,7 @@ const syncEventRequestToServiceOrders = async (
     const { data: serviceOrder } = await supabase
       .from("service_orders")
       .insert({
-        title: `${eventRequest.event_type} - Event Request`,
+        title: `${eventRequest.event_type} - Service Request`,
         service_type: eventRequest.event_type,
         service_details: eventRequest.requirements || "",
         location: eventRequest.location || "",

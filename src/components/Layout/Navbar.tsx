@@ -75,7 +75,8 @@ const Navbar = () => {
           </Link>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-3 justify-end">
+          <div className="flex items-center gap-2 justify-end">
+            <ThemeToggle />
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

@@ -34,16 +34,16 @@ const statusLabels: Record<string, string> = {
   completed: "Completed",
   cancelled: "Cancelled",
   new: "New",
-  sent_to_vendor: "Sent to Vendor",
-  vendor_accepted: "Vendor Accepted",
-  vendor_declined: "Vendor Declined",
+  sent_to_vendors: "Sent to Vendor",
+  accepted: "Vendor Accepted",
+  declined: "Vendor Declined",
   quoted: "Quoted",
   confirmed: "Confirmed",
   delivered: "Delivered",
 };
 
 const allStatuses: EventRequest["status"][] = ["pending", "approved", "in_progress", "completed", "cancelled"];
-const rentalStatuses = ["new", "sent_to_vendor", "vendor_accepted", "vendor_declined", "quoted", "confirmed", "in_progress", "completed", "delivered", "cancelled"];
+const rentalStatuses = ["new", "sent_to_vendors", "accepted", "declined", "quoted", "confirmed", "in_progress", "completed", "delivered", "cancelled"];
 
 const serviceStatuses = ["new", "in_progress", "quoted", "confirmed", "completed", "cancelled"];
 

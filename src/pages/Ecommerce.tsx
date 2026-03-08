@@ -11,20 +11,7 @@ import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
-// Event category icons/config for browsing
-const EVENT_CATEGORIES = [
-  { label: "All", value: "" },
-  { label: "Catering", value: "Catering" },
-  { label: "Staging", value: "Staging" },
-  { label: "Lighting", value: "Lighting" },
-  { label: "Sound", value: "Sound" },
-  { label: "Decor", value: "Decor" },
-  { label: "Furniture", value: "Furniture" },
-  { label: "Tents & Structures", value: "Tents & Structures" },
-  { label: "AV Equipment", value: "AV Equipment" },
-  { label: "Talent", value: "Talent" },
-  { label: "Photography", value: "Photography" },
-];
+// Event categories will be built dynamically from rental data
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();

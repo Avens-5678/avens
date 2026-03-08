@@ -121,7 +121,7 @@ const LiveServiceOrders = () => {
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />New Service Order</Button>
+            <Button><Plus className="mr-2 h-4 w-4" />New Event Request</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Create Service Order</DialogTitle></DialogHeader>

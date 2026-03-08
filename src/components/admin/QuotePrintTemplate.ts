@@ -278,12 +278,12 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
 .sig { text-align:center; font-size:12px; color:#888; } .sig-line { width:150px; border-top:1px solid #764ba2; margin:40px auto 6px; }
 </style></head><body>
 <div class="hero">
-  <div><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
+  <div>${s.logoHtml}<h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
   <div class="hero-meta"><div>Quotation <strong>#${s.qNum}</strong></div><div>${s.dateStr}</div>${s.orderRef ? `<div style="font-size:12px;opacity:.9;">${s.orderRef}</div>` : ""}</div>
 </div>
 <div class="content">
   <div class="parties">
-    <div class="party-card"><h3>From</h3><p><strong>Evnting (Avens Events Pvt. Ltd.)</strong><br>Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033<br>GSTIN: 36AABCA1234B1Z5</p></div>
+    <div class="party-card"><h3>From</h3><p><strong>${s.companyName}</strong><br>${s.companyAddress}${s.gstEnabled ? `<br>GSTIN: ${s.companyGst}` : ""}</p></div>
     <div class="party-card"><h3>To</h3><p><strong>${data.clientName}</strong>${data.clientEmail ? `<br>${data.clientEmail}` : ""}${data.clientPhone ? `<br>${data.clientPhone}` : ""}</p></div>
   </div>
   <table class="items"><thead><tr><th>Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
@@ -293,7 +293,7 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
   </div>
 </div>
 <div class="footer">
-  <div class="footer-contact">Email: <strong>leads@avens.in</strong> | Phone: <strong>+91 90000 00000</strong></div>
+  <div class="footer-contact">Email: <strong>${s.companyEmail}</strong> | Phone: <strong>${s.companyPhone}</strong></div>
   <div class="sig"><div class="sig-line"></div>Authorized Signature</div>
 </div>
 <script>window.onload=function(){window.print();}</script>

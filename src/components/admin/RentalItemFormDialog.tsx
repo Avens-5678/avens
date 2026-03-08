@@ -74,6 +74,7 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
           short_description: editingItem.short_description || '',
           description: editingItem.description || '',
         });
+        setSpecRows(Array.isArray(editingItem.specifications) ? editingItem.specifications : []);
         setHasVariants(editingItem.has_variants || false);
         if (editingItem.has_variants) {
           loadVariants(editingItem.id, editingItem._variantTable || "rental_variants");

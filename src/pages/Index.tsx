@@ -497,7 +497,7 @@ const Index = () => {
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
                   asChild>
-                  <Link to="/client/dashboard?tab=request">
+                  <Link to={getServiceRequestPath('')}>
                     Start Planning
                     <Calendar className="ml-2 h-5 w-5" />
                   </Link>

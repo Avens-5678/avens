@@ -147,7 +147,7 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
       address: companyAddress,
       phone: companyPhone,
       email: companyEmail,
-      gst_enabled: gstEnabled,
+      gst_enabled: true,
       logo_url: logoUrl || null,
     });
   };

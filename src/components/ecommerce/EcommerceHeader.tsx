@@ -1,4 +1,4 @@
-import { Search, X, MapPin, User, ShoppingCart, ChevronDown } from "lucide-react";
+import { Search, X, User, ShoppingCart, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";

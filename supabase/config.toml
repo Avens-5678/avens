@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.sync-quote-to-order]
 verify_jwt = false
+
+[functions.wati-quote-notification]
+verify_jwt = false

@@ -136,12 +136,16 @@ const PromoBannerManager = () => {
             className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30"
           >
             <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div
-              className="w-10 h-10 rounded-lg flex-shrink-0"
-              style={{
-                background: `linear-gradient(135deg, ${banner.gradient_from || "#7c3aed"}, ${banner.gradient_to || "#a855f7"})`,
-              }}
-            />
+            {banner.image_url ? (
+              <img src={banner.image_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+            ) : (
+              <div
+                className="w-10 h-10 rounded-lg flex-shrink-0"
+                style={{
+                  background: `linear-gradient(135deg, ${banner.gradient_from || "#7c3aed"}, ${banner.gradient_to || "#a855f7"})`,
+                }}
+              />
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{banner.title}</p>
               <p className="text-xs text-muted-foreground truncate">{banner.subtitle}</p>

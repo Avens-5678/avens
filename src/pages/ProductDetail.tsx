@@ -332,7 +332,7 @@ const ProductDetail = () => {
                       <span className="text-2xl sm:text-3xl font-bold text-foreground">{displayPrice.text}</span>
                     )}
                   </div>
-                  <p className="text-[11px] text-green-600 font-medium">Inclusive of all taxes</p>
+                  <p className="text-[11px] text-primary font-medium">Inclusive of all taxes</p>
                 </div>
               )}
 

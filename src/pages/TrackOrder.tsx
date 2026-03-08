@@ -251,7 +251,7 @@ const TrackOrder = () => {
               )}
 
               {/* Cancelled / Declined */}
-              {(order.status === "cancelled" || order.status === "vendor_declined") && (
+              {(order.status === "cancelled" || order.status === "declined") && (
                 <Card className="border-destructive/30">
                   <CardContent className="flex items-center gap-3 py-6">
                     <AlertCircle className="h-5 w-5 text-destructive" />

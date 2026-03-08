@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit, calculateCartTotal } from "@/utils/pricingUtils";
 import { ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus, CalendarDays } from "lucide-react";
+import { normalizePhoneNumber } from "@/utils/phoneUtils";
 
 const Cart = () => {
   const { items, removeItem, updateQuantity, updateDimensions, clearCart } = useCart();

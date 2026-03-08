@@ -28,14 +28,14 @@ const Navbar = () => {
   const navLinks = [
     { href: "/services", label: "Services" },
     { href: "/portfolio", label: "Portfolio" },
-    { href: "/ecommerce", label: "Shop" },
+    { href: "/ecommerce", label: "Rental" },
     { href: "/about", label: "About" },
   ];
 
   const mobileNavLinks = [
     { href: "/services", label: "Services" },
     { href: "/portfolio", label: "Portfolio" },
-    { href: "/ecommerce", label: "Shop" },
+    { href: "/ecommerce", label: "Rental" },
     { href: "/about", label: "About" },
     { href: "/blog", label: "Blog" },
     { href: "/faq", label: "FAQ" },

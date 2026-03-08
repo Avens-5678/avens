@@ -247,7 +247,7 @@ const Index = () => {
               {homeServices.map((service) =>
               <GlassmorphismCard
                 key={service.id}
-                className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 min-w-[70vw] max-w-[320px] sm:min-w-[55vw] md:min-w-0 md:max-w-none snap-center flex-shrink-0 md:flex-shrink"
+                className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300"
                 variant="subtle">
 
                   <div className="space-y-2.5 md:space-y-4">
@@ -350,7 +350,7 @@ const Index = () => {
               {homeRentals.slice(0, 6).map((rental) =>
               <GlassmorphismCard
                 key={rental.id}
-                className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[70vw] max-w-[320px] sm:min-w-[55vw] md:min-w-0 md:max-w-none snap-center flex-shrink-0 md:flex-shrink">
+                className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
 
                   <div className="relative">
                     {rental.image_url ?

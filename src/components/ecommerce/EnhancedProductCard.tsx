@@ -107,10 +107,6 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
           </div>
         )}
 
-        {/* Delivery estimate */}
-        <p className="text-[10px] sm:text-[11px] text-muted-foreground">
-          Get it by <span className="font-semibold text-foreground">{deliveryDate}</span>
-        </p>
 
         {/* Location */}
         {rental.address && (

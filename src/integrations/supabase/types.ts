@@ -1437,6 +1437,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_admin_secure: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      lookup_order_by_id: { Args: { order_id: string }; Returns: Json }
       validate_admin_email: { Args: { check_email: string }; Returns: boolean }
     }
     Enums: {

@@ -223,12 +223,12 @@ table.items tbody td { padding:10px 14px; border-bottom:1px solid #eee; font-siz
 .sig { text-align:center; font-size:12px; color:#888; } .sig-line { width:150px; border-top:1px solid #1a1a2e; margin:40px auto 6px; }
 </style></head><body>
 <div class="header">
-  <div class="logo"><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
+  <div class="logo">${s.logoHtml}<h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
   <div class="meta"><div><span class="label">Quotation:</span><span class="value">${s.qNum}</span></div><div><span class="label">Date:</span><span class="value">${s.dateStr}</span></div>${s.orderRef ? `<div><span class="label">${s.orderRef}</span></div>` : ""}</div>
 </div>
 <div class="quote-badge"><span>QUOTATION</span></div>
 <div class="parties">
-  <div class="party"><h3>From</h3><p><strong>Evnting (Avens Events Pvt. Ltd.)</strong><br>Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033<br>GSTIN: 36AABCA1234B1Z5 | PAN: AABCA1234B</p></div>
+  <div class="party"><h3>From</h3><p><strong>${s.companyName}</strong><br>${s.companyAddress}${s.gstPanInline}</p></div>
   <div class="party"><h3>To</h3><p><strong>${data.clientName}</strong>${data.clientEmail ? `<br>Email: ${data.clientEmail}` : ""}${data.clientPhone ? `<br>Phone: ${data.clientPhone}` : ""}</p></div>
 </div>
 <table class="items"><thead><tr><th>Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
@@ -237,7 +237,7 @@ table.items tbody td { padding:10px 14px; border-bottom:1px solid #eee; font-siz
   <div class="totals">${buildTotals(data, s)}</div>
 </div>
 <div class="footer">
-  <div class="footer-contact">Email: <strong>leads@avens.in</strong> | Phone: <strong>+91 90000 00000</strong></div>
+  <div class="footer-contact">Email: <strong>${s.companyEmail}</strong> | Phone: <strong>${s.companyPhone}</strong></div>
   <div class="sig"><div class="sig-line"></div>Authorized Signature</div>
 </div>
 <script>window.onload=function(){window.print();}</script>

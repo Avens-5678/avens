@@ -1,17 +1,18 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { Package, ShoppingCart, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square, Eye, ClipboardList, MapPin } from "lucide-react";
-import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
+import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
+import TrustStrip from "@/components/ecommerce/TrustStrip";
+import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
+import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
 
-// Event categories will be built dynamically from rental data
+type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
@@ -20,6 +21,8 @@ const Ecommerce = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [searchCategory, setSearchCategory] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     categories: true,
     city: false,
@@ -51,7 +54,7 @@ const Ecommerce = () => {
 
   const filteredRentals = useMemo(() => {
     if (!rentals) return [];
-    return rentals.filter((rental) => {
+    let results = rentals.filter((rental) => {
       const matchesSearch =
         !searchTerm ||
         rental.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -59,8 +62,9 @@ const Ecommerce = () => {
         rental.search_keywords?.toLowerCase().includes(searchTerm.toLowerCase());
       const allCats = [...selectedCategories];
       if (activeQuickCat && !allCats.includes(activeQuickCat)) allCats.push(activeQuickCat);
+      if (searchCategory && !allCats.includes(searchCategory)) allCats.push(searchCategory);
       const matchesCategory =
-        allCats.length === 0 || rental.categories?.some((c) => 
+        allCats.length === 0 || rental.categories?.some((c) =>
           allCats.some((selected) => c.toLowerCase() === selected.toLowerCase())
         );
       const matchesCity =
@@ -68,7 +72,25 @@ const Ecommerce = () => {
         (rental.address?.trim() && selectedCities.includes(rental.address.trim()));
       return matchesSearch && matchesCategory && matchesCity;
     });
-  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat]);
+
+    // Sort
+    switch (sortBy) {
+      case "price_low":
+        results.sort((a, b) => (a.price_value ?? Infinity) - (b.price_value ?? Infinity));
+        break;
+      case "price_high":
+        results.sort((a, b) => (b.price_value ?? 0) - (a.price_value ?? 0));
+        break;
+      case "newest":
+        results.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case "rating":
+        results.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        break;
+    }
+
+    return results;
+  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -87,14 +109,7 @@ const Ecommerce = () => {
   };
 
   const activeFilterCount = selectedCategories.length + selectedCities.length;
-
-  const formatPrice = (rental: any) => {
-    if (rental.price_value != null) {
-      return `₹${rental.price_value.toLocaleString()} / ${rental.pricing_unit || "Per Day"}`;
-    }
-    if (rental.price_range) return `₹${rental.price_range}`;
-    return null;
-  };
+  const activeDisplayCategory = activeQuickCat || searchCategory || (selectedCategories.length === 1 ? selectedCategories[0] : "");
 
   if (isLoading) {
     return (
@@ -204,61 +219,28 @@ const Ecommerce = () => {
   );
 
   return (
-    <Layout>
-      {/* Hero with Central Search */}
-      <section className="relative overflow-hidden">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/videos/event-hero.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-20 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-3">
-            Premium Event Rentals
-          </h1>
-          <p className="text-base sm:text-lg text-white/80 mb-8 max-w-2xl mx-auto">
-            Find everything you need — from staging and lighting to catering and decor.
-          </p>
+    <Layout hideNavbar>
+      {/* Compact Amazon-style Header */}
+      <EcommerceHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        categories={categories}
+        selectedSearchCategory={searchCategory}
+        onSearchCategoryChange={setSearchCategory}
+      />
 
-          {/* Central Search Bar */}
-          <div className="max-w-2xl mx-auto relative">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search for equipment, decor, lighting, staging..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-14 pr-6 py-4 rounded-2xl bg-background text-foreground text-base sm:text-lg shadow-xl border-0 focus:outline-none focus:ring-4 focus:ring-primary-foreground/20 transition-all placeholder:text-muted-foreground"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Event Category Quick Browse */}
-      <section className="border-b border-border bg-card/50">
+      {/* Category Quick Browse Strip */}
+      <section className="border-b border-border bg-card/80 sticky top-14 sm:top-16 z-40">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="overflow-x-auto scrollbar-hide py-4">
+          <div className="overflow-x-auto scrollbar-hide py-2.5">
             <div className="flex gap-2 sm:gap-3 justify-start sm:justify-center min-w-max">
               {quickBrowseCategories.map((cat) => (
                 <button
                   key={cat.value}
                   onClick={() => setActiveQuickCat(cat.value === activeQuickCat ? "" : cat.value)}
-                  className={`flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 whitespace-nowrap ${
+                  className={`flex-shrink-0 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 whitespace-nowrap ${
                     (cat.value === "" && !activeQuickCat) || activeQuickCat === cat.value
-                      ? "bg-primary text-primary-foreground border-primary shadow-md"
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
                       : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
@@ -270,68 +252,24 @@ const Ecommerce = () => {
         </div>
       </section>
 
-      {/* Toolbar */}
-      <section className="border-b border-border bg-background sticky top-0 z-20">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1">
-            <button
-              onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-              className="lg:hidden flex items-center gap-2 text-sm font-medium text-foreground border border-border rounded-lg px-3 py-2 hover:bg-muted transition-colors"
-            >
-              Filters
-              {activeFilterCount > 0 && (
-                <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-            <span className="text-sm text-muted-foreground">
-              {filteredRentals.length} product{filteredRentals.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Button onClick={() => navigate("/ecommerce/track")} variant="outline" size="sm" className="gap-2">
-              <MapPin className="h-4 w-4" />
-              <span className="hidden sm:inline">Track Order</span>
-              <span className="sm:hidden">Track</span>
-            </Button>
-            <Button onClick={() => navigate("/ecommerce/orders")} variant="outline" size="sm" className="gap-2">
-              <ClipboardList className="h-4 w-4" />
-              Orders
-            </Button>
-            <Button onClick={() => navigate("/cart")} variant="outline" size="sm" className="gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              Cart ({items.length})
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile: View Toggle */}
-        <div className="lg:hidden container mx-auto px-4 py-2 flex items-center gap-2">
-          <div className="flex items-center border border-border rounded-lg overflow-hidden flex-shrink-0">
-            <button onClick={() => setMobileView("list")} className={`p-2 transition-colors ${mobileView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`} aria-label="List view">
-              <List className="h-4 w-4" />
-            </button>
-            <button onClick={() => setMobileView("two")} className={`p-2 transition-colors ${mobileView === "two" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`} aria-label="Two column view">
-              <Grid2X2 className="h-4 w-4" />
-            </button>
-            <button onClick={() => setMobileView("one")} className={`p-2 transition-colors ${mobileView === "one" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`} aria-label="Single column view">
-              <Square className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* Trust Strip */}
+      <TrustStrip />
 
       {/* Main Content */}
-      <section id="products" className="py-8 sm:py-10">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-4">
-          <div className="flex gap-8">
-            <aside className="hidden lg:block w-60 flex-shrink-0">
-              <div className="sticky top-20">
+      <section className="py-4 sm:py-6 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-4">
+          {/* Breadcrumbs */}
+          <EcommerceBreadcrumbs activeCategory={activeDisplayCategory} searchTerm={searchTerm} />
+
+          <div className="flex gap-6 lg:gap-8">
+            {/* Desktop Sidebar */}
+            <aside className="hidden lg:block w-56 flex-shrink-0">
+              <div className="sticky top-36 bg-card rounded-xl border border-border/60 p-4 shadow-soft">
                 <SidebarContent />
               </div>
             </aside>
 
+            {/* Mobile Sidebar */}
             {mobileSidebarOpen && (
               <div className="fixed inset-0 z-50 lg:hidden">
                 <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarOpen(false)} />
@@ -347,7 +285,58 @@ const Ecommerce = () => {
               </div>
             )}
 
+            {/* Products */}
             <div className="flex-1 min-w-0">
+              {/* Toolbar: Sort + View + Filters */}
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 bg-card rounded-lg border border-border/60 px-4 py-2.5 shadow-soft">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setMobileSidebarOpen(true)}
+                    className="lg:hidden flex items-center gap-2 text-xs font-medium text-foreground border border-border rounded-md px-2.5 py-1.5 hover:bg-muted transition-colors"
+                  >
+                    Filters
+                    {activeFilterCount > 0 && (
+                      <span className="flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px]">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </button>
+                  <span className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">{filteredRentals.length}</span> result{filteredRentals.length !== 1 ? "s" : ""}
+                    {searchTerm && <span> for "<span className="text-primary">{searchTerm}</span>"</span>}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Sort */}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    className="text-xs bg-background border border-border rounded-md px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                  >
+                    <option value="relevance">Relevance</option>
+                    <option value="price_low">Price: Low to High</option>
+                    <option value="price_high">Price: High to Low</option>
+                    <option value="newest">Newest First</option>
+                    <option value="rating">Rating</option>
+                  </select>
+
+                  {/* Mobile View Toggle */}
+                  <div className="lg:hidden flex items-center border border-border rounded-md overflow-hidden">
+                    <button onClick={() => setMobileView("list")} className={`p-1.5 transition-colors ${mobileView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <List className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => setMobileView("two")} className={`p-1.5 transition-colors ${mobileView === "two" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <Grid2X2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => setMobileView("one")} className={`p-1.5 transition-colors ${mobileView === "one" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <Square className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Grid */}
               {filteredRentals.length === 0 ? (
                 <div className="text-center py-20">
                   <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -360,65 +349,10 @@ const Ecommerce = () => {
                 <div
                   className={`grid gap-3 sm:gap-4 ${
                     mobileView === "list" ? "grid-cols-1" : mobileView === "two" ? "grid-cols-2" : "grid-cols-1"
-                  } sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5`}
+                  } sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4`}
                 >
                   {filteredRentals.map((rental) => (
-                    <Card
-                      key={rental.id}
-                      className={`group overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow duration-300 rounded-xl cursor-pointer ${
-                        mobileView === "list" ? "flex flex-row sm:flex-col" : ""
-                      }`}
-                      onClick={() => navigate(`/ecommerce/${rental.id}`)}
-                    >
-                      <div
-                        className={`overflow-hidden bg-muted relative ${
-                          mobileView === "list" ? "w-28 h-28 flex-shrink-0 sm:w-full sm:h-auto sm:aspect-square" : "aspect-square"
-                        }`}
-                      >
-                        {rental.image_urls && rental.image_urls.length > 0 ? (
-                          <MultiImageCarousel images={rental.image_urls} title={rental.title} className="!aspect-square !rounded-none" />
-                        ) : rental.image_url ? (
-                          <img src={rental.image_url} alt={rental.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-muted-foreground text-sm">No Image</span>
-                          </div>
-                        )}
-                        {rental.categories && rental.categories.length > 0 && mobileView !== "list" && (
-                          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                            {rental.categories.slice(0, 2).map((cat) => (
-                              <Badge key={cat} className="bg-foreground text-background text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
-                                {cat}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <CardContent className="p-3 space-y-1.5">
-                        <h3 className="font-semibold text-foreground text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                          {rental.title}
-                        </h3>
-                        <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-2">
-                          {rental.short_description}
-                        </p>
-                        {formatPrice(rental) && (
-                          <p className="text-xs sm:text-sm font-semibold text-foreground">
-                            {formatPrice(rental)}
-                          </p>
-                        )}
-                        <div className="flex gap-1.5 pt-1.5">
-                          <Button
-                            onClick={(e) => { e.stopPropagation(); navigate(`/ecommerce/${rental.id}`); }}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 text-[11px] h-8"
-                          >
-                            <Eye className="mr-1 h-3 w-3" />View
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <EnhancedProductCard key={rental.id} rental={rental} viewMode={mobileView} />
                   ))}
                 </div>
               )}
@@ -427,7 +361,7 @@ const Ecommerce = () => {
         </div>
       </section>
 
-      {/* Floating Cart Button */}
+      {/* Floating Cart */}
       {items.length > 0 && (
         <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
           <Button onClick={() => navigate("/cart")} size="lg" className="rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl transition-all duration-300">

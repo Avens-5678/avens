@@ -255,23 +255,6 @@ const Index = () => {
 
       <SectionDivider variant="gradient" />
 
-      {/* Why Choose Us Section */}
-      <Section spacing="large" className="relative overflow-hidden">
-        <BackgroundPattern variant="grid" />
-        <div className="container mx-auto px-4">
-          <ScrollReveal animation="fade-in-up">
-            <SectionHeader
-              badge={<Badge variant="outline"><Shield className="mr-2 h-4 w-4" />Why Choose Us</Badge>}
-              title="Your Trust, Our Commitment"
-              description="Experience excellence with our proven track record and dedicated support."
-            />
-          </ScrollReveal>
-          
-          <WhyChooseUs />
-        </div>
-      </Section>
-
-      <SectionDivider variant="gradient" />
 
       {/* Services Section */}
       <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">

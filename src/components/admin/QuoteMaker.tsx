@@ -9,11 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRentalOrders } from "@/hooks/useRentalOrders";
 import { useServiceOrders } from "@/hooks/useServiceOrders";
-import { useCreateQuote, type QuoteLineItem } from "@/hooks/useQuotes";
+import { useCreateQuote, useQuotes, useQuoteVersions, type QuoteLineItem, type Quote } from "@/hooks/useQuotes";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Calculator, Send, Mail, MessageSquare, Download } from "lucide-react";
-import { downloadQuoteAsPDF } from "./QuotePrintTemplate";
+import { Plus, Trash2, Calculator, Mail, MessageSquare, Download, PackageSearch, Copy, History, Palette } from "lucide-react";
+import { downloadQuoteAsPDF, type QuoteTemplate } from "./QuotePrintTemplate";
+import QuotePicklistDialog from "./QuotePicklistDialog";
 
 interface QuoteMakerProps {
   prefillOrderId?: string | null;
@@ -24,6 +25,7 @@ interface QuoteMakerProps {
 const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerProps) => {
   const { data: rentalOrders } = useRentalOrders();
   const { data: serviceOrders } = useServiceOrders();
+  const { data: allQuotes } = useQuotes();
   const createQuote = useCreateQuote();
   const { toast } = useToast();
 
@@ -35,11 +37,20 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   const [selectedOrderId, setSelectedOrderId] = useState<string>(prefillOrderId || "");
   const [discountType, setDiscountType] = useState<"amount" | "percent">("amount");
   const [discountValue, setDiscountValue] = useState(0);
-  const [gstPercent, setGstPercent] = useState(18);
+  const [taxType, setTaxType] = useState<"gst" | "vat" | "none">("gst");
+  const [taxPercent, setTaxPercent] = useState(18);
+  const [template, setTemplate] = useState<QuoteTemplate>("modern");
   const [lineItems, setLineItems] = useState<Omit<QuoteLineItem, "id" | "quote_id">[]>([
     { item_description: "", quantity: 1, unit: "Nos", unit_price: 0, total_price: 0 },
   ]);
   const [sending, setSending] = useState(false);
+  const [picklistOpen, setPicklistOpen] = useState(false);
+
+  // Version control state
+  const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null);
+  const [parentQuoteId, setParentQuoteId] = useState<string | null>(null);
+  const [currentVersion, setCurrentVersion] = useState(1);
+  const { data: versionHistory } = useQuoteVersions(parentQuoteId || editingQuoteId || undefined);
 
   // Auto-populate from selected order
   useEffect(() => {
@@ -51,7 +62,6 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
         setClientEmail(order.client_email || "");
         setClientPhone(order.client_phone || "");
         if (order.budget) setNotes(prev => prev ? prev : `Budget: ${order.budget}`);
-        // Parse equipment details if cart items exist
         try {
           const details = JSON.parse(order.equipment_details || "{}");
           if (details.cart_items?.length) {
@@ -63,22 +73,10 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
               total_price: (ci.price_value || 0) * (ci.quantity || 1),
             })));
           } else {
-            setLineItems([{
-              item_description: order.title,
-              quantity: 1,
-              unit: "Nos",
-              unit_price: 0,
-              total_price: 0,
-            }]);
+            setLineItems([{ item_description: order.title, quantity: 1, unit: "Nos", unit_price: 0, total_price: 0 }]);
           }
         } catch {
-          setLineItems([{
-            item_description: order.title,
-            quantity: 1,
-            unit: "Nos",
-            unit_price: 0,
-            total_price: 0,
-          }]);
+          setLineItems([{ item_description: order.title, quantity: 1, unit: "Nos", unit_price: 0, total_price: 0 }]);
         }
       }
     } else if (selectedSourceType === "service_order") {
@@ -88,13 +86,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
         setClientEmail(order.client_email || "");
         setClientPhone(order.client_phone || "");
         if (order.budget) setNotes(prev => prev ? prev : `Budget: ${order.budget}`);
-        setLineItems([{
-          item_description: order.title,
-          quantity: 1,
-          unit: "Event",
-          unit_price: 0,
-          total_price: 0,
-        }]);
+        setLineItems([{ item_description: order.title, quantity: 1, unit: "Event", unit_price: 0, total_price: 0 }]);
       }
     }
   }, [selectedOrderId, selectedSourceType, rentalOrders, serviceOrders]);
@@ -116,28 +108,61 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
     }));
   };
 
+  const handlePicklistAdd = (items: Omit<QuoteLineItem, "id" | "quote_id">[]) => {
+    setLineItems(prev => {
+      // If first item is empty placeholder, replace it
+      if (prev.length === 1 && !prev[0].item_description && prev[0].unit_price === 0) {
+        return items;
+      }
+      return [...prev, ...items];
+    });
+  };
+
   const calculations = useMemo(() => {
     const subtotal = lineItems.reduce((s, li) => s + (li.total_price || 0), 0);
     const discountAmount = discountType === "percent"
       ? subtotal * (discountValue / 100)
       : discountValue;
     const afterDiscount = Math.max(0, subtotal - discountAmount);
-    const gstAmount = afterDiscount * (gstPercent / 100);
-    const total = afterDiscount + gstAmount;
-    return { subtotal, discountAmount, afterDiscount, gstAmount, total };
-  }, [lineItems, discountType, discountValue, gstPercent]);
+    const effectiveTaxPercent = taxType === "none" ? 0 : taxPercent;
+    const taxAmount = afterDiscount * (effectiveTaxPercent / 100);
+    const total = afterDiscount + taxAmount;
+    return { subtotal, discountAmount, afterDiscount, taxAmount, total, effectiveTaxPercent };
+  }, [lineItems, discountType, discountValue, taxType, taxPercent]);
+
+  const buildQuotePayload = (status: string, sentVia: string | null = null) => ({
+    source_type: selectedSourceType,
+    source_order_id: selectedOrderId || null,
+    client_name: clientName,
+    client_email: clientEmail || null,
+    client_phone: clientPhone || null,
+    subtotal: calculations.subtotal,
+    discount_type: discountType,
+    discount_value: discountValue,
+    discount_amount: calculations.discountAmount,
+    gst_percent: calculations.effectiveTaxPercent,
+    gst_amount: calculations.taxAmount,
+    total: calculations.total,
+    notes: notes || null,
+    status,
+    sent_via: sentVia,
+    sent_at: sentVia ? new Date().toISOString() : null,
+    created_by: null,
+    tax_type: taxType,
+    template,
+    version: currentVersion,
+    parent_quote_id: parentQuoteId,
+    acceptance_token: null,
+    signature_url: null,
+    signed_at: null,
+  });
 
   const handleSave = async () => {
     if (!clientName.trim()) {
       toast({ title: "Client name is required", variant: "destructive" });
       return;
     }
-    if (lineItems.some(li => li.unit_price < 0)) {
-      toast({ title: "Prices must be ≥ 0", variant: "destructive" });
-      return;
-    }
 
-    // Download the quote as PDF
     downloadQuoteAsPDF({
       clientName,
       clientEmail,
@@ -147,35 +172,15 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       discountType,
       discountValue,
       discountAmount: calculations.discountAmount,
-      gstPercent,
-      gstAmount: calculations.gstAmount,
+      taxType,
+      taxPercent: calculations.effectiveTaxPercent,
+      taxAmount: calculations.taxAmount,
       total: calculations.total,
       notes,
+      template,
     });
 
-    // Also save to database
-    createQuote.mutate({
-      quote: {
-        source_type: selectedSourceType,
-        source_order_id: selectedOrderId || null,
-        client_name: clientName,
-        client_email: clientEmail || null,
-        client_phone: clientPhone || null,
-        subtotal: calculations.subtotal,
-        discount_type: discountType,
-        discount_value: discountValue,
-        discount_amount: calculations.discountAmount,
-        gst_percent: gstPercent,
-        gst_amount: calculations.gstAmount,
-        total: calculations.total,
-        notes: notes || null,
-        status: "draft",
-        sent_via: null,
-        sent_at: null,
-        created_by: null,
-      },
-      lineItems,
-    });
+    createQuote.mutate({ quote: buildQuotePayload("draft"), lineItems });
   };
 
   const handleSendVia = async (via: "email" | "whatsapp") => {
@@ -185,17 +190,16 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
     }
     setSending(true);
 
-    // Build quote summary text
     const itemsText = lineItems.map((li, i) =>
       `${i + 1}. ${li.item_description} — ${li.quantity} ${li.unit} × ₹${li.unit_price.toLocaleString()} = ₹${li.total_price.toLocaleString()}`
     ).join("\n");
 
-    const quoteText = `📋 *Quote for ${clientName}*\n\n${itemsText}\n\nSubtotal: ₹${calculations.subtotal.toLocaleString()}\nDiscount: ₹${calculations.discountAmount.toLocaleString()}\nGST (${gstPercent}%): ₹${calculations.gstAmount.toLocaleString()}\n\n💰 *Total: ₹${calculations.total.toLocaleString()}*`;
+    const taxLabel = taxType === "vat" ? "VAT" : "GST";
+    const quoteText = `📋 *Quote for ${clientName}*\n\n${itemsText}\n\nSubtotal: ₹${calculations.subtotal.toLocaleString()}\nDiscount: ₹${calculations.discountAmount.toLocaleString()}\n${taxLabel} (${calculations.effectiveTaxPercent}%): ₹${calculations.taxAmount.toLocaleString()}\n\n💰 *Total: ₹${calculations.total.toLocaleString()}*`;
 
     if (via === "whatsapp" && clientPhone) {
       const phone = clientPhone.replace(/[^0-9]/g, "");
-      const url = `https://wa.me/${phone}?text=${encodeURIComponent(quoteText)}`;
-      window.open(url, "_blank");
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(quoteText)}`, "_blank");
       toast({ title: "WhatsApp opened", description: "Quote message ready to send." });
     } else if (via === "email" && clientEmail) {
       const subject = encodeURIComponent(`Quote from Evnting - ${clientName}`);
@@ -206,31 +210,54 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       toast({ title: "Missing contact", description: `No ${via === "email" ? "email" : "phone"} provided.`, variant: "destructive" });
     }
 
-    // Save the quote with sent status
-    createQuote.mutate({
-      quote: {
-        source_type: selectedSourceType,
-        source_order_id: selectedOrderId || null,
-        client_name: clientName,
-        client_email: clientEmail || null,
-        client_phone: clientPhone || null,
-        subtotal: calculations.subtotal,
-        discount_type: discountType,
-        discount_value: discountValue,
-        discount_amount: calculations.discountAmount,
-        gst_percent: gstPercent,
-        gst_amount: calculations.gstAmount,
-        total: calculations.total,
-        notes: notes || null,
-        status: "sent",
-        sent_via: via,
-        sent_at: new Date().toISOString(),
-        created_by: null,
-      },
-      lineItems,
-    });
-
+    createQuote.mutate({ quote: buildQuotePayload("sent", via), lineItems });
     setSending(false);
+  };
+
+  const handleCopyAcceptanceLink = async () => {
+    if (!clientName.trim()) {
+      toast({ title: "Save the quote first", variant: "destructive" });
+      return;
+    }
+
+    // Create quote and get acceptance token
+    const { data: createdQuote, error } = await supabase
+      .from("quotes")
+      .insert(buildQuotePayload("sent") as any)
+      .select("id, acceptance_token")
+      .single();
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    // Insert line items
+    if (lineItems.length > 0) {
+      await supabase.from("quote_line_items").insert(
+        lineItems.map((li, idx) => ({ ...li, quote_id: createdQuote.id, display_order: idx }))
+      );
+    }
+
+    const link = `${window.location.origin}/quote/${createdQuote.acceptance_token}`;
+    await navigator.clipboard.writeText(link);
+    toast({ title: "Acceptance Link Copied!", description: "Share this link with the client to accept & sign." });
+  };
+
+  const handleReviseQuote = (quote: Quote) => {
+    setEditingQuoteId(quote.id);
+    setParentQuoteId(quote.parent_quote_id || quote.id);
+    setCurrentVersion((quote.version || 1) + 1);
+    setClientName(quote.client_name);
+    setClientEmail(quote.client_email || "");
+    setClientPhone(quote.client_phone || "");
+    setNotes(quote.notes || "");
+    setTaxType((quote.tax_type as any) || "gst");
+    setTaxPercent(quote.gst_percent || 18);
+    setTemplate((quote.template as QuoteTemplate) || "modern");
+    setDiscountType((quote.discount_type as any) || "amount");
+    setDiscountValue(quote.discount_value || 0);
+    toast({ title: `Revising to v${(quote.version || 1) + 1}`, description: "Make your changes and save." });
   };
 
   const availableOrders = selectedSourceType === "rental_order"
@@ -244,15 +271,15 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Quote Maker</h2>
-          <p className="text-muted-foreground text-sm">Create custom quotes with dynamic pricing</p>
+          <p className="text-muted-foreground text-sm">Create custom quotes with dynamic pricing, templates & signature</p>
         </div>
         {onClose && <Button variant="outline" onClick={onClose}>← Back</Button>}
       </div>
 
-      {/* Source Selection */}
+      {/* Source Selection + Template */}
       <Card className="rounded-2xl">
         <CardContent className="p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <Label>Source</Label>
               <Select value={selectedSourceType} onValueChange={v => { setSelectedSourceType(v); setSelectedOrderId(""); }}>
@@ -277,6 +304,17 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
                 </Select>
               </div>
             )}
+            <div>
+              <Label className="flex items-center gap-1"><Palette className="h-3 w-3" />Template</Label>
+              <Select value={template} onValueChange={v => setTemplate(v as QuoteTemplate)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="modern">🟠 Modern (Orange)</SelectItem>
+                  <SelectItem value="classic">🔵 Classic (Navy & Gold)</SelectItem>
+                  <SelectItem value="creative">🟣 Creative (Gradient)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -297,10 +335,14 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       <Card className="rounded-2xl">
         <CardHeader className="pb-3 flex flex-row items-center justify-between">
           <CardTitle className="text-base">Line Items</CardTitle>
-          <Button size="sm" variant="outline" onClick={addLineItem}><Plus className="h-4 w-4 mr-1" />Add Item</Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setPicklistOpen(true)} className="gap-1">
+              <PackageSearch className="h-4 w-4" />Pick from Catalog
+            </Button>
+            <Button size="sm" variant="outline" onClick={addLineItem}><Plus className="h-4 w-4 mr-1" />Add Item</Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {/* Header */}
           <div className="hidden sm:grid grid-cols-12 gap-2 text-xs font-semibold text-muted-foreground uppercase">
             <div className="col-span-4">Description</div>
             <div className="col-span-2">Qty</div>
@@ -354,7 +396,24 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       <Card className="rounded-2xl">
         <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Calculator className="h-4 w-4" />Price Calculation</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div>
+              <Label>Tax Type</Label>
+              <Select value={taxType} onValueChange={v => setTaxType(v as any)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gst">GST</SelectItem>
+                  <SelectItem value="vat">VAT</SelectItem>
+                  <SelectItem value="none">No Tax</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {taxType !== "none" && (
+              <div>
+                <Label>{taxType.toUpperCase()} %</Label>
+                <Input type="number" min={0} max={100} value={taxPercent} onChange={e => setTaxPercent(parseFloat(e.target.value) || 0)} />
+              </div>
+            )}
             <div>
               <Label>Discount Type</Label>
               <Select value={discountType} onValueChange={v => setDiscountType(v as "amount" | "percent")}>
@@ -369,10 +428,6 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
               <Label>Discount Value</Label>
               <Input type="number" min={0} step="any" value={discountValue} onChange={e => setDiscountValue(parseFloat(e.target.value) || 0)} />
             </div>
-            <div>
-              <Label>GST %</Label>
-              <Input type="number" min={0} max={100} value={gstPercent} onChange={e => setGstPercent(parseFloat(e.target.value) || 0)} />
-            </div>
           </div>
 
           <Separator />
@@ -382,7 +437,9 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
             {calculations.discountAmount > 0 && (
               <div className="flex justify-between text-green-600"><span>Discount</span><span>-₹{calculations.discountAmount.toLocaleString()}</span></div>
             )}
-            <div className="flex justify-between"><span className="text-muted-foreground">GST ({gstPercent}%)</span><span>₹{calculations.gstAmount.toLocaleString()}</span></div>
+            {taxType !== "none" && (
+              <div className="flex justify-between"><span className="text-muted-foreground">{taxType.toUpperCase()} ({calculations.effectiveTaxPercent}%)</span><span>₹{calculations.taxAmount.toLocaleString()}</span></div>
+            )}
             <Separator />
             <div className="flex justify-between text-lg"><span className="font-bold">Total</span><span className="font-bold text-primary">₹{calculations.total.toLocaleString()}</span></div>
           </div>
@@ -397,19 +454,74 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
         </CardContent>
       </Card>
 
+      {/* Version History */}
+      {versionHistory && versionHistory.length > 1 && (
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2"><History className="h-4 w-4" />Version History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {versionHistory.map(v => (
+                <div key={v.id} className="flex items-center justify-between p-2 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <Badge variant={v.id === editingQuoteId ? "default" : "outline"}>v{v.version || 1}</Badge>
+                    <span className="text-sm">{v.quote_number}</span>
+                    <span className="text-xs text-muted-foreground">{new Date(v.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{v.status}</Badge>
+                    {v.signed_at && <Badge className="bg-green-100 text-green-800">Signed</Badge>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Quotes for Revision */}
+      {allQuotes && allQuotes.length > 0 && !editingQuoteId && (
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2"><History className="h-4 w-4" />Recent Quotes — Revise</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {allQuotes.slice(0, 10).map(q => (
+                <div key={q.id} className="flex items-center justify-between p-2 rounded-lg border hover:bg-muted/50">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline">v{q.version || 1}</Badge>
+                    <span className="text-sm font-medium">{q.client_name}</span>
+                    <span className="text-xs text-muted-foreground">{q.quote_number}</span>
+                    <span className="text-xs text-muted-foreground">₹{Number(q.total).toLocaleString()}</span>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => handleReviseQuote(q)}>Revise</Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
         <Button onClick={handleSave} disabled={createQuote.isPending} className="flex-1 gap-2">
           <Download className="h-4 w-4" />
           {createQuote.isPending ? "Saving..." : "Save & Download Quote"}
         </Button>
         <Button variant="outline" onClick={() => handleSendVia("email")} disabled={sending} className="flex-1 gap-2">
-          <Mail className="h-4 w-4" />Send via Email
+          <Mail className="h-4 w-4" />Email
         </Button>
         <Button variant="outline" onClick={() => handleSendVia("whatsapp")} disabled={sending} className="flex-1 gap-2">
-          <MessageSquare className="h-4 w-4" />Send via WhatsApp
+          <MessageSquare className="h-4 w-4" />WhatsApp
+        </Button>
+        <Button variant="secondary" onClick={handleCopyAcceptanceLink} className="flex-1 gap-2">
+          <Copy className="h-4 w-4" />Copy Acceptance Link
         </Button>
       </div>
+
+      <QuotePicklistDialog open={picklistOpen} onOpenChange={setPicklistOpen} onAddItems={handlePicklistAdd} />
     </div>
   );
 };

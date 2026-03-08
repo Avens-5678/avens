@@ -2,6 +2,27 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 
+const sendServiceConfirmationWhatsApp = async (order: {
+  id: string;
+  client_name?: string | null;
+  client_phone?: string | null;
+  service_type?: string;
+}) => {
+  if (!order.client_phone) return;
+  try {
+    await supabase.functions.invoke("wati-service-confirmation", {
+      body: {
+        phone: order.client_phone,
+        name: order.client_name || "Customer",
+        service_type: order.service_type || "Event Service",
+        order_id: order.id,
+      },
+    });
+  } catch (err) {
+    console.error("WhatsApp confirmation failed:", err);
+  }
+};
+
 export interface ServiceOrder {
   id: string;
   title: string;
@@ -81,9 +102,10 @@ export const useCreateServiceOrder = () => {
       if (error) throw error;
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["service_orders"] });
       toast({ title: "Order Created", description: "Service order has been created." });
+      sendServiceConfirmationWhatsApp(result);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

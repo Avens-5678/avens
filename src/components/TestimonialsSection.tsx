@@ -128,8 +128,8 @@ const TestimonialsSection = () => {
             onWheel={handleWheel}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className="flex gap-4 overflow-x-hidden py-2 cursor-grab active:cursor-grabbing"
-            style={{ scrollBehavior: "auto" }}
+            className="flex gap-4 overflow-x-hidden py-2 cursor-grab active:cursor-grabbing scroll-smooth"
+            style={{ scrollBehavior: "smooth" }}
           >
             {tripled.map((testimonial, idx) => (
               <div key={`${testimonial.id}-${idx}`} className="flex-shrink-0 w-[320px] md:w-[360px]">

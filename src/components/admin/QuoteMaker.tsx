@@ -213,7 +213,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       companyAddress: companySettings?.address,
       companyPhone: companySettings?.phone,
       companyEmail: companySettings?.email,
-      gstEnabled: companySettings?.gst_enabled ?? true,
+      gstEnabled,
     });
 
     createQuote.mutate({ quote: buildQuotePayload("draft"), lineItems });

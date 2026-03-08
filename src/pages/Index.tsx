@@ -453,7 +453,7 @@ const Index = () => {
 
       {/* Trusted Clients - Marquee */}
       {activeClients.length > 0 &&
-        <Section spacing="large">
+        <Section spacing="compact">
           <div className="container mx-auto px-4">
             <SectionHeader
               badge={<Badge variant="outline"><Users className="mr-2 h-4 w-4" />Trusted Partners</Badge>}

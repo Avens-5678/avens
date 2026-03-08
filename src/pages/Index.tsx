@@ -487,7 +487,8 @@ const Index = () => {
                   </div>
                 </GlassmorphismCard>
               )}
-            </ServiceScrollContainer>
+              </ServiceScrollContainer>
+            </ScrollReveal>
             }
 
           {homeRentals.length > 0 &&

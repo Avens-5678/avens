@@ -1,52 +1,77 @@
-# Professional Product Detail Page Upgrade
 
-Redesign the PDP to match Amazon/Flipkart conventions with better visual hierarchy, structured information sections, and a polished layout.
 
-## Key Changes to `src/pages/ProductDetail.tsx`
+# AI Chatbot for Client and Vendor Dashboards
 
-### 1. Image Gallery — Desktop: Left thumbnails strip + main image (like Amazon)
+## Overview
+Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
 
-- Vertical thumbnail strip on the left (desktop), horizontal on mobile
-- Main image with zoom-on-hover effect (CSS `transform: scale(2)` inside overflow-hidden on mouse move)
-- Image counter badge stays on mobile
+## What the Chatbot Does
 
-### 2. Product Info — Structured sections with clear dividers
+**For Clients:**
+- Help plan events (suggest themes, budgets, timelines)
+- Guide through creating event requests
+- Answer questions about event status and vendor assignments
+- Provide rental equipment recommendations
 
-- **Title area**: Category breadcrumb-style tags above title, then title
-- **Rating row**: Green rating pill (like Flipkart), review count placeholder, share button, wishlist-style bookmark
-- **Evnting Assured**: Horizontal strip with icon + "7 Day Easy Returns · Free Delivery · Top Rated"
-- **Variant selectors**: Image-backed variant chips when variant has images, bordered pills otherwise
-- **Quantity / Dimensions**: Same logic, cleaner styling
-- **CTA row**: Two buttons side-by-side — "Add to Cart" (outline) + "Enquire Now" (primary filled), Flipkart-style
-- **Trust badges**: Horizontal icon row (same 3 badges, inline instead of grid)
+**For Vendors:**
+- Help with listing creation and pricing strategies
+- Guide through inventory management
+- Answer questions about assigned jobs
+- Provide marketplace tips and best practices
 
-### 3. Below-the-fold content — Tabbed or accordion sections
+## UI Design (Reference Image Style)
 
-- **Description** tab with the existing description text
-- **Specifications** section (if description has structured content, parse it; otherwise just description)
-- **Reviews placeholder** — "Be the first to review" with a subtle CTA
+The chat tab will feature:
+- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
+- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
+- Markdown rendering for AI responses
+- Typing indicator animation while streaming
+- Message input bar at the bottom with send button
+- Smooth token-by-token streaming display
 
-### 4. "You May Also Like" — Card-style with price + rating + Add to Cart quick button
+## Technical Plan
 
-- Larger cards (w-48 on mobile, w-56 on desktop)
-- Each card shows image, title, price, rating pill, and a small "Add to Cart" icon button
+### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
+- Accepts `{ messages, role: "client" | "vendor" }` in the request body
+- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
+- Role-specific system prompts:
+  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
+  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
+- Returns SSE stream for token-by-token rendering
+- Handles 429/402 errors gracefully
 
-### 5. Recently Viewed Section
+### 2. Update `supabase/config.toml`
+- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
 
-- Pull from localStorage, show horizontal scroll of recently viewed products (exclude current)
+### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
+- Props: `role: "client" | "vendor"` and `userName: string`
+- **Home screen**: Greeting + quick-action chips in a card grid layout
+- **Chat view**: Scrollable message list with streaming support
+- Uses `react-markdown` (already available or will add) for rendering
+- SSE streaming via fetch to the edge function
+- Conversation stored in local React state (no persistence needed)
+- Framer Motion for message entrance animations
 
-### 6. Sticky Mobile Bottom Bar
+### 4. Update `src/pages/client/ClientDashboard.tsx`
+- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
+- Render `<DashboardChatbot role="client" userName={...} />` when active
 
-- On mobile, a fixed bottom bar with price summary + "Add to Cart" button (like Flipkart mobile PDP)
-- Only shows when scrolled past the main CTA
+### 5. Update `src/pages/vendor/VendorDashboard.tsx`
+- Add same "AI Assistant" sidebar item
+- Render `<DashboardChatbot role="vendor" userName={...} />` when active
 
-## Files Modified
+## File Changes Summary
 
-- `src/pages/ProductDetail.tsx` — Full rewrite of the JSX layout
+| File | Action |
+|------|--------|
+| `supabase/functions/dashboard-chat/index.ts` | Create |
+| `supabase/config.toml` | Edit (add function entry) |
+| `src/components/dashboard/DashboardChatbot.tsx` | Create |
+| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
+| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
 
-## Technical Notes
+## Dependencies
+- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
+- Uses existing `framer-motion` for animations
+- Uses existing Supabase client for auth token in fetch calls
 
-- No new dependencies needed
-- Zoom effect: pure CSS with `onMouseMove` tracking for `transform-origin`
-- Sticky bottom bar uses `IntersectionObserver` on the main CTA to toggle visibility
-- All existing logic (variants, cart, pricing, measurable units) preserved exactly

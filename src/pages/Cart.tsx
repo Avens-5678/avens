@@ -363,23 +363,6 @@ const Cart = () => {
                       <p className="text-[11px] text-muted-foreground text-center">Our team will respond within 24 hours.</p>
                     </div>
 
-                    {/* Trust signals */}
-                    <div className="bg-background border border-border rounded-xl p-4">
-                      <div className="grid grid-cols-3 gap-3">
-                        {[
-                          { icon: ShieldCheck, label: "Assured Quality" },
-                          { icon: Truck, label: "Free Delivery" },
-                          { icon: RotateCcw, label: "Easy Returns" },
-                        ].map(({ icon: Icon, label }) => (
-                          <div key={label} className="flex flex-col items-center gap-1.5 text-center">
-                            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                              <Icon className="h-4 w-4 text-primary" />
-                            </div>
-                            <span className="text-[10px] font-medium text-muted-foreground leading-tight">{label}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
                   </>
                 )}
               </div>

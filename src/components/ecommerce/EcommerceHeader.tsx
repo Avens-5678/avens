@@ -46,14 +46,6 @@ const EcommerceHeader = ({
             Evnting
           </button>
 
-          {/* Deliver to */}
-          <button className="hidden md:flex items-center gap-1.5 text-xs hover:outline hover:outline-1 hover:outline-primary-foreground/30 rounded px-2 py-1.5 transition-all flex-shrink-0">
-            <MapPin className="h-4 w-4 text-primary-foreground/60" />
-            <div className="text-left">
-              <span className="block text-[10px] text-primary-foreground/60 leading-none">Deliver to</span>
-              <span className="block font-semibold text-primary-foreground leading-tight">Hyderabad</span>
-            </div>
-          </button>
 
           {/* Search bar */}
           <div className="flex-1 flex items-center min-w-0">

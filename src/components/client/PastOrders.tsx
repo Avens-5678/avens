@@ -39,7 +39,7 @@ const PastOrders = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Past Orders</h2>
-      <p className="text-muted-foreground">View all your service requests and rental orders in one place.</p>
+      <p className="text-muted-foreground">View all your event requests and rental orders in one place.</p>
 
       <Tabs defaultValue="services" className="w-full">
         <TabsList className="grid w-full grid-cols-2">

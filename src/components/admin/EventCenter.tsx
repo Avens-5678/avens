@@ -4,9 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEventRequests, useAssignVendor, useVendors, EventRequest } from "@/hooks/useEventRequests";
 import { useUpdateEventStatus } from "@/hooks/useEventRequests";
-import { Loader2, Calendar, Users as UsersIcon, MapPin, ClipboardList } from "lucide-react";
+import { useRentalOrders, useUpdateRentalOrder } from "@/hooks/useRentalOrders";
+import { Loader2, Calendar, Users as UsersIcon, MapPin, ClipboardList, Package } from "lucide-react";
 import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {

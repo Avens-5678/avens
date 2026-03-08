@@ -153,7 +153,10 @@ const EventCenter = () => {
             <Package className="h-4 w-4 mr-2" />
             Rental Orders ({rentalOrders?.length || 0})
           </TabsTrigger>
-        </TabsList>
+          <TabsTrigger value="services">
+            <Briefcase className="h-4 w-4 mr-2" />
+            Service Orders ({serviceOrders?.length || 0})
+          </TabsTrigger>
 
         {/* Event Requests Tab */}
         <TabsContent value="events" className="space-y-6">

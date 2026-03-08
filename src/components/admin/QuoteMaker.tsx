@@ -384,6 +384,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   };
 
   const handleReviseQuote = (quote: Quote) => {
+    setHideRecentQuotes(false);
     setEditingQuoteId(quote.id);
     setParentQuoteId(quote.parent_quote_id || quote.id);
     setCurrentVersion((quote.version || 1) + 1);

@@ -657,6 +657,7 @@ export type Database = {
           gradient_from: string | null
           gradient_to: string | null
           id: string
+          image_url: string | null
           is_active: boolean | null
           subtitle: string | null
           title: string
@@ -669,6 +670,7 @@ export type Database = {
           gradient_from?: string | null
           gradient_to?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           subtitle?: string | null
           title: string
@@ -681,6 +683,7 @@ export type Database = {
           gradient_from?: string | null
           gradient_to?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           subtitle?: string | null
           title?: string

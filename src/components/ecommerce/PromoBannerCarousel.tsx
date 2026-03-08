@@ -11,6 +11,7 @@ interface PromoBanner {
   cta_text: string | null;
   gradient_from: string | null;
   gradient_to: string | null;
+  image_url: string | null;
   display_order: number | null;
 }
 
@@ -52,12 +53,20 @@ const PromoBannerCarousel = () => {
         {banners.map((banner) => (
           <div
             key={banner.id}
-            className="w-full flex-shrink-0 py-6 sm:py-8 px-6 sm:px-12"
+            className="w-full flex-shrink-0 py-6 sm:py-8 px-6 sm:px-12 relative overflow-hidden"
             style={{
               background: `linear-gradient(135deg, ${banner.gradient_from || "hsl(var(--primary))"}, ${banner.gradient_to || "hsl(var(--accent))"})`,
             }}
           >
-            <div className="container mx-auto flex items-center justify-between gap-4">
+            {banner.image_url && (
+              <img
+                src={banner.image_url}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover opacity-30"
+                loading="lazy"
+              />
+            )}
+            <div className="container mx-auto flex items-center justify-between gap-4 relative">
               <div className="space-y-1.5 sm:space-y-2">
                 <h3 className="text-lg sm:text-2xl font-bold text-primary-foreground drop-shadow-sm">
                   {banner.title}

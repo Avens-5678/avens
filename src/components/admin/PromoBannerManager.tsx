@@ -23,6 +23,7 @@ interface PromoBanner {
   cta_text: string | null;
   gradient_from: string | null;
   gradient_to: string | null;
+  image_url: string | null;
   display_order: number | null;
   is_active: boolean | null;
 }
@@ -33,6 +34,7 @@ const defaultBanner: Omit<PromoBanner, "id"> = {
   cta_text: "Shop Now",
   gradient_from: "#7c3aed",
   gradient_to: "#a855f7",
+  image_url: null,
   display_order: 0,
   is_active: true,
 };
@@ -70,6 +72,7 @@ const PromoBannerManager = () => {
       cta_text: banner.cta_text,
       gradient_from: banner.gradient_from,
       gradient_to: banner.gradient_to,
+      image_url: banner.image_url,
       display_order: banner.display_order,
       is_active: banner.is_active,
     });
@@ -133,12 +136,16 @@ const PromoBannerManager = () => {
             className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30"
           >
             <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div
-              className="w-10 h-10 rounded-lg flex-shrink-0"
-              style={{
-                background: `linear-gradient(135deg, ${banner.gradient_from || "#7c3aed"}, ${banner.gradient_to || "#a855f7"})`,
-              }}
-            />
+            {banner.image_url ? (
+              <img src={banner.image_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+            ) : (
+              <div
+                className="w-10 h-10 rounded-lg flex-shrink-0"
+                style={{
+                  background: `linear-gradient(135deg, ${banner.gradient_from || "#7c3aed"}, ${banner.gradient_to || "#a855f7"})`,
+                }}
+              />
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{banner.title}</p>
               <p className="text-xs text-muted-foreground truncate">{banner.subtitle}</p>
@@ -179,6 +186,10 @@ const PromoBannerManager = () => {
               <Label>CTA Text</Label>
               <Input value={form.cta_text || ""} onChange={(e) => setForm({ ...form, cta_text: e.target.value })} />
             </div>
+            <div>
+              <Label>Banner Image URL</Label>
+              <Input value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value || null })} placeholder="https://... (optional)" />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Gradient From</Label>
@@ -207,13 +218,18 @@ const PromoBannerManager = () => {
             </div>
             {/* Preview */}
             <div
-              className="rounded-lg p-4"
+              className="rounded-lg p-4 relative overflow-hidden"
               style={{
                 background: `linear-gradient(135deg, ${form.gradient_from || "#7c3aed"}, ${form.gradient_to || "#a855f7"})`,
               }}
             >
-              <p className="text-white font-bold text-sm">{form.title || "Banner Title"}</p>
-              <p className="text-white/70 text-xs">{form.subtitle || "Subtitle text"}</p>
+              {form.image_url && (
+                <img src={form.image_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+              )}
+              <div className="relative">
+                <p className="text-white font-bold text-sm">{form.title || "Banner Title"}</p>
+                <p className="text-white/70 text-xs">{form.subtitle || "Subtitle text"}</p>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

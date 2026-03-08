@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.wati-service-confirmation]
 verify_jwt = false
+
+[functions.wati-rental-confirmation]
+verify_jwt = false

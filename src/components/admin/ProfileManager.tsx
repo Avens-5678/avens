@@ -60,7 +60,7 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
       setCompanyAddress(companySettings.address || "");
       setCompanyPhone(companySettings.phone || "");
       setCompanyEmail(companySettings.email || "");
-      setGstEnabled(companySettings.gst_enabled);
+      setLogoUrl(companySettings.logo_url || "");
       setLogoUrl(companySettings.logo_url || "");
     }
   }, [companySettings]);

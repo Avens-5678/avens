@@ -143,7 +143,7 @@ table.items tbody td { font-size:13px; }
 <div class="quote-title">Quotation</div>
 <div class="header">
   <div class="logo-area"><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
-  <table class="meta-table"><tr><td>Quotation #</td><td>${s.qNum}</td></tr><tr><td>Date</td><td>${s.dateStr}</td></tr></table>
+  <table class="meta-table"><tr><td>Quotation #</td><td>${s.qNum}</td></tr><tr><td>Date</td><td>${s.dateStr}</td></tr>${s.orderRef ? `<tr><td>Order Ref</td><td>${s.orderRef}</td></tr>` : ""}</table>
 </div>
 <div class="parties">
   <div class="party-box"><h3>Quotation By</h3><p><strong>Evnting (Avens Events Pvt. Ltd.)</strong></p><p>Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033</p><p style="margin-top:6px;"><span class="label">GSTIN</span> 36AABCA1234B1Z5</p><p><span class="label">PAN</span> AABCA1234B</p></div>

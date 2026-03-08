@@ -467,8 +467,12 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div><Label>Name *</Label><Input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Client name" /></div>
-            <div><Label>Email</Label><Input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="client@email.com" /></div>
+            <div><Label>Email</Label><Input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} onBlur={() => fetchClientProfile(clientEmail)} placeholder="client@email.com" /></div>
             <div><Label>Phone</Label><Input value={clientPhone} onChange={e => setClientPhone(e.target.value)} placeholder="+91 ..." /></div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><Label>Company Name</Label><Input value={clientCompanyName} onChange={e => setClientCompanyName(e.target.value)} placeholder="Client's company (optional)" /></div>
+            <div><Label>Client GSTIN</Label><Input value={clientGst} onChange={e => setClientGst(e.target.value)} placeholder="Client's GST number (optional)" /></div>
           </div>
         </CardContent>
       </Card>

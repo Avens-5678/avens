@@ -191,6 +191,14 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       template,
       sourceOrderId: selectedOrderId || null,
       sourceType: selectedSourceType !== "manual" ? selectedSourceType : null,
+      companyName: companySettings?.company_name,
+      companyLogoUrl: companySettings?.logo_url,
+      companyGst: companySettings?.gst_number,
+      companyPan: companySettings?.pan_number,
+      companyAddress: companySettings?.address,
+      companyPhone: companySettings?.phone,
+      companyEmail: companySettings?.email,
+      gstEnabled: companySettings?.gst_enabled ?? true,
     });
 
     createQuote.mutate({ quote: buildQuotePayload("draft"), lineItems });

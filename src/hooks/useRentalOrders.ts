@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 import { syncRentalOrderToZohoProducts } from "@/utils/zohoSync";
+import { normalizePhoneNumber } from "@/utils/phoneUtils";
 
 const sendRentalConfirmationWhatsApp = async (
   order: {

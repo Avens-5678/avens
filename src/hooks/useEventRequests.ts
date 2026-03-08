@@ -37,6 +37,7 @@ const sendEventConfirmationWhatsApp = async (
 
 
 export interface EventRequest {
+  id: string;
   client_id: string;
   assigned_vendor_id: string | null;
   status: "pending" | "approved" | "in_progress" | "completed" | "cancelled";

@@ -191,6 +191,48 @@ export type Database = {
         }
         Relationships: []
       }
+      company_settings: {
+        Row: {
+          address: string | null
+          company_name: string
+          created_at: string
+          email: string | null
+          gst_enabled: boolean
+          gst_number: string | null
+          id: string
+          logo_url: string | null
+          pan_number: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          company_name?: string
+          created_at?: string
+          email?: string | null
+          gst_enabled?: boolean
+          gst_number?: string | null
+          id?: string
+          logo_url?: string | null
+          pan_number?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          company_name?: string
+          created_at?: string
+          email?: string | null
+          gst_enabled?: boolean
+          gst_number?: string | null
+          id?: string
+          logo_url?: string | null
+          pan_number?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_requests: {
         Row: {
           admin_notes: string | null

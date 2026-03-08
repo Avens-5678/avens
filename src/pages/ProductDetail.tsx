@@ -429,20 +429,6 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Trust badges — inline */}
-              <div className="flex items-center gap-5 pt-1">
-                {[
-                  { icon: ShieldCheck, label: "Assured Quality" },
-                  { icon: Truck, label: "Free Delivery" },
-                  { icon: Headphones, label: "24/7 Support" },
-                  { icon: RotateCcw, label: "Easy Returns" },
-                ].map(({ icon: Icon, label }) => (
-                  <div key={label} className="flex items-center gap-1.5">
-                    <Icon className="h-4 w-4 text-primary" />
-                    <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground whitespace-nowrap">{label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>

@@ -336,22 +336,6 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              {/* Evnting Assured strip */}
-              {rental.rating && rental.rating >= 4 && (
-                <div className="flex items-center gap-4 bg-primary/5 border border-primary/20 rounded-lg px-4 py-2.5">
-                  <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0" />
-                  <div className="flex items-center gap-3 text-xs font-medium text-foreground flex-wrap">
-                    <span>Evnting Assured</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground">7 Day Easy Returns</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground">Free Delivery</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground">Top Rated</span>
-                  </div>
-                </div>
-              )}
-
               <div className="h-px bg-border" />
 
               {/* Variant Selectors */}

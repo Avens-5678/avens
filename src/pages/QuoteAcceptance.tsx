@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Check, FileText, Pen } from "lucide-react";
+import { Check, FileText, Pen, Package } from "lucide-react";
 
 const QuoteAcceptance = () => {
   const { token } = useParams<{ token: string }>();
@@ -116,6 +116,17 @@ const QuoteAcceptance = () => {
 
       if (updateError) throw updateError;
 
+      // Sync line items to linked order via edge function
+      if (quote.source_order_id) {
+        try {
+          await supabase.functions.invoke("sync-quote-to-order", {
+            body: { quote_id: quote.id },
+          });
+        } catch (syncErr) {
+          console.error("Order sync failed:", syncErr);
+        }
+      }
+
       setSigned(true);
       toast({ title: "Quote Accepted!", description: "Your signature has been recorded successfully." });
     } catch (err: any) {
@@ -172,6 +183,15 @@ const QuoteAcceptance = () => {
             </Badge>
           </CardHeader>
           <CardContent>
+            {quote.source_order_id && (
+              <div className="flex items-center gap-2 mb-4 p-3 bg-muted/50 rounded-lg">
+                <Package className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Order Ref:</span>
+                <Badge variant="outline" className="font-mono">#{String(quote.source_order_id).substring(0, 8).toUpperCase()}</Badge>
+                <Badge variant="secondary" className="capitalize">{String(quote.source_type || "").replace("_", " ")}</Badge>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <div>
                 <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Client</p>

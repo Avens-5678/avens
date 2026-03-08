@@ -6,6 +6,8 @@ export type QuoteTemplate = "modern" | "classic" | "creative";
 
 export interface QuotePrintData {
   quoteNumber?: string;
+  sourceOrderId?: string | null;
+  sourceType?: string | null;
   clientName: string;
   clientEmail: string;
   clientPhone: string;
@@ -72,7 +74,9 @@ function getSharedData(data: QuotePrintData) {
     </tr>
   `).join("");
 
-  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML };
+  const orderRef = data.sourceOrderId ? `Order Ref: #${data.sourceOrderId.substring(0, 8).toUpperCase()}` : "";
+
+  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef };
 }
 
 function buildTerms(notes: string) {
@@ -139,7 +143,7 @@ table.items tbody td { font-size:13px; }
 <div class="quote-title">Quotation</div>
 <div class="header">
   <div class="logo-area"><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
-  <table class="meta-table"><tr><td>Quotation #</td><td>${s.qNum}</td></tr><tr><td>Date</td><td>${s.dateStr}</td></tr></table>
+  <table class="meta-table"><tr><td>Quotation #</td><td>${s.qNum}</td></tr><tr><td>Date</td><td>${s.dateStr}</td></tr>${s.orderRef ? `<tr><td>Order Ref</td><td>${s.orderRef}</td></tr>` : ""}</table>
 </div>
 <div class="parties">
   <div class="party-box"><h3>Quotation By</h3><p><strong>Evnting (Avens Events Pvt. Ltd.)</strong></p><p>Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033</p><p style="margin-top:6px;"><span class="label">GSTIN</span> 36AABCA1234B1Z5</p><p><span class="label">PAN</span> AABCA1234B</p></div>
@@ -190,7 +194,7 @@ table.items tbody td { padding:10px 14px; border-bottom:1px solid #eee; font-siz
 </style></head><body>
 <div class="header">
   <div class="logo"><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
-  <div class="meta"><div><span class="label">Quotation:</span><span class="value">${s.qNum}</span></div><div><span class="label">Date:</span><span class="value">${s.dateStr}</span></div></div>
+  <div class="meta"><div><span class="label">Quotation:</span><span class="value">${s.qNum}</span></div><div><span class="label">Date:</span><span class="value">${s.dateStr}</span></div>${s.orderRef ? `<div><span class="label">${s.orderRef}</span></div>` : ""}</div>
 </div>
 <div class="quote-badge"><span>QUOTATION</span></div>
 <div class="parties">
@@ -245,7 +249,7 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
 </style></head><body>
 <div class="hero">
   <div><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
-  <div class="hero-meta"><div>Quotation <strong>#${s.qNum}</strong></div><div>${s.dateStr}</div></div>
+  <div class="hero-meta"><div>Quotation <strong>#${s.qNum}</strong></div><div>${s.dateStr}</div>${s.orderRef ? `<div style="font-size:12px;opacity:.9;">${s.orderRef}</div>` : ""}</div>
 </div>
 <div class="content">
   <div class="parties">

@@ -1,43 +1,77 @@
 
 
-## Plan: Link Quote to Order & Auto-Sync on Acceptance
+# AI Chatbot for Client and Vendor Dashboards
 
-### What the user wants
-1. Display the linked **order number** (order ID) on the quote — both in the admin QuoteMaker and on the public QuoteAcceptance page.
-2. When a client **accepts/signs** the quote, automatically sync the quote line items back to the linked order (updating `equipment_details` for rental orders or `service_details` for service orders).
+## Overview
+Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
 
-### Current state
-- Quotes already store `source_type` (`rental_order` / `service_order` / `manual`) and `source_order_id` (UUID of the linked order).
-- The QuoteAcceptance page does NOT display the order reference or sync anything on acceptance — it only updates `signature_url`, `signed_at`, and `status`.
+## What the Chatbot Does
 
-### Changes
+**For Clients:**
+- Help plan events (suggest themes, budgets, timelines)
+- Guide through creating event requests
+- Answer questions about event status and vendor assignments
+- Provide rental equipment recommendations
 
-#### 1. `src/pages/QuoteAcceptance.tsx`
-- **Display order number**: Show `source_order_id` (truncated) and `source_type` in the quote info header when present.
-- **Sync on sign**: After updating the quote status to "accepted", check if `source_order_id` exists. If so:
-  - For `rental_order`: Update `rental_orders.equipment_details` with the quote's line items as a JSON object (`{ cart_items: [...] }`), and update the order `status` to `"confirmed"`.
-  - For `service_order`: Update `service_orders.service_details` with a text summary of line items, and update `status` to `"confirmed"`.
-- This uses the existing public UPDATE RLS policy on quotes, but the order update needs to happen server-side. We'll create a small **edge function** `sync-quote-to-order` that accepts the quote ID and performs the update with the service role key.
+**For Vendors:**
+- Help with listing creation and pricing strategies
+- Guide through inventory management
+- Answer questions about assigned jobs
+- Provide marketplace tips and best practices
 
-#### 2. New Edge Function: `supabase/functions/sync-quote-to-order/index.ts`
-- Accepts `{ quote_id: string }` in the body.
-- Fetches the quote + line items using the service role.
-- If `source_order_id` is set, updates the corresponding order table with line items and sets status to `"confirmed"`.
-- Returns success/failure.
+## UI Design (Reference Image Style)
 
-#### 3. `src/components/admin/QuoteMaker.tsx`
-- Show the linked order ID (first 8 chars) as a badge next to the source selector when an order is selected.
-- Include `source_order_id` in the quote data passed to `downloadQuoteAsPDF` so it appears on the PDF.
+The chat tab will feature:
+- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
+- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
+- Markdown rendering for AI responses
+- Typing indicator animation while streaming
+- Message input bar at the bottom with send button
+- Smooth token-by-token streaming display
 
-#### 4. `src/components/admin/QuotePrintTemplate.ts`
-- Add "Order Ref: #XXXXXXXX" line in the quote header when `sourceOrderId` is provided.
+## Technical Plan
 
-### Files to create/edit
+### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
+- Accepts `{ messages, role: "client" | "vendor" }` in the request body
+- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
+- Role-specific system prompts:
+  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
+  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
+- Returns SSE stream for token-by-token rendering
+- Handles 429/402 errors gracefully
+
+### 2. Update `supabase/config.toml`
+- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
+
+### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
+- Props: `role: "client" | "vendor"` and `userName: string`
+- **Home screen**: Greeting + quick-action chips in a card grid layout
+- **Chat view**: Scrollable message list with streaming support
+- Uses `react-markdown` (already available or will add) for rendering
+- SSE streaming via fetch to the edge function
+- Conversation stored in local React state (no persistence needed)
+- Framer Motion for message entrance animations
+
+### 4. Update `src/pages/client/ClientDashboard.tsx`
+- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
+- Render `<DashboardChatbot role="client" userName={...} />` when active
+
+### 5. Update `src/pages/vendor/VendorDashboard.tsx`
+- Add same "AI Assistant" sidebar item
+- Render `<DashboardChatbot role="vendor" userName={...} />` when active
+
+## File Changes Summary
 
 | File | Action |
 |------|--------|
-| `supabase/functions/sync-quote-to-order/index.ts` | New — syncs quote line items to linked order on acceptance |
-| `src/pages/QuoteAcceptance.tsx` | Show order number + call sync edge function on sign |
-| `src/components/admin/QuoteMaker.tsx` | Pass order ID to PDF template |
-| `src/components/admin/QuotePrintTemplate.ts` | Show order reference in PDF |
+| `supabase/functions/dashboard-chat/index.ts` | Create |
+| `supabase/config.toml` | Edit (add function entry) |
+| `src/components/dashboard/DashboardChatbot.tsx` | Create |
+| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
+| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
+
+## Dependencies
+- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
+- Uses existing `framer-motion` for animations
+- Uses existing Supabase client for auth token in fetch calls
 

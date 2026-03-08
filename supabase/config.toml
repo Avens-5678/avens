@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.wati-rental-confirmation]
 verify_jwt = false
+
+[functions.sync-quote-to-order]
+verify_jwt = false

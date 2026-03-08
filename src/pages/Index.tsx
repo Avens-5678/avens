@@ -303,11 +303,14 @@ const Index = () => {
 
       {/* Services Section */}
       <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">
+        <BackgroundPattern variant="noise" />
         <div className="container mx-auto px-4">
-          <SectionHeader
+          <ScrollReveal animation="fade-in-up">
+            <SectionHeader
               badge={<Badge variant="outline"><Sparkles className="mr-2 h-4 w-4" />Premium Services</Badge>}
               title="Exceptional Event Management"
               description="From intimate gatherings to grand celebrations, we deliver sophistication and excellence." />
+          </ScrollReveal>
 
           
           {loadingServices ?

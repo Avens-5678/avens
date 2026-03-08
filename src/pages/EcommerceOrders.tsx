@@ -16,18 +16,18 @@ const ACTIVE_STATUSES = ["new", "sent_to_vendor", "vendor_accepted", "quoted", "
 const COMPLETED_STATUSES = ["completed", "delivered", "cancelled", "vendor_declined"];
 
 const statusColors: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800",
-  pending: "bg-yellow-100 text-yellow-800",
-  approved: "bg-green-100 text-green-800",
-  sent_to_vendor: "bg-purple-100 text-purple-800",
-  vendor_accepted: "bg-emerald-100 text-emerald-800",
-  vendor_declined: "bg-red-100 text-red-800",
-  quoted: "bg-indigo-100 text-indigo-800",
-  confirmed: "bg-teal-100 text-teal-800",
-  in_progress: "bg-orange-100 text-orange-800",
-  completed: "bg-green-100 text-green-800",
-  delivered: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
+  new: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+  pending: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-300",
+  approved: "bg-green-500/15 text-green-700 dark:text-green-300",
+  sent_to_vendor: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
+  vendor_accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  vendor_declined: "bg-red-500/15 text-red-700 dark:text-red-300",
+  quoted: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
+  confirmed: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
+  in_progress: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
+  completed: "bg-green-500/15 text-green-700 dark:text-green-300",
+  delivered: "bg-green-500/15 text-green-700 dark:text-green-300",
+  cancelled: "bg-red-500/15 text-red-700 dark:text-red-300",
 };
 
 const statusLabels: Record<string, string> = {

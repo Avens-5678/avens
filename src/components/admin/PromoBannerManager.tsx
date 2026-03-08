@@ -218,13 +218,18 @@ const PromoBannerManager = () => {
             </div>
             {/* Preview */}
             <div
-              className="rounded-lg p-4"
+              className="rounded-lg p-4 relative overflow-hidden"
               style={{
                 background: `linear-gradient(135deg, ${form.gradient_from || "#7c3aed"}, ${form.gradient_to || "#a855f7"})`,
               }}
             >
-              <p className="text-white font-bold text-sm">{form.title || "Banner Title"}</p>
-              <p className="text-white/70 text-xs">{form.subtitle || "Subtitle text"}</p>
+              {form.image_url && (
+                <img src={form.image_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+              )}
+              <div className="relative">
+                <p className="text-white font-bold text-sm">{form.title || "Banner Title"}</p>
+                <p className="text-white/70 text-xs">{form.subtitle || "Subtitle text"}</p>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

@@ -429,11 +429,12 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-            <ServiceScrollContainer items={homeRentals.slice(0, 6)}>
-              {homeRentals.slice(0, 6).map((rental) =>
-              <GlassmorphismCard
-                key={rental.id}
-                className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <ScrollReveal animation="fade-in-up" delay={100}>
+              <ServiceScrollContainer items={homeRentals.slice(0, 6)}>
+                {homeRentals.slice(0, 6).map((rental) =>
+                <GlassmorphismCard
+                  key={rental.id}
+                  className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
 
                   <div className="relative">
                     {rental.image_url ?

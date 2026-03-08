@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.wati-quote-notification]
 verify_jwt = false
+
+[functions.send-quote-email]
+verify_jwt = false

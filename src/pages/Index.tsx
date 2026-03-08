@@ -174,25 +174,27 @@ const Index = () => {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up opacity-0"
             style={{ animationDelay: '0.6s', animationDuration: '0.8s', animationFillMode: 'forwards' }}
           >
-            <Button
+            <MagneticButton
                 size="lg"
+                strength={15}
                 className="bg-secondary hover:bg-secondary/90 text-white px-8 py-4 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl"
                 asChild>
               <Link to={`/events/${currentBanner?.event_type?.toLowerCase().replace(/\s+/g, '-') || 'corporate'}`}>
                 {currentBanner?.button_text || "Explore Services"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
-            </Button>
-            <Button
+            </MagneticButton>
+            <MagneticButton
                 variant="outline"
                 size="lg"
+                strength={15}
                 className="backdrop-blur-md bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white px-8 py-4 text-base font-semibold rounded-xl"
                 asChild>
               <Link to="/portfolio">
                 View Portfolio
                 <Camera className="ml-2 h-5 w-5" />
               </Link>
-            </Button>
+            </MagneticButton>
           </div>
         </div>
 

@@ -23,7 +23,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
   const priceInfo = formatPrice();
   const isAssured = rental.rating && rental.rating >= 4;
-  const deliveryDate = format(addDays(new Date(), 3 + Math.floor(Math.random() * 4)), "MMM d");
+  
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
 

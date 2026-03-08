@@ -166,7 +166,7 @@ const DynamicEventPage = () => {
                   className="button-primary px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold rounded-full shadow-2xl w-full sm:w-auto"
                   asChild
                 >
-                  <Link to={`/client/dashboard?tab=request&type=${event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Link to={getServiceRequestPath(event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-'))}>
                     <Briefcase className="mr-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
                     Plan My {event.title}
                     <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />

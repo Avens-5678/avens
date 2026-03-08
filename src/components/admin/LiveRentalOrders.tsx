@@ -814,7 +814,6 @@ const LiveRentalOrders = () => {
               {viewOrder.equipment_details && (
                 <div><Label className="text-muted-foreground">Equipment Details</Label><EquipmentDetailsDisplay details={viewOrder.equipment_details} /></div>
               )}
-              )}
               {viewOrder.vendor_response && (
                 <div className="p-3 bg-muted rounded">
                   <Label className="text-muted-foreground">Vendor Response</Label>

@@ -11,6 +11,7 @@ import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
+import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
@@ -57,9 +58,7 @@ const Ecommerce = () => {
     let results = rentals.filter((rental) => {
       const matchesSearch =
         !searchTerm ||
-        rental.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        rental.short_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        rental.search_keywords?.toLowerCase().includes(searchTerm.toLowerCase());
+        rental.title.toLowerCase().includes(searchTerm.toLowerCase());
       const allCats = [...selectedCategories];
       if (activeQuickCat && !allCats.includes(activeQuickCat)) allCats.push(activeQuickCat);
       if (searchCategory && !allCats.includes(searchCategory)) allCats.push(searchCategory);
@@ -251,6 +250,9 @@ const Ecommerce = () => {
           </div>
         </div>
       </section>
+
+      {/* Promotional Banner Carousel */}
+      <PromoBannerCarousel />
 
       {/* Trust Strip */}
       <TrustStrip />

@@ -153,7 +153,7 @@ const ProductDetail = () => {
       length: isMeasurable ? length : undefined,
       breadth: isMeasurable ? breadth : undefined,
     });
-    toast({ title: "Added to Cart", description: `${rental.title} added successfully.` });
+    // Quick cart sheet opens automatically - no toast needed
     setQuickCartOpen(true);
   };
 

@@ -27,6 +27,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   const { data: rentalOrders } = useRentalOrders();
   const { data: serviceOrders } = useServiceOrders();
   const { data: allQuotes } = useQuotes();
+  const { data: companySettings } = useCompanySettings();
   const createQuote = useCreateQuote();
   const { toast } = useToast();
 

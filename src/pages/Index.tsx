@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useAboutContent } from "@/hooks/useData";
 import { useDashboardPath } from "@/hooks/useDashboardPath";
-import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight, Shield } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { GradientText } from "@/components/ui/animated-text";
@@ -22,6 +22,11 @@ import { ServiceScrollContainer } from "@/components/ui/service-scroll-container
 import { CursorTrail } from "@/components/ui/cursor-trail";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { TiltCard } from "@/components/ui/tilt-card";
+import { ScrollIndicator } from "@/components/ui/scroll-indicator";
+import { WhyChooseUs } from "@/components/ui/why-choose-us";
+import { BackgroundPattern } from "@/components/ui/background-pattern";
+import { SectionDivider } from "@/components/ui/section-divider";
+import ScrollReveal from "@/components/ui/scroll-reveal";
 
 // Lazy load heavy/below-fold components
 const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));
@@ -70,6 +75,8 @@ const Index = () => {
   const touchEndX = useRef<number | null>(null);
   const [showArrows, setShowArrows] = useState(true);
   const arrowTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoRotateRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Filter data
   const homeServices = services?.filter((s) => s.show_on_home && s.is_active) || [];
@@ -90,6 +97,19 @@ const Index = () => {
     resetArrowTimer();
     return () => {if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current);};
   }, [resetArrowTimer]);
+
+  // Auto-rotate banners every 7 seconds (pause on hover)
+  useEffect(() => {
+    if (activeBanners.length <= 1 || isPaused) return;
+
+    autoRotateRef.current = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % activeBanners.length);
+    }, 7000);
+
+    return () => {
+      if (autoRotateRef.current) clearInterval(autoRotateRef.current);
+    };
+  }, [activeBanners.length, isPaused]);
 
   useEffect(() => {
     if (!loadingBanners) {
@@ -118,7 +138,12 @@ const Index = () => {
           backgroundImage={currentBanner?.image_url}
           className="relative overflow-hidden"
           onMouseMove={resetArrowTimer}
-          onTouchStart={(e: React.TouchEvent) => {touchStartX.current = e.changedTouches[0].screenX;}}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={(e: React.TouchEvent) => {
+            touchStartX.current = e.changedTouches[0].screenX;
+            setIsPaused(true);
+          }}
           onTouchEnd={(e: React.TouchEvent) => {
             touchEndX.current = e.changedTouches[0].screenX;
             if (touchStartX.current !== null && activeBanners.length > 1) {
@@ -132,6 +157,7 @@ const Index = () => {
               }
             }
             touchStartX.current = null;
+            setIsPaused(false);
           }}>
 
         {/* Desktop/Tablet navigation arrows - auto-hide on inactivity */}
@@ -201,32 +227,50 @@ const Index = () => {
         </div>
 
         {/* Navigation dots */}
-        {activeBanners.length > 1
+        {activeBanners.length > 1 && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+            {activeBanners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setCurrentBannerIndex(index);
+                  setIsPaused(true);
+                  setTimeout(() => setIsPaused(false), 3000);
+                }}
+                className="group relative"
+                aria-label={`Go to slide ${index + 1}`}
+              >
+                <div
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    currentBannerIndex === index
+                      ? 'w-8 bg-white'
+                      : 'w-2 bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+        )}
 
-
-
-
-
-
-
-
-
-
-          }
+        {/* Scroll indicator */}
+        <ScrollIndicator />
 
 
       </HeroSection>
 
       {/* Stats Section */}
-      <Section spacing="large" variant="muted" className="bg-gradient-to-br from-muted/60 via-muted/40 to-primary/[0.04]">
+      <Section spacing="large" variant="muted" className="relative bg-gradient-to-br from-muted/60 via-muted/40 to-primary/[0.04]">
+        <BackgroundPattern variant="dots" />
         <StatsContainer>
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
-              The only platform that creates extraordinary
-              <br />
-              <span className="text-primary">& memorable events</span> with precision
-            </h2>
-          </div>
+          <ScrollReveal animation="fade-in-up">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
+                The only platform that creates extraordinary
+                <br />
+                <span className="text-primary">& memorable events</span> with precision
+              </h2>
+            </div>
+          </ScrollReveal>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             <StatCard number="500+" label="EVENTS MANAGED" />
@@ -237,13 +281,36 @@ const Index = () => {
         </StatsContainer>
       </Section>
 
+      <SectionDivider variant="gradient" />
+
+      {/* Why Choose Us Section */}
+      <Section spacing="large" className="relative overflow-hidden">
+        <BackgroundPattern variant="grid" />
+        <div className="container mx-auto px-4">
+          <ScrollReveal animation="fade-in-up">
+            <SectionHeader
+              badge={<Badge variant="outline"><Shield className="mr-2 h-4 w-4" />Why Choose Us</Badge>}
+              title="Your Trust, Our Commitment"
+              description="Experience excellence with our proven track record and dedicated support."
+            />
+          </ScrollReveal>
+          
+          <WhyChooseUs />
+        </div>
+      </Section>
+
+      <SectionDivider variant="gradient" />
+
       {/* Services Section */}
       <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">
+        <BackgroundPattern variant="noise" />
         <div className="container mx-auto px-4">
-          <SectionHeader
+          <ScrollReveal animation="fade-in-up">
+            <SectionHeader
               badge={<Badge variant="outline"><Sparkles className="mr-2 h-4 w-4" />Premium Services</Badge>}
               title="Exceptional Event Management"
               description="From intimate gatherings to grand celebrations, we deliver sophistication and excellence." />
+          </ScrollReveal>
 
           
           {loadingServices ?
@@ -251,12 +318,13 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-            <ServiceScrollContainer items={homeServices}>
-              {homeServices.map((service) =>
-              <TiltCard key={service.id} tiltDegree={8} scale={1.02} glareMaxOpacity={0.15} className="h-full">
-              <GlassmorphismCard
-                className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 h-full"
-                variant="subtle">
+            <ScrollReveal animation="fade-in-up" delay={100}>
+              <ServiceScrollContainer items={homeServices}>
+                {homeServices.map((service) =>
+                <TiltCard key={service.id} tiltDegree={8} scale={1.02} glareMaxOpacity={0.15} className="h-full">
+                <GlassmorphismCard
+                  className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 h-full"
+                  variant="subtle">
 
                   <div className="space-y-2.5 md:space-y-4">
                     {service.image_url &&
@@ -286,7 +354,8 @@ const Index = () => {
                 </GlassmorphismCard>
               </TiltCard>
               )}
-          </ServiceScrollContainer>
+              </ServiceScrollContainer>
+            </ScrollReveal>
             }
 
           {homeServices.length > 0 &&
@@ -341,13 +410,18 @@ const Index = () => {
         </Section>
         }
 
+      <SectionDivider variant="gradient" />
+
       {/* Equipment Rental Section */}
       <Section spacing="large" variant="muted" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_600px_at_0%_100%,hsl(var(--secondary)/0.06),transparent)] before:pointer-events-none">
+        <BackgroundPattern variant="dots" />
         <div className="container mx-auto px-4">
-          <SectionHeader
+          <ScrollReveal animation="fade-in-up">
+            <SectionHeader
               badge={<Badge variant="outline"><Award className="mr-2 h-4 w-4" />Premium Equipment</Badge>}
               title="Professional Event Rentals"
               description="High-quality equipment to elevate your event experience." />
+          </ScrollReveal>
 
           
           {loadingRentals ?
@@ -355,11 +429,12 @@ const Index = () => {
               {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
             </div> :
 
-            <ServiceScrollContainer items={homeRentals.slice(0, 6)}>
-              {homeRentals.slice(0, 6).map((rental) =>
-              <GlassmorphismCard
-                key={rental.id}
-                className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <ScrollReveal animation="fade-in-up" delay={100}>
+              <ServiceScrollContainer items={homeRentals.slice(0, 6)}>
+                {homeRentals.slice(0, 6).map((rental) =>
+                <GlassmorphismCard
+                  key={rental.id}
+                  className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
 
                   <div className="relative">
                     {rental.image_url ?
@@ -412,7 +487,8 @@ const Index = () => {
                   </div>
                 </GlassmorphismCard>
               )}
-            </ServiceScrollContainer>
+              </ServiceScrollContainer>
+            </ScrollReveal>
             }
 
           {homeRentals.length > 0 &&

@@ -1,66 +1,77 @@
-## Homepage Premium Enhancement Options
 
-Based on the current implementation, here are strategic improvements to elevate the homepage:
 
----
+# AI Chatbot for Client and Vendor Dashboards
 
-### 1. Hero Section Enhancements
+## Overview
+Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
 
-- **Add hero navigation dots** — Currently incomplete; add animated dot indicators with progress
-- **Scroll indicator** — Animated chevron/arrow at bottom to guide users to scroll
-- **Auto-rotate banners** — Add 6-8 second auto-advance with pause on hover
+## What the Chatbot Does
 
----
+**For Clients:**
+- Help plan events (suggest themes, budgets, timelines)
+- Guide through creating event requests
+- Answer questions about event status and vendor assignments
+- Provide rental equipment recommendations
 
-### 2. New "Why Choose Us" Section
+**For Vendors:**
+- Help with listing creation and pricing strategies
+- Guide through inventory management
+- Answer questions about assigned jobs
+- Provide marketplace tips and best practices
 
-A premium benefits section between Stats and Services:
+## UI Design (Reference Image Style)
 
-```text
-┌─────────────────────────────────────────┐
-│  [Icon]     [Icon]     [Icon]     [Icon]│
-│  500+       Expert     24/7      Premium│
-│  Events     Team       Support   Quality│
-│  (desc)     (desc)     (desc)    (desc) │
-└─────────────────────────────────────────┘
-```
+The chat tab will feature:
+- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
+- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
+- Markdown rendering for AI responses
+- Typing indicator animation while streaming
+- Message input bar at the bottom with send button
+- Smooth token-by-token streaming display
 
-- 4-column grid with animated icons
-- Hover lift effect on each card
+## Technical Plan
 
----
+### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
+- Accepts `{ messages, role: "client" | "vendor" }` in the request body
+- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
+- Role-specific system prompts:
+  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
+  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
+- Returns SSE stream for token-by-token rendering
+- Handles 429/402 errors gracefully
 
----
+### 2. Update `supabase/config.toml`
+- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
 
----
+### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
+- Props: `role: "client" | "vendor"` and `userName: string`
+- **Home screen**: Greeting + quick-action chips in a card grid layout
+- **Chat view**: Scrollable message list with streaming support
+- Uses `react-markdown` (already available or will add) for rendering
+- SSE streaming via fetch to the edge function
+- Conversation stored in local React state (no persistence needed)
+- Framer Motion for message entrance animations
 
-### 3. Micro-Interaction Upgrades
+### 4. Update `src/pages/client/ClientDashboard.tsx`
+- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
+- Render `<DashboardChatbot role="client" userName={...} />` when active
 
-- **Scroll reveal animations** — Staggered fade-in for cards
-- **Image parallax** — Subtle depth on service/rental images
-- **Stats glow pulse** — Soft glow animation on stat numbers
+### 5. Update `src/pages/vendor/VendorDashboard.tsx`
+- Add same "AI Assistant" sidebar item
+- Render `<DashboardChatbot role="vendor" userName={...} />` when active
 
----
+## File Changes Summary
 
-### 4. Visual Polish
+| File | Action |
+|------|--------|
+| `supabase/functions/dashboard-chat/index.ts` | Create |
+| `supabase/config.toml` | Edit (add function entry) |
+| `src/components/dashboard/DashboardChatbot.tsx` | Create |
+| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
+| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
 
-- **Background patterns** — Subtle dot grid or noise texture
-- **Gradient dividers** — Soft color transitions between sections
-- **Improved section spacing** — More breathing room
+## Dependencies
+- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
+- Uses existing `framer-motion` for animations
+- Uses existing Supabase client for auth token in fetch calls
 
----
-
-### Quick Wins (Easy to Implement)
-
-1. Fix missing hero navigation dots
-2. Add scroll indicator to hero
-3. Add subtle background textures
-4. Improve section transitions with gradient dividers
-
-### Medium Effort
-
-5. Scroll reveal animations throughout
-
----
-
-Which enhancements interest you? I can implement any combination of these.

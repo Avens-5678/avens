@@ -399,7 +399,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       {/* Source Selection + Template */}
       <Card className="rounded-2xl">
         <CardContent className="p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 gap-4 ${selectedSourceType !== "manual" ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
             <div>
               <Label>Source</Label>
               <Select value={selectedSourceType} onValueChange={v => { setSelectedSourceType(v); setSelectedOrderId(""); }}>

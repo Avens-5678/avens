@@ -19,9 +19,9 @@ const statusColors: Record<string, string> = {
   completed: "bg-green-500/10 text-green-600 border-green-500/20",
   cancelled: "bg-red-500/10 text-red-600 border-red-500/20",
   new: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
-  sent_to_vendor: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  vendor_accepted: "bg-green-500/10 text-green-600 border-green-500/20",
-  vendor_declined: "bg-red-500/10 text-red-600 border-red-500/20",
+  sent_to_vendors: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  accepted: "bg-green-500/10 text-green-600 border-green-500/20",
+  declined: "bg-red-500/10 text-red-600 border-red-500/20",
   quoted: "bg-purple-500/10 text-purple-600 border-purple-500/20",
   confirmed: "bg-green-500/10 text-green-600 border-green-500/20",
   delivered: "bg-green-500/10 text-green-600 border-green-500/20",
@@ -34,16 +34,16 @@ const statusLabels: Record<string, string> = {
   completed: "Completed",
   cancelled: "Cancelled",
   new: "New",
-  sent_to_vendor: "Sent to Vendor",
-  vendor_accepted: "Vendor Accepted",
-  vendor_declined: "Vendor Declined",
+  sent_to_vendors: "Sent to Vendor",
+  accepted: "Vendor Accepted",
+  declined: "Vendor Declined",
   quoted: "Quoted",
   confirmed: "Confirmed",
   delivered: "Delivered",
 };
 
 const allStatuses: EventRequest["status"][] = ["pending", "approved", "in_progress", "completed", "cancelled"];
-const rentalStatuses = ["new", "sent_to_vendor", "vendor_accepted", "vendor_declined", "quoted", "confirmed", "in_progress", "completed", "delivered", "cancelled"];
+const rentalStatuses = ["new", "sent_to_vendors", "accepted", "declined", "quoted", "confirmed", "in_progress", "completed", "delivered", "cancelled"];
 
 const serviceStatuses = ["new", "in_progress", "quoted", "confirmed", "completed", "cancelled"];
 

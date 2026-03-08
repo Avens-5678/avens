@@ -98,14 +98,14 @@ const menuGroups: MenuGroup[] = [
       { label: "Forms", value: "forms" },
       { label: "FAQ", value: "faq" },
       { label: "About", value: "about" },
+      { label: "Awards & News", value: "settings" },
+      { label: "Audio", value: "audio" },
     ],
   },
   {
     icon: Settings, label: "Settings", value: "settings-group",
     subTabs: [
       { label: "Integrations", value: "integrations" },
-      { label: "Awards & News", value: "settings" },
-      { label: "Audio", value: "audio" },
       { label: "Profile", value: "profile" },
     ],
   },

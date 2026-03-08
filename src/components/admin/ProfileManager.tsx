@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { User, Lock, Mail } from "lucide-react";
 
 const profileSchema = z.object({
@@ -15,7 +16,6 @@ const profileSchema = z.object({
 });
 
 const passwordSchema = z.object({
-  current_password: z.string().min(1, "Current password is required"),
   new_password: z.string().min(6, "Password must be at least 6 characters"),
   confirm_password: z.string().min(1, "Please confirm your password"),
 }).refine((data) => data.new_password === data.confirm_password, {
@@ -44,7 +44,6 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
   const passwordForm = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
-      current_password: "",
       new_password: "",
       confirm_password: "",
     },
@@ -84,21 +83,23 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
     setIsPasswordLoading(true);
 
     try {
-      // In a real app, you would validate the current password and update it in the database
-      // For now, we'll simulate the password change
-      
+      const { error } = await supabase.auth.updateUser({
+        password: values.new_password,
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Password Changed",
         description: "Your password has been successfully updated.",
       });
 
-      // Clear the form
       passwordForm.reset();
     } catch (error: any) {
       console.error("Password change error:", error);
       toast({
         title: "Password Change Failed",
-        description: "Failed to change password. Please try again.",
+        description: error.message || "Failed to change password. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -170,20 +171,6 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
           <CardContent className="space-y-3">
             <Form {...passwordForm}>
               <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-3">
-                <FormField
-                  control={passwordForm.control}
-                  name="current_password"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-sm">Current Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter current password" {...field} className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={passwordForm.control}
                   name="new_password"

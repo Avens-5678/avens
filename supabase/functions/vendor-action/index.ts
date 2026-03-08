@@ -59,9 +59,12 @@ Deno.serve(async (req) => {
       if (quote_amount) {
         updateData.vendor_quote_amount = quote_amount;
       }
+    } else if (action === "decline") {
+      updateData.status = "declined";
+      updateData.vendor_response = vendor_response || "Declined";
     } else {
       return new Response(
-        JSON.stringify({ error: "Invalid action. Use 'accept' or 'quote'" }),
+        JSON.stringify({ error: "Invalid action. Use 'accept', 'quote', or 'decline'" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

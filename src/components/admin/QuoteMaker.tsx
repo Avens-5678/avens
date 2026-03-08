@@ -177,6 +177,8 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       total: calculations.total,
       notes,
       template,
+      sourceOrderId: selectedOrderId || null,
+      sourceType: selectedSourceType !== "manual" ? selectedSourceType : null,
     });
 
     createQuote.mutate({ quote: buildQuotePayload("draft"), lineItems });

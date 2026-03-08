@@ -251,9 +251,6 @@ const Index = () => {
         </StatsContainer>
       </Section>
 
-      <SectionDivider variant="gradient" />
-
-
       {/* Services Section */}
       <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">
         <BackgroundPattern variant="noise" />

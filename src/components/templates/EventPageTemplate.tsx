@@ -88,6 +88,8 @@ export const EventPageTemplate = ({
   isLoading = false
 }: EventPageTemplateProps) => {
   
+  const { getServiceRequestPath } = useDashboardPath();
+  
   if (isLoading) {
     return (
       <Layout>

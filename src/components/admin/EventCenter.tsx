@@ -399,6 +399,86 @@ const EventCenter = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Service Orders Tab */}
+        <TabsContent value="services" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Service Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!serviceOrders || serviceOrders.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No service orders yet</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Event Date</TableHead>
+                        <TableHead>Guests</TableHead>
+                        <TableHead>Budget</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead>Update Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {serviceOrders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell>
+                            <Badge className={statusColors[order.status] || "bg-muted text-muted-foreground"}>
+                              {statusLabels[order.status] || order.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium max-w-[200px] truncate">{order.title}</TableCell>
+                          <TableCell>{order.service_type}</TableCell>
+                          <TableCell>{order.client_name || "-"}</TableCell>
+                          <TableCell>{order.client_phone || "-"}</TableCell>
+                          <TableCell>{order.location || "-"}</TableCell>
+                          <TableCell>
+                            {order.event_date
+                              ? format(new Date(order.event_date), "MMM d, yyyy")
+                              : "-"
+                            }
+                          </TableCell>
+                          <TableCell>{order.guest_count || "-"}</TableCell>
+                          <TableCell>{order.budget || "-"}</TableCell>
+                          <TableCell>{format(new Date(order.created_at), "MMM d, yyyy")}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={order.status}
+                              onValueChange={(value) => handleServiceStatusChange(order.id, value)}
+                              disabled={isUpdatingService}
+                            >
+                              <SelectTrigger className="w-[160px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {serviceStatuses.map((status) => (
+                                  <SelectItem key={status} value={status}>
+                                    {statusLabels[status] || status}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );

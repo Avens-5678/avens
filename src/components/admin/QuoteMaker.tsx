@@ -55,15 +55,29 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   const [currentVersion, setCurrentVersion] = useState(1);
   const { data: versionHistory } = useQuoteVersions(parentQuoteId || editingQuoteId || undefined);
 
-  // Auto-set tax type from company settings
+  // Per-quote GST toggle (defaults from company settings)
+  const [gstEnabled, setGstEnabled] = useState(true);
+
   useEffect(() => {
     if (companySettings) {
+      setGstEnabled(companySettings.gst_enabled);
       if (!companySettings.gst_enabled) {
         setTaxType("none");
         setTaxPercent(0);
       }
     }
   }, [companySettings]);
+
+  // Sync GST toggle with tax fields
+  useEffect(() => {
+    if (!gstEnabled) {
+      setTaxType("none");
+      setTaxPercent(0);
+    } else if (taxType === "none") {
+      setTaxType("gst");
+      setTaxPercent(18);
+    }
+  }, [gstEnabled]);
 
   // Auto-populate from selected order
   useEffect(() => {

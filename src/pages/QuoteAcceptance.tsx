@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Check, FileText, Pen } from "lucide-react";
+import { Check, FileText, Pen, Package } from "lucide-react";
 
 const QuoteAcceptance = () => {
   const { token } = useParams<{ token: string }>();

@@ -19,6 +19,7 @@ const FAQ = lazy(() => import("./pages/FAQ"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
 const Ecommerce = lazy(() => import("./pages/Ecommerce"));
 const EcommerceOrders = lazy(() => import("./pages/EcommerceOrders"));
+const TrackOrder = lazy(() => import("./pages/TrackOrder"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Auth = lazy(() => import("./pages/Auth"));

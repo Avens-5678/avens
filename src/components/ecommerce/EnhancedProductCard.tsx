@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Star, ShieldCheck, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { addDays, format } from "date-fns";
+
 
 interface EnhancedProductCardProps {
   rental: any;

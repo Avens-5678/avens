@@ -30,6 +30,7 @@ const DynamicEventPage = () => {
   const { eventType } = useParams<{ eventType: string }>();
   const { data: event, isLoading } = useEvent(eventType || "");
   const { data: portfolio } = usePortfolio();
+  const { getServiceRequestPath } = useDashboardPath();
 
   const eventPortfolio = portfolio?.filter(item => 
     item.event_id === event?.id || 

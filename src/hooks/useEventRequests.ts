@@ -4,7 +4,38 @@ import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
 import { syncRequestToZoho } from "@/utils/zohoSync";
 
-export interface EventRequest {
+const sendEventConfirmationWhatsApp = async (
+  eventRequestId: string,
+  clientId: string,
+  eventType: string,
+  toastFn: (opts: { title: string; description: string; variant?: "destructive" }) => void
+) => {
+  try {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, phone")
+      .eq("user_id", clientId)
+      .single();
+
+    if (!profile?.phone) {
+      toastFn({ title: "WhatsApp Not Sent", description: "Client has no phone number on profile.", variant: "destructive" });
+      return;
+    }
+
+    await supabase.functions.invoke("wati-service-confirmation", {
+      body: {
+        phone: profile.phone,
+        name: profile.full_name || "Customer",
+        service_type: eventType,
+        order_id: eventRequestId,
+      },
+    });
+  } catch (err) {
+    console.error("WhatsApp event confirmation failed:", err);
+  }
+};
+
+
   id: string;
   client_id: string;
   assigned_vendor_id: string | null;

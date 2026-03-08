@@ -350,7 +350,7 @@ const Index = () => {
               {homeRentals.slice(0, 6).map((rental) =>
               <GlassmorphismCard
                 key={rental.id}
-                className="group overflow-hidden hover:shadow-lg transition-shadow duration-300 min-w-[70vw] max-w-[320px] sm:min-w-[55vw] md:min-w-0 md:max-w-none snap-center flex-shrink-0 md:flex-shrink">
+                className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
 
                   <div className="relative">
                     {rental.image_url ?

@@ -83,24 +83,26 @@ Deno.serve(async (req) => {
           const cleanBaseUrl = watiApiUrl.replace(/\/+$/, "");
           const watiAuthToken = watiApiKey.replace(/^Bearer\s+/i, "");
 
-          // Use v2 API as per WATI docs
-          const watiResponse = await fetch(
-            `${cleanBaseUrl}/api/v1/sendTemplateMessage/${phone}`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${watiAuthToken}`,
-                "Content-Type": "application/json-patch+json",
-              },
-              body: JSON.stringify({
-                template_name: "reminder",
-                broadcast_name: `order_${orderId}`,
-                parameters: [
-                  { name: "1", value: vendorName || "Vendor" },
-                ],
-              }),
-            }
-          );
+          const watiUrl = `${cleanBaseUrl}/api/v1/sendTemplateMessage/${phone}`;
+          const watiBody = {
+            template_name: "reminder",
+            broadcast_name: `order_${orderId}`,
+            parameters: [
+              { name: "1", value: vendorName || "Vendor" },
+            ],
+          };
+
+          console.log("WATI request URL:", watiUrl);
+          console.log("WATI request body:", JSON.stringify(watiBody));
+
+          const watiResponse = await fetch(watiUrl, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${watiAuthToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(watiBody),
+          });
 
           if (watiResponse.ok) {
             whatsappSent = true;

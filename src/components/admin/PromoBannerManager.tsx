@@ -23,6 +23,7 @@ interface PromoBanner {
   cta_text: string | null;
   gradient_from: string | null;
   gradient_to: string | null;
+  image_url: string | null;
   display_order: number | null;
   is_active: boolean | null;
 }
@@ -33,6 +34,7 @@ const defaultBanner: Omit<PromoBanner, "id"> = {
   cta_text: "Shop Now",
   gradient_from: "#7c3aed",
   gradient_to: "#a855f7",
+  image_url: null,
   display_order: 0,
   is_active: true,
 };

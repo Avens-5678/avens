@@ -210,7 +210,7 @@ const Index = () => {
       </HeroSection>
 
       {/* Stats Section */}
-      <Section spacing="large" variant="muted">
+      <Section spacing="large" variant="muted" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[conic-gradient(from_180deg_at_50%_50%,hsl(var(--primary)/0.04)_0deg,transparent_120deg,hsl(var(--secondary)/0.04)_240deg,transparent_360deg)] before:pointer-events-none">
         <StatsContainer>
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
@@ -230,7 +230,7 @@ const Index = () => {
       </Section>
 
       {/* Services Section */}
-      <Section spacing="large">
+      <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">
         <div className="container mx-auto px-4">
           <SectionHeader
               badge={<Badge variant="outline"><Sparkles className="mr-2 h-4 w-4" />Premium Services</Badge>}
@@ -333,7 +333,7 @@ const Index = () => {
         }
 
       {/* Equipment Rental Section */}
-      <Section spacing="large">
+      <Section spacing="large" variant="muted" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_600px_at_0%_100%,hsl(var(--secondary)/0.06),transparent)] before:pointer-events-none">
         <div className="container mx-auto px-4">
           <SectionHeader
               badge={<Badge variant="outline"><Award className="mr-2 h-4 w-4" />Premium Equipment</Badge>}

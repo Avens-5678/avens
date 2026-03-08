@@ -303,7 +303,7 @@ const ProductDetail = () => {
               {/* Rating + Actions row */}
               <div className="flex items-center gap-3 flex-wrap">
                 {rental.rating && (
-                  <span className="inline-flex items-center gap-1 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded">
+                  <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
                     {rental.rating} <Star className="h-3 w-3 fill-current" />
                   </span>
                 )}

@@ -50,6 +50,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   ]);
   const [sending, setSending] = useState(false);
   const [picklistOpen, setPicklistOpen] = useState(false);
+  const [hideRecentQuotes, setHideRecentQuotes] = useState(false);
 
   // Version control state
   const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null);

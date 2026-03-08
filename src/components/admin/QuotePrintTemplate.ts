@@ -28,6 +28,15 @@ export interface QuotePrintData {
   total: number;
   notes: string;
   template?: QuoteTemplate;
+  // Company settings
+  companyName?: string;
+  companyLogoUrl?: string | null;
+  companyGst?: string | null;
+  companyPan?: string | null;
+  companyAddress?: string | null;
+  companyPhone?: string | null;
+  companyEmail?: string | null;
+  gstEnabled?: boolean;
 }
 
 function numberToWords(num: number): string {

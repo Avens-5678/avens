@@ -72,6 +72,7 @@ const PromoBannerManager = () => {
       cta_text: banner.cta_text,
       gradient_from: banner.gradient_from,
       gradient_to: banner.gradient_to,
+      image_url: banner.image_url,
       display_order: banner.display_order,
       is_active: banner.is_active,
     });

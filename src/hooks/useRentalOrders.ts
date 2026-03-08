@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 import { syncRentalOrderToZohoProducts } from "@/utils/zohoSync";
+import { normalizePhoneNumber } from "@/utils/phoneUtils";
 
 const sendRentalConfirmationWhatsApp = async (
   order: {
@@ -16,9 +17,10 @@ const sendRentalConfirmationWhatsApp = async (
     return;
   }
   try {
+    const normalizedPhone = normalizePhoneNumber(order.client_phone);
     await supabase.functions.invoke("wati-rental-confirmation", {
       body: {
-        phone: order.client_phone,
+        phone: normalizedPhone,
         name: order.client_name || "Customer",
         order_id: order.id,
       },

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
 import { syncRequestToZoho } from "@/utils/zohoSync";
+import { normalizePhoneNumber } from "@/utils/phoneUtils";
 
 const sendEventConfirmationWhatsApp = async (
   eventRequestId: string,
@@ -22,9 +23,10 @@ const sendEventConfirmationWhatsApp = async (
       return;
     }
 
+    const normalizedPhone = normalizePhoneNumber(profile.phone);
     await supabase.functions.invoke("wati-service-confirmation", {
       body: {
-        phone: profile.phone,
+        phone: normalizedPhone,
         name: profile.full_name || "Customer",
         service_type: eventType,
         order_id: eventRequestId,

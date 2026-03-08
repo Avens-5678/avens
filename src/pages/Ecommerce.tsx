@@ -218,10 +218,10 @@ const Ecommerce = () => {
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
         <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-20 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-3">
             Premium Event Rentals
           </h1>
-          <p className="text-base sm:text-lg text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Find everything you need — from staging and lighting to catering and decor.
           </p>
 

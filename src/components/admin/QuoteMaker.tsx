@@ -54,6 +54,16 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   const [currentVersion, setCurrentVersion] = useState(1);
   const { data: versionHistory } = useQuoteVersions(parentQuoteId || editingQuoteId || undefined);
 
+  // Auto-set tax type from company settings
+  useEffect(() => {
+    if (companySettings) {
+      if (!companySettings.gst_enabled) {
+        setTaxType("none");
+        setTaxPercent(0);
+      }
+    }
+  }, [companySettings]);
+
   // Auto-populate from selected order
   useEffect(() => {
     if (!selectedOrderId) return;

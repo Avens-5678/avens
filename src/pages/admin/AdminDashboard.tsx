@@ -360,6 +360,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         );
       case "rentals":
         return <EnhancedRentalManager rentals={rentals || []} />;
+      case "promo-banners":
+        return <PromoBannerManager />;
+      case "trust-strip":
+        return <TrustStripManager />;
       case "portfolio":
         return <NewEnhancedPortfolioManager portfolio={portfolio || []} events={events || []} />;
       case "clients":

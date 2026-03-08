@@ -1,32 +1,77 @@
 
 
-## Problem Analysis
+# AI Chatbot for Client and Vendor Dashboards
 
-Two separate issues identified:
+## Overview
+Add a dedicated "AI Assistant" tab to both the Client and Vendor dashboards, featuring a modern chat interface inspired by the reference image. The chatbot will use Lovable AI (Gemini) via a new edge function, with role-specific system prompts so it can help clients plan events and vendors manage listings.
 
-### 1. Event Request WhatsApp not sending
-When a client submits an event request, the new DB trigger creates a `service_orders` row — but **nobody calls `wati-service-confirmation`**. Previously the client-side sync code did this, but we removed it. The DB trigger can't call edge functions directly.
+## What the Chatbot Does
 
-**Fix**: Add a `wati-service-confirmation` call in `useCreateEventRequest` onSuccess (in `useEventRequests.ts`). The trigger handles the DB sync; the client-side handles the WhatsApp notification.
+**For Clients:**
+- Help plan events (suggest themes, budgets, timelines)
+- Guide through creating event requests
+- Answer questions about event status and vendor assignments
+- Provide rental equipment recommendations
 
-### 2. Rental Order WhatsApp — likely working but silently failing
-The `useCreateRentalOrder` hook already calls `sendRentalConfirmationWhatsApp` in onSuccess. I tested the edge function — it's deployed and responds. The most likely cause: the `client_phone` field is empty when creating the order, so the function early-returns without sending.
+**For Vendors:**
+- Help with listing creation and pricing strategies
+- Guide through inventory management
+- Answer questions about assigned jobs
+- Provide marketplace tips and best practices
 
-**Fix**: Add a toast warning when WhatsApp can't be sent (no phone number), so the admin knows why it didn't fire.
+## UI Design (Reference Image Style)
 
-### 3. `api.whatsapp.com` blocked error
-This is from the **WhatsApp bot UI widget** in the preview iframe — the browser blocks `api.whatsapp.com` due to X-Frame-Options. This is **unrelated** to the WATI API notifications. No action needed for this.
+The chat tab will feature:
+- A welcome home screen with greeting ("Hi [Name], Ready to Plan Something Amazing?") and quick-action suggestion chips (e.g., "Plan an Event", "Check My Events" for clients; "Add Listing", "View Jobs" for vendors)
+- Clean chat bubble layout: user messages on right (dark), assistant messages on left (light glass card)
+- Markdown rendering for AI responses
+- Typing indicator animation while streaming
+- Message input bar at the bottom with send button
+- Smooth token-by-token streaming display
 
-## Plan
+## Technical Plan
 
-### File: `src/hooks/useEventRequests.ts`
-- Add a `sendEventConfirmationWhatsApp` function that calls `wati-service-confirmation` edge function (similar to how rental orders do it)
-- Call it in `useCreateEventRequest` onSuccess, passing `result.id`, client profile info, and `result.event_type`
-- Need to fetch client profile (phone/name) since event_requests only stores `client_id`
+### 1. New Edge Function: `supabase/functions/dashboard-chat/index.ts`
+- Accepts `{ messages, role: "client" | "vendor" }` in the request body
+- Uses `LOVABLE_API_KEY` to call Lovable AI Gateway with `google/gemini-3-flash-preview`
+- Role-specific system prompts:
+  - **Client prompt**: Evnting event planning assistant -- helps with event types, budgets, vendor info, rental catalog
+  - **Vendor prompt**: Evnting vendor business assistant -- helps with inventory, pricing, job management, marketplace
+- Returns SSE stream for token-by-token rendering
+- Handles 429/402 errors gracefully
 
-### File: `src/hooks/useRentalOrders.ts`
-- Add a toast notification in `sendRentalConfirmationWhatsApp` when `client_phone` is empty, so admin sees "WhatsApp not sent — no phone number"
+### 2. Update `supabase/config.toml`
+- Add `[functions.dashboard-chat]` with `verify_jwt = true` (authenticated users only)
 
-### File: `src/hooks/useServiceOrders.ts`
-- Same improvement: warn when `client_phone` is missing
+### 3. New Component: `src/components/dashboard/DashboardChatbot.tsx`
+- Props: `role: "client" | "vendor"` and `userName: string`
+- **Home screen**: Greeting + quick-action chips in a card grid layout
+- **Chat view**: Scrollable message list with streaming support
+- Uses `react-markdown` (already available or will add) for rendering
+- SSE streaming via fetch to the edge function
+- Conversation stored in local React state (no persistence needed)
+- Framer Motion for message entrance animations
+
+### 4. Update `src/pages/client/ClientDashboard.tsx`
+- Add `Bot` (or `MessageSquare`) icon sidebar item for "AI Assistant" tab
+- Render `<DashboardChatbot role="client" userName={...} />` when active
+
+### 5. Update `src/pages/vendor/VendorDashboard.tsx`
+- Add same "AI Assistant" sidebar item
+- Render `<DashboardChatbot role="vendor" userName={...} />` when active
+
+## File Changes Summary
+
+| File | Action |
+|------|--------|
+| `supabase/functions/dashboard-chat/index.ts` | Create |
+| `supabase/config.toml` | Edit (add function entry) |
+| `src/components/dashboard/DashboardChatbot.tsx` | Create |
+| `src/pages/client/ClientDashboard.tsx` | Edit (add AI tab) |
+| `src/pages/vendor/VendorDashboard.tsx` | Edit (add AI tab) |
+
+## Dependencies
+- No new npm packages needed (react-markdown can be rendered with basic HTML for now, or we use a simple prose renderer)
+- Uses existing `framer-motion` for animations
+- Uses existing Supabase client for auth token in fetch calls
 

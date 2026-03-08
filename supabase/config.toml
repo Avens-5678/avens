@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.wati-vendor-reminder]
 verify_jwt = false
+
+[functions.wati-service-confirmation]
+verify_jwt = false

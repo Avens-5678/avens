@@ -281,7 +281,7 @@ const LiveServiceOrders = () => {
       {/* View Order Dialog */}
       <Dialog open={!!viewOrder} onOpenChange={() => setViewOrder(null)}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Service Order Details</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Event Request Details</DialogTitle></DialogHeader>
           {viewOrder && (
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-3">

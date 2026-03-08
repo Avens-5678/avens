@@ -68,7 +68,7 @@ const Cart = () => {
         pricing_unit: item.pricing_unit,
       }));
 
-      const { error } = await supabase.from("rental_orders").insert({
+      const { data: orderResult, error } = await supabase.from("rental_orders").insert({
         title: `Cart Enquiry - ${items.length} item(s)`,
         equipment_category: "Cart Order",
         equipment_details: JSON.stringify({ cart_items: cartPayload, event_details: eventDetails }),
@@ -79,9 +79,24 @@ const Cart = () => {
         location: `${eventDetails.event_location}${eventDetails.venue_area ? ' - ' + eventDetails.venue_area : ''}`,
         notes: eventDetails.notes || null,
         status: "new",
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Send WhatsApp rental confirmation
+      if (orderResult?.client_phone) {
+        try {
+          await supabase.functions.invoke("wati-rental-confirmation", {
+            body: {
+              phone: orderResult.client_phone,
+              name: orderResult.client_name || "Customer",
+              order_id: orderResult.id,
+            },
+          });
+        } catch (whatsappErr) {
+          console.error("WhatsApp rental confirmation failed:", whatsappErr);
+        }
+      }
 
       toast({ title: "Enquiry Sent!", description: "Our team will respond within 24 hours." });
       clearCart();

@@ -116,6 +116,17 @@ const QuoteAcceptance = () => {
 
       if (updateError) throw updateError;
 
+      // Sync line items to linked order via edge function
+      if (quote.source_order_id) {
+        try {
+          await supabase.functions.invoke("sync-quote-to-order", {
+            body: { quote_id: quote.id },
+          });
+        } catch (syncErr) {
+          console.error("Order sync failed:", syncErr);
+        }
+      }
+
       setSigned(true);
       toast({ title: "Quote Accepted!", description: "Your signature has been recorded successfully." });
     } catch (err: any) {

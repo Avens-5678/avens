@@ -29,9 +29,9 @@ const statusLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   new: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
-  sent_to_vendor: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
-  vendor_accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-  vendor_declined: "bg-red-500/15 text-red-700 dark:text-red-300",
+  sent_to_vendors: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
+  accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  declined: "bg-red-500/15 text-red-700 dark:text-red-300",
   quoted: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
   confirmed: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
   in_progress: "bg-orange-500/15 text-orange-700 dark:text-orange-300",

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -812,7 +813,7 @@ const LiveRentalOrders = () => {
                 <div><Label className="text-muted-foreground">Client Phone</Label><p>{viewOrder.client_phone || "—"}</p></div>
               </div>
               {viewOrder.equipment_details && (
-                <div><Label className="text-muted-foreground">Equipment Details</Label><p className="whitespace-pre-wrap">{viewOrder.equipment_details}</p></div>
+                <div><Label className="text-muted-foreground">Equipment Details</Label><EquipmentDetailsDisplay details={viewOrder.equipment_details} /></div>
               )}
               {viewOrder.vendor_response && (
                 <div className="p-3 bg-muted rounded">

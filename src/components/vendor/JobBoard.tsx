@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -227,7 +228,7 @@ const JobBoard = () => {
               {order.equipment_details && (
                 <div className="bg-muted/50 p-3 rounded-md">
                   <p className="text-sm font-medium mb-1">Equipment Details:</p>
-                  <p className="text-sm text-muted-foreground">{order.equipment_details}</p>
+                  <EquipmentDetailsDisplay details={order.equipment_details} />
                 </div>
               )}
 

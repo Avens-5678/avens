@@ -12,16 +12,16 @@ import { Package, Briefcase, Calendar, MapPin, Clock, ArrowLeft, LogIn, IndianRu
 import { format } from "date-fns";
 import { CheckCircle2, Circle } from "lucide-react";
 
-const ACTIVE_STATUSES = ["new", "sent_to_vendor", "vendor_accepted", "quoted", "confirmed", "in_progress", "pending", "approved"];
-const COMPLETED_STATUSES = ["completed", "delivered", "cancelled", "vendor_declined"];
+const ACTIVE_STATUSES = ["new", "sent_to_vendors", "accepted", "quoted", "confirmed", "in_progress", "pending", "approved"];
+const COMPLETED_STATUSES = ["completed", "delivered", "cancelled", "declined"];
 
 const statusColors: Record<string, string> = {
   new: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
   pending: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-300",
   approved: "bg-green-500/15 text-green-700 dark:text-green-300",
-  sent_to_vendor: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
-  vendor_accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-  vendor_declined: "bg-red-500/15 text-red-700 dark:text-red-300",
+  sent_to_vendors: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
+  accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  declined: "bg-red-500/15 text-red-700 dark:text-red-300",
   quoted: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
   confirmed: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
   in_progress: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
@@ -34,9 +34,9 @@ const statusLabels: Record<string, string> = {
   new: "New",
   pending: "Pending",
   approved: "Approved",
-  sent_to_vendor: "Sent to Vendor",
-  vendor_accepted: "Vendor Accepted",
-  vendor_declined: "Vendor Declined",
+  sent_to_vendors: "Sent to Vendor",
+  accepted: "Vendor Accepted",
+  declined: "Vendor Declined",
   quoted: "Quoted",
   confirmed: "Confirmed",
   in_progress: "In Progress",
@@ -114,7 +114,7 @@ const EcommerceOrders = () => {
     );
   }
 
-  const RENTAL_STEPS = ["new", "sent_to_vendor", "vendor_accepted", "quoted", "confirmed", "in_progress", "completed"];
+  const RENTAL_STEPS = ["new", "sent_to_vendors", "accepted", "quoted", "confirmed", "in_progress", "completed"];
   const SERVICE_STEPS = ["new", "in_progress", "quoted", "confirmed", "completed"];
 
   const getSteps = (orderType: string) => {

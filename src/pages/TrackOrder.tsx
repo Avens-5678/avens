@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
 import Layout from "@/components/Layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,15 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Package, Calendar, MapPin, Clock, CheckCircle2, Circle, AlertCircle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
-const STATUS_STEPS_RENTAL = ["new", "sent_to_vendor", "vendor_accepted", "quoted", "confirmed", "in_progress", "completed"];
+const STATUS_STEPS_RENTAL = ["new", "sent_to_vendors", "accepted", "quoted", "confirmed", "in_progress", "completed"];
 const STATUS_STEPS_SERVICE = ["new", "in_progress", "quoted", "confirmed", "completed"];
 
 const statusLabels: Record<string, string> = {
   new: "Order Received",
   pending: "Pending",
-  sent_to_vendor: "Sent to Vendor",
-  vendor_accepted: "Vendor Accepted",
-  vendor_declined: "Vendor Declined",
+  sent_to_vendors: "Sent to Vendor",
+  accepted: "Vendor Accepted",
+  declined: "Vendor Declined",
   quoted: "Quoted",
   confirmed: "Confirmed",
   in_progress: "In Progress",
@@ -28,9 +29,9 @@ const statusLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   new: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
-  sent_to_vendor: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
-  vendor_accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-  vendor_declined: "bg-red-500/15 text-red-700 dark:text-red-300",
+  sent_to_vendors: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
+  accepted: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  declined: "bg-red-500/15 text-red-700 dark:text-red-300",
   quoted: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
   confirmed: "bg-teal-500/15 text-teal-700 dark:text-teal-300",
   in_progress: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
@@ -189,32 +190,12 @@ const TrackOrder = () => {
                       </div>
                     )}
                   </div>
-                  {order.details && (() => {
-                    // Try to parse JSON cart details
-                    try {
-                      const parsed = JSON.parse(order.details);
-                      if (parsed.cart_items && Array.isArray(parsed.cart_items)) {
-                        return (
-                          <div className="border-t border-border pt-3 mt-3 space-y-2">
-                            <p className="text-sm font-medium text-foreground">Items:</p>
-                            <ul className="space-y-1">
-                              {parsed.cart_items.map((item: any, i: number) => (
-                                <li key={i} className="text-sm text-muted-foreground flex justify-between">
-                                  <span>{item.title} × {item.quantity || 1}</span>
-                                  {item.price_value && <span>₹{Number(item.price_value).toLocaleString()}</span>}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      }
-                    } catch {}
-                    return (
-                      <p className="text-sm text-muted-foreground border-t border-border pt-3 mt-3">
-                        {order.details}
-                      </p>
-                    );
-                  })()}
+                  {order.details && (
+                    <div className="border-t border-border pt-3 mt-3">
+                      <p className="text-sm font-medium text-foreground mb-2">Equipment Details</p>
+                      <EquipmentDetailsDisplay details={order.details} />
+                    </div>
+                  )}
                   {order.vendor_quote_amount != null && order.vendor_quote_amount > 0 && (
                     <div className="border-t border-border pt-3">
                       <p className="text-sm font-medium text-foreground">
@@ -226,7 +207,7 @@ const TrackOrder = () => {
               </Card>
 
               {/* Status Stepper */}
-              {order.status !== "cancelled" && order.status !== "vendor_declined" && (
+              {order.status !== "cancelled" && order.status !== "declined" && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">Order Progress</CardTitle>
@@ -270,7 +251,7 @@ const TrackOrder = () => {
               )}
 
               {/* Cancelled / Declined */}
-              {(order.status === "cancelled" || order.status === "vendor_declined") && (
+              {(order.status === "cancelled" || order.status === "declined") && (
                 <Card className="border-destructive/30">
                   <CardContent className="flex items-center gap-3 py-6">
                     <AlertCircle className="h-5 w-5 text-destructive" />

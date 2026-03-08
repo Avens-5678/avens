@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout/Layout";
 import { useEvent, usePortfolio } from "@/hooks/useData";
+import { useDashboardPath } from "@/hooks/useDashboardPath";
 import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap, Target, Building, Mic, Monitor, Layout as LayoutIcon } from "lucide-react";
 import ScrollReveal from "@/components/ui/scroll-reveal";
 import FloatingParticles from "@/components/ui/floating-particles";

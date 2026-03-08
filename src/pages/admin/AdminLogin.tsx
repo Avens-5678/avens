@@ -44,27 +44,14 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
     try {
-      const { data: isValidAdmin, error: validationError } = await supabase
-        .rpc('validate_admin_email', { check_email: values.email });
-
-      if (validationError) throw validationError;
-
-      if (!isValidAdmin) {
-        toast({
-          title: "Access Denied",
-          description: "This email is not authorized for admin access.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
+      // Do not pre-validate admin email to prevent enumeration attacks.
+      // Admin status is verified server-side after successful authentication.
       setEmail(values.email);
       setStep('choose');
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to validate email.",
+        description: error.message || "Something went wrong.",
         variant: "destructive",
       });
     } finally {
@@ -91,6 +78,23 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     }
   };
 
+  const verifyAdminAfterAuth = async () => {
+    const { data, error } = await supabase.rpc('is_admin');
+    if (error || !data) {
+      await supabase.auth.signOut();
+      toast({
+        title: "Access Denied",
+        description: "This account is not authorized for admin access.",
+        variant: "destructive",
+      });
+      setStep('email');
+      setEmail('');
+      setOtp('');
+      return false;
+    }
+    return true;
+  };
+
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) {
       toast({ title: "Invalid OTP", description: "Please enter the complete 6-digit code.", variant: "destructive" });
@@ -100,6 +104,10 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     try {
       const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: 'email' });
       if (error) throw error;
+      
+      const isAdmin = await verifyAdminAfterAuth();
+      if (!isAdmin) return;
+      
       toast({ title: "Login Successful", description: "Welcome to the admin dashboard." });
       onLoginSuccess();
     } catch (error: any) {
@@ -114,6 +122,10 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password: values.password });
       if (error) throw error;
+      
+      const isAdmin = await verifyAdminAfterAuth();
+      if (!isAdmin) return;
+      
       toast({ title: "Login Successful", description: "Welcome to the admin dashboard." });
       onLoginSuccess();
     } catch (error: any) {

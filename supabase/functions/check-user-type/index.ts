@@ -37,8 +37,14 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Never expose is_admin status to unauthenticated callers
+    const safeResponse = {
+      exists: data?.exists ?? false,
+      roles: data?.roles ?? [],
+    }
+
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify(safeResponse),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (err) {

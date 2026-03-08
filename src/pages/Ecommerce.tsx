@@ -6,7 +6,7 @@ import Layout from "@/components/Layout/Layout";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { Package, ShoppingCart, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square, Eye, ClipboardList } from "lucide-react";
+import { Package, ShoppingCart, Search, ChevronDown, ChevronUp, X, List, Grid2X2, Square, Eye, ClipboardList, MapPin } from "lucide-react";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";

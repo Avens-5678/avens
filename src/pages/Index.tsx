@@ -498,7 +498,7 @@ const Index = () => {
       </Section>
 
       {/* Final CTA */}
-      <Section variant="gradient" spacing="large">
+      <Section variant="muted" spacing="default">
         <div className="container mx-auto px-5 sm:px-6 text-center">
           <div className="max-w-3xl mx-auto space-y-6">
             <Badge variant="outline" className="mb-4">

@@ -54,6 +54,9 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
   const [variantRows, setVariantRows] = useState<VariantRow[]>([]);
   const [newAttributeValue, setNewAttributeValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [specRows, setSpecRows] = useState<SpecRow[]>([]);
+  const [newSpecKey, setNewSpecKey] = useState("");
+  const [newSpecValue, setNewSpecValue] = useState("");
   const multipleFileInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

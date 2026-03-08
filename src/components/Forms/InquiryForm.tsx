@@ -118,27 +118,29 @@ const InquiryForm = ({
       // Auto-create a rental order when form type is rental
       if (formType === "rental") {
         try {
-          const { data: rentalResult } = await supabase.from("rental_orders").insert({
+          const normalizedPhone = values.phone ? normalizePhoneNumber(values.phone) : null;
+
+          await supabase.from("rental_orders").insert({
             title: rentalTitle || `Rental Inquiry: ${values.eventType || "General"}`,
             equipment_category: values.eventType || "General",
             equipment_details: values.message,
             location: values.location || null,
             event_date: values.eventDate ? values.eventDate.toISOString().split('T')[0] : null,
             client_name: values.name,
-            client_phone: values.phone || null,
+            client_phone: normalizedPhone,
             client_email: values.email,
             notes: rentalTitle ? `Rental item: ${rentalTitle}` : null,
             status: "new",
-          }).select().single();
+          });
 
           // Send WhatsApp rental confirmation
-          if (rentalResult?.client_phone) {
+          if (normalizedPhone) {
             try {
               await supabase.functions.invoke("wati-rental-confirmation", {
                 body: {
-                  phone: rentalResult.client_phone,
-                  name: rentalResult.client_name || "Customer",
-                  order_id: rentalResult.id,
+                  phone: normalizedPhone,
+                  name: values.name || "Customer",
+                  order_id: "INQUIRY",
                 },
               });
             } catch (whatsappErr) {

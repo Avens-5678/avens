@@ -23,9 +23,10 @@ const sendEventConfirmationWhatsApp = async (
       return;
     }
 
+    const normalizedPhone = normalizePhoneNumber(profile.phone);
     await supabase.functions.invoke("wati-service-confirmation", {
       body: {
-        phone: profile.phone,
+        phone: normalizedPhone,
         name: profile.full_name || "Customer",
         service_type: eventType,
         order_id: eventRequestId,

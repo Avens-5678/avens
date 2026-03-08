@@ -17,9 +17,10 @@ const sendRentalConfirmationWhatsApp = async (
     return;
   }
   try {
+    const normalizedPhone = normalizePhoneNumber(order.client_phone);
     await supabase.functions.invoke("wati-rental-confirmation", {
       body: {
-        phone: order.client_phone,
+        phone: normalizedPhone,
         name: order.client_name || "Customer",
         order_id: order.id,
       },

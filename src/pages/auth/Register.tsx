@@ -106,7 +106,7 @@ const Register = () => {
             user_id: authData.user.id,
             email: values.email,
             full_name: values.fullName,
-            phone: values.phone || null,
+            phone: values.phone ? normalizePhoneNumber(values.phone) : null,
             company_name: values.companyName || null,
             address: values.address || null,
             city: values.city || null,

@@ -69,29 +69,31 @@ const Cart = () => {
         pricing_unit: item.pricing_unit,
       }));
 
-      const { data: orderResult, error } = await supabase.from("rental_orders").insert({
+      const normalizedPhone = eventDetails.contact_number ? normalizePhoneNumber(eventDetails.contact_number) : null;
+
+      const { error } = await supabase.from("rental_orders").insert({
         title: `Cart Enquiry - ${items.length} item(s)`,
         equipment_category: "Cart Order",
         equipment_details: JSON.stringify({ cart_items: cartPayload, event_details: eventDetails }),
         client_name: eventDetails.customer_name,
         client_email: eventDetails.email,
-        client_phone: eventDetails.contact_number,
+        client_phone: normalizedPhone,
         event_date: eventDetails.event_start_date || null,
         location: `${eventDetails.event_location}${eventDetails.venue_area ? ' - ' + eventDetails.venue_area : ''}`,
         notes: eventDetails.notes || null,
         status: "new",
-      }).select().single();
+      });
 
       if (error) throw error;
 
       // Send WhatsApp rental confirmation
-      if (orderResult?.client_phone) {
+      if (normalizedPhone) {
         try {
           await supabase.functions.invoke("wati-rental-confirmation", {
             body: {
-              phone: orderResult.client_phone,
-              name: orderResult.client_name || "Customer",
-              order_id: orderResult.id,
+              phone: normalizedPhone,
+              name: eventDetails.customer_name || "Customer",
+              order_id: "CART",
             },
           });
         } catch (whatsappErr) {

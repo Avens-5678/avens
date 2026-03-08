@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEventRequests, useAssignVendor, useVendors, EventRequest } from "@/hooks/useEventRequests";
 import { useUpdateEventStatus } from "@/hooks/useEventRequests";
 import { useRentalOrders, useUpdateRentalOrder } from "@/hooks/useRentalOrders";
-import { Loader2, Calendar, Users as UsersIcon, MapPin, ClipboardList, Package } from "lucide-react";
+import { useServiceOrders, useUpdateServiceOrder } from "@/hooks/useServiceOrders";
+import { Loader2, Calendar, Users as UsersIcon, MapPin, ClipboardList, Package, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {
@@ -44,6 +45,8 @@ const statusLabels: Record<string, string> = {
 const allStatuses: EventRequest["status"][] = ["pending", "approved", "in_progress", "completed", "cancelled"];
 const rentalStatuses = ["new", "sent_to_vendor", "vendor_accepted", "vendor_declined", "quoted", "confirmed", "in_progress", "completed", "delivered", "cancelled"];
 
+const serviceStatuses = ["new", "in_progress", "quoted", "confirmed", "completed", "cancelled"];
+
 const EventCenter = () => {
   const { data: requests, isLoading: requestsLoading } = useEventRequests();
   const { data: vendors, isLoading: vendorsLoading } = useVendors();
@@ -51,6 +54,8 @@ const EventCenter = () => {
   const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateEventStatus();
   const { data: rentalOrders, isLoading: rentalsLoading } = useRentalOrders();
   const { mutate: updateRentalOrder, isPending: isUpdatingRental } = useUpdateRentalOrder();
+  const { data: serviceOrders, isLoading: servicesLoading } = useServiceOrders();
+  const { mutate: updateServiceOrder, isPending: isUpdatingService } = useUpdateServiceOrder();
   const [selectedVendor, setSelectedVendor] = useState<Record<string, string>>({});
 
   const handleAssign = (requestId: string) => {
@@ -67,8 +72,11 @@ const EventCenter = () => {
   const handleRentalStatusChange = (orderId: string, status: string) => {
     updateRentalOrder({ id: orderId, status });
   };
+  const handleServiceStatusChange = (orderId: string, status: string) => {
+    updateServiceOrder({ id: orderId, status });
+  };
 
-  if (requestsLoading || vendorsLoading || rentalsLoading) {
+  if (requestsLoading || vendorsLoading || rentalsLoading || servicesLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -83,7 +91,7 @@ const EventCenter = () => {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
@@ -118,6 +126,14 @@ const EventCenter = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Service Orders</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{serviceOrders?.length || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Available Vendors</CardTitle>
           </CardHeader>
           <CardContent>
@@ -137,8 +153,11 @@ const EventCenter = () => {
             <Package className="h-4 w-4 mr-2" />
             Rental Orders ({rentalOrders?.length || 0})
           </TabsTrigger>
+          <TabsTrigger value="services">
+            <Briefcase className="h-4 w-4 mr-2" />
+            Service Orders ({serviceOrders?.length || 0})
+          </TabsTrigger>
         </TabsList>
-
         {/* Event Requests Tab */}
         <TabsContent value="events" className="space-y-6">
           {/* Pending Requests - Priority Section */}
@@ -364,6 +383,86 @@ const EventCenter = () => {
                               </SelectTrigger>
                               <SelectContent>
                                 {rentalStatuses.map((status) => (
+                                  <SelectItem key={status} value={status}>
+                                    {statusLabels[status] || status}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Service Orders Tab */}
+        <TabsContent value="services" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Service Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!serviceOrders || serviceOrders.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No service orders yet</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Event Date</TableHead>
+                        <TableHead>Guests</TableHead>
+                        <TableHead>Budget</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead>Update Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {serviceOrders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell>
+                            <Badge className={statusColors[order.status] || "bg-muted text-muted-foreground"}>
+                              {statusLabels[order.status] || order.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium max-w-[200px] truncate">{order.title}</TableCell>
+                          <TableCell>{order.service_type}</TableCell>
+                          <TableCell>{order.client_name || "-"}</TableCell>
+                          <TableCell>{order.client_phone || "-"}</TableCell>
+                          <TableCell>{order.location || "-"}</TableCell>
+                          <TableCell>
+                            {order.event_date
+                              ? format(new Date(order.event_date), "MMM d, yyyy")
+                              : "-"
+                            }
+                          </TableCell>
+                          <TableCell>{order.guest_count || "-"}</TableCell>
+                          <TableCell>{order.budget || "-"}</TableCell>
+                          <TableCell>{format(new Date(order.created_at), "MMM d, yyyy")}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={order.status}
+                              onValueChange={(value) => handleServiceStatusChange(order.id, value)}
+                              disabled={isUpdatingService}
+                            >
+                              <SelectTrigger className="w-[160px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {serviceStatuses.map((status) => (
                                   <SelectItem key={status} value={status}>
                                     {statusLabels[status] || status}
                                   </SelectItem>

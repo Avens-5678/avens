@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,9 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Lock, Mail } from "lucide-react";
+import { useCompanySettings, useUpdateCompanySettings } from "@/hooks/useCompanySettings";
+import { User, Lock, Mail, Building2, Upload, Image } from "lucide-react";
 
 const profileSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters"),
@@ -34,6 +38,33 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const { toast } = useToast();
 
+  const { data: companySettings, isLoading: companyLoading } = useCompanySettings();
+  const updateCompany = useUpdateCompanySettings();
+
+  // Company form state
+  const [companyName, setCompanyName] = useState("");
+  const [companyGst, setCompanyGst] = useState("");
+  const [companyPan, setCompanyPan] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [gstEnabled, setGstEnabled] = useState(true);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (companySettings) {
+      setCompanyName(companySettings.company_name || "");
+      setCompanyGst(companySettings.gst_number || "");
+      setCompanyPan(companySettings.pan_number || "");
+      setCompanyAddress(companySettings.address || "");
+      setCompanyPhone(companySettings.phone || "");
+      setCompanyEmail(companySettings.email || "");
+      setGstEnabled(companySettings.gst_enabled);
+      setLogoUrl(companySettings.logo_url || "");
+    }
+  }, [companySettings]);
+
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -53,29 +84,12 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
 
   const onProfileSubmit = async (values: z.infer<typeof profileSchema>) => {
     setIsProfileLoading(true);
-
     try {
-      // Update admin user state (no localStorage for security)
-      const updatedUser = {
-        ...adminUser,
-        full_name: values.full_name,
-        email: values.email,
-      };
-
-      // Only update in-memory state, not localStorage (security best practice)
+      const updatedUser = { ...adminUser, full_name: values.full_name, email: values.email };
       onProfileUpdate(updatedUser);
-
-      toast({
-        title: "Profile Updated",
-        description: "Your profile information has been successfully updated.",
-      });
+      toast({ title: "Profile Updated", description: "Your profile information has been successfully updated." });
     } catch (error: any) {
-      console.error("Profile update error:", error);
-      toast({
-        title: "Update Failed",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Update Failed", description: "Failed to update profile.", variant: "destructive" });
     } finally {
       setIsProfileLoading(false);
     }
@@ -83,54 +97,146 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
 
   const onPasswordSubmit = async (values: z.infer<typeof passwordSchema>) => {
     setIsPasswordLoading(true);
-
     try {
-      // First verify current password by signing in
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: adminUser.email,
         password: values.current_password,
       });
-
       if (signInError) {
-        toast({
-          title: "Incorrect Password",
-          description: "The current password you entered is incorrect.",
-          variant: "destructive",
-        });
+        toast({ title: "Incorrect Password", description: "The current password is incorrect.", variant: "destructive" });
         setIsPasswordLoading(false);
         return;
       }
-
-      const { error } = await supabase.auth.updateUser({
-        password: values.new_password,
-      });
-
+      const { error } = await supabase.auth.updateUser({ password: values.new_password });
       if (error) throw error;
-
-      toast({
-        title: "Password Changed",
-        description: "Your password has been successfully updated.",
-      });
-
+      toast({ title: "Password Changed", description: "Your password has been successfully updated." });
       passwordForm.reset();
     } catch (error: any) {
-      console.error("Password change error:", error);
-      toast({
-        title: "Password Change Failed",
-        description: error.message || "Failed to change password. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Password Change Failed", description: error.message, variant: "destructive" });
     } finally {
       setIsPasswordLoading(false);
     }
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `company-logo.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("general-uploads")
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from("general-uploads").getPublicUrl(path);
+      setLogoUrl(publicUrl);
+      toast({ title: "Logo Uploaded", description: "Save company settings to apply." });
+    } catch (err: any) {
+      toast({ title: "Upload Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveCompany = () => {
+    updateCompany.mutate({
+      company_name: companyName,
+      gst_number: companyGst,
+      pan_number: companyPan,
+      address: companyAddress,
+      phone: companyPhone,
+      email: companyEmail,
+      gst_enabled: gstEnabled,
+      logo_url: logoUrl || null,
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-bold">Profile Management</h2>
-        <p className="text-muted-foreground text-sm">Manage your admin profile and account settings</p>
+        <h2 className="text-xl font-bold">Profile & Company Settings</h2>
+        <p className="text-muted-foreground text-sm">Manage your admin profile and company details for quotes & invoices</p>
       </div>
+
+      {/* Company Details */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center space-x-2 text-base">
+            <Building2 className="h-4 w-4" />
+            <span>Company Details</span>
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">These details appear on quotations, invoices and emails</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Logo */}
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center overflow-hidden bg-muted/30">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Company logo" className="h-full w-full object-contain" />
+              ) : (
+                <Image className="h-6 w-6 text-muted-foreground/50" />
+              )}
+            </div>
+            <div>
+              <Label htmlFor="logo-upload" className="text-sm font-medium">Company Logo</Label>
+              <div className="flex items-center gap-2 mt-1">
+                <Button variant="outline" size="sm" asChild disabled={uploading}>
+                  <label htmlFor="logo-upload" className="cursor-pointer">
+                    <Upload className="h-3 w-3 mr-1" />{uploading ? "Uploading..." : "Upload Logo"}
+                  </label>
+                </Button>
+                <input id="logo-upload" type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label className="text-sm">Company Name</Label>
+              <Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Company name" className="h-9" />
+            </div>
+            <div>
+              <Label className="text-sm">Company Email</Label>
+              <Input value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="company@email.com" className="h-9" />
+            </div>
+            <div>
+              <Label className="text-sm">Phone Number</Label>
+              <Input value={companyPhone} onChange={e => setCompanyPhone(e.target.value)} placeholder="+91 ..." className="h-9" />
+            </div>
+            <div>
+              <Label className="text-sm">Address</Label>
+              <Input value={companyAddress} onChange={e => setCompanyAddress(e.target.value)} placeholder="Full address" className="h-9" />
+            </div>
+          </div>
+
+          {/* GST Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+            <div>
+              <p className="text-sm font-medium">GST Billing</p>
+              <p className="text-xs text-muted-foreground">When OFF, GSTIN & PAN won't appear on quotes and tax won't be calculated</p>
+            </div>
+            <Switch checked={gstEnabled} onCheckedChange={setGstEnabled} />
+          </div>
+
+          {gstEnabled && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm">GSTIN</Label>
+                <Input value={companyGst} onChange={e => setCompanyGst(e.target.value)} placeholder="e.g. 36AABCA1234B1Z5" className="h-9" />
+              </div>
+              <div>
+                <Label className="text-sm">PAN Number</Label>
+                <Input value={companyPan} onChange={e => setCompanyPan(e.target.value)} placeholder="e.g. AABCA1234B" className="h-9" />
+              </div>
+            </div>
+          )}
+
+          <Button onClick={handleSaveCompany} disabled={updateCompany.isPending || companyLoading} size="sm">
+            {updateCompany.isPending ? "Saving..." : "Save Company Details"}
+          </Button>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
@@ -143,34 +249,20 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
           <CardContent className="space-y-3">
             <Form {...profileForm}>
               <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-3">
-                <FormField
-                  control={profileForm.control}
-                  name="full_name"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-sm">Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your full name" {...field} className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={profileForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-sm">Email Address</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="Enter your email" {...field} className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
+                <FormField control={profileForm.control} name="full_name" render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-sm">Full Name</FormLabel>
+                    <FormControl><Input placeholder="Enter your full name" {...field} className="h-9" /></FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )} />
+                <FormField control={profileForm.control} name="email" render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-sm">Email Address</FormLabel>
+                    <FormControl><Input type="email" placeholder="Enter your email" {...field} className="h-9" /></FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )} />
                 <Button type="submit" disabled={isProfileLoading} size="sm">
                   {isProfileLoading ? "Updating..." : "Update Profile"}
                 </Button>
@@ -189,47 +281,27 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
           <CardContent className="space-y-3">
             <Form {...passwordForm}>
               <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-3">
-                <FormField
-                  control={passwordForm.control}
-                  name="current_password"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-sm">Current Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter current password" {...field} className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={passwordForm.control}
-                  name="new_password"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-sm">New Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter new password" {...field} className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={passwordForm.control}
-                  name="confirm_password"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel className="text-sm">Confirm New Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Confirm new password" {...field} className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
+                <FormField control={passwordForm.control} name="current_password" render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-sm">Current Password</FormLabel>
+                    <FormControl><Input type="password" placeholder="Enter current password" {...field} className="h-9" /></FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )} />
+                <FormField control={passwordForm.control} name="new_password" render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-sm">New Password</FormLabel>
+                    <FormControl><Input type="password" placeholder="Enter new password" {...field} className="h-9" /></FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )} />
+                <FormField control={passwordForm.control} name="confirm_password" render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="text-sm">Confirm New Password</FormLabel>
+                    <FormControl><Input type="password" placeholder="Confirm new password" {...field} className="h-9" /></FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )} />
                 <Button type="submit" disabled={isPasswordLoading} variant="outline" size="sm">
                   {isPasswordLoading ? "Changing..." : "Change Password"}
                 </Button>

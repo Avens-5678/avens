@@ -6,6 +6,8 @@ export type QuoteTemplate = "modern" | "classic" | "creative";
 
 export interface QuotePrintData {
   quoteNumber?: string;
+  sourceOrderId?: string | null;
+  sourceType?: string | null;
   clientName: string;
   clientEmail: string;
   clientPhone: string;

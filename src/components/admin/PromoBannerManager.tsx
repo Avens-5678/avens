@@ -186,6 +186,10 @@ const PromoBannerManager = () => {
               <Label>CTA Text</Label>
               <Input value={form.cta_text || ""} onChange={(e) => setForm({ ...form, cta_text: e.target.value })} />
             </div>
+            <div>
+              <Label>Banner Image URL</Label>
+              <Input value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value || null })} placeholder="https://... (optional)" />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Gradient From</Label>

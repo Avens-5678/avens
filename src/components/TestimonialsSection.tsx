@@ -3,7 +3,8 @@ import { useTestimonials } from "@/hooks/useTestimonials";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Quote, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Star, Quote, Users, ChevronLeft, ChevronRight } from "lucide-react";
 
 const TestimonialsSection = () => {
   const { data: testimonials, isLoading } = useTestimonials();
@@ -88,6 +89,34 @@ const TestimonialsSection = () => {
           </p>
         </div>
 
+        {/* Navigation buttons */}
+        <div className="flex justify-center gap-3 mb-8">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-10 w-10"
+            onClick={() => {
+              if (!scrollRef.current) return;
+              scrollRef.current.scrollLeft -= 340;
+            }}
+            aria-label="Previous testimonial"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-10 w-10"
+            onClick={() => {
+              if (!scrollRef.current) return;
+              scrollRef.current.scrollLeft += 340;
+            }}
+            aria-label="Next testimonial"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
+
         {/* Horizontal scroll container */}
         <div className="relative">
           {/* Fade edges */}
@@ -99,8 +128,8 @@ const TestimonialsSection = () => {
             onWheel={handleWheel}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className="flex gap-4 overflow-x-hidden py-2 cursor-grab active:cursor-grabbing"
-            style={{ scrollBehavior: "auto" }}
+            className="flex gap-4 overflow-x-hidden py-2 cursor-grab active:cursor-grabbing scroll-smooth"
+            style={{ scrollBehavior: "smooth" }}
           >
             {tripled.map((testimonial, idx) => (
               <div key={`${testimonial.id}-${idx}`} className="flex-shrink-0 w-[320px] md:w-[360px]">

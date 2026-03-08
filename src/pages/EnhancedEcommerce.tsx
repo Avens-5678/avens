@@ -14,8 +14,6 @@ import Layout from "@/components/Layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
 import CartModal from "@/components/Cart/CartModal";
 import { ProductImageCarousel } from "@/components/ui/product-image-carousel";
-import ecommerceBanner from "@/assets/ecommerce-banner.jpg";
-
 const EnhancedEcommerce = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");

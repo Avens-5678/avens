@@ -19,7 +19,7 @@ const baseSchema = {
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
   fullName: z.string().min(2, "Full name is required"),
-  phone: z.string().optional(),
+  phone: z.string().min(10, "Phone number is required (min 10 digits)"),
   role: z.enum(["client", "vendor"], {
     required_error: "Please select a role",
   }),

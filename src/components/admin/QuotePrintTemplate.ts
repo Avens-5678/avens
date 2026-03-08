@@ -73,6 +73,27 @@ function getSharedData(data: QuotePrintData) {
   const totalInWords = numberToWords(Math.round(data.total));
   const discountLabel = data.discountType === "percent" ? `Discount (${data.discountValue}%)` : "Discount";
   const taxLabel = data.taxType === "vat" ? `VAT (${data.taxPercent}%)` : data.taxType === "gst" ? `GST (${data.taxPercent}%)` : `Tax (${data.taxPercent}%)`;
+  const gstEnabled = data.gstEnabled !== false;
+
+  const companyName = data.companyName || "Evnting (Avens Events Pvt. Ltd.)";
+  const companyAddress = data.companyAddress || "Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033";
+  const companyPhone = data.companyPhone || "+91 90000 00000";
+  const companyEmail = data.companyEmail || "leads@avens.in";
+  const companyGst = data.companyGst || "36AABCA1234B1Z5";
+  const companyPan = data.companyPan || "AABCA1234B";
+  const companyLogoUrl = data.companyLogoUrl || null;
+
+  const gstPanHtml = gstEnabled
+    ? `<p style="margin-top:6px;"><span class="label">GSTIN</span> ${companyGst}</p><p><span class="label">PAN</span> ${companyPan}</p>`
+    : "";
+
+  const gstPanInline = gstEnabled
+    ? `<br>GSTIN: ${companyGst} | PAN: ${companyPan}`
+    : "";
+
+  const logoHtml = companyLogoUrl
+    ? `<img src="${companyLogoUrl}" alt="Logo" style="max-height:48px;max-width:160px;object-fit:contain;margin-bottom:4px;" />`
+    : "";
 
   const itemsHTML = data.lineItems.map((li, i) => `
     <tr>
@@ -85,7 +106,7 @@ function getSharedData(data: QuotePrintData) {
 
   const orderRef = data.sourceOrderId ? `Order Ref: #${data.sourceOrderId.substring(0, 8).toUpperCase()}` : "";
 
-  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef };
+  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef, gstEnabled, companyName, companyAddress, companyPhone, companyEmail, companyGst, companyPan, gstPanHtml, gstPanInline, logoHtml };
 }
 
 function buildTerms(notes: string) {

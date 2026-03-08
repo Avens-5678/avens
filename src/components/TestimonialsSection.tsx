@@ -89,6 +89,34 @@ const TestimonialsSection = () => {
           </p>
         </div>
 
+        {/* Navigation buttons */}
+        <div className="flex justify-center gap-3 mb-8">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-10 w-10"
+            onClick={() => {
+              if (!scrollRef.current) return;
+              scrollRef.current.scrollLeft -= 340;
+            }}
+            aria-label="Previous testimonial"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-10 w-10"
+            onClick={() => {
+              if (!scrollRef.current) return;
+              scrollRef.current.scrollLeft += 340;
+            }}
+            aria-label="Next testimonial"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
+
         {/* Horizontal scroll container */}
         <div className="relative">
           {/* Fade edges */}

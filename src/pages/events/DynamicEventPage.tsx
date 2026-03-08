@@ -417,27 +417,17 @@ const DynamicEventPage = () => {
             </p>
 
             <ScrollReveal animation="elastic" delay={400} className="pt-4 lg:pt-6">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <MagneticButton 
-                    size="lg" 
-                    className="button-primary px-8 sm:px-10 lg:px-12 py-3 sm:py-4 text-lg sm:text-xl font-semibold rounded-full shadow-2xl w-full sm:w-auto"
-                  >
-                    <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
-                    {event.cta_button_text || 'Book a Consultation'}
-                    <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6" />
-                  </MagneticButton>
-                </DialogTrigger>
-                <DialogContent className="w-[95vw] sm:w-[90vw] max-w-2xl glass mx-4">
-                  <DialogTitle>✨ Start Planning Your {event.title}</DialogTitle>
-                  <DialogDescription>Fill out this form to begin your journey</DialogDescription>
-                  <InquiryForm 
-                    formType="inquiry"
-                    eventType={event.event_type}
-                    title="Book Consultation"
-                  />
-                </DialogContent>
-              </Dialog>
+              <MagneticButton 
+                size="lg" 
+                className="button-primary px-8 sm:px-10 lg:px-12 py-3 sm:py-4 text-lg sm:text-xl font-semibold rounded-full shadow-2xl w-full sm:w-auto"
+                asChild
+              >
+                <Link to={`/client/dashboard?tab=request&type=${event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
+                  {event.cta_button_text || 'Book a Consultation'}
+                  <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6" />
+                </Link>
+              </MagneticButton>
             </ScrollReveal>
           </ScrollReveal>
         </div>

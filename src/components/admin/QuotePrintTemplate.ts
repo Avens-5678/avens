@@ -28,6 +28,15 @@ export interface QuotePrintData {
   total: number;
   notes: string;
   template?: QuoteTemplate;
+  // Company settings
+  companyName?: string;
+  companyLogoUrl?: string | null;
+  companyGst?: string | null;
+  companyPan?: string | null;
+  companyAddress?: string | null;
+  companyPhone?: string | null;
+  companyEmail?: string | null;
+  gstEnabled?: boolean;
 }
 
 function numberToWords(num: number): string {
@@ -64,6 +73,27 @@ function getSharedData(data: QuotePrintData) {
   const totalInWords = numberToWords(Math.round(data.total));
   const discountLabel = data.discountType === "percent" ? `Discount (${data.discountValue}%)` : "Discount";
   const taxLabel = data.taxType === "vat" ? `VAT (${data.taxPercent}%)` : data.taxType === "gst" ? `GST (${data.taxPercent}%)` : `Tax (${data.taxPercent}%)`;
+  const gstEnabled = data.gstEnabled !== false;
+
+  const companyName = data.companyName || "Evnting (Avens Events Pvt. Ltd.)";
+  const companyAddress = data.companyAddress || "Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033";
+  const companyPhone = data.companyPhone || "+91 90000 00000";
+  const companyEmail = data.companyEmail || "leads@avens.in";
+  const companyGst = data.companyGst || "36AABCA1234B1Z5";
+  const companyPan = data.companyPan || "AABCA1234B";
+  const companyLogoUrl = data.companyLogoUrl || null;
+
+  const gstPanHtml = gstEnabled
+    ? `<p style="margin-top:6px;"><span class="label">GSTIN</span> ${companyGst}</p><p><span class="label">PAN</span> ${companyPan}</p>`
+    : "";
+
+  const gstPanInline = gstEnabled
+    ? `<br>GSTIN: ${companyGst} | PAN: ${companyPan}`
+    : "";
+
+  const logoHtml = companyLogoUrl
+    ? `<img src="${companyLogoUrl}" alt="Logo" style="max-height:48px;max-width:160px;object-fit:contain;margin-bottom:4px;" />`
+    : "";
 
   const itemsHTML = data.lineItems.map((li, i) => `
     <tr>
@@ -76,7 +106,7 @@ function getSharedData(data: QuotePrintData) {
 
   const orderRef = data.sourceOrderId ? `Order Ref: #${data.sourceOrderId.substring(0, 8).toUpperCase()}` : "";
 
-  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef };
+  return { dateStr, qNum, totalInWords, discountLabel, taxLabel, itemsHTML, orderRef, gstEnabled, companyName, companyAddress, companyPhone, companyEmail, companyGst, companyPan, gstPanHtml, gstPanInline, logoHtml };
 }
 
 function buildTerms(notes: string) {
@@ -142,11 +172,11 @@ table.items tbody td { font-size:13px; }
 </style></head><body>
 <div class="quote-title">Quotation</div>
 <div class="header">
-  <div class="logo-area"><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
+  <div class="logo-area">${s.logoHtml}<h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
   <table class="meta-table"><tr><td>Quotation #</td><td>${s.qNum}</td></tr><tr><td>Date</td><td>${s.dateStr}</td></tr>${s.orderRef ? `<tr><td>Order Ref</td><td>${s.orderRef}</td></tr>` : ""}</table>
 </div>
 <div class="parties">
-  <div class="party-box"><h3>Quotation By</h3><p><strong>Evnting (Avens Events Pvt. Ltd.)</strong></p><p>Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033</p><p style="margin-top:6px;"><span class="label">GSTIN</span> 36AABCA1234B1Z5</p><p><span class="label">PAN</span> AABCA1234B</p></div>
+  <div class="party-box"><h3>Quotation By</h3><p><strong>${s.companyName}</strong></p><p>${s.companyAddress}</p>${s.gstPanHtml}</div>
   <div class="party-box"><h3>Quotation To</h3><p><strong>${data.clientName}</strong></p>${data.clientEmail ? `<p>Email: ${data.clientEmail}</p>` : ""}${data.clientPhone ? `<p>Phone: ${data.clientPhone}</p>` : ""}</div>
 </div>
 <table class="items"><thead><tr><th>Item # / Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
@@ -155,7 +185,7 @@ table.items tbody td { font-size:13px; }
   <div class="totals">${buildTotals(data, s)}</div>
 </div>
 <div class="footer">
-  <div class="footer-contact">For enquiries, email <strong>leads@avens.in</strong> or call <strong>+91 90000 00000</strong></div>
+  <div class="footer-contact">For enquiries, email <strong>${s.companyEmail}</strong> or call <strong>${s.companyPhone}</strong></div>
   <div class="signature"><div class="signature-line"></div>Authorized Signature</div>
 </div>
 <script>window.onload=function(){window.print();}</script>
@@ -193,12 +223,12 @@ table.items tbody td { padding:10px 14px; border-bottom:1px solid #eee; font-siz
 .sig { text-align:center; font-size:12px; color:#888; } .sig-line { width:150px; border-top:1px solid #1a1a2e; margin:40px auto 6px; }
 </style></head><body>
 <div class="header">
-  <div class="logo"><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
+  <div class="logo">${s.logoHtml}<h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
   <div class="meta"><div><span class="label">Quotation:</span><span class="value">${s.qNum}</span></div><div><span class="label">Date:</span><span class="value">${s.dateStr}</span></div>${s.orderRef ? `<div><span class="label">${s.orderRef}</span></div>` : ""}</div>
 </div>
 <div class="quote-badge"><span>QUOTATION</span></div>
 <div class="parties">
-  <div class="party"><h3>From</h3><p><strong>Evnting (Avens Events Pvt. Ltd.)</strong><br>Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033<br>GSTIN: 36AABCA1234B1Z5 | PAN: AABCA1234B</p></div>
+  <div class="party"><h3>From</h3><p><strong>${s.companyName}</strong><br>${s.companyAddress}${s.gstPanInline}</p></div>
   <div class="party"><h3>To</h3><p><strong>${data.clientName}</strong>${data.clientEmail ? `<br>Email: ${data.clientEmail}` : ""}${data.clientPhone ? `<br>Phone: ${data.clientPhone}` : ""}</p></div>
 </div>
 <table class="items"><thead><tr><th>Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
@@ -207,7 +237,7 @@ table.items tbody td { padding:10px 14px; border-bottom:1px solid #eee; font-siz
   <div class="totals">${buildTotals(data, s)}</div>
 </div>
 <div class="footer">
-  <div class="footer-contact">Email: <strong>leads@avens.in</strong> | Phone: <strong>+91 90000 00000</strong></div>
+  <div class="footer-contact">Email: <strong>${s.companyEmail}</strong> | Phone: <strong>${s.companyPhone}</strong></div>
   <div class="sig"><div class="sig-line"></div>Authorized Signature</div>
 </div>
 <script>window.onload=function(){window.print();}</script>
@@ -248,12 +278,12 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
 .sig { text-align:center; font-size:12px; color:#888; } .sig-line { width:150px; border-top:1px solid #764ba2; margin:40px auto 6px; }
 </style></head><body>
 <div class="hero">
-  <div><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
+  <div>${s.logoHtml}<h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
   <div class="hero-meta"><div>Quotation <strong>#${s.qNum}</strong></div><div>${s.dateStr}</div>${s.orderRef ? `<div style="font-size:12px;opacity:.9;">${s.orderRef}</div>` : ""}</div>
 </div>
 <div class="content">
   <div class="parties">
-    <div class="party-card"><h3>From</h3><p><strong>Evnting (Avens Events Pvt. Ltd.)</strong><br>Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033<br>GSTIN: 36AABCA1234B1Z5</p></div>
+    <div class="party-card"><h3>From</h3><p><strong>${s.companyName}</strong><br>${s.companyAddress}${s.gstEnabled ? `<br>GSTIN: ${s.companyGst}` : ""}</p></div>
     <div class="party-card"><h3>To</h3><p><strong>${data.clientName}</strong>${data.clientEmail ? `<br>${data.clientEmail}` : ""}${data.clientPhone ? `<br>${data.clientPhone}` : ""}</p></div>
   </div>
   <table class="items"><thead><tr><th>Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
@@ -263,7 +293,7 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
   </div>
 </div>
 <div class="footer">
-  <div class="footer-contact">Email: <strong>leads@avens.in</strong> | Phone: <strong>+91 90000 00000</strong></div>
+  <div class="footer-contact">Email: <strong>${s.companyEmail}</strong> | Phone: <strong>${s.companyPhone}</strong></div>
   <div class="sig"><div class="sig-line"></div>Authorized Signature</div>
 </div>
 <script>window.onload=function(){window.print();}</script>

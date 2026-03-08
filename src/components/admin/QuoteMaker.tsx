@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRentalOrders } from "@/hooks/useRentalOrders";
 import { useServiceOrders } from "@/hooks/useServiceOrders";
 import { useCreateQuote, useQuotes, useQuoteVersions, type QuoteLineItem, type Quote } from "@/hooks/useQuotes";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, Calculator, Mail, MessageSquare, Download, PackageSearch, Copy, History, Palette } from "lucide-react";
@@ -26,6 +27,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   const { data: rentalOrders } = useRentalOrders();
   const { data: serviceOrders } = useServiceOrders();
   const { data: allQuotes } = useQuotes();
+  const { data: companySettings } = useCompanySettings();
   const createQuote = useCreateQuote();
   const { toast } = useToast();
 
@@ -51,6 +53,16 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   const [parentQuoteId, setParentQuoteId] = useState<string | null>(null);
   const [currentVersion, setCurrentVersion] = useState(1);
   const { data: versionHistory } = useQuoteVersions(parentQuoteId || editingQuoteId || undefined);
+
+  // Auto-set tax type from company settings
+  useEffect(() => {
+    if (companySettings) {
+      if (!companySettings.gst_enabled) {
+        setTaxType("none");
+        setTaxPercent(0);
+      }
+    }
+  }, [companySettings]);
 
   // Auto-populate from selected order
   useEffect(() => {
@@ -179,6 +191,14 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       template,
       sourceOrderId: selectedOrderId || null,
       sourceType: selectedSourceType !== "manual" ? selectedSourceType : null,
+      companyName: companySettings?.company_name,
+      companyLogoUrl: companySettings?.logo_url,
+      companyGst: companySettings?.gst_number,
+      companyPan: companySettings?.pan_number,
+      companyAddress: companySettings?.address,
+      companyPhone: companySettings?.phone,
+      companyEmail: companySettings?.email,
+      gstEnabled: companySettings?.gst_enabled ?? true,
     });
 
     createQuote.mutate({ quote: buildQuotePayload("draft"), lineItems });

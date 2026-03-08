@@ -52,6 +52,7 @@ const CardSkeleton = () =>
 
 const Index = () => {
   const isMobile = useIsMobile();
+  const { getServiceRequestPath } = useDashboardPath();
   // Core data - only essential for above-the-fold
   const { data: heroBanners, isLoading: loadingBanners } = useHeroBanners();
   const { data: services, isLoading: loadingServices } = useServices();

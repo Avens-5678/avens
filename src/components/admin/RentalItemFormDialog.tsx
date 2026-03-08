@@ -22,6 +22,11 @@ const RENTAL_CATEGORIES = [
 
 const PRICING_UNITS = ["Per Hour", "Per Day", "Per Week", "Per Event", "Fixed Price", "Per Sq.Ft", "Per Sq.M"];
 
+interface SpecRow {
+  key: string;
+  value: string;
+}
+
 interface VariantRow {
   attribute_value: string;
   price_value: number | null;

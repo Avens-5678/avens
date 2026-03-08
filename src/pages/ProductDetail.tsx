@@ -458,26 +458,36 @@ const ProductDetail = () => {
 
             <TabsContent value="specifications" className="pt-5">
               <div className="max-w-2xl space-y-2">
+                {/* Dynamic specifications from DB */}
+                {(rental as any).specifications && Array.isArray((rental as any).specifications) && (rental as any).specifications.length > 0 && (
+                  (rental as any).specifications.map((spec: { key: string; value: string }, i: number) => (
+                    <div key={i} className={`flex items-start py-2.5 px-3 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""} rounded`}>
+                      <span className="w-40 font-medium text-foreground flex-shrink-0">{spec.key}</span>
+                      <span className="text-muted-foreground">{spec.value}</span>
+                    </div>
+                  ))
+                )}
+                {/* Fallback specs */}
                 {[
                   { label: "Category", value: rental.categories?.join(", ") },
                   { label: "Pricing", value: displayPrice && "value" in displayPrice ? `₹${displayPrice.value.toLocaleString()} ${displayPrice.unit}` : displayPrice?.text },
                   { label: "Rating", value: rental.rating ? `${rental.rating} / 5` : undefined },
                   { label: "Variants", value: variants?.length ? `${variants.length} options available` : undefined },
-                ].filter(r => r.value).map(({ label, value }, i) => (
-                  <div key={label} className={`flex items-start py-2.5 px-3 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""} rounded`}>
-                    <span className="w-40 font-medium text-foreground flex-shrink-0">{label}</span>
-                    <span className="text-muted-foreground">{value}</span>
-                  </div>
-                ))}
+                ].filter(r => r.value).map(({ label, value }, idx) => {
+                  const specCount = ((rental as any).specifications || []).length;
+                  const i = idx + specCount;
+                  return (
+                    <div key={label} className={`flex items-start py-2.5 px-3 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""} rounded`}>
+                      <span className="w-40 font-medium text-foreground flex-shrink-0">{label}</span>
+                      <span className="text-muted-foreground">{value}</span>
+                    </div>
+                  );
+                })}
               </div>
             </TabsContent>
 
             <TabsContent value="reviews" className="pt-5">
-              <div className="text-center py-10 space-y-3">
-                <Star className="h-10 w-10 text-muted-foreground/30 mx-auto" />
-                <p className="text-sm text-muted-foreground">No reviews yet. Be the first to review this product!</p>
-                <Button variant="outline" size="sm" className="text-xs">Write a Review</Button>
-              </div>
+              <ReviewsSection rentalId={id!} />
             </TabsContent>
           </Tabs>
         </div>

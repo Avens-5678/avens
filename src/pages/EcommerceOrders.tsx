@@ -114,7 +114,51 @@ const EcommerceOrders = () => {
     );
   }
 
-  const OrderCard = ({ order }: { order: (typeof allOrders)[0] }) => (
+  const RENTAL_STEPS = ["new", "sent_to_vendor", "vendor_accepted", "quoted", "confirmed", "in_progress", "completed"];
+  const SERVICE_STEPS = ["new", "in_progress", "quoted", "confirmed", "completed"];
+
+  const getSteps = (orderType: string) => {
+    const steps = orderType === "rental" ? RENTAL_STEPS : SERVICE_STEPS;
+    return steps.map((s) => ({ key: s, label: statusLabels[s] || s }));
+  };
+
+  const getStepIndex = (status: string, orderType: string) => {
+    const steps = orderType === "rental" ? RENTAL_STEPS : SERVICE_STEPS;
+    const idx = steps.indexOf(status);
+    return idx >= 0 ? idx : 0;
+  };
+
+  const StatusStepper = ({ status, orderType }: { status: string; orderType: string }) => {
+    const steps = getSteps(orderType);
+    const currentIdx = getStepIndex(status, orderType);
+    return (
+      <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide pt-3 pb-1">
+        {steps.map((step, i) => {
+          const isDone = i <= currentIdx;
+          const isCurrent = i === currentIdx;
+          return (
+            <div key={step.key} className="flex items-center flex-shrink-0">
+              <div className="flex flex-col items-center gap-1">
+                {isDone ? (
+                  <CheckCircle2 className={`h-5 w-5 ${isCurrent ? "text-primary" : "text-primary/60"}`} />
+                ) : (
+                  <Circle className="h-5 w-5 text-muted-foreground/40" />
+                )}
+                <span className={`text-[10px] sm:text-xs whitespace-nowrap ${isCurrent ? "font-semibold text-primary" : isDone ? "text-foreground/70" : "text-muted-foreground/50"}`}>
+                  {step.label}
+                </span>
+              </div>
+              {i < steps.length - 1 && (
+                <div className={`w-6 sm:w-10 h-0.5 mx-1 ${i < currentIdx ? "bg-primary/60" : "bg-muted-foreground/20"}`} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const OrderCard = ({ order, showStepper }: { order: (typeof allOrders)[0]; showStepper?: boolean }) => (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <CardContent className="p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -172,6 +216,10 @@ const EcommerceOrders = () => {
             {statusLabels[order.status] || order.status}
           </Badge>
         </div>
+
+        {showStepper && (
+          <StatusStepper status={order.status} orderType={order.orderType} />
+        )}
       </CardContent>
     </Card>
   );

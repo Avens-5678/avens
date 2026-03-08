@@ -229,11 +229,11 @@ const Index = () => {
       </HeroSection>
 
       {/* Stats Section */}
-      <Section spacing="large" variant="muted" className="relative bg-gradient-to-br from-muted/60 via-muted/40 to-primary/[0.04]">
+      <Section spacing="default" variant="muted" className="relative">
         <BackgroundPattern variant="dots" />
         <StatsContainer>
           <ScrollReveal animation="fade-in-up">
-            <div className="text-center mb-14">
+            <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
                 The only platform that creates extraordinary
                 <br />
@@ -251,11 +251,8 @@ const Index = () => {
         </StatsContainer>
       </Section>
 
-      <SectionDivider variant="gradient" />
-
-
       {/* Services Section */}
-      <Section spacing="large" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_800px_at_100%_200px,hsl(var(--primary)/0.07),transparent)] before:pointer-events-none">
+      <Section spacing="default" className="relative overflow-hidden">
         <BackgroundPattern variant="noise" />
         <div className="container mx-auto px-4">
           <ScrollReveal animation="fade-in-up">
@@ -325,7 +322,7 @@ const Index = () => {
 
       {/* About CTA Section */}
       {aboutContent &&
-        <Section variant="gradient" spacing="large">
+        <Section variant="gradient" spacing="default">
           <div className="container mx-auto px-5 sm:px-6 text-center">
             <div className="max-w-3xl mx-auto space-y-6">
               <Badge variant="outline" className="mb-4">
@@ -363,10 +360,8 @@ const Index = () => {
         </Section>
         }
 
-      <SectionDivider variant="gradient" />
-
       {/* Equipment Rental Section */}
-      <Section spacing="large" variant="muted" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(circle_600px_at_0%_100%,hsl(var(--secondary)/0.06),transparent)] before:pointer-events-none">
+      <Section spacing="default" variant="muted" className="relative overflow-hidden">
         <BackgroundPattern variant="dots" />
         <div className="container mx-auto px-4">
           <ScrollReveal animation="fade-in-up">
@@ -458,7 +453,7 @@ const Index = () => {
 
       {/* Trusted Clients - Marquee */}
       {activeClients.length > 0 &&
-        <Section spacing="large">
+        <Section spacing="compact">
           <div className="container mx-auto px-4">
             <SectionHeader
               badge={<Badge variant="outline"><Users className="mr-2 h-4 w-4" />Trusted Partners</Badge>}
@@ -489,7 +484,7 @@ const Index = () => {
         }
 
       {/* Testimonials - Lazy loaded */}
-      <Section variant="gradient" spacing="large">
+      <Section variant="gradient" spacing="default">
         <div className="container mx-auto px-4">
           <Suspense fallback={
             <div className="text-center py-12">
@@ -503,7 +498,7 @@ const Index = () => {
       </Section>
 
       {/* Final CTA */}
-      <Section variant="gradient" spacing="large">
+      <Section variant="muted" spacing="default">
         <div className="container mx-auto px-5 sm:px-6 text-center">
           <div className="max-w-3xl mx-auto space-y-6">
             <Badge variant="outline" className="mb-4">

@@ -109,7 +109,8 @@ export const useCreateEventRequest = () => {
         title: "Request Submitted",
         description: "Your event request has been submitted successfully.",
       });
-      // Sync to service_orders handled by DB trigger
+      // Send WhatsApp confirmation
+      sendEventConfirmationWhatsApp(result.id, result.client_id, result.event_type, toast);
       // Sync to Zoho CRM
       syncRequestToZoho('event_request', {
         ...result,

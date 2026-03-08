@@ -113,7 +113,7 @@ export const useCreateRentalOrder = () => {
       queryClient.invalidateQueries({ queryKey: ["rental_orders"] });
       toast({ title: "Order Created", description: "Rental order has been created." });
       syncRentalOrderToZohoProducts('create', result);
-      sendRentalConfirmationWhatsApp(result);
+      sendRentalConfirmationWhatsApp(result, toast);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

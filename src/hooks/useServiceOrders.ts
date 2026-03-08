@@ -111,7 +111,7 @@ export const useCreateServiceOrder = () => {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["service_orders"] });
       toast({ title: "Order Created", description: "Service order has been created." });
-      sendServiceConfirmationWhatsApp(result);
+      sendServiceConfirmationWhatsApp(result, toast);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

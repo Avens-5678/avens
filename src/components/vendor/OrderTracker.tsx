@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useEventRequests, useUpdateEventStatus, EventRequest } from "@/hooks/useEventRequests";
 import { Loader2, Calendar, MapPin, Users, Clock, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
+import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",

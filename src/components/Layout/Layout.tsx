@@ -7,12 +7,13 @@ const AudioControls = lazy(() => import("@/components/Audio/AudioControls"));
 
 interface LayoutProps {
   children: ReactNode;
+  hideNavbar?: boolean;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({ children, hideNavbar }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <main className="flex-1">{children}</main>
       <Footer />
       <Suspense fallback={null}>

@@ -27,7 +27,8 @@ import {
   UsersRound,
   ShieldCheck,
   Truck,
-  Briefcase
+  Briefcase,
+  ShoppingBag
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";

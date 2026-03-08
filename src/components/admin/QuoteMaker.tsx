@@ -241,24 +241,58 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       return;
     }
 
-    // Email flow
-    const itemsText = lineItems.map((li, i) =>
-      `${i + 1}. ${li.item_description} — ${li.quantity} ${li.unit} × ₹${li.unit_price.toLocaleString()} = ₹${li.total_price.toLocaleString()}`
-    ).join("\n");
-
-    const taxLabel = taxType === "vat" ? "VAT" : "GST";
-    const quoteText = `📋 *Quote for ${clientName}*\n\n${itemsText}\n\nSubtotal: ₹${calculations.subtotal.toLocaleString()}\nDiscount: ₹${calculations.discountAmount.toLocaleString()}\n${taxLabel} (${calculations.effectiveTaxPercent}%): ₹${calculations.taxAmount.toLocaleString()}\n\n💰 *Total: ₹${calculations.total.toLocaleString()}*`;
-
-    if (clientEmail) {
-      const subject = encodeURIComponent(`Quote from Evnting - ${clientName}`);
-      const body = encodeURIComponent(quoteText.replace(/\*/g, ""));
-      window.open(`mailto:${clientEmail}?subject=${subject}&body=${body}`, "_blank");
-      toast({ title: "Email client opened", description: "Quote ready to send via email." });
-    } else {
+    // Email flow — save quote then send via edge function
+    if (!clientEmail) {
       toast({ title: "Missing email", description: "No email provided.", variant: "destructive" });
+      setSending(false);
+      return;
     }
 
-    createQuote.mutate({ quote: buildQuotePayload("sent", "email"), lineItems });
+    try {
+      const { data: createdQuote, error: insertError } = await supabase
+        .from("quotes")
+        .insert(buildQuotePayload("sent", "email") as any)
+        .select("id, acceptance_token, quote_number")
+        .single();
+
+      if (insertError || !createdQuote) throw new Error(insertError?.message || "Failed to create quote");
+
+      if (lineItems.length > 0) {
+        await supabase.from("quote_line_items").insert(
+          lineItems.map((li, idx) => ({ ...li, quote_id: createdQuote.id, display_order: idx }))
+        );
+      }
+
+      const taxLabel = taxType === "vat" ? "VAT" : "GST";
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke("send-quote-email", {
+        body: {
+          clientName,
+          clientEmail,
+          quoteNumber: createdQuote.quote_number,
+          acceptanceToken: createdQuote.acceptance_token,
+          sourceOrderId: selectedOrderId || null,
+          lineItems,
+          subtotal: calculations.subtotal,
+          discountAmount: calculations.discountAmount,
+          taxLabel,
+          taxPercent: calculations.effectiveTaxPercent,
+          taxAmount: calculations.taxAmount,
+          total: calculations.total,
+          notes,
+        },
+      });
+
+      if (emailError) {
+        toast({ title: "Quote saved", description: `Email failed: ${emailError.message}`, variant: "destructive" });
+      } else if (emailResult?.success) {
+        toast({ title: "Email Sent!", description: `Quote emailed to ${clientEmail}.` });
+      } else {
+        toast({ title: "Quote saved", description: `Email failed: ${emailResult?.error || "Unknown error"}`, variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+
     setSending(false);
   };
 

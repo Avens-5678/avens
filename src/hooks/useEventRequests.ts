@@ -110,7 +110,7 @@ const syncEventRequestToServiceOrders = async (
         client_name: clientName,
         client_phone: clientPhone || "",
         client_email: clientEmail || "",
-        notes: `Auto-synced from Service Request #${eventRequest.id.substring(0, 8)}`,
+        notes: `Auto-synced from Event Request #${eventRequest.id.substring(0, 8)}`,
       })
       .select()
       .single();

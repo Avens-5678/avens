@@ -166,7 +166,7 @@ const EventTracker = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">My Service Requests</h2>
+      <h2 className="text-2xl font-bold">My Event Requests</h2>
       
       {/* Active Orders */}
       {activeRequests.length > 0 && (

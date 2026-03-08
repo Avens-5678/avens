@@ -82,7 +82,7 @@ const LiveServiceOrders = () => {
 
       // For now, open WhatsApp directly with confirmation message
       const phone = order.client_phone.replace(/[^0-9]/g, "");
-      const message = `🎪 *Evnting - Service Request Confirmation*\n\nHi ${order.client_name || "there"},\n\nThank you for your service request!\n\n📋 *Request:* ${order.title}\n📍 *Location:* ${order.location || "TBD"}\n📅 *Date:* ${order.event_date ? new Date(order.event_date).toLocaleDateString() : "TBD"}\n\nOur team has received your request and will get back to you shortly with a detailed quote.\n\nBest regards,\nTeam Evnting`;
+      const message = `🎪 *Evnting - Event Request Confirmation*\n\nHi ${order.client_name || "there"},\n\nThank you for your event request!\n\n📋 *Request:* ${order.title}\n📍 *Location:* ${order.location || "TBD"}\n📅 *Date:* ${order.event_date ? new Date(order.event_date).toLocaleDateString() : "TBD"}\n\nOur team has received your request and will get back to you shortly with a detailed quote.\n\nBest regards,\nTeam Evnting`;
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
 
       updateOrder.mutate({ id: order.id, status: "in_progress" });

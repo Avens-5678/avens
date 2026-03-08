@@ -56,8 +56,8 @@ const PastOrders = () => {
             <Card>
               <CardContent className="py-12 text-center">
                 <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Service Requests</h3>
-                <p className="text-muted-foreground">You haven't submitted any service requests yet.</p>
+                <h3 className="text-lg font-semibold mb-2">No Event Requests</h3>
+                <p className="text-muted-foreground">You haven't submitted any event requests yet.</p>
               </CardContent>
             </Card>
           ) : (

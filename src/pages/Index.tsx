@@ -210,7 +210,7 @@ const Index = () => {
       </HeroSection>
 
       {/* Stats Section */}
-      <Section spacing="large" variant="muted">
+      <Section spacing="large" variant="muted" className="relative overflow-hidden before:absolute before:inset-0 before:bg-[conic-gradient(from_180deg_at_50%_50%,hsl(var(--primary)/0.04)_0deg,transparent_120deg,hsl(var(--secondary)/0.04)_240deg,transparent_360deg)] before:pointer-events-none">
         <StatsContainer>
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">

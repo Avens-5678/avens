@@ -243,7 +243,7 @@ const Ecommerce = () => {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="overflow-x-auto scrollbar-hide py-4">
             <div className="flex gap-2 sm:gap-3 justify-start sm:justify-center min-w-max">
-              {EVENT_CATEGORIES.map((cat) => (
+              {quickBrowseCategories.map((cat) => (
                 <button
                   key={cat.value}
                   onClick={() => setActiveQuickCat(cat.value === activeQuickCat ? "" : cat.value)}

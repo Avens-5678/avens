@@ -42,6 +42,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const queryClient = new QueryClient();
 
 const App = () => (
+  <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />

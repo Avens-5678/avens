@@ -78,6 +78,23 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     }
   };
 
+  const verifyAdminAfterAuth = async () => {
+    const { data, error } = await supabase.rpc('is_admin');
+    if (error || !data) {
+      await supabase.auth.signOut();
+      toast({
+        title: "Access Denied",
+        description: "This account is not authorized for admin access.",
+        variant: "destructive",
+      });
+      setStep('email');
+      setEmail('');
+      setOtp('');
+      return false;
+    }
+    return true;
+  };
+
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) {
       toast({ title: "Invalid OTP", description: "Please enter the complete 6-digit code.", variant: "destructive" });
@@ -87,6 +104,10 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     try {
       const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: 'email' });
       if (error) throw error;
+      
+      const isAdmin = await verifyAdminAfterAuth();
+      if (!isAdmin) return;
+      
       toast({ title: "Login Successful", description: "Welcome to the admin dashboard." });
       onLoginSuccess();
     } catch (error: any) {

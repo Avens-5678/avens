@@ -905,6 +905,50 @@ export type Database = {
         }
         Relationships: []
       }
+      rental_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          is_approved: boolean | null
+          rating: number
+          rental_id: string
+          review_text: string
+          reviewer_email: string | null
+          reviewer_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          rating: number
+          rental_id: string
+          review_text: string
+          reviewer_email?: string | null
+          reviewer_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          rating?: number
+          rental_id?: string
+          review_text?: string
+          reviewer_email?: string | null
+          reviewer_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_reviews_rental_id_fkey"
+            columns: ["rental_id"]
+            isOneToOne: false
+            referencedRelation: "rentals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rental_variants: {
         Row: {
           attribute_type: string
@@ -982,6 +1026,7 @@ export type Database = {
           short_description: string
           show_on_home: boolean | null
           size_options: string[] | null
+          specifications: Json | null
           title: string
           updated_at: string
         }
@@ -1005,6 +1050,7 @@ export type Database = {
           short_description: string
           show_on_home?: boolean | null
           size_options?: string[] | null
+          specifications?: Json | null
           title: string
           updated_at?: string
         }
@@ -1028,6 +1074,7 @@ export type Database = {
           short_description?: string
           show_on_home?: boolean | null
           size_options?: string[] | null
+          specifications?: Json | null
           title?: string
           updated_at?: string
         }

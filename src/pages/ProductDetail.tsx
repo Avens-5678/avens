@@ -7,16 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAllRentals } from "@/hooks/useData";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
-  Star, ShieldCheck, Truck, Headphones, Share2, RotateCcw,
-  Plus, MessageSquare, Bookmark, ZoomIn,
+  Star, Share2, Plus, MessageSquare, Bookmark, ZoomIn,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -336,22 +338,6 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              {/* Evnting Assured strip */}
-              {rental.rating && rental.rating >= 4 && (
-                <div className="flex items-center gap-4 bg-primary/5 border border-primary/20 rounded-lg px-4 py-2.5">
-                  <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0" />
-                  <div className="flex items-center gap-3 text-xs font-medium text-foreground flex-wrap">
-                    <span>Evnting Assured</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground">7 Day Easy Returns</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground">Free Delivery</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground">Top Rated</span>
-                  </div>
-                </div>
-              )}
-
               <div className="h-px bg-border" />
 
               {/* Variant Selectors */}
@@ -445,20 +431,6 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Trust badges — inline */}
-              <div className="flex items-center gap-5 pt-1">
-                {[
-                  { icon: ShieldCheck, label: "Assured Quality" },
-                  { icon: Truck, label: "Free Delivery" },
-                  { icon: Headphones, label: "24/7 Support" },
-                  { icon: RotateCcw, label: "Easy Returns" },
-                ].map(({ icon: Icon, label }) => (
-                  <div key={label} className="flex items-center gap-1.5">
-                    <Icon className="h-4 w-4 text-primary" />
-                    <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground whitespace-nowrap">{label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -486,26 +458,36 @@ const ProductDetail = () => {
 
             <TabsContent value="specifications" className="pt-5">
               <div className="max-w-2xl space-y-2">
+                {/* Dynamic specifications from DB */}
+                {(rental as any).specifications && Array.isArray((rental as any).specifications) && (rental as any).specifications.length > 0 && (
+                  (rental as any).specifications.map((spec: { key: string; value: string }, i: number) => (
+                    <div key={i} className={`flex items-start py-2.5 px-3 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""} rounded`}>
+                      <span className="w-40 font-medium text-foreground flex-shrink-0">{spec.key}</span>
+                      <span className="text-muted-foreground">{spec.value}</span>
+                    </div>
+                  ))
+                )}
+                {/* Fallback specs */}
                 {[
                   { label: "Category", value: rental.categories?.join(", ") },
                   { label: "Pricing", value: displayPrice && "value" in displayPrice ? `₹${displayPrice.value.toLocaleString()} ${displayPrice.unit}` : displayPrice?.text },
                   { label: "Rating", value: rental.rating ? `${rental.rating} / 5` : undefined },
                   { label: "Variants", value: variants?.length ? `${variants.length} options available` : undefined },
-                ].filter(r => r.value).map(({ label, value }, i) => (
-                  <div key={label} className={`flex items-start py-2.5 px-3 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""} rounded`}>
-                    <span className="w-40 font-medium text-foreground flex-shrink-0">{label}</span>
-                    <span className="text-muted-foreground">{value}</span>
-                  </div>
-                ))}
+                ].filter(r => r.value).map(({ label, value }, idx) => {
+                  const specCount = ((rental as any).specifications || []).length;
+                  const i = idx + specCount;
+                  return (
+                    <div key={label} className={`flex items-start py-2.5 px-3 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""} rounded`}>
+                      <span className="w-40 font-medium text-foreground flex-shrink-0">{label}</span>
+                      <span className="text-muted-foreground">{value}</span>
+                    </div>
+                  );
+                })}
               </div>
             </TabsContent>
 
             <TabsContent value="reviews" className="pt-5">
-              <div className="text-center py-10 space-y-3">
-                <Star className="h-10 w-10 text-muted-foreground/30 mx-auto" />
-                <p className="text-sm text-muted-foreground">No reviews yet. Be the first to review this product!</p>
-                <Button variant="outline" size="sm" className="text-xs">Write a Review</Button>
-              </div>
+              <ReviewsSection rentalId={id!} />
             </TabsContent>
           </Tabs>
         </div>
@@ -603,6 +585,122 @@ const ProductDetail = () => {
         currentProductId={id}
       />
     </Layout>
+  );
+};
+
+// ── Reviews Section Component ──
+const ReviewsSection = ({ rentalId }: { rentalId: string }) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewData, setReviewData] = useState({ name: "", email: "", rating: 5, text: "" });
+
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["rental-reviews", rentalId],
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("rental_reviews" as any) as any)
+        .select("*")
+        .eq("rental_id", rentalId)
+        .eq("is_approved", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!reviewData.name || !reviewData.text) {
+      toast({ title: "Error", description: "Please fill in your name and review.", variant: "destructive" });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await (supabase.from("rental_reviews" as any) as any).insert({
+        rental_id: rentalId,
+        reviewer_name: reviewData.name,
+        reviewer_email: reviewData.email || null,
+        rating: reviewData.rating,
+        review_text: reviewData.text,
+      });
+      if (error) throw error;
+      toast({ title: "Review Submitted!", description: "Your review will appear after approval." });
+      setReviewData({ name: "", email: "", rating: 5, text: "" });
+      setShowForm(false);
+      queryClient.invalidateQueries({ queryKey: ["rental-reviews", rentalId] });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Existing reviews */}
+      {reviews.length > 0 ? (
+        <div className="space-y-4 max-w-2xl">
+          {reviews.map((review: any) => (
+            <div key={review.id} className="border border-border rounded-lg p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
+                  {review.rating} <Star className="h-3 w-3 fill-current" />
+                </span>
+                <span className="text-sm font-medium text-foreground">{review.reviewer_name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(review.created_at).toLocaleDateString()}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">{review.review_text}</p>
+            </div>
+          ))}
+        </div>
+      ) : !showForm ? (
+        <div className="text-center py-8 space-y-3">
+          <Star className="h-10 w-10 text-muted-foreground/30 mx-auto" />
+          <p className="text-sm text-muted-foreground">No reviews yet. Be the first to review this product!</p>
+        </div>
+      ) : null}
+
+      {/* Write review form */}
+      {showForm ? (
+        <div className="max-w-lg border border-border rounded-xl p-5 space-y-4 bg-muted/20">
+          <h3 className="text-sm font-semibold text-foreground">Write a Review</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Your Name *</Label>
+              <Input value={reviewData.name} onChange={(e) => setReviewData(p => ({ ...p, name: e.target.value }))} placeholder="John Doe" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Email (optional)</Label>
+              <Input type="email" value={reviewData.email} onChange={(e) => setReviewData(p => ({ ...p, email: e.target.value }))} placeholder="john@example.com" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Rating</Label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button key={star} onClick={() => setReviewData(p => ({ ...p, rating: star }))} className="p-0.5">
+                  <Star className={`h-6 w-6 transition-colors ${star <= reviewData.rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/30"}`} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Your Review *</Label>
+            <Textarea value={reviewData.text} onChange={(e) => setReviewData(p => ({ ...p, text: e.target.value }))} placeholder="Share your experience..." rows={3} />
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleSubmit} size="sm" disabled={submitting}>{submitting ? "Submitting..." : "Submit Review"}</Button>
+            <Button onClick={() => setShowForm(false)} size="sm" variant="outline">Cancel</Button>
+          </div>
+        </div>
+      ) : (
+        <Button onClick={() => setShowForm(true)} variant="outline" size="sm" className="text-xs">
+          <Plus className="h-3 w-3 mr-1" /> Write a Review
+        </Button>
+      )}
+    </div>
   );
 };
 

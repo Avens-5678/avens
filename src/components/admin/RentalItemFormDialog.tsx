@@ -22,6 +22,11 @@ const RENTAL_CATEGORIES = [
 
 const PRICING_UNITS = ["Per Hour", "Per Day", "Per Week", "Per Event", "Fixed Price", "Per Sq.Ft", "Per Sq.M"];
 
+interface SpecRow {
+  key: string;
+  value: string;
+}
+
 interface VariantRow {
   attribute_value: string;
   price_value: number | null;
@@ -49,6 +54,9 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
   const [variantRows, setVariantRows] = useState<VariantRow[]>([]);
   const [newAttributeValue, setNewAttributeValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [specRows, setSpecRows] = useState<SpecRow[]>([]);
+  const [newSpecKey, setNewSpecKey] = useState("");
+  const [newSpecValue, setNewSpecValue] = useState("");
   const multipleFileInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +74,7 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
           short_description: editingItem.short_description || '',
           description: editingItem.description || '',
         });
+        setSpecRows(Array.isArray(editingItem.specifications) ? editingItem.specifications : []);
         setHasVariants(editingItem.has_variants || false);
         if (editingItem.has_variants) {
           loadVariants(editingItem.id, editingItem._variantTable || "rental_variants");
@@ -82,6 +91,7 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
         });
         setHasVariants(false);
         setVariantRows([]);
+        setSpecRows([]);
         setAttributeType("Size");
       }
     }
@@ -189,7 +199,7 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
     setSaving(true);
     try {
       await onSave(
-        { ...formData, has_variants: hasVariants, price_value: hasVariants ? null : (formData.price_value ? parseFloat(formData.price_value) : null), pricing_unit: hasVariants ? null : (formData.pricing_unit || 'Per Day') },
+        { ...formData, has_variants: hasVariants, specifications: specRows, price_value: hasVariants ? null : (formData.price_value ? parseFloat(formData.price_value) : null), pricing_unit: hasVariants ? null : (formData.pricing_unit || 'Per Day') },
         hasVariants && variantRows.length > 0 ? { attributeType, rows: variantRows } : null
       );
       onOpenChange(false);
@@ -366,6 +376,53 @@ const RentalItemFormDialog = ({ open, onOpenChange, editingItem, onSave, title, 
                 </div>
               )}
               <p className="text-xs text-muted-foreground">💡 Variants without images will fallback to the base product images.</p>
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        {/* Step 3: Specifications */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Step 3: Specifications</h3>
+          <p className="text-xs text-muted-foreground">Add key-value specification rows that appear on the product detail page.</p>
+          
+          <div className="flex items-end gap-2">
+            <div className="space-y-1 flex-1">
+              <Label className="text-xs">Specification Name</Label>
+              <Input value={newSpecKey} onChange={(e) => setNewSpecKey(e.target.value)} placeholder="e.g. Material, Weight, Dimensions" />
+            </div>
+            <div className="space-y-1 flex-1">
+              <Label className="text-xs">Value</Label>
+              <Input value={newSpecValue} onChange={(e) => setNewSpecValue(e.target.value)} placeholder="e.g. Aluminum, 50kg, 20m x 10m" onKeyDown={(e) => {
+                if (e.key === 'Enter' && newSpecKey.trim() && newSpecValue.trim()) {
+                  setSpecRows(prev => [...prev, { key: newSpecKey.trim(), value: newSpecValue.trim() }]);
+                  setNewSpecKey(""); setNewSpecValue("");
+                }
+              }} />
+            </div>
+            <Button size="sm" onClick={() => {
+              if (newSpecKey.trim() && newSpecValue.trim()) {
+                setSpecRows(prev => [...prev, { key: newSpecKey.trim(), value: newSpecValue.trim() }]);
+                setNewSpecKey(""); setNewSpecValue("");
+              }
+            }}><Plus className="h-4 w-4 mr-1" />Add</Button>
+          </div>
+
+          {specRows.length > 0 && (
+            <div className="border border-border rounded-xl overflow-hidden">
+              <div className="grid grid-cols-[1fr_1fr_40px] gap-2 p-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase">
+                <span>Name</span><span>Value</span><span></span>
+              </div>
+              {specRows.map((row, i) => (
+                <div key={i} className="grid grid-cols-[1fr_1fr_40px] gap-2 p-3 border-t border-border items-center">
+                  <Input className="h-8 text-sm" value={row.key} onChange={(e) => setSpecRows(prev => prev.map((r, idx) => idx === i ? { ...r, key: e.target.value } : r))} />
+                  <Input className="h-8 text-sm" value={row.value} onChange={(e) => setSpecRows(prev => prev.map((r, idx) => idx === i ? { ...r, value: e.target.value } : r))} />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setSpecRows(prev => prev.filter((_, idx) => idx !== i))}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
           )}
         </div>

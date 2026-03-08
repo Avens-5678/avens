@@ -210,27 +210,17 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
             </div>
           </div>
 
-          {/* GST Toggle */}
-          <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+          {/* GST Fields always visible */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <p className="text-sm font-medium">GST Billing</p>
-              <p className="text-xs text-muted-foreground">When OFF, GSTIN & PAN won't appear on quotes and tax won't be calculated</p>
+              <Label className="text-sm">GSTIN</Label>
+              <Input value={companyGst} onChange={e => setCompanyGst(e.target.value)} placeholder="e.g. 36AABCA1234B1Z5" className="h-9" />
             </div>
-            <Switch checked={gstEnabled} onCheckedChange={setGstEnabled} />
+            <div>
+              <Label className="text-sm">PAN Number</Label>
+              <Input value={companyPan} onChange={e => setCompanyPan(e.target.value)} placeholder="e.g. AABCA1234B" className="h-9" />
+            </div>
           </div>
-
-          {gstEnabled && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label className="text-sm">GSTIN</Label>
-                <Input value={companyGst} onChange={e => setCompanyGst(e.target.value)} placeholder="e.g. 36AABCA1234B1Z5" className="h-9" />
-              </div>
-              <div>
-                <Label className="text-sm">PAN Number</Label>
-                <Input value={companyPan} onChange={e => setCompanyPan(e.target.value)} placeholder="e.g. AABCA1234B" className="h-9" />
-              </div>
-            </div>
-          )}
 
           <Button onClick={handleSaveCompany} disabled={updateCompany.isPending || companyLoading} size="sm">
             {updateCompany.isPending ? "Saving..." : "Save Company Details"}

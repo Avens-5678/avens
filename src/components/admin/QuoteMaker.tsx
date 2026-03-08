@@ -222,6 +222,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
             clientPhone,
             quoteNumber: createdQuote.quote_number,
             acceptanceToken: createdQuote.acceptance_token,
+            sourceOrderId: selectedOrderId || null,
           },
         });
 

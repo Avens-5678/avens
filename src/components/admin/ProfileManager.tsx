@@ -45,6 +45,7 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
   const passwordForm = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
+      current_password: "",
       new_password: "",
       confirm_password: "",
     },

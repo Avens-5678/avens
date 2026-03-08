@@ -281,6 +281,10 @@ const Ecommerce = () => {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <Button onClick={() => navigate("/ecommerce/orders")} variant="outline" size="sm" className="gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Orders
+            </Button>
             <Button onClick={() => navigate("/cart")} variant="outline" size="sm" className="gap-2">
               <ShoppingCart className="h-4 w-4" />
               Cart ({items.length})

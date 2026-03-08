@@ -354,7 +354,8 @@ const Index = () => {
                 </GlassmorphismCard>
               </TiltCard>
               )}
-          </ServiceScrollContainer>
+              </ServiceScrollContainer>
+            </ScrollReveal>
             }
 
           {homeServices.length > 0 &&

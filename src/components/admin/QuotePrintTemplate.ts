@@ -235,7 +235,7 @@ table.items tbody td { padding:10px 14px; border-bottom:1px solid #eee; font-siz
 <div class="quote-badge"><span>QUOTATION</span></div>
 <div class="parties">
   <div class="party"><h3>From</h3><p><strong>${s.companyName}</strong><br>${s.companyAddress}${s.gstPanInline}</p></div>
-  <div class="party"><h3>To</h3><p><strong>${data.clientName}</strong>${data.clientEmail ? `<br>Email: ${data.clientEmail}` : ""}${data.clientPhone ? `<br>Phone: ${data.clientPhone}` : ""}</p></div>
+  <div class="party"><h3>To</h3><p>${data.clientCompanyName ? `<strong>${data.clientCompanyName}</strong><br>` : ""}<strong>${data.clientName}</strong>${data.clientEmail ? `<br>Email: ${data.clientEmail}` : ""}${data.clientPhone ? `<br>Phone: ${data.clientPhone}` : ""}${s.clientGstInline}</p></div>
 </div>
 <table class="items"><thead><tr><th>Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
 <div class="bottom">

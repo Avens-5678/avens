@@ -13,6 +13,7 @@ import { useCreateQuote, useQuotes, useQuoteVersions, type QuoteLineItem, type Q
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, Calculator, Mail, MessageSquare, Download, PackageSearch, Copy, History, Palette } from "lucide-react";
 import { downloadQuoteAsPDF, type QuoteTemplate } from "./QuotePrintTemplate";
 import QuotePicklistDialog from "./QuotePicklistDialog";
@@ -54,15 +55,29 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
   const [currentVersion, setCurrentVersion] = useState(1);
   const { data: versionHistory } = useQuoteVersions(parentQuoteId || editingQuoteId || undefined);
 
-  // Auto-set tax type from company settings
+  // Per-quote GST toggle (defaults from company settings)
+  const [gstEnabled, setGstEnabled] = useState(true);
+
   useEffect(() => {
     if (companySettings) {
+      setGstEnabled(companySettings.gst_enabled);
       if (!companySettings.gst_enabled) {
         setTaxType("none");
         setTaxPercent(0);
       }
     }
   }, [companySettings]);
+
+  // Sync GST toggle with tax fields
+  useEffect(() => {
+    if (!gstEnabled) {
+      setTaxType("none");
+      setTaxPercent(0);
+    } else if (taxType === "none") {
+      setTaxType("gst");
+      setTaxPercent(18);
+    }
+  }, [gstEnabled]);
 
   // Auto-populate from selected order
   useEffect(() => {
@@ -198,7 +213,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       companyAddress: companySettings?.address,
       companyPhone: companySettings?.phone,
       companyEmail: companySettings?.email,
-      gstEnabled: companySettings?.gst_enabled ?? true,
+      gstEnabled,
     });
 
     createQuote.mutate({ quote: buildQuotePayload("draft"), lineItems });
@@ -506,19 +521,29 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       <Card className="rounded-2xl">
         <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Calculator className="h-4 w-4" />Price Calculation</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          {/* GST Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
             <div>
-              <Label>Tax Type</Label>
-              <Select value={taxType} onValueChange={v => setTaxType(v as any)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gst">GST</SelectItem>
-                  <SelectItem value="vat">VAT</SelectItem>
-                  <SelectItem value="none">No Tax</SelectItem>
-                </SelectContent>
-              </Select>
+              <p className="text-sm font-medium">GST Billing</p>
+              <p className="text-xs text-muted-foreground">When OFF, GSTIN & PAN won't appear on quotes and tax won't be calculated</p>
             </div>
-            {taxType !== "none" && (
+            <Switch checked={gstEnabled} onCheckedChange={setGstEnabled} />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            {gstEnabled && (
+              <div>
+                <Label>Tax Type</Label>
+                <Select value={taxType} onValueChange={v => setTaxType(v as any)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gst">GST</SelectItem>
+                    <SelectItem value="vat">VAT</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {gstEnabled && (
               <div>
                 <Label>{taxType.toUpperCase()} %</Label>
                 <Input type="number" min={0} max={100} value={taxPercent} onChange={e => setTaxPercent(parseFloat(e.target.value) || 0)} />

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -48,7 +47,6 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
   const [companyAddress, setCompanyAddress] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
-  const [gstEnabled, setGstEnabled] = useState(true);
   const [logoUrl, setLogoUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
@@ -60,7 +58,6 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
       setCompanyAddress(companySettings.address || "");
       setCompanyPhone(companySettings.phone || "");
       setCompanyEmail(companySettings.email || "");
-      setGstEnabled(companySettings.gst_enabled);
       setLogoUrl(companySettings.logo_url || "");
     }
   }, [companySettings]);
@@ -147,7 +144,7 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
       address: companyAddress,
       phone: companyPhone,
       email: companyEmail,
-      gst_enabled: gstEnabled,
+      gst_enabled: true,
       logo_url: logoUrl || null,
     });
   };
@@ -210,27 +207,17 @@ const ProfileManager = ({ adminUser, onProfileUpdate }: ProfileManagerProps) => 
             </div>
           </div>
 
-          {/* GST Toggle */}
-          <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+          {/* GST Fields always visible */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <p className="text-sm font-medium">GST Billing</p>
-              <p className="text-xs text-muted-foreground">When OFF, GSTIN & PAN won't appear on quotes and tax won't be calculated</p>
+              <Label className="text-sm">GSTIN</Label>
+              <Input value={companyGst} onChange={e => setCompanyGst(e.target.value)} placeholder="e.g. 36AABCA1234B1Z5" className="h-9" />
             </div>
-            <Switch checked={gstEnabled} onCheckedChange={setGstEnabled} />
+            <div>
+              <Label className="text-sm">PAN Number</Label>
+              <Input value={companyPan} onChange={e => setCompanyPan(e.target.value)} placeholder="e.g. AABCA1234B" className="h-9" />
+            </div>
           </div>
-
-          {gstEnabled && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label className="text-sm">GSTIN</Label>
-                <Input value={companyGst} onChange={e => setCompanyGst(e.target.value)} placeholder="e.g. 36AABCA1234B1Z5" className="h-9" />
-              </div>
-              <div>
-                <Label className="text-sm">PAN Number</Label>
-                <Input value={companyPan} onChange={e => setCompanyPan(e.target.value)} placeholder="e.g. AABCA1234B" className="h-9" />
-              </div>
-            </div>
-          )}
 
           <Button onClick={handleSaveCompany} disabled={updateCompany.isPending || companyLoading} size="sm">
             {updateCompany.isPending ? "Saving..." : "Save Company Details"}

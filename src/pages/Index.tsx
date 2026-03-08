@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useAboutContent } from "@/hooks/useData";
 import { useDashboardPath } from "@/hooks/useDashboardPath";
-import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight, Shield } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { GradientText } from "@/components/ui/animated-text";
@@ -22,6 +22,11 @@ import { ServiceScrollContainer } from "@/components/ui/service-scroll-container
 import { CursorTrail } from "@/components/ui/cursor-trail";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { TiltCard } from "@/components/ui/tilt-card";
+import { ScrollIndicator } from "@/components/ui/scroll-indicator";
+import { WhyChooseUs } from "@/components/ui/why-choose-us";
+import { BackgroundPattern } from "@/components/ui/background-pattern";
+import { SectionDivider } from "@/components/ui/section-divider";
+import ScrollReveal from "@/components/ui/scroll-reveal";
 
 // Lazy load heavy/below-fold components
 const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));

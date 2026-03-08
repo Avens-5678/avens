@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import Layout from "@/components/Layout/Layout";
-import InquiryForm from "@/components/Forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
 import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap, Target, Building, Mic, Monitor, Layout as LayoutIcon } from "lucide-react";
 import ScrollReveal from "@/components/ui/scroll-reveal";
@@ -161,27 +159,17 @@ const DynamicEventPage = () => {
                </ScrollReveal>
 
               <ScrollReveal animation="elastic" delay={600}>
-                <Dialog>
-                  <DialogTrigger asChild>
-                     <MagneticButton 
-                       size="lg" 
-                       className="button-primary px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold rounded-full shadow-2xl w-full sm:w-auto"
-                     >
-                       <Briefcase className="mr-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
-                       Plan My {event.title}
-                       <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
-                     </MagneticButton>
-                  </DialogTrigger>
-                  <DialogContent className="w-[95vw] sm:w-[90vw] max-w-2xl glass mx-4">
-                    <DialogTitle>✨ Start Planning Your {event.title}</DialogTitle>
-                    <DialogDescription>Fill out this form to begin your journey</DialogDescription>
-                    <InquiryForm 
-                      formType="inquiry"
-                      eventType={event.event_type}
-                      title={`Plan Your ${event.title}`}
-                    />
-                  </DialogContent>
-                </Dialog>
+                <MagneticButton 
+                  size="lg" 
+                  className="button-primary px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold rounded-full shadow-2xl w-full sm:w-auto"
+                  asChild
+                >
+                  <Link to={`/client/dashboard?tab=request&type=${event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <Briefcase className="mr-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
+                    Plan My {event.title}
+                    <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
+                  </Link>
+                </MagneticButton>
               </ScrollReveal>
             </ScrollReveal>
           </div>
@@ -429,27 +417,17 @@ const DynamicEventPage = () => {
             </p>
 
             <ScrollReveal animation="elastic" delay={400} className="pt-4 lg:pt-6">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <MagneticButton 
-                    size="lg" 
-                    className="button-primary px-8 sm:px-10 lg:px-12 py-3 sm:py-4 text-lg sm:text-xl font-semibold rounded-full shadow-2xl w-full sm:w-auto"
-                  >
-                    <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
-                    {event.cta_button_text || 'Book a Consultation'}
-                    <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6" />
-                  </MagneticButton>
-                </DialogTrigger>
-                <DialogContent className="w-[95vw] sm:w-[90vw] max-w-2xl glass mx-4">
-                  <DialogTitle>✨ Start Planning Your {event.title}</DialogTitle>
-                  <DialogDescription>Fill out this form to begin your journey</DialogDescription>
-                  <InquiryForm 
-                    formType="inquiry"
-                    eventType={event.event_type}
-                    title="Book Consultation"
-                  />
-                </DialogContent>
-              </Dialog>
+              <MagneticButton 
+                size="lg" 
+                className="button-primary px-8 sm:px-10 lg:px-12 py-3 sm:py-4 text-lg sm:text-xl font-semibold rounded-full shadow-2xl w-full sm:w-auto"
+                asChild
+              >
+                <Link to={`/client/dashboard?tab=request&type=${event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
+                  {event.cta_button_text || 'Book a Consultation'}
+                  <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6" />
+                </Link>
+              </MagneticButton>
             </ScrollReveal>
           </ScrollReveal>
         </div>

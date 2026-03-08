@@ -418,7 +418,7 @@ export const EventPageTemplate = ({
                   strength={20}
                   asChild
                 >
-                  <Link to={`/client/dashboard?tab=request&type=${eventType.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Link to={getServiceRequestPath(eventType.toLowerCase().replace(/\s+/g, '-'))}>
                     <EventIcon className="mr-2 h-6 w-6" />
                     Start Planning Today
                     <ArrowRight className="ml-2 h-6 w-6" />

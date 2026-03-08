@@ -35,6 +35,14 @@ export interface Quote {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  // New fields
+  tax_type: string | null;
+  template: string | null;
+  version: number | null;
+  parent_quote_id: string | null;
+  acceptance_token: string | null;
+  signature_url: string | null;
+  signed_at: string | null;
 }
 
 export const useQuotes = () => {
@@ -68,6 +76,23 @@ export const useQuoteLineItems = (quoteId?: string) => {
   });
 };
 
+export const useQuoteVersions = (parentQuoteId?: string) => {
+  return useQuery({
+    queryKey: ["quote_versions", parentQuoteId],
+    queryFn: async () => {
+      if (!parentQuoteId) return [];
+      const { data, error } = await supabase
+        .from("quotes")
+        .select("*")
+        .or(`id.eq.${parentQuoteId},parent_quote_id.eq.${parentQuoteId}`)
+        .order("version", { ascending: true });
+      if (error) throw error;
+      return data as Quote[];
+    },
+    enabled: !!parentQuoteId,
+  });
+};
+
 export const useCreateQuote = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -82,7 +107,7 @@ export const useCreateQuote = () => {
     }) => {
       const { data: createdQuote, error: quoteError } = await supabase
         .from("quotes")
-        .insert(quote)
+        .insert(quote as any)
         .select()
         .single();
       if (quoteError) throw quoteError;

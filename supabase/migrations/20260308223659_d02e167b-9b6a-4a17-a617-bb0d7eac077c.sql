@@ -1,0 +1,1 @@
+ALTER TABLE public.promo_banners ADD COLUMN image_url text;

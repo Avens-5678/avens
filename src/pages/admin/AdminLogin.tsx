@@ -44,27 +44,14 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
     try {
-      const { data: isValidAdmin, error: validationError } = await supabase
-        .rpc('validate_admin_email', { check_email: values.email });
-
-      if (validationError) throw validationError;
-
-      if (!isValidAdmin) {
-        toast({
-          title: "Access Denied",
-          description: "This email is not authorized for admin access.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
+      // Do not pre-validate admin email to prevent enumeration attacks.
+      // Admin status is verified server-side after successful authentication.
       setEmail(values.email);
       setStep('choose');
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to validate email.",
+        description: error.message || "Something went wrong.",
         variant: "destructive",
       });
     } finally {

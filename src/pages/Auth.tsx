@@ -98,11 +98,6 @@ const Auth = () => {
       setEmail(values.email);
       setUserTypeInfo(data);
 
-      if (data.is_admin) {
-        navigate("/admin");
-        return;
-      }
-
       if (data.exists) {
         setStep("password");
       } else {

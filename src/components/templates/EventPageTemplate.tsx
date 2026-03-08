@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useDashboardPath } from "@/hooks/useDashboardPath";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -87,6 +88,8 @@ export const EventPageTemplate = ({
   isLoading = false
 }: EventPageTemplateProps) => {
   
+  const { getServiceRequestPath } = useDashboardPath();
+  
   if (isLoading) {
     return (
       <Layout>
@@ -140,7 +143,7 @@ export const EventPageTemplate = ({
                   strength={15}
                   asChild
                 >
-                  <Link to={`/client/dashboard?tab=request&type=${eventType.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Link to={getServiceRequestPath(eventType.toLowerCase().replace(/\s+/g, '-'))}>
                     <EventIcon className="mr-2 h-5 w-5" />
                     Plan My {eventTitle}
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -415,7 +418,7 @@ export const EventPageTemplate = ({
                   strength={20}
                   asChild
                 >
-                  <Link to={`/client/dashboard?tab=request&type=${eventType.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Link to={getServiceRequestPath(eventType.toLowerCase().replace(/\s+/g, '-'))}>
                     <EventIcon className="mr-2 h-6 w-6" />
                     Start Planning Today
                     <ArrowRight className="ml-2 h-6 w-6" />

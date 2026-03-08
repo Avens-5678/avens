@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout/Layout";
 import { useEvent, usePortfolio } from "@/hooks/useData";
+import { useDashboardPath } from "@/hooks/useDashboardPath";
 import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap, Target, Building, Mic, Monitor, Layout as LayoutIcon } from "lucide-react";
 import ScrollReveal from "@/components/ui/scroll-reveal";
 import FloatingParticles from "@/components/ui/floating-particles";
@@ -29,6 +30,7 @@ const DynamicEventPage = () => {
   const { eventType } = useParams<{ eventType: string }>();
   const { data: event, isLoading } = useEvent(eventType || "");
   const { data: portfolio } = usePortfolio();
+  const { getServiceRequestPath } = useDashboardPath();
 
   const eventPortfolio = portfolio?.filter(item => 
     item.event_id === event?.id || 
@@ -164,7 +166,7 @@ const DynamicEventPage = () => {
                   className="button-primary px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold rounded-full shadow-2xl w-full sm:w-auto"
                   asChild
                 >
-                  <Link to={`/client/dashboard?tab=request&type=${event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Link to={getServiceRequestPath(event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-'))}>
                     <Briefcase className="mr-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
                     Plan My {event.title}
                     <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
@@ -422,7 +424,7 @@ const DynamicEventPage = () => {
                 className="button-primary px-8 sm:px-10 lg:px-12 py-3 sm:py-4 text-lg sm:text-xl font-semibold rounded-full shadow-2xl w-full sm:w-auto"
                 asChild
               >
-                <Link to={`/client/dashboard?tab=request&type=${event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
+                <Link to={getServiceRequestPath(event.url_slug || event.event_type.toLowerCase().replace(/\s+/g, '-'))}>
                   <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
                   {event.cta_button_text || 'Book a Consultation'}
                   <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6" />

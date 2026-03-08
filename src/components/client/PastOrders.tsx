@@ -39,12 +39,12 @@ const PastOrders = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Past Orders</h2>
-      <p className="text-muted-foreground">View all your service requests and rental orders in one place.</p>
+      <p className="text-muted-foreground">View all your event requests and rental orders in one place.</p>
 
       <Tabs defaultValue="services" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="services">
-            Service Requests ({allServiceRequests.length})
+            Event Requests ({allServiceRequests.length})
           </TabsTrigger>
           <TabsTrigger value="rentals">
             Rental Orders ({allRentalOrders.length})
@@ -56,8 +56,8 @@ const PastOrders = () => {
             <Card>
               <CardContent className="py-12 text-center">
                 <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Service Requests</h3>
-                <p className="text-muted-foreground">You haven't submitted any service requests yet.</p>
+                <h3 className="text-lg font-semibold mb-2">No Event Requests</h3>
+                <p className="text-muted-foreground">You haven't submitted any event requests yet.</p>
               </CardContent>
             </Card>
           ) : (

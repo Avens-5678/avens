@@ -111,7 +111,7 @@ const TrackOrder = () => {
               Track Your Order
             </h1>
             <p className="text-muted-foreground max-w-lg mx-auto mb-8">
-              Enter your order ID to check the current status and progress of your rental or service request.
+              Enter your order ID to check the current status and progress of your rental or event request.
             </p>
 
             {/* Search */}

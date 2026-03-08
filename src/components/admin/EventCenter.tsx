@@ -126,7 +126,7 @@ const EventCenter = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Service Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">Event Requests</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{serviceOrders?.length || 0}</div>
@@ -155,7 +155,7 @@ const EventCenter = () => {
           </TabsTrigger>
           <TabsTrigger value="services">
             <Briefcase className="h-4 w-4 mr-2" />
-            Service Orders ({serviceOrders?.length || 0})
+            Event Requests ({serviceOrders?.length || 0})
           </TabsTrigger>
         </TabsList>
         {/* Event Requests Tab */}
@@ -404,13 +404,13 @@ const EventCenter = () => {
         <TabsContent value="services" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>All Service Orders</CardTitle>
+              <CardTitle>All Event Requests</CardTitle>
             </CardHeader>
             <CardContent>
               {!serviceOrders || serviceOrders.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No service orders yet</p>
+                  <p>No event requests yet</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">

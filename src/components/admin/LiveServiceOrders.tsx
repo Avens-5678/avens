@@ -82,7 +82,7 @@ const LiveServiceOrders = () => {
 
       // For now, open WhatsApp directly with confirmation message
       const phone = order.client_phone.replace(/[^0-9]/g, "");
-      const message = `🎪 *Evnting - Service Request Confirmation*\n\nHi ${order.client_name || "there"},\n\nThank you for your service request!\n\n📋 *Request:* ${order.title}\n📍 *Location:* ${order.location || "TBD"}\n📅 *Date:* ${order.event_date ? new Date(order.event_date).toLocaleDateString() : "TBD"}\n\nOur team has received your request and will get back to you shortly with a detailed quote.\n\nBest regards,\nTeam Evnting`;
+      const message = `🎪 *Evnting - Event Request Confirmation*\n\nHi ${order.client_name || "there"},\n\nThank you for your event request!\n\n📋 *Request:* ${order.title}\n📍 *Location:* ${order.location || "TBD"}\n📅 *Date:* ${order.event_date ? new Date(order.event_date).toLocaleDateString() : "TBD"}\n\nOur team has received your request and will get back to you shortly with a detailed quote.\n\nBest regards,\nTeam Evnting`;
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
 
       updateOrder.mutate({ id: order.id, status: "in_progress" });
@@ -116,15 +116,15 @@ const LiveServiceOrders = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-         <h2 className="text-2xl font-bold">Service Requests</h2>
-          <p className="text-muted-foreground text-sm">Manage service requests & generate quotes</p>
+         <h2 className="text-2xl font-bold">Event Requests</h2>
+          <p className="text-muted-foreground text-sm">Manage event requests & generate quotes</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />New Service Order</Button>
+            <Button><Plus className="mr-2 h-4 w-4" />New Event Request</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Create Service Order</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Create Event Request</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div><Label>Title *</Label><Input value={newOrder.title} onChange={e => setNewOrder({ ...newOrder, title: e.target.value })} placeholder="e.g. Wedding Reception - 500 Guests" /></div>
               <div>
@@ -227,8 +227,8 @@ const LiveServiceOrders = () => {
         <Card>
           <CardContent className="text-center py-12">
             <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">No service orders found</h3>
-            <p className="text-muted-foreground text-sm">Create your first service order or adjust filters.</p>
+             <h3 className="text-lg font-medium">No event requests found</h3>
+             <p className="text-muted-foreground text-sm">Create your first event request or adjust filters.</p>
           </CardContent>
         </Card>
       ) : (
@@ -281,7 +281,7 @@ const LiveServiceOrders = () => {
       {/* View Order Dialog */}
       <Dialog open={!!viewOrder} onOpenChange={() => setViewOrder(null)}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Service Order Details</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Event Request Details</DialogTitle></DialogHeader>
           {viewOrder && (
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-3">

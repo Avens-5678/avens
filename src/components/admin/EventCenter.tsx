@@ -404,7 +404,7 @@ const EventCenter = () => {
         <TabsContent value="services" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>All Service Orders</CardTitle>
+              <CardTitle>All Event Requests</CardTitle>
             </CardHeader>
             <CardContent>
               {!serviceOrders || serviceOrders.length === 0 ? (

@@ -93,17 +93,10 @@ Deno.serve(async (req) => {
                 "Content-Type": "application/json-patch+json",
               },
               body: JSON.stringify({
-                template_name: "vendor_order_notification",
+                template_name: "reminder",
                 broadcast_name: `order_${orderId}`,
                 parameters: [
-                  { name: "vendor_name", value: vendorName || "Vendor" },
-                  { name: "order_title", value: order.title || "New Order" },
-                  { name: "category", value: order.equipment_category || "General" },
-                  { name: "location", value: order.location || "TBD" },
-                  { name: "event_date", value: order.event_date || "TBD" },
-                  { name: "budget", value: order.budget || "Negotiable" },
-                  { name: "accept_url", value: acceptUrl },
-                  { name: "quote_url", value: quoteUrl },
+                  { name: "1", value: vendorName || "Vendor" },
                 ],
               }),
             }

@@ -375,9 +375,8 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       );
     }
 
-    const baseUrl = window.location.hostname.includes("lovableproject.com") || window.location.hostname.includes("lovable.app")
-      ? "https://evnting.com"
-      : window.location.origin;
+    const baseUrl = "https://avens.lovable.app";
+    // Use custom domain if configured: const baseUrl = "https://evnting.com";
     const link = `${baseUrl}/quote/${createdQuote.acceptance_token}`;
     await navigator.clipboard.writeText(link);
     toast({ title: "Acceptance Link Copied!", description: "Share this link with the client to accept & sign." });
@@ -418,7 +417,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       {/* Source Selection + Template */}
       <Card className="rounded-2xl">
         <CardContent className="p-5 space-y-4">
-          <div className={`grid grid-cols-1 gap-4 ${selectedSourceType !== "manual" ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Source</Label>
               <Select value={selectedSourceType} onValueChange={v => { setSelectedSourceType(v); setSelectedOrderId(""); }}>

@@ -27,7 +27,6 @@ const passwordSchema = z.object({
 type Step = "email" | "password" | "role-select" | "forgot-password" | "google-onboarding";
 
 interface UserTypeInfo {
-  is_admin: boolean;
   exists: boolean;
   roles: string[];
 }

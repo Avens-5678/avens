@@ -172,11 +172,11 @@ table.items tbody td { font-size:13px; }
 </style></head><body>
 <div class="quote-title">Quotation</div>
 <div class="header">
-  <div class="logo-area"><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
+  <div class="logo-area">${s.logoHtml}<h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
   <table class="meta-table"><tr><td>Quotation #</td><td>${s.qNum}</td></tr><tr><td>Date</td><td>${s.dateStr}</td></tr>${s.orderRef ? `<tr><td>Order Ref</td><td>${s.orderRef}</td></tr>` : ""}</table>
 </div>
 <div class="parties">
-  <div class="party-box"><h3>Quotation By</h3><p><strong>Evnting (Avens Events Pvt. Ltd.)</strong></p><p>Plot No. 123, Jubilee Hills<br>Hyderabad, Telangana - 500033</p><p style="margin-top:6px;"><span class="label">GSTIN</span> 36AABCA1234B1Z5</p><p><span class="label">PAN</span> AABCA1234B</p></div>
+  <div class="party-box"><h3>Quotation By</h3><p><strong>${s.companyName}</strong></p><p>${s.companyAddress}</p>${s.gstPanHtml}</div>
   <div class="party-box"><h3>Quotation To</h3><p><strong>${data.clientName}</strong></p>${data.clientEmail ? `<p>Email: ${data.clientEmail}</p>` : ""}${data.clientPhone ? `<p>Phone: ${data.clientPhone}</p>` : ""}</div>
 </div>
 <table class="items"><thead><tr><th>Item # / Description</th><th>Qty.</th><th>Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${s.itemsHTML}</tbody></table>
@@ -185,7 +185,7 @@ table.items tbody td { font-size:13px; }
   <div class="totals">${buildTotals(data, s)}</div>
 </div>
 <div class="footer">
-  <div class="footer-contact">For enquiries, email <strong>leads@avens.in</strong> or call <strong>+91 90000 00000</strong></div>
+  <div class="footer-contact">For enquiries, email <strong>${s.companyEmail}</strong> or call <strong>${s.companyPhone}</strong></div>
   <div class="signature"><div class="signature-line"></div>Authorized Signature</div>
 </div>
 <script>window.onload=function(){window.print();}</script>

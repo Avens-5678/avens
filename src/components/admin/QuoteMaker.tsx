@@ -644,7 +644,10 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       {allQuotes && allQuotes.length > 0 && !editingQuoteId && (
         <Card className="rounded-2xl">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2"><History className="h-4 w-4" />Recent Quotes — Revise</CardTitle>
+            <div className="flex items-center justify-between w-full">
+              <CardTitle className="text-base flex items-center gap-2"><History className="h-4 w-4" />Recent Quotes — Revise</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => { setClientName(""); setClientEmail(""); setClientPhone(""); setClientCompanyName(""); setClientGst(""); setNotes(""); setLineItems([{ item_description: "", quantity: 1, unit: "nos", unit_price: 0, total_price: 0 }]); setDiscountValue(0); }}>Clear</Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 max-h-48 overflow-y-auto">

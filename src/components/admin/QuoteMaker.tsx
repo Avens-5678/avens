@@ -191,6 +191,56 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
     }
     setSending(true);
 
+    if (via === "whatsapp") {
+      if (!clientPhone) {
+        toast({ title: "Missing phone number", description: "Client phone is required to send via WhatsApp.", variant: "destructive" });
+        setSending(false);
+        return;
+      }
+
+      try {
+        // Save the quote first to get the acceptance token
+        const { data: createdQuote, error: insertError } = await supabase
+          .from("quotes")
+          .insert(buildQuotePayload("sent", "whatsapp") as any)
+          .select("id, acceptance_token, quote_number")
+          .single();
+
+        if (insertError || !createdQuote) throw new Error(insertError?.message || "Failed to create quote");
+
+        // Insert line items
+        if (lineItems.length > 0) {
+          await supabase.from("quote_line_items").insert(
+            lineItems.map((li, idx) => ({ ...li, quote_id: createdQuote.id, display_order: idx }))
+          );
+        }
+
+        // Send via WATI edge function
+        const { data: watiResult, error: watiError } = await supabase.functions.invoke("wati-quote-notification", {
+          body: {
+            clientName,
+            clientPhone,
+            quoteNumber: createdQuote.quote_number,
+            acceptanceToken: createdQuote.acceptance_token,
+          },
+        });
+
+        if (watiError) {
+          toast({ title: "Quote saved", description: `Quote created but WhatsApp failed: ${watiError.message}`, variant: "destructive" });
+        } else if (watiResult?.success) {
+          toast({ title: "WhatsApp Sent!", description: `Quote sent to ${clientPhone} via WATI.` });
+        } else {
+          toast({ title: "Quote saved", description: `WhatsApp failed: ${watiResult?.error || "Unknown error"}`, variant: "destructive" });
+        }
+      } catch (err: any) {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      }
+
+      setSending(false);
+      return;
+    }
+
+    // Email flow
     const itemsText = lineItems.map((li, i) =>
       `${i + 1}. ${li.item_description} — ${li.quantity} ${li.unit} × ₹${li.unit_price.toLocaleString()} = ₹${li.total_price.toLocaleString()}`
     ).join("\n");
@@ -198,20 +248,16 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
     const taxLabel = taxType === "vat" ? "VAT" : "GST";
     const quoteText = `📋 *Quote for ${clientName}*\n\n${itemsText}\n\nSubtotal: ₹${calculations.subtotal.toLocaleString()}\nDiscount: ₹${calculations.discountAmount.toLocaleString()}\n${taxLabel} (${calculations.effectiveTaxPercent}%): ₹${calculations.taxAmount.toLocaleString()}\n\n💰 *Total: ₹${calculations.total.toLocaleString()}*`;
 
-    if (via === "whatsapp" && clientPhone) {
-      const phone = clientPhone.replace(/[^0-9]/g, "");
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(quoteText)}`, "_blank");
-      toast({ title: "WhatsApp opened", description: "Quote message ready to send." });
-    } else if (via === "email" && clientEmail) {
+    if (clientEmail) {
       const subject = encodeURIComponent(`Quote from Evnting - ${clientName}`);
       const body = encodeURIComponent(quoteText.replace(/\*/g, ""));
       window.open(`mailto:${clientEmail}?subject=${subject}&body=${body}`, "_blank");
       toast({ title: "Email client opened", description: "Quote ready to send via email." });
     } else {
-      toast({ title: "Missing contact", description: `No ${via === "email" ? "email" : "phone"} provided.`, variant: "destructive" });
+      toast({ title: "Missing email", description: "No email provided.", variant: "destructive" });
     }
 
-    createQuote.mutate({ quote: buildQuotePayload("sent", via), lineItems });
+    createQuote.mutate({ quote: buildQuotePayload("sent", "email"), lineItems });
     setSending(false);
   };
 

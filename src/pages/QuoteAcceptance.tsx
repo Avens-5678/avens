@@ -183,6 +183,15 @@ const QuoteAcceptance = () => {
             </Badge>
           </CardHeader>
           <CardContent>
+            {quote.source_order_id && (
+              <div className="flex items-center gap-2 mb-4 p-3 bg-muted/50 rounded-lg">
+                <Package className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Order Ref:</span>
+                <Badge variant="outline" className="font-mono">#{String(quote.source_order_id).substring(0, 8).toUpperCase()}</Badge>
+                <Badge variant="secondary" className="capitalize">{String(quote.source_type || "").replace("_", " ")}</Badge>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <div>
                 <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Client</p>

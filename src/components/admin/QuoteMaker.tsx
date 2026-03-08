@@ -303,6 +303,11 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedOrderId && (
+                  <Badge variant="outline" className="mt-2 font-mono text-xs">
+                    Order: #{selectedOrderId.substring(0, 8).toUpperCase()}
+                  </Badge>
+                )}
               </div>
             )}
             <div>

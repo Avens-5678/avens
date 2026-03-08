@@ -249,7 +249,7 @@ table.items tbody tr:nth-child(even) { background:#fafafe; }
 </style></head><body>
 <div class="hero">
   <div><h1>EVNTING</h1><p>Premium Event Management & Rentals</p></div>
-  <div class="hero-meta"><div>Quotation <strong>#${s.qNum}</strong></div><div>${s.dateStr}</div></div>
+  <div class="hero-meta"><div>Quotation <strong>#${s.qNum}</strong></div><div>${s.dateStr}</div>${s.orderRef ? `<div style="font-size:12px;opacity:.9;">${s.orderRef}</div>` : ""}</div>
 </div>
 <div class="content">
   <div class="parties">

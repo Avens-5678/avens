@@ -92,6 +92,7 @@ const menuGroups: MenuGroup[] = [
     icon: ShoppingBag, label: "Ecommerce", value: "ecommerce",
     subTabs: [
       { label: "Rentals", value: "rentals" },
+      { label: "Vendor Inventory", value: "vendor-inventory" },
       { label: "Promo Banners", value: "promo-banners" },
       { label: "Trust Strip", value: "trust-strip" },
     ],

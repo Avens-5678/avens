@@ -17,6 +17,8 @@ export const useDashboardPath = () => {
         return "/admin";
       case "vendor":
         return "/vendor/dashboard";
+      case "employee":
+        return "/employee/dashboard";
       case "client":
       default:
         return "/client/dashboard";

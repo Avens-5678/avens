@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogIn, ArrowLeft, UserPlus, ArrowRight, Shield, Mail, User, Building2 } from "lucide-react";
+import { Loader2, LogIn, ArrowLeft, UserPlus, ArrowRight, Shield, Mail, User, Building2, Briefcase } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -74,6 +74,7 @@ const Auth = () => {
         case "admin": navigate("/admin"); break;
         case "client": navigate("/client/dashboard"); break;
         case "vendor": navigate("/vendor/dashboard"); break;
+        case "employee": navigate("/employee/dashboard"); break;
         default: navigate("/");
       }
     } else if (user && !role && !roleLoading) {
@@ -152,6 +153,7 @@ const Auth = () => {
     switch (selectedRole) {
       case "client": navigate("/client/dashboard"); break;
       case "vendor": navigate("/vendor/dashboard"); break;
+      case "employee": navigate("/employee/dashboard"); break;
       case "admin": navigate("/admin"); break;
       default: navigate("/");
     }
@@ -396,11 +398,12 @@ const Auth = () => {
                 >
                   {r === "client" && <UserPlus className="mr-3 h-5 w-5 text-primary" />}
                   {r === "vendor" && <Shield className="mr-3 h-5 w-5 text-accent" />}
+                  {r === "employee" && <Briefcase className="mr-3 h-5 w-5 text-primary" />}
                   {r === "admin" && <Shield className="mr-3 h-5 w-5 text-destructive" />}
                   <div>
                     <div className="font-medium capitalize">{r} Dashboard</div>
                     <div className="text-xs text-muted-foreground">
-                      {r === "client" ? "Manage your events" : r === "vendor" ? "Manage inventory & jobs" : "Full admin access"}
+                      {r === "client" ? "Manage your events" : r === "vendor" ? "Manage inventory & jobs" : r === "employee" ? "Employee workspace" : "Full admin access"}
                     </div>
                   </div>
                 </Button>

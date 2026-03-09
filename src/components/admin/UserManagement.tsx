@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Users, Search, Shield, UserCheck, UserX } from "lucide-react";
+import { Loader2, Users, Search, Shield, UserCheck, UserX, Briefcase } from "lucide-react";
 import { format } from "date-fns";
+import EmployeePermissionManager from "./EmployeePermissionManager";
 
 interface UserWithRole {
   user_id: string;
@@ -26,6 +27,7 @@ const UserManagement = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
 
   // Fetch all users with roles
   const { data: users, isLoading } = useQuery({
@@ -67,7 +69,7 @@ const UserManagement = () => {
 
   // Update user role
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: "admin" | "client" | "vendor" }) => {
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: "admin" | "client" | "vendor" | "employee" }) => {
       const { error } = await supabase
         .from("user_roles")
         .update({ role: newRole })
@@ -105,6 +107,7 @@ const UserManagement = () => {
     admin: users?.filter(u => u.role === "admin").length || 0,
     client: users?.filter(u => u.role === "client").length || 0,
     vendor: users?.filter(u => u.role === "vendor").length || 0,
+    employee: users?.filter(u => u.role === "employee").length || 0,
   };
 
   if (isLoading) {
@@ -118,7 +121,7 @@ const UserManagement = () => {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -160,6 +163,17 @@ const UserManagement = () => {
             <div className="text-2xl font-bold text-purple-600">{roleStats.vendor}</div>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-green-500" />
+              Employees
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{roleStats.employee}</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -190,6 +204,7 @@ const UserManagement = () => {
                 <SelectItem value="admin">Admins</SelectItem>
                 <SelectItem value="client">Clients</SelectItem>
                 <SelectItem value="vendor">Vendors</SelectItem>
+                <SelectItem value="employee">Employees</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -215,7 +230,8 @@ const UserManagement = () => {
               </TableHeader>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.user_id}>
+                  <React.Fragment key={user.user_id}>
+                  <TableRow>
                     <TableCell className="font-medium">
                       {user.full_name || "No name"}
                     </TableCell>
@@ -226,7 +242,8 @@ const UserManagement = () => {
                       <Badge 
                         variant={
                           user.role === "admin" ? "destructive" : 
-                          user.role === "vendor" ? "secondary" : "default"
+                          user.role === "vendor" ? "secondary" : 
+                          user.role === "employee" ? "outline" : "default"
                         }
                       >
                         {user.role}
@@ -236,23 +253,48 @@ const UserManagement = () => {
                       {format(new Date(user.created_at), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell>
-                      <Select
-                        value={user.role}
-                        onValueChange={(newRole: "admin" | "client" | "vendor") => 
-                          updateRoleMutation.mutate({ userId: user.user_id, newRole })
-                        }
-                        disabled={updateRoleMutation.isPending}
-                      >
-                        <SelectTrigger className="w-[120px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="client">Client</SelectItem>
-                          <SelectItem value="vendor">Vendor</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={user.role}
+                          onValueChange={(newRole: "admin" | "client" | "vendor" | "employee") => 
+                            updateRoleMutation.mutate({ userId: user.user_id, newRole })
+                          }
+                          disabled={updateRoleMutation.isPending}
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="client">Client</SelectItem>
+                            <SelectItem value="vendor">Vendor</SelectItem>
+                            <SelectItem value="employee">Employee</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {user.role === "employee" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedEmployee(
+                              selectedEmployee === user.user_id ? null : user.user_id
+                            )}
+                          >
+                            Permissions
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
+                  {selectedEmployee === user.user_id && user.role === "employee" && (
+                    <TableRow>
+                      <TableCell colSpan={7} className="p-4 bg-muted/30">
+                        <EmployeePermissionManager
+                          employeeId={user.user_id}
+                          employeeName={user.full_name || user.email}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>

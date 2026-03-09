@@ -39,6 +39,9 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           case "vendor":
             navigate("/vendor/dashboard");
             break;
+          case "employee":
+            navigate("/employee/dashboard");
+            break;
           default:
             navigate("/");
         }

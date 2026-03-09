@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogIn, ArrowLeft, UserPlus, ArrowRight, Shield, Mail, User, Building2 } from "lucide-react";
+import { Loader2, LogIn, ArrowLeft, UserPlus, ArrowRight, Shield, Mail, User, Building2, Briefcase } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";

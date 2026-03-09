@@ -27,6 +27,7 @@ const Register = lazy(() => import("./pages/auth/Register"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ClientDashboard = lazy(() => import("./pages/client/ClientDashboard"));
 const VendorDashboard = lazy(() => import("./pages/vendor/VendorDashboard"));
+const EmployeeDashboard = lazy(() => import("./pages/employee/EmployeeDashboard"));
 const VendorAction = lazy(() => import("./pages/vendor/VendorAction"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));

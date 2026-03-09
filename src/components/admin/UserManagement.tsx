@@ -252,23 +252,47 @@ const UserManagement = () => {
                       {format(new Date(user.created_at), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell>
-                      <Select
-                        value={user.role}
-                        onValueChange={(newRole: "admin" | "client" | "vendor") => 
-                          updateRoleMutation.mutate({ userId: user.user_id, newRole })
-                        }
-                        disabled={updateRoleMutation.isPending}
-                      >
-                        <SelectTrigger className="w-[120px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="client">Client</SelectItem>
-                          <SelectItem value="vendor">Vendor</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={user.role}
+                          onValueChange={(newRole: "admin" | "client" | "vendor" | "employee") => 
+                            updateRoleMutation.mutate({ userId: user.user_id, newRole })
+                          }
+                          disabled={updateRoleMutation.isPending}
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="client">Client</SelectItem>
+                            <SelectItem value="vendor">Vendor</SelectItem>
+                            <SelectItem value="employee">Employee</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {user.role === "employee" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedEmployee(
+                              selectedEmployee === user.user_id ? null : user.user_id
+                            )}
+                          >
+                            Permissions
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
+                  {selectedEmployee === user.user_id && user.role === "employee" && (
+                    <TableRow>
+                      <TableCell colSpan={7} className="p-4 bg-muted/30">
+                        <EmployeePermissionManager
+                          employeeId={user.user_id}
+                          employeeName={user.full_name || user.email}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
                 ))}
               </TableBody>
             </Table>

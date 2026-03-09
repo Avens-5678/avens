@@ -104,6 +104,16 @@ const App = () => (
                   </Suspense>
                 } 
               />
+              <Route 
+                path="/employee/dashboard" 
+                element={
+                  <Suspense fallback={<div className="min-h-screen" />}>
+                    <ProtectedRoute allowedRoles={["employee"]}>
+                      <EmployeeDashboard />
+                    </ProtectedRoute>
+                  </Suspense>
+                } 
+              />
               
               <Route path="/vendor/action" element={<VendorAction />} />
               <Route path="*" element={<NotFound />} />

@@ -153,6 +153,7 @@ const Auth = () => {
     switch (selectedRole) {
       case "client": navigate("/client/dashboard"); break;
       case "vendor": navigate("/vendor/dashboard"); break;
+      case "employee": navigate("/employee/dashboard"); break;
       case "admin": navigate("/admin"); break;
       default: navigate("/");
     }

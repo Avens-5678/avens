@@ -107,6 +107,7 @@ const UserManagement = () => {
     admin: users?.filter(u => u.role === "admin").length || 0,
     client: users?.filter(u => u.role === "client").length || 0,
     vendor: users?.filter(u => u.role === "vendor").length || 0,
+    employee: users?.filter(u => u.role === "employee").length || 0,
   };
 
   if (isLoading) {

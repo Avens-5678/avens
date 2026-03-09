@@ -230,7 +230,8 @@ const UserManagement = () => {
               </TableHeader>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.user_id}>
+                  <React.Fragment key={user.user_id}>
+                  <TableRow>
                     <TableCell className="font-medium">
                       {user.full_name || "No name"}
                     </TableCell>
@@ -293,6 +294,7 @@ const UserManagement = () => {
                       </TableCell>
                     </TableRow>
                   )}
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>

@@ -39,10 +39,10 @@ const EcommerceHeader = ({
       {/* Main header row */}
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center gap-3 sm:gap-4 h-14 sm:h-16">
-          {/* Logo / Brand */}
+          {/* Logo / Brand - hidden on mobile */}
           <button
             onClick={() => navigate("/")}
-            className="flex-shrink-0 flex items-center gap-1 hover:opacity-80 transition-opacity"
+            className="hidden sm:flex flex-shrink-0 items-center gap-1 hover:opacity-80 transition-opacity"
           >
             <img src={logoEv} alt="Evnting logo" className="h-7 w-auto block" />
             <span className="text-lg sm:text-xl font-bold tracking-tight text-primary-foreground">

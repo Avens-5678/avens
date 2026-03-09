@@ -74,6 +74,7 @@ const Auth = () => {
         case "admin": navigate("/admin"); break;
         case "client": navigate("/client/dashboard"); break;
         case "vendor": navigate("/vendor/dashboard"); break;
+        case "employee": navigate("/employee/dashboard"); break;
         default: navigate("/");
       }
     } else if (user && !role && !roleLoading) {

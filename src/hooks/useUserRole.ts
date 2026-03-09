@@ -47,6 +47,7 @@ export const useUserRole = () => {
   const isAdmin = role === "admin";
   const isClient = role === "client";
   const isVendor = role === "vendor";
+  const isEmployee = role === "employee";
 
   return {
     role,

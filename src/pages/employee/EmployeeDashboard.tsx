@@ -200,7 +200,8 @@ const EmployeeDashboard = () => {
   const renderTab = () => {
     switch (activeSubTab) {
       case "rentals":
-        return <EnhancedRentalManager rentals={rentals || []} or-inventory":
+        return <EnhancedRentalManager rentals={rentals || []} />;
+      case "vendor-inventory":
         return <VendorInventoryAdmin />;
       case "promo-banners":
         return <PromoBannerManager />;

@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Users, Search, Shield, UserCheck, UserX } from "lucide-react";
+import { Loader2, Users, Search, Shield, UserCheck, UserX, Briefcase } from "lucide-react";
 import { format } from "date-fns";
+import EmployeePermissionManager from "./EmployeePermissionManager";
 
 interface UserWithRole {
   user_id: string;

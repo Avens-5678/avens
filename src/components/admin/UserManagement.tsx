@@ -27,6 +27,7 @@ const UserManagement = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
 
   // Fetch all users with roles
   const { data: users, isLoading } = useQuery({

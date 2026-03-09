@@ -1,6 +1,5 @@
 import { ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { getOptimizedImageUrl } from "@/utils/imageAssets"
 
 interface HeroSectionProps extends React.HTMLAttributes<HTMLElement> {
   children: ReactNode
@@ -18,9 +17,6 @@ export function HeroSection({
   gradient = true,
   ...props
 }: HeroSectionProps) {
-  // Serve a wide but compressed version for the hero background (1920w, 80q webp)
-  const optimizedBg = backgroundImage ? getOptimizedImageUrl(backgroundImage, 1920, 80) : undefined;
-  
   return (
     <div className="md:contents p-3 pt-4 sm:p-0">
       <section 
@@ -29,8 +25,8 @@ export function HeroSection({
           "min-h-[70vh] rounded-2xl md:rounded-none md:min-h-screen",
           className
         )}
-        style={optimizedBg ? { 
-          backgroundImage: `url(${optimizedBg})`,
+        style={backgroundImage ? { 
+          backgroundImage: `url(${backgroundImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -38,27 +34,28 @@ export function HeroSection({
         {...props}
       >
         {/* Hidden img for LCP preload discovery + fetchpriority */}
-        {optimizedBg && (
+        {backgroundImage && (
           <img
-            src={optimizedBg}
+            src={backgroundImage}
             alt=""
-            fetchPriority="high"
+            // @ts-ignore - fetchpriority is valid HTML but React 18 types don't include it
+            fetchpriority="high"
             aria-hidden="true"
             className="absolute w-0 h-0 opacity-0 pointer-events-none"
           />
         )}
 
         {/* Gradient overlay */}
-        {gradient && !optimizedBg && (
+        {gradient && !backgroundImage && (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/6 to-secondary/4 rounded-2xl md:rounded-none" />
         )}
         
         {/* Dark overlay for readability over images */}
-        {overlay && optimizedBg && (
+        {overlay && backgroundImage && (
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 rounded-2xl md:rounded-none" />
         )}
         
-        {/* Ambient decoration — subtle, not distracting */}
+        {/* Ambient decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-2xl md:rounded-none">
           <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
           <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-secondary/4 rounded-full blur-[100px]" />

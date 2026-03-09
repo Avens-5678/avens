@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getOptimizedImageUrl } from '@/utils/imageAssets';
 
 interface ProductImageCarouselProps {
   images: string[];
@@ -9,8 +8,6 @@ interface ProductImageCarouselProps {
   className?: string;
   autoPlay?: boolean;
   interval?: number;
-  /** Width hint for Supabase image transform (default 500) */
-  imageWidth?: number;
 }
 
 export const ProductImageCarousel = ({
@@ -19,28 +16,21 @@ export const ProductImageCarousel = ({
   className,
   autoPlay = false,
   interval = 3000,
-  imageWidth = 500,
 }: ProductImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     if (!autoPlay || images.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex === images.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     }, interval);
     return () => clearInterval(timer);
   }, [autoPlay, images.length, interval]);
 
-  const goToPrevious = () => {
+  const goToPrevious = () =>
     setCurrentIndex(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
-  };
-
-  const goToNext = () => {
+  const goToNext = () =>
     setCurrentIndex(currentIndex === images.length - 1 ? 0 : currentIndex + 1);
-  };
-
   const goToSlide = (index: number) => setCurrentIndex(index);
 
   if (!images || images.length === 0) {
@@ -57,11 +47,10 @@ export const ProductImageCarousel = ({
     return (
       <div className={cn("relative h-48 overflow-hidden", className)}>
         <img
-          src={getOptimizedImageUrl(images[0], imageWidth, 75)}
+          src={images[0]}
           alt={title}
           loading="lazy"
           decoding="async"
-          width={imageWidth}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
       </div>
@@ -72,22 +61,12 @@ export const ProductImageCarousel = ({
     <div className={cn("relative h-48 overflow-hidden group", className)}>
       <div className="relative w-full h-full">
         <img
-          src={getOptimizedImageUrl(images[currentIndex], imageWidth, 75)}
+          src={images[currentIndex]}
           alt={`${title} ${currentIndex + 1}`}
           loading="lazy"
           decoding="async"
-          width={imageWidth}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
-        
-        {/* Preload next image */}
-        {images.length > 1 && (
-          <link
-            rel="preload"
-            as="image"
-            href={getOptimizedImageUrl(images[(currentIndex + 1) % images.length], imageWidth, 75)}
-          />
-        )}
 
         {/* Navigation Arrows */}
         <button
@@ -97,7 +76,6 @@ export const ProductImageCarousel = ({
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        
         <button
           onClick={goToNext}
           className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -105,7 +83,7 @@ export const ProductImageCarousel = ({
         >
           <ChevronRight className="h-4 w-4" />
         </button>
-        
+
         {/* Slide Indicators */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
           {images.map((_, index) => (
@@ -114,9 +92,7 @@ export const ProductImageCarousel = ({
               onClick={() => goToSlide(index)}
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-300",
-                currentIndex === index
-                  ? "bg-white scale-125"
-                  : "bg-white/50 hover:bg-white/70"
+                currentIndex === index ? "bg-white scale-125" : "bg-white/50 hover:bg-white/70"
               )}
               aria-label={`Go to image ${index + 1}`}
             />

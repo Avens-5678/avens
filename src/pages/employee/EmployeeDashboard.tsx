@@ -183,7 +183,7 @@ const EmployeeDashboard = () => {
   const renderContent = () => {
     // If user doesn't have edit access, show read-only notice
     const readOnlyBanner = !canEdit ? (
-      <div className="mb-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm flex items-center gap-2">
+      <div className="mb-4 p-3 rounded-lg bg-muted border border-border text-muted-foreground text-sm flex items-center gap-2">
         <Lock className="h-4 w-4 flex-shrink-0" />
         <span>You have view-only access to this section. Editing is disabled.</span>
       </div>
@@ -200,8 +200,7 @@ const EmployeeDashboard = () => {
   const renderTab = () => {
     switch (activeSubTab) {
       case "rentals":
-        return <EnhancedRentalManager rentals={rentals || []} />;
-      case "vendor-inventory":
+        return <EnhancedRentalManager rentals={rentals || []} or-inventory":
         return <VendorInventoryAdmin />;
       case "promo-banners":
         return <PromoBannerManager />;

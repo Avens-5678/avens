@@ -55,5 +55,6 @@ export const useUserRole = () => {
     isAdmin,
     isClient,
     isVendor,
+    isEmployee,
   };
 };

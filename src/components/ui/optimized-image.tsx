@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { resolveImageUrl } from '@/utils/imageAssets';
+import { resolveImageUrl, getOptimizedImageUrl } from '@/utils/imageAssets';
 
 interface OptimizedImageProps {
   src: string;
@@ -11,6 +11,10 @@ interface OptimizedImageProps {
   loading?: 'lazy' | 'eager';
   onLoad?: () => void;
   onError?: () => void;
+  /** Quality for Supabase image transform (default 75) */
+  quality?: number;
+  /** Whether to apply Supabase image optimization (default true) */
+  optimize?: boolean;
 }
 
 export const OptimizedImage = ({
@@ -21,10 +25,17 @@ export const OptimizedImage = ({
   height,
   loading = 'lazy',
   onLoad,
-  onError
+  onError,
+  quality = 75,
+  optimize = true,
 }: OptimizedImageProps) => {
   const [hasError, setHasError] = useState(false);
+  
+  // First resolve any asset paths, then apply optimization
   const resolvedSrc = resolveImageUrl(src);
+  const finalSrc = optimize 
+    ? getOptimizedImageUrl(resolvedSrc, width || 600, quality)
+    : resolvedSrc;
 
   if (hasError) {
     return (
@@ -39,7 +50,7 @@ export const OptimizedImage = ({
 
   return (
     <img
-      src={resolvedSrc}
+      src={finalSrc}
       alt={alt}
       width={width}
       height={height}

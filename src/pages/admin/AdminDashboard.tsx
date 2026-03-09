@@ -132,7 +132,7 @@ const sidebarItems: SidebarItem[] = menuGroups.map((g) => ({
   value: g.value,
 }));
 
-const mobilePrimaryItems = ["overview", "operations", "user-mgmt", "ecommerce", "website", "settings-group"];
+const mobilePrimaryItems = ["overview", "operations", "user-mgmt", "ecommerce", "content"];
 
 const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const [activeGroup, setActiveGroup] = useState("overview");

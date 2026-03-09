@@ -233,6 +233,36 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_permissions: {
+        Row: {
+          can_edit: boolean | null
+          can_view: boolean | null
+          created_at: string | null
+          employee_id: string
+          id: string
+          permission_category: string
+          updated_at: string | null
+        }
+        Insert: {
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          permission_category: string
+          updated_at?: string | null
+        }
+        Update: {
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          permission_category?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       event_requests: {
         Row: {
           admin_notes: string | null
@@ -1631,7 +1661,7 @@ export type Database = {
       validate_admin_email: { Args: { check_email: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "client" | "vendor"
+      app_role: "admin" | "client" | "vendor" | "employee"
       request_status:
         | "pending"
         | "approved"
@@ -1765,7 +1795,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "client", "vendor"],
+      app_role: ["admin", "client", "vendor", "employee"],
       request_status: [
         "pending",
         "approved",

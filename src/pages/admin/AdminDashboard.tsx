@@ -97,16 +97,21 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
+    icon: ClipboardList, label: "Content", value: "content",
+    subTabs: [
+      { label: "Portfolio", value: "portfolio" },
+      { label: "Reviews", value: "testimonials" },
+      { label: "Forms", value: "forms" },
+      { label: "FAQ", value: "faq" },
+    ],
+  },
+  {
     icon: Home, label: "Website", value: "website",
     subTabs: [
       { label: "Banners", value: "banners" },
       { label: "Services", value: "services" },
       { label: "Events", value: "events" },
-      { label: "Portfolio", value: "portfolio" },
       { label: "Clients", value: "clients" },
-      { label: "Reviews", value: "testimonials" },
-      { label: "Forms", value: "forms" },
-      { label: "FAQ", value: "faq" },
       { label: "About", value: "about" },
       { label: "Awards & News", value: "settings" },
       { label: "Audio", value: "audio" },

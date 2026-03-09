@@ -30,6 +30,23 @@ const assetMap: Record<string, string> = {
 };
 
 /**
+ * Transforms a Supabase storage URL to use the image render endpoint for
+ * automatic WebP conversion, resizing, and compression.
+ */
+export function getOptimizedImageUrl(
+  url: string | null | undefined,
+  width = 600,
+  quality = 75
+): string {
+  if (!url) return '/placeholder.svg';
+  if (url.includes('supabase.co/storage/v1/object/public/')) {
+    const params = new URLSearchParams({ width: String(width), quality: String(quality), format: 'webp' });
+    return url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?' + params.toString();
+  }
+  return url;
+}
+
+/**
  * Resolves an image path to an actual URL.
  * - If the path is in our asset map, return the imported image
  * - If it's already a full URL (http/https), return as-is

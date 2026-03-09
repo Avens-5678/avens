@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getOptimizedImageUrl } from '@/utils/imageAssets';
 
 interface ProductImageCarouselProps {
   images: string[];
@@ -8,26 +9,27 @@ interface ProductImageCarouselProps {
   className?: string;
   autoPlay?: boolean;
   interval?: number;
+  /** Width hint for Supabase image transform (default 500) */
+  imageWidth?: number;
 }
 
 export const ProductImageCarousel = ({
   images,
   title,
   className,
-  autoPlay = true,
-  interval = 3000
+  autoPlay = false,
+  interval = 3000,
+  imageWidth = 500,
 }: ProductImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     if (!autoPlay || images.length <= 1) return;
-
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
+      setCurrentIndex((prevIndex) =>
         prevIndex === images.length - 1 ? 0 : prevIndex + 1
       );
     }, interval);
-
     return () => clearInterval(timer);
   }, [autoPlay, images.length, interval]);
 
@@ -39,9 +41,7 @@ export const ProductImageCarousel = ({
     setCurrentIndex(currentIndex === images.length - 1 ? 0 : currentIndex + 1);
   };
 
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
+  const goToSlide = (index: number) => setCurrentIndex(index);
 
   if (!images || images.length === 0) {
     return (
@@ -57,8 +57,11 @@ export const ProductImageCarousel = ({
     return (
       <div className={cn("relative h-48 overflow-hidden", className)}>
         <img
-          src={images[0]}
+          src={getOptimizedImageUrl(images[0], imageWidth, 75)}
           alt={title}
+          loading="lazy"
+          decoding="async"
+          width={imageWidth}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
       </div>
@@ -67,14 +70,25 @@ export const ProductImageCarousel = ({
 
   return (
     <div className={cn("relative h-48 overflow-hidden group", className)}>
-      {/* Main Image */}
       <div className="relative w-full h-full">
         <img
-          src={images[currentIndex]}
+          src={getOptimizedImageUrl(images[currentIndex], imageWidth, 75)}
           alt={`${title} ${currentIndex + 1}`}
+          loading="lazy"
+          decoding="async"
+          width={imageWidth}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
         
+        {/* Preload next image */}
+        {images.length > 1 && (
+          <link
+            rel="preload"
+            as="image"
+            href={getOptimizedImageUrl(images[(currentIndex + 1) % images.length], imageWidth, 75)}
+          />
+        )}
+
         {/* Navigation Arrows */}
         <button
           onClick={goToPrevious}
@@ -108,7 +122,7 @@ export const ProductImageCarousel = ({
             />
           ))}
         </div>
-        
+
         {/* Image Counter */}
         <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
           {currentIndex + 1} / {images.length}

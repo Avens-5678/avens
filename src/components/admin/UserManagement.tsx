@@ -69,7 +69,7 @@ const UserManagement = () => {
 
   // Update user role
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: "admin" | "client" | "vendor" }) => {
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: "admin" | "client" | "vendor" | "employee" }) => {
       const { error } = await supabase
         .from("user_roles")
         .update({ role: newRole })

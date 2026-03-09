@@ -163,6 +163,17 @@ const UserManagement = () => {
             <div className="text-2xl font-bold text-purple-600">{roleStats.vendor}</div>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-green-500" />
+              Employees
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{roleStats.employee}</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}

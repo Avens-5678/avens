@@ -1,5 +1,6 @@
 import { ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { getOptimizedImageUrl } from "@/utils/imageAssets"
 
 interface HeroSectionProps extends React.HTMLAttributes<HTMLElement> {
   children: ReactNode
@@ -17,7 +18,8 @@ export function HeroSection({
   gradient = true,
   ...props
 }: HeroSectionProps) {
-  const resolvedImage = backgroundImage;
+  // Serve a wide but compressed version for the hero background (1920w, 80q webp)
+  const optimizedBg = backgroundImage ? getOptimizedImageUrl(backgroundImage, 1920, 80) : undefined;
   
   return (
     <div className="md:contents p-3 pt-4 sm:p-0">
@@ -27,8 +29,8 @@ export function HeroSection({
           "min-h-[70vh] rounded-2xl md:rounded-none md:min-h-screen",
           className
         )}
-        style={resolvedImage ? { 
-          backgroundImage: `url(${resolvedImage})`,
+        style={optimizedBg ? { 
+          backgroundImage: `url(${optimizedBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -36,9 +38,9 @@ export function HeroSection({
         {...props}
       >
         {/* Hidden img for LCP preload discovery + fetchpriority */}
-        {resolvedImage && (
+        {optimizedBg && (
           <img
-            src={resolvedImage}
+            src={optimizedBg}
             alt=""
             fetchPriority="high"
             aria-hidden="true"
@@ -47,12 +49,12 @@ export function HeroSection({
         )}
 
         {/* Gradient overlay */}
-        {gradient && !resolvedImage && (
+        {gradient && !optimizedBg && (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/6 to-secondary/4 rounded-2xl md:rounded-none" />
         )}
         
         {/* Dark overlay for readability over images */}
-        {overlay && resolvedImage && (
+        {overlay && optimizedBg && (
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 rounded-2xl md:rounded-none" />
         )}
         

@@ -241,7 +241,8 @@ const UserManagement = () => {
                       <Badge 
                         variant={
                           user.role === "admin" ? "destructive" : 
-                          user.role === "vendor" ? "secondary" : "default"
+                          user.role === "vendor" ? "secondary" : 
+                          user.role === "employee" ? "outline" : "default"
                         }
                       >
                         {user.role}

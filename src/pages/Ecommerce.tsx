@@ -262,6 +262,15 @@ const Ecommerce = () => {
 
   return (
     <Layout hideNavbar>
+      {/* Pull-down navbar overlay */}
+      <div
+        className={`fixed top-0 left-0 right-0 z-[60] transition-transform duration-300 ease-out ${
+          showNavbar ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
+        <Navbar />
+      </div>
+
       {/* Compact Amazon-style Header */}
       <EcommerceHeader
         searchTerm={searchTerm}

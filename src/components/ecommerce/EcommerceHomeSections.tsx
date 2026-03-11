@@ -281,7 +281,6 @@ const ProductRow = ({
                   <div className="relative aspect-square overflow-hidden">
                     <MultiImageCarousel
                       images={images}
-                      alt={rental.title}
                       autoPlay
                       interval={4000}
                     />

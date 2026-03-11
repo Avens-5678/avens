@@ -34,6 +34,48 @@ const Ecommerce = () => {
   const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
   const [activeQuickCat, setActiveQuickCat] = useState("");
 
+  // Pull-down navbar reveal logic
+  const [showNavbar, setShowNavbar] = useState(false);
+  const lastScrollY = useRef(0);
+  const navbarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const hideNavbar = useCallback(() => {
+    setShowNavbar(false);
+    if (navbarTimerRef.current) {
+      clearTimeout(navbarTimerRef.current);
+      navbarTimerRef.current = null;
+    }
+  }, []);
+
+  const revealNavbar = useCallback(() => {
+    setShowNavbar(true);
+    if (navbarTimerRef.current) clearTimeout(navbarTimerRef.current);
+    navbarTimerRef.current = setTimeout(() => {
+      setShowNavbar(false);
+      navbarTimerRef.current = null;
+    }, 15000);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      // User scrolled up by at least 30px
+      if (currentY < lastScrollY.current - 30 && currentY > 60) {
+        if (!showNavbar) revealNavbar();
+      }
+      // User scrolled back to top — hide immediately
+      if (currentY <= 10) {
+        hideNavbar();
+      }
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (navbarTimerRef.current) clearTimeout(navbarTimerRef.current);
+    };
+  }, [showNavbar, revealNavbar, hideNavbar]);
+
   const categories = useMemo(() => {
     if (!rentals) return [];
     const cats = new Set<string>();

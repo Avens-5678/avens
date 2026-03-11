@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import Navbar from "@/components/Layout/Navbar";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";

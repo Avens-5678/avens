@@ -281,8 +281,7 @@ const ProductRow = ({
                   <div className="relative aspect-square overflow-hidden">
                     <MultiImageCarousel
                       images={images}
-                      autoPlay
-                      interval={4000}
+                      title={rental.title}
                     />
                     {rental.rating && rental.rating >= 4 && (
                       <div className="absolute top-2 left-2">

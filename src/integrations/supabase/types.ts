@@ -1646,6 +1646,10 @@ export type Database = {
     }
     Functions: {
       check_email_type: { Args: { check_email: string }; Returns: Json }
+      employee_has_permission: {
+        Args: { _category: string; _type?: string; _user_id: string }
+        Returns: boolean
+      }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {

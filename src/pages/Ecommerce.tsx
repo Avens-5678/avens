@@ -262,10 +262,10 @@ const Ecommerce = () => {
 
   return (
     <Layout hideNavbar>
-      {/* Pull-down navbar overlay */}
+      {/* Pull-down navbar above search bar */}
       <div
-        className={`fixed top-0 left-0 right-0 z-[60] transition-transform duration-300 ease-out ${
-          showNavbar ? "translate-y-0" : "-translate-y-full"
+        className={`overflow-hidden transition-all duration-300 ease-out ${
+          showNavbar ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <Navbar />

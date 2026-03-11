@@ -13,6 +13,7 @@ import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
 import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
+import EcommerceHomeSections from "@/components/ecommerce/EcommerceHomeSections";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
@@ -280,34 +281,51 @@ const Ecommerce = () => {
         onSearchCategoryChange={setSearchCategory}
       />
 
-      {/* Category Quick Browse Strip */}
-      <section className="border-b border-border bg-card/80 sticky top-14 sm:top-16 z-40">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="overflow-x-auto scrollbar-hide py-2.5">
-            <div className="flex gap-2 sm:gap-3 justify-start sm:justify-center min-w-max">
-              {quickBrowseCategories.map((cat) => (
-                <button
-                  key={cat.value}
-                  onClick={() => setActiveQuickCat(cat.value === activeQuickCat ? "" : cat.value)}
-                  className={`flex-shrink-0 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 whitespace-nowrap ${
-                    (cat.value === "" && !activeQuickCat) || activeQuickCat === cat.value
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                      : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── Home Sections ── */}
+      <EcommerceHomeSections
+        rentals={rentals || []}
+        categories={categories}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onCategoryClick={(cat) => {
+          setActiveQuickCat(cat);
+          setTimeout(() => {
+            document.getElementById("shop-catalog")?.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        }}
+      />
 
       {/* Promotional Banner Carousel */}
       <PromoBannerCarousel />
 
       {/* Trust Strip */}
       <TrustStrip />
+
+      {/* ── Full Catalog ── */}
+      <div id="shop-catalog">
+        {/* Category Quick Browse Strip */}
+        <section className="border-b border-border bg-card/80 sticky top-14 sm:top-16 z-40">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="overflow-x-auto scrollbar-hide py-2.5">
+              <div className="flex gap-2 sm:gap-3 justify-start sm:justify-center min-w-max">
+                {quickBrowseCategories.map((cat) => (
+                  <button
+                    key={cat.value}
+                    onClick={() => setActiveQuickCat(cat.value === activeQuickCat ? "" : cat.value)}
+                    className={`flex-shrink-0 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 whitespace-nowrap ${
+                      (cat.value === "" && !activeQuickCat) || activeQuickCat === cat.value
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                        : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
 
       {/* Main Content */}
       <section className="py-4 sm:py-6 bg-muted/30">

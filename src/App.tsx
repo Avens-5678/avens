@@ -7,6 +7,7 @@ import { AudioProvider } from "@/contexts/AudioContext";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "@/components/ScrollToTop";
 import { lazy, Suspense } from "react";
+import { Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 
 // Lazy-loaded routes to reduce initial JS bundle
@@ -56,7 +57,8 @@ const App = () => (
           <Suspense fallback={<div className="min-h-screen" />}>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Navigate to="/ecommerce" replace />} />
+              <Route path="/home" element={<Index />} />
               <Route path="/services" element={<Services />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/gallery/:portfolioId" element={<Gallery />} />

@@ -69,13 +69,11 @@ const Auth = () => {
   useEffect(() => {
     if (authLoading || roleLoading) return;
     if (user && role) {
-      // User has a role, redirect to dashboard
-      switch (role) {
-        case "admin": navigate("/admin"); break;
-        case "client": navigate("/client/dashboard"); break;
-        case "vendor": navigate("/vendor/dashboard"); break;
-        case "employee": navigate("/employee/dashboard"); break;
-        default: navigate("/");
+      // User has a role, redirect to ecommerce (or admin for admins)
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/ecommerce");
       }
     } else if (user && !role && !roleLoading) {
       // User is authenticated but has no role - needs onboarding (Google OAuth new user)
@@ -150,12 +148,10 @@ const Auth = () => {
   };
 
   const handleRoleSelect = (selectedRole: string) => {
-    switch (selectedRole) {
-      case "client": navigate("/client/dashboard"); break;
-      case "vendor": navigate("/vendor/dashboard"); break;
-      case "employee": navigate("/employee/dashboard"); break;
-      case "admin": navigate("/admin"); break;
-      default: navigate("/");
+    if (selectedRole === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/ecommerce");
     }
   };
 
@@ -245,12 +241,8 @@ const Auth = () => {
 
       toast({ title: "Welcome!", description: "Your account is set up successfully." });
 
-      // Navigate to appropriate dashboard
-      if (selectedOnboardingRole === "client") {
-        navigate("/client/dashboard");
-      } else {
-        navigate("/vendor/dashboard");
-      }
+      // Navigate to ecommerce after onboarding
+      navigate("/ecommerce");
     } catch (error: any) {
       console.error("Onboarding error:", error);
       toast({ title: "Setup Failed", description: error.message || "Something went wrong.", variant: "destructive" });

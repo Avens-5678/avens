@@ -7,6 +7,7 @@ import { AudioProvider } from "@/contexts/AudioContext";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "@/components/ScrollToTop";
 import { lazy, Suspense } from "react";
+import { Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 
 // Lazy-loaded routes to reduce initial JS bundle

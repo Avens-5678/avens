@@ -89,9 +89,10 @@ const EcommerceHeader = ({
 
           {/* Right actions */}
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+            {/* Profile - mobile: icon only, desktop: with text */}
             <button
               onClick={() => navigate(getDashboardPath())}
-              className="hidden sm:flex items-center gap-1.5 text-xs hover:outline hover:outline-1 hover:outline-primary-foreground/30 rounded px-2 py-1.5 transition-all"
+              className="flex items-center gap-1.5 text-xs hover:outline hover:outline-1 hover:outline-primary-foreground/30 rounded px-2 py-1.5 transition-all"
             >
               <User className="h-5 w-5" />
               <div className="text-left hidden lg:block">
@@ -99,7 +100,7 @@ const EcommerceHeader = ({
                   {user ? "Hello" : "Hello, Sign in"}
                 </span>
                 <span className="block font-semibold text-primary-foreground leading-tight">
-                  {user ? "Account" : "Account"}
+                  Account
                 </span>
               </div>
             </button>

@@ -241,12 +241,8 @@ const Auth = () => {
 
       toast({ title: "Welcome!", description: "Your account is set up successfully." });
 
-      // Navigate to appropriate dashboard
-      if (selectedOnboardingRole === "client") {
-        navigate("/client/dashboard");
-      } else {
-        navigate("/vendor/dashboard");
-      }
+      // Navigate to ecommerce after onboarding
+      navigate("/ecommerce");
     } catch (error: any) {
       console.error("Onboarding error:", error);
       toast({ title: "Setup Failed", description: error.message || "Something went wrong.", variant: "destructive" });

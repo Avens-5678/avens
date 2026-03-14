@@ -57,7 +57,8 @@ const App = () => (
           <Suspense fallback={<div className="min-h-screen" />}>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Navigate to="/ecommerce" replace />} />
+              <Route path="/home" element={<Index />} />
               <Route path="/services" element={<Services />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/gallery/:portfolioId" element={<Gallery />} />

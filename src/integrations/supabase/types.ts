@@ -872,6 +872,7 @@ export type Database = {
           assigned_vendor_id: string | null
           budget: string | null
           client_email: string | null
+          client_id: string | null
           client_name: string | null
           client_phone: string | null
           created_at: string
@@ -894,6 +895,7 @@ export type Database = {
           assigned_vendor_id?: string | null
           budget?: string | null
           client_email?: string | null
+          client_id?: string | null
           client_name?: string | null
           client_phone?: string | null
           created_at?: string
@@ -916,6 +918,7 @@ export type Database = {
           assigned_vendor_id?: string | null
           budget?: string | null
           client_email?: string | null
+          client_id?: string | null
           client_name?: string | null
           client_phone?: string | null
           created_at?: string

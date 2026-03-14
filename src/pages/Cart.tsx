@@ -89,7 +89,8 @@ const Cart = () => {
         location: `${eventDetails.event_location}${eventDetails.venue_area ? ' - ' + eventDetails.venue_area : ''}`,
         notes: eventDetails.notes || null,
         status: "new",
-      });
+        client_id: user.id,
+      } as any);
       if (error) throw error;
       if (normalizedPhone) {
         try {

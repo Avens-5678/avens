@@ -69,13 +69,11 @@ const Auth = () => {
   useEffect(() => {
     if (authLoading || roleLoading) return;
     if (user && role) {
-      // User has a role, redirect to dashboard
-      switch (role) {
-        case "admin": navigate("/admin"); break;
-        case "client": navigate("/client/dashboard"); break;
-        case "vendor": navigate("/vendor/dashboard"); break;
-        case "employee": navigate("/employee/dashboard"); break;
-        default: navigate("/");
+      // User has a role, redirect to ecommerce (or admin for admins)
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/ecommerce");
       }
     } else if (user && !role && !roleLoading) {
       // User is authenticated but has no role - needs onboarding (Google OAuth new user)

@@ -392,9 +392,9 @@ const Ecommerce = () => {
               </div>
             ) : (
               <div
-                className={`grid gap-3 sm:gap-4 ${
+                className={`max-w-5xl mx-auto grid gap-3 sm:gap-4 ${
                   mobileView === "list" ? "grid-cols-1" : mobileView === "two" ? "grid-cols-2" : "grid-cols-1"
-                } sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5`}
+                } sm:grid-cols-2 md:grid-cols-3`}
               >
                 {filteredRentals.map((rental) => (
                   <EnhancedProductCard key={rental.id} rental={rental} viewMode={mobileView} />

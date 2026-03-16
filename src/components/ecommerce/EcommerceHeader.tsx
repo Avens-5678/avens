@@ -119,8 +119,8 @@ const EcommerceHeader = ({
               className="hidden sm:flex items-center gap-1.5 text-xs hover:outline hover:outline-1 hover:outline-primary-foreground/30 rounded px-2 py-1.5 transition-all"
             >
               <div className="text-left">
-                <span className="block text-[10px] text-primary-foreground/60 leading-none">Returns</span>
-                <span className="block font-semibold text-primary-foreground leading-tight">& Orders</span>
+                <span className="block text-[10px] text-primary-foreground/60 leading-none">Your</span>
+                <span className="block font-semibold text-primary-foreground leading-tight">Orders</span>
               </div>
             </button>
 

@@ -370,13 +370,28 @@ const Cart = () => {
                         <p className="text-[11px] text-muted-foreground">* Some items require a custom quote. Final price confirmed by our team.</p>
                       )}
                       <Button
-                        onClick={() => {
+                        onClick={async () => {
                           if (!user && !authLoading) {
                             toast({ title: "Please log in", description: "Sign in to send your enquiry.", variant: "destructive" });
                             navigate("/auth");
                             return;
                           }
-                          setShowEnquiry(true);
+                          // Fetch profile and check completeness
+                          if (user) {
+                            const { data } = await supabase
+                              .from("profiles")
+                              .select("full_name, email, phone")
+                              .eq("user_id", user.id)
+                              .single();
+                            if (data && data.full_name && data.phone) {
+                              setProfileData({ full_name: data.full_name, email: data.email || user.email || "", phone: data.phone });
+                              setProfileLoaded(true);
+                              setShowEnquiry(true);
+                            } else {
+                              toast({ title: "Complete your profile", description: "Please add your name and phone number to proceed.", variant: "destructive" });
+                              navigate("/client");
+                            }
+                          }
                         }}
                         className="w-full gap-2"
                         size="lg"

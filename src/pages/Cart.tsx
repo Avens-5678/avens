@@ -28,14 +28,14 @@ const Cart = () => {
 
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileData, setProfileData] = useState<{ full_name: string; email: string; phone: string } | null>(null);
   const [eventDetails, setEventDetails] = useState({
-    customer_name: "",
-    contact_number: "",
-    email: "",
     event_start_date: "",
     event_end_date: "",
-    event_location: "",
-    venue_area: "",
+    venue_address_line1: "",
+    venue_address_line2: "",
+    venue_pincode: "",
     notes: "",
   });
 

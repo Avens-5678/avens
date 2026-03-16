@@ -294,18 +294,14 @@ const Cart = () => {
                     </div>
                     <Separator />
                     <div className="space-y-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Full Name *</Label>
-                        <Input value={eventDetails.customer_name} onChange={e => setEventDetails(p => ({ ...p, customer_name: e.target.value }))} placeholder="Your name" />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Email *</Label>
-                        <Input type="email" value={eventDetails.email} onChange={e => setEventDetails(p => ({ ...p, email: e.target.value }))} placeholder="you@example.com" />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Phone</Label>
-                        <Input value={eventDetails.contact_number} onChange={e => setEventDetails(p => ({ ...p, contact_number: e.target.value }))} placeholder="+91 ..." />
-                      </div>
+                      {/* Profile info summary */}
+                      {profileData && (
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
+                          <p className="font-medium text-foreground">{profileData.full_name}</p>
+                          <p className="text-muted-foreground text-xs">{profileData.email}</p>
+                          <p className="text-muted-foreground text-xs">{profileData.phone}</p>
+                        </div>
+                      )}
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <Label className="text-xs">Start Date *</Label>
@@ -317,12 +313,16 @@ const Cart = () => {
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">City / Location</Label>
-                        <Input value={eventDetails.event_location} onChange={e => setEventDetails(p => ({ ...p, event_location: e.target.value }))} placeholder="Hyderabad" />
+                        <Label className="text-xs">Venue Address Line 1 *</Label>
+                        <Input value={eventDetails.venue_address_line1} onChange={e => setEventDetails(p => ({ ...p, venue_address_line1: e.target.value }))} placeholder="Street address, building name" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Venue / Area</Label>
-                        <Input value={eventDetails.venue_area} onChange={e => setEventDetails(p => ({ ...p, venue_area: e.target.value }))} placeholder="Convention Center, etc." />
+                        <Label className="text-xs">Venue Address Line 2</Label>
+                        <Input value={eventDetails.venue_address_line2} onChange={e => setEventDetails(p => ({ ...p, venue_address_line2: e.target.value }))} placeholder="Area, landmark" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Pin Code</Label>
+                        <Input value={eventDetails.venue_pincode} onChange={e => setEventDetails(p => ({ ...p, venue_pincode: e.target.value }))} placeholder="500001" maxLength={6} />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs">Additional Notes</Label>

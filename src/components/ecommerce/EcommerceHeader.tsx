@@ -39,16 +39,25 @@ const EcommerceHeader = ({
       {/* Main header row */}
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center gap-3 sm:gap-4 h-14 sm:h-16">
-          {/* Logo / Brand */}
-          <button
-            onClick={() => navigate("/")}
-            className="flex-shrink-0 flex items-center gap-1 hover:opacity-80 transition-opacity"
-          >
-            <img src={logoEv} alt="Evnting logo" className="h-7 w-auto hidden sm:block" />
-            <span className="text-lg sm:text-xl font-bold tracking-tight text-primary-foreground">
-              Evnting
-            </span>
-          </button>
+          {/* Menu + Logo */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => navigate("/home")}
+              className="flex items-center justify-center hover:outline hover:outline-1 hover:outline-primary-foreground/30 rounded p-1.5 transition-all"
+              aria-label="Menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+            >
+              <img src={logoEv} alt="Evnting logo" className="h-7 w-auto hidden sm:block" />
+              <span className="text-lg sm:text-xl font-bold tracking-tight text-primary-foreground">
+                Evnting
+              </span>
+            </button>
+          </div>
 
 
           {/* Search bar */}

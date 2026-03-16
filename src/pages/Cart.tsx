@@ -52,14 +52,35 @@ const Cart = () => {
     return null;
   };
 
+  // Fetch profile when user is available
+  const fetchProfile = async () => {
+    if (!user || profileLoaded) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, email, phone")
+      .eq("user_id", user.id)
+      .single();
+    if (data && data.full_name && data.phone) {
+      setProfileData({ full_name: data.full_name, email: data.email || user.email || "", phone: data.phone });
+    } else {
+      setProfileData(null);
+    }
+    setProfileLoaded(true);
+  };
+
   const handleSendEnquiry = async () => {
     if (!user) {
       toast({ title: "Please log in", description: "You need to sign in to send an enquiry.", variant: "destructive" });
       navigate("/auth");
       return;
     }
-    if (!eventDetails.customer_name || !eventDetails.email || !eventDetails.event_start_date) {
-      toast({ title: "Missing information", description: "Please fill in name, email, and start date.", variant: "destructive" });
+    if (!profileData?.full_name || !profileData?.phone) {
+      toast({ title: "Complete your profile", description: "Please fill in your name and phone number first.", variant: "destructive" });
+      navigate("/client");
+      return;
+    }
+    if (!eventDetails.event_start_date || !eventDetails.venue_address_line1) {
+      toast({ title: "Missing information", description: "Please fill in start date and venue address.", variant: "destructive" });
       return;
     }
     setSubmitting(true);
@@ -75,18 +96,19 @@ const Cart = () => {
         price_value: item.price_value,
         pricing_unit: item.pricing_unit,
       }));
-      const normalizedPhone = eventDetails.contact_number ? normalizePhoneNumber(eventDetails.contact_number) : null;
+      const normalizedPhone = profileData.phone ? normalizePhoneNumber(profileData.phone) : null;
+      const venueLocation = [eventDetails.venue_address_line1, eventDetails.venue_address_line2, eventDetails.venue_pincode].filter(Boolean).join(", ");
       const orderId = crypto.randomUUID();
       const { error } = await supabase.from("rental_orders").insert({
         id: orderId,
         title: `Cart Enquiry - ${items.length} item(s)`,
         equipment_category: "Cart Order",
-        equipment_details: JSON.stringify({ cart_items: cartPayload, event_details: eventDetails }),
-        client_name: eventDetails.customer_name,
-        client_email: eventDetails.email,
+        equipment_details: JSON.stringify({ cart_items: cartPayload, event_details: { ...eventDetails, customer_name: profileData.full_name, email: profileData.email, contact_number: profileData.phone } }),
+        client_name: profileData.full_name,
+        client_email: profileData.email,
         client_phone: normalizedPhone,
         event_date: eventDetails.event_start_date || null,
-        location: `${eventDetails.event_location}${eventDetails.venue_area ? ' - ' + eventDetails.venue_area : ''}`,
+        location: venueLocation,
         notes: eventDetails.notes || null,
         status: "new",
         client_id: user.id,
@@ -95,7 +117,7 @@ const Cart = () => {
       if (normalizedPhone) {
         try {
           await supabase.functions.invoke("wati-rental-confirmation", {
-            body: { phone: normalizedPhone, name: eventDetails.customer_name || "Customer", order_id: orderId },
+            body: { phone: normalizedPhone, name: profileData.full_name || "Customer", order_id: orderId },
           });
         } catch (whatsappErr) {
           console.error("WhatsApp rental confirmation failed:", whatsappErr);
@@ -104,7 +126,7 @@ const Cart = () => {
       toast({ title: "Enquiry Sent!", description: "Our team will respond within 24 hours." });
       clearCart();
       setShowEnquiry(false);
-      setEventDetails({ customer_name: "", contact_number: "", email: "", event_start_date: "", event_end_date: "", event_location: "", venue_area: "", notes: "" });
+      setEventDetails({ event_start_date: "", event_end_date: "", venue_address_line1: "", venue_address_line2: "", venue_pincode: "", notes: "" });
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to send enquiry", variant: "destructive" });
     } finally {

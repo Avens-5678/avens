@@ -121,6 +121,12 @@ Deno.serve(async (req) => {
 
     const { SMTPClient } = await import("https://deno.land/x/denomailer@1.6.0/mod.ts");
 
+    // Send to both company email and admin@evnting.com
+    const recipients = new Set<string>();
+    recipients.add(adminEmail);
+    recipients.add("admin@evnting.com");
+    const toList = Array.from(recipients);
+
     const client = new SMTPClient({
       connection: {
         hostname: smtpHost,
@@ -135,7 +141,7 @@ Deno.serve(async (req) => {
 
     await client.send({
       from: smtpUser,
-      to: adminEmail,
+      to: toList,
       subject: `🔔 New ${typeLabel} — ${title || orderRef}`,
       content: "auto",
       html: html,

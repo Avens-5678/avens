@@ -33,6 +33,7 @@ const Ecommerce = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
   const [activeQuickCat, setActiveQuickCat] = useState("");
+  const [promoFilterIds, setPromoFilterIds] = useState<string[]>([]);
 
   // Pull-down navbar reveal logic
   const [showNavbar, setShowNavbar] = useState(false);
@@ -98,6 +99,19 @@ const Ecommerce = () => {
 
   const filteredRentals = useMemo(() => {
     if (!rentals) return [];
+
+    // If promo filter is active, show only those items
+    if (promoFilterIds.length > 0) {
+      let results = rentals.filter((r) => promoFilterIds.includes(r.id));
+      // Still apply search within promo items
+      if (searchTerm) {
+        results = results.filter((r) =>
+          r.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+      return results;
+    }
+
     let results = rentals.filter((rental) => {
       const matchesSearch =
         !searchTerm ||
@@ -132,7 +146,7 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy]);
+  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -304,7 +318,16 @@ const Ecommerce = () => {
       </section>
 
       {/* Promotional Banner Carousel */}
-      <PromoBannerCarousel />
+      <PromoBannerCarousel onCtaClick={(ids) => {
+        setPromoFilterIds(ids);
+        setSelectedCategories([]);
+        setActiveQuickCat("");
+        setSearchTerm("");
+        // Scroll to products
+        setTimeout(() => {
+          document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }} />
 
       {/* Trust Strip */}
       <TrustStrip />
@@ -381,7 +404,21 @@ const Ecommerce = () => {
               </div>
             </div>
 
+            {/* Promo Filter Active Banner */}
+            {promoFilterIds.length > 0 && (
+              <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+                <span className="text-sm font-medium text-primary">Showing promo items</span>
+                <button
+                  onClick={() => setPromoFilterIds([])}
+                  className="ml-auto text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1"
+                >
+                  <X className="h-3.5 w-3.5" /> Clear
+                </button>
+              </div>
+            )}
+
             {/* Product Grid */}
+            <div id="product-grid">
             {filteredRentals.length === 0 ? (
               <div className="text-center py-20">
                 <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -401,6 +438,7 @@ const Ecommerce = () => {
                 ))}
               </div>
             )}
+            </div>
           </div>
         </div>
       </section>

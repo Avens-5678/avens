@@ -404,7 +404,21 @@ const Ecommerce = () => {
               </div>
             </div>
 
+            {/* Promo Filter Active Banner */}
+            {promoFilterIds.length > 0 && (
+              <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+                <span className="text-sm font-medium text-primary">Showing promo items</span>
+                <button
+                  onClick={() => setPromoFilterIds([])}
+                  className="ml-auto text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1"
+                >
+                  <X className="h-3.5 w-3.5" /> Clear
+                </button>
+              </div>
+            )}
+
             {/* Product Grid */}
+            <div id="product-grid">
             {filteredRentals.length === 0 ? (
               <div className="text-center py-20">
                 <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

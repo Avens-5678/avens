@@ -99,6 +99,19 @@ const Ecommerce = () => {
 
   const filteredRentals = useMemo(() => {
     if (!rentals) return [];
+
+    // If promo filter is active, show only those items
+    if (promoFilterIds.length > 0) {
+      let results = rentals.filter((r) => promoFilterIds.includes(r.id));
+      // Still apply search within promo items
+      if (searchTerm) {
+        results = results.filter((r) =>
+          r.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+      return results;
+    }
+
     let results = rentals.filter((rental) => {
       const matchesSearch =
         !searchTerm ||

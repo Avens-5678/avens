@@ -318,7 +318,16 @@ const Ecommerce = () => {
       </section>
 
       {/* Promotional Banner Carousel */}
-      <PromoBannerCarousel />
+      <PromoBannerCarousel onCtaClick={(ids) => {
+        setPromoFilterIds(ids);
+        setSelectedCategories([]);
+        setActiveQuickCat("");
+        setSearchTerm("");
+        // Scroll to products
+        setTimeout(() => {
+          document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }} />
 
       {/* Trust Strip */}
       <TrustStrip />

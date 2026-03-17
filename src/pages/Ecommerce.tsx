@@ -33,6 +33,7 @@ const Ecommerce = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
   const [activeQuickCat, setActiveQuickCat] = useState("");
+  const [promoFilterIds, setPromoFilterIds] = useState<string[]>([]);
 
   // Pull-down navbar reveal logic
   const [showNavbar, setShowNavbar] = useState(false);

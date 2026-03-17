@@ -13,9 +13,14 @@ interface PromoBanner {
   gradient_to: string | null;
   image_url: string | null;
   display_order: number | null;
+  linked_rental_ids: string[] | null;
 }
 
-const PromoBannerCarousel = () => {
+interface PromoBannerCarouselProps {
+  onCtaClick?: (rentalIds: string[]) => void;
+}
+
+const PromoBannerCarousel = ({ onCtaClick }: PromoBannerCarouselProps) => {
   const [current, setCurrent] = useState(0);
 
   const { data: banners = [] } = useQuery({
@@ -41,6 +46,12 @@ const PromoBannerCarousel = () => {
 
   const prev = () => setCurrent((c) => (c === 0 ? banners.length - 1 : c - 1));
   const next = () => setCurrent((c) => (c + 1) % banners.length);
+
+  const handleCtaClick = (banner: PromoBanner) => {
+    if (onCtaClick && banner.linked_rental_ids && banner.linked_rental_ids.length > 0) {
+      onCtaClick(banner.linked_rental_ids);
+    }
+  };
 
   if (banners.length === 0) return null;
 
@@ -74,7 +85,10 @@ const PromoBannerCarousel = () => {
                 <p className="text-xs sm:text-sm text-primary-foreground/80 max-w-md">
                   {banner.subtitle}
                 </p>
-                <button className="mt-2 px-5 py-2 rounded-full text-xs sm:text-sm font-semibold bg-background text-foreground transition-all hover:scale-105 shadow-md">
+                <button
+                  onClick={() => handleCtaClick(banner)}
+                  className="mt-2 px-5 py-2 rounded-full text-xs sm:text-sm font-semibold bg-background text-foreground transition-all hover:scale-105 shadow-md"
+                >
                   {banner.cta_text || "Shop Now"}
                 </button>
               </div>

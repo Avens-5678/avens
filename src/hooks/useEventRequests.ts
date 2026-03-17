@@ -151,6 +151,20 @@ export const useCreateEventRequest = () => {
         client_name: user?.email || '',
         client_email: user?.email || '',
       });
+      // Notify admin via email
+      supabase.functions.invoke("notify-admin-order", {
+        body: {
+          order_type: "event_request",
+          order_id: result.id,
+          title: result.event_type,
+          client_name: user?.email || '',
+          client_email: user?.email || '',
+          event_date: result.event_date,
+          location: result.location,
+          details: result.requirements,
+          budget: result.budget,
+        },
+      }).catch((err) => console.error("Admin email notification failed:", err));
     },
     onError: (error) => {
       toast({

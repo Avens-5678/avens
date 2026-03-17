@@ -116,6 +116,21 @@ export const useCreateRentalOrder = () => {
       toast({ title: "Order Created", description: "Rental order has been created." });
       syncRentalOrderToZohoProducts('create', result);
       sendRentalConfirmationWhatsApp(result, toast);
+      // Notify admin via email
+      supabase.functions.invoke("notify-admin-order", {
+        body: {
+          order_type: "rental_order",
+          order_id: result.id,
+          title: result.title,
+          client_name: result.client_name,
+          client_email: result.client_email,
+          client_phone: result.client_phone,
+          event_date: result.event_date,
+          location: result.location,
+          details: result.equipment_details,
+          budget: result.budget,
+        },
+      }).catch((err) => console.error("Admin email notification failed:", err));
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

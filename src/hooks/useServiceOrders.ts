@@ -112,6 +112,21 @@ export const useCreateServiceOrder = () => {
       queryClient.invalidateQueries({ queryKey: ["service_orders"] });
       toast({ title: "Order Created", description: "Service order has been created." });
       sendServiceConfirmationWhatsApp(result, toast);
+      // Notify admin via email
+      supabase.functions.invoke("notify-admin-order", {
+        body: {
+          order_type: "service_order",
+          order_id: result.id,
+          title: result.title,
+          client_name: result.client_name,
+          client_email: result.client_email,
+          client_phone: result.client_phone,
+          event_date: result.event_date,
+          location: result.location,
+          details: result.service_details,
+          budget: result.budget,
+        },
+      }).catch((err) => console.error("Admin email notification failed:", err));
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

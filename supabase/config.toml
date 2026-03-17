@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.send-quote-email]
 verify_jwt = false
+
+[functions.notify-admin-order]
+verify_jwt = false

@@ -12,7 +12,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-5 lg:col-span-1">
             <div>
-              <span className="text-white text-2xl font-display font-bold tracking-tight">
+              <span className="text-white text-2xl font-brand font-bold italic tracking-tight uppercase">
                 Evnting<span className="text-secondary">.com</span>
               </span>
               <div className="text-white/40 text-sm mt-1">Online platform for event production</div>

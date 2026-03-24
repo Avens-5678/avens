@@ -53,7 +53,7 @@ const EcommerceHeader = ({
               className="flex items-center gap-1 hover:opacity-80 transition-opacity">
               
               
-              <span className="text-lg sm:text-xl font-bold tracking-tight text-primary-foreground">
+              <span className="text-lg sm:text-xl font-brand font-bold italic tracking-tight uppercase text-primary-foreground">
                 Evnting
               </span>
             </button>

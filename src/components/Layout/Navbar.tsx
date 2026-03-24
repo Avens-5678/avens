@@ -138,7 +138,7 @@ const Navbar = () => {
           </Button>
 
           <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-            <span className="text-white text-lg font-display font-bold tracking-tight">
+            <span className="text-white text-lg font-brand font-bold italic tracking-tight uppercase">
               Evnting<span className="text-secondary">.com</span>
             </span>
           </Link>

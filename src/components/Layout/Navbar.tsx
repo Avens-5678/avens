@@ -69,7 +69,7 @@ const Navbar = () => {
 
           {/* Center: Logo */}
           <Link to="/" className="flex items-center justify-center">
-            <span className="text-white text-xl font-display font-bold tracking-tight">
+            <span className="text-white text-xl font-brand font-bold italic tracking-tight uppercase">
               Evnting<span className="text-secondary">.com</span>
             </span>
           </Link>

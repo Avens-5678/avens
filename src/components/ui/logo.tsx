@@ -17,7 +17,7 @@ const Logo = ({ className }: LogoProps) => {
         </div>
       </div>
       <div className="font-bold">
-        <span className="text-primary text-xl">Evnting.com</span>
+        <span className="text-primary text-xl font-brand font-bold italic uppercase">Evnting.com</span>
         <div className="text-muted-foreground text-sm -mt-1">Online platform for event production</div>
       </div>
     </div>

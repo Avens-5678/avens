@@ -25,6 +25,7 @@ export default {
 				sans: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
 				display: ['Playfair Display', 'serif'],
 				body: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
+				brand: ['Chakra Petch', 'sans-serif'],
 			},
 			fontSize: {
 				'xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.05em' }],

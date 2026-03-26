@@ -13,6 +13,8 @@ import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
 import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
+import ServiceSelector from "@/components/ecommerce/ServiceSelector";
+import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 

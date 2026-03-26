@@ -381,7 +381,7 @@ const InventoryManager = () => {
             <SelectTrigger className="w-full sm:w-[200px]"><Filter className="h-4 w-4 mr-2" /><SelectValue placeholder="Category" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {INVENTORY_CATEGORIES.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+              {[...RENTAL_CATEGORIES, ...VENUE_CATEGORIES, ...CREW_CATEGORIES].filter((v, i, a) => a.indexOf(v) === i).map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

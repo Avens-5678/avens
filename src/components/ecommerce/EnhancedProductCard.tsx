@@ -1,9 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
-import { Star, ShieldCheck, Zap, Store } from "lucide-react";
+import { Star, ShieldCheck, Zap, Store, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 interface EnhancedProductCardProps {
   rental: any;
@@ -12,6 +14,8 @@ interface EnhancedProductCardProps {
 
 const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const { addViewed } = useRecentlyViewed();
 
   const formatPrice = () => {
     if (rental.price_value != null) {

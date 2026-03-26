@@ -126,24 +126,24 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile layout */}
-        <div className="flex md:hidden items-center justify-between h-14">
+        {/* Mobile layout - Amazon-style */}
+        <div className="flex md:hidden items-center justify-between h-14 gap-2">
           <Button
             variant="ghost"
             size="icon"
-            className="text-white hover:bg-white/8 rounded-xl"
+            className="text-white hover:bg-white/8 rounded-xl shrink-0"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
 
-          <Link to="/" className="absolute left-1/2 -translate-x-1/2">
+          <Link to="/" className="shrink-0">
             <span className="text-white text-lg font-brand font-bold italic tracking-tight uppercase">
               Evnting<span className="text-secondary">.com</span>
             </span>
           </Link>
 
-          <div className="w-10" aria-hidden="true" />
+          <div className="flex-1" />
         </div>
 
         {/* Mobile Menu */}
@@ -176,31 +176,6 @@ const Navbar = () => {
                   <Mail className="h-4 w-4" />
                   Contact Us
                 </button>
-
-                {user ? (
-                  <>
-                    <Link to={getDashboardPath()} onClick={() => setIsMenuOpen(false)}>
-                      <button className="w-full flex items-center gap-3 text-sm text-white/55 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 transition-all">
-                        <User className="h-4 w-4" />
-                        My Dashboard
-                      </button>
-                    </Link>
-                    <button
-                      className="w-full flex items-center gap-3 text-sm text-white/55 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 transition-all"
-                      onClick={() => { signOut(); setIsMenuOpen(false); }}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign Out
-                    </button>
-                  </>
-                ) : (
-                  <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                    <button className="w-full flex items-center gap-3 text-sm text-white/55 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 transition-all">
-                      <LogIn className="h-4 w-4" />
-                      Sign In
-                    </button>
-                  </Link>
-                )}
               </div>
             </div>
           </div>

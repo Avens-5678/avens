@@ -1,61 +1,61 @@
 
 
-## 3 Features: Top Picks, Hover Quick Preview, Mobile Bottom Nav
+## Add 3 New Sections: Category Grid, Stats Bar, How It Works
 
-### 1. "Top Picks for You" Personalized Row
+### 1. "Shop by Category" Image Grid
+**New file: `src/components/ecommerce/CategoryGrid.tsx`**
 
-**What**: Track items the user clicks on in `localStorage`, then show a "Top Picks for You" discovery row with items from similar categories they haven't viewed yet.
+Replace the icon-based `CategoryIconStrip` on the discovery view with a visually rich image-based grid. Each card has a background image (from Unsplash/placeholder), category name overlay with gradient, and click to filter.
 
-**How**:
-- Create `src/hooks/useRecentlyViewed.ts` — stores last 10 viewed item IDs in `localStorage` key `evnting_recently_viewed`
-- Expose `addViewed(id)` and `recentIds` from the hook
-- In `Ecommerce.tsx`, compute `topPicksForYou` by:
-  1. Getting categories from recently viewed items
-  2. Filtering `allItems` for items in those categories that aren't in the viewed list
-  3. Showing up to 12 items
-- Add a `DiscoveryRow` titled "Top Picks for You" in the discovery view section (after existing rows)
-- Also add a "Recently Viewed" row showing the actual viewed items
-- Call `addViewed(rental.id)` in `EnhancedProductCard` on click (before navigating)
+- 2x3 grid on desktop, 2x2 on mobile with horizontal scroll for overflow
+- Categories: Lighting, Sound & DJ, Stages, Decor & Floral, Tents & Structures, Catering — for rentals (default)
+- When a service is active, continue using `CategoryIconStrip` (scrollable strip fits better in catalog mode)
+- On click: sets `activeService` + `activeQuickCat` to navigate into that category's catalog
+- Each card: rounded-xl, ~160px tall, background image with dark gradient overlay, white text label
 
-### 2. Product Card Hover Quick Preview (Desktop Only)
+Category images will use curated stock image URLs mapped per category keyword.
 
-**What**: On desktop hover, show a tooltip/popover with key specs (description, specs, availability, rating breakdown) without navigating.
+### 2. Redesigned Stats/Social Proof Bar
+**Modify: `src/components/ecommerce/TrustStrip.tsx`**
 
-**How**:
-- In `EnhancedProductCard.tsx`, wrap the card in a `HoverCard` (from existing `@/components/ui/hover-card`)
-- The `HoverCardTrigger` is the card itself
-- `HoverCardContent` shows:
-  - Full title
-  - First 3 specifications from `rental.specifications`
-  - Amenities (if venue), experience level (if crew)
-  - Full description (line-clamped to 4 lines)
-  - "View Details →" link
-- Only render `HoverCard` on non-mobile (use `useIsMobile` hook) — on mobile, just render the card directly
-- Add `openDelay={400}` to avoid accidental triggers
+Transform from a minimal icon+text strip into a visually impactful stats bar with animated counters on scroll (reusing the `IntersectionObserver` pattern from `elegant-stats.tsx`).
 
-### 3. Mobile Bottom Navigation Bar (Swiggy/Zepto-style)
+- 4 stats in a row: "500+ Events" | "4.8★ Rating" | "200+ Vendors" | "24/7 Support"
+- Hardcoded stats (no DB dependency) with animated number counting on scroll
+- Background: subtle gradient or muted bg with border top/bottom
+- Icons with colored circular backgrounds
+- Replaces the current DB-driven trust strip items (those were minimal text items)
 
-**What**: Fixed bottom nav with 4 icons: Home, Browse, Cart, Account — replaces the floating cart button on mobile.
+### 3. "How It Works" Mini Strip
+**New file: `src/components/ecommerce/HowItWorks.tsx`**
 
-**How**:
-- Create `src/components/ecommerce/MobileBottomNav.tsx`
-- Fixed bar at bottom, 4 items:
-  - 🏠 **Home** → `/` 
-  - 📂 **Browse** → scrolls to top / toggles service selector
-  - 🛒 **Cart** (with badge count) → `/cart`
-  - 👤 **Account** → `/auth` or dashboard based on auth state
-- Styled: `fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border` with `safe-area-inset-bottom` padding
-- Only visible on mobile (`md:hidden`)
-- In `Ecommerce.tsx`:
-  - Import and render `MobileBottomNav` passing cart count
-  - Hide the floating cart button on mobile (show only on `hidden sm:flex` or similar)
+A 3-step horizontal strip placed between the banner carousel and the discovery rows.
+
+- 3 steps: `Browse` → `Book Instantly` → `Celebrate`
+- Each step: numbered circle + icon + title + one-line description
+- Connected by a dashed line or arrow between steps
+- Clean, centered layout with subtle background
+- Responsive: horizontal on desktop, stacked on mobile
+
+### Section Order in Ecommerce.tsx (Discovery View)
+
+```text
+Header
+Location Bar
+ServiceSelector
+PromoBannerCarousel
+CategoryGrid          ← NEW (replaces CategoryIconStrip in discovery)
+HowItWorks            ← NEW
+TrustStrip (redesigned) ← MODIFIED
+DiscoverySection (rows)
+```
 
 ### Files Changed
 
 | File | Change |
 |---|---|
-| `src/hooks/useRecentlyViewed.ts` | New hook — localStorage tracking of viewed items |
-| `src/pages/Ecommerce.tsx` | Add Top Picks + Recently Viewed discovery rows; import MobileBottomNav; hide floating cart on mobile |
-| `src/components/ecommerce/EnhancedProductCard.tsx` | Add HoverCard wrapper for desktop; call `addViewed` on click |
-| `src/components/ecommerce/MobileBottomNav.tsx` | New component — fixed bottom nav with Home, Browse, Cart, Account |
+| `src/components/ecommerce/CategoryGrid.tsx` | New — image-based category grid with gradient overlays |
+| `src/components/ecommerce/HowItWorks.tsx` | New — 3-step process strip (Browse → Book → Celebrate) |
+| `src/components/ecommerce/TrustStrip.tsx` | Redesign — animated stats bar with counters replacing DB-driven items |
+| `src/pages/Ecommerce.tsx` | Import new components, render CategoryGrid + HowItWorks in discovery view, reorder sections |
 

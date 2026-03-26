@@ -223,6 +223,9 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
         image_urls: formData.image_urls || [],
         address: formData.address || null,
         service_type: formData.service_type || 'rental',
+        amenities: formData.amenities || [],
+        guest_capacity: formData.guest_capacity || null,
+        experience_level: formData.experience_level || null,
       };
 
       let rentalId: string;

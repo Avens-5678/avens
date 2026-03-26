@@ -40,6 +40,7 @@ const defaultBanner: Omit<PromoBanner, "id"> = {
   display_order: 0,
   is_active: true,
   linked_rental_ids: [],
+  service_type: "rental",
 };
 
 const PromoBannerManager = () => {

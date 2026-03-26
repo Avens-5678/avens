@@ -470,25 +470,30 @@ const Ecommerce = () => {
       {/* Service Selection Strip */}
       <ServiceSelector activeService={activeService} onServiceChange={setActiveService} />
 
-      {/* Category Quick Browse Strip with Icons */}
-      <CategoryIconStrip
-        categories={quickBrowseCategories}
-        activeCategory={activeQuickCat}
-        onCategoryChange={(val) => setActiveQuickCat(val === activeQuickCat ? "" : val)}
-        activeService={activeServiceType}
-      />
+      {/* Category Quick Browse Strip with Icons — only when a service is selected */}
+      {!isDiscoveryView && (
+        <CategoryIconStrip
+          categories={quickBrowseCategories}
+          activeCategory={activeQuickCat}
+          onCategoryChange={(val) => setActiveQuickCat(val === activeQuickCat ? "" : val)}
+          activeService={activeServiceType}
+        />
+      )}
 
       {/* Promotional Banner Carousel */}
-      <PromoBannerCarousel onCtaClick={(ids) => {
-        setPromoFilterIds(ids);
-        setSelectedCategories([]);
-        setActiveQuickCat("");
-        setSearchTerm("");
-        setActiveService("");
-        setTimeout(() => {
-          document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }} />
+      <PromoBannerCarousel
+        serviceType={activeServiceType}
+        onCtaClick={(ids) => {
+          setPromoFilterIds(ids);
+          setSelectedCategories([]);
+          setActiveQuickCat("");
+          setSearchTerm("");
+          setActiveService("");
+          setTimeout(() => {
+            document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        }}
+      />
 
       {/* Trust Strip */}
       <TrustStrip />
@@ -627,6 +632,7 @@ const Ecommerce = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Floating Cart */}
       {items.length > 0 && (

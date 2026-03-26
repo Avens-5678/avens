@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { Search, X, User, ShoppingCart, Menu, Home, Briefcase, Image, Info, BookOpen, HelpCircle, Users, Package, ChevronRight, Clock, TrendingUp } from "lucide-react";
+import { Search, X, User, ShoppingCart, Menu, Home, Briefcase, Image, Info, BookOpen, HelpCircle, Users, Package, ChevronRight, Clock, TrendingUp, Sparkles } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
@@ -25,6 +25,26 @@ interface EcommerceHeaderProps {
 
 const RECENT_SEARCHES_KEY = "evnting_recent_searches";
 const MAX_RECENT = 5;
+
+const PLACEHOLDER_TEXTS = [
+  "Search for LED walls, trusses, stages...",
+  "Find banquet halls & venues near you...",
+  "Hire event managers & decorators...",
+  "Search sound systems & lighting...",
+  "Explore tents, chairs & tables...",
+  "Find photographers & videographers...",
+];
+
+const TRENDING_SEARCHES = [
+  "LED Wall",
+  "Truss System",
+  "DJ Sound System",
+  "Stage Platform",
+  "Wedding Venue",
+  "Flower Decorator",
+  "AC Tent",
+  "Projector",
+];
 
 const menuLinks = [
   { href: "/home", label: "Home", icon: Home },
@@ -53,8 +73,23 @@ const EcommerceHeader = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Rotating placeholder text
+  useEffect(() => {
+    if (searchTerm) return; // Don't rotate when user is typing
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setPlaceholderIndex((prev) => (prev + 1) % PLACEHOLDER_TEXTS.length);
+        setIsAnimating(false);
+      }, 200);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [searchTerm]);
 
   // Load recent searches
   useEffect(() => {
@@ -79,10 +114,9 @@ const EcommerceHeader = ({
   const suggestions = useMemo(() => {
     if (!searchTerm.trim() || allItems.length === 0) return [];
     const term = searchTerm.toLowerCase();
-    const matches = allItems
+    return allItems
       .filter((item) => item.title.toLowerCase().includes(term))
       .slice(0, 8);
-    return matches;
   }, [searchTerm, allItems]);
 
   const groupedSuggestions = useMemo(() => {
@@ -124,6 +158,12 @@ const EcommerceHeader = ({
     setShowDropdown(false);
   }, [onSearchChange]);
 
+  const handleTrendingClick = useCallback((term: string) => {
+    onSearchChange(term);
+    saveRecentSearch(term);
+    setShowDropdown(false);
+  }, [onSearchChange, saveRecentSearch]);
+
   const handleSubmit = useCallback(() => {
     if (searchTerm.trim()) {
       saveRecentSearch(searchTerm.trim());
@@ -161,7 +201,7 @@ const EcommerceHeader = ({
     }
   };
 
-  const showRecentView = showDropdown && !searchTerm.trim() && recentSearches.length > 0;
+  const showRecentView = showDropdown && !searchTerm.trim() && (recentSearches.length > 0 || TRENDING_SEARCHES.length > 0);
   const showSuggestionsView = showDropdown && searchTerm.trim().length > 0 && flatSuggestions.length > 0;
 
   return (
@@ -231,7 +271,7 @@ const EcommerceHeader = ({
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder="Search equipment, venues, services..."
+                  placeholder={PLACEHOLDER_TEXTS[placeholderIndex]}
                   value={searchTerm}
                   onChange={(e) => {
                     onSearchChange(e.target.value);
@@ -240,7 +280,9 @@ const EcommerceHeader = ({
                   }}
                   onFocus={() => setShowDropdown(true)}
                   onKeyDown={handleKeyDown}
-                  className="w-full px-4 py-2.5 text-foreground text-sm outline-none bg-transparent placeholder:text-muted-foreground"
+                  className={`w-full px-4 py-2.5 text-foreground text-sm outline-none bg-transparent placeholder:text-muted-foreground transition-opacity ${
+                    isAnimating ? "placeholder:opacity-0" : "placeholder:opacity-100"
+                  }`}
                 />
                 {searchTerm && (
                   <button
@@ -262,22 +304,45 @@ const EcommerceHeader = ({
             {/* Autocomplete dropdown */}
             {(showRecentView || showSuggestionsView) && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-xl z-[60] max-h-[400px] overflow-y-auto">
-                {/* Recent searches */}
+                {/* Empty state: Trending + Recent */}
                 {showRecentView && (
                   <div className="p-3">
-                    <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
-                      <Clock className="h-3 w-3" /> Recent Searches
-                    </p>
-                    {recentSearches.map((term, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleRecentClick(term)}
-                        className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors flex items-center gap-2"
-                      >
-                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                        {term}
-                      </button>
-                    ))}
+                    {/* Trending searches */}
+                    <div className="mb-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+                        <Sparkles className="h-3 w-3 text-secondary" /> Trending Searches
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {TRENDING_SEARCHES.map((term) => (
+                          <button
+                            key={term}
+                            onClick={() => handleTrendingClick(term)}
+                            className="px-3 py-1.5 text-xs font-medium text-foreground bg-muted hover:bg-primary/10 hover:text-primary rounded-full border border-border/50 transition-colors"
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Recent searches */}
+                    {recentSearches.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+                          <Clock className="h-3 w-3" /> Recent Searches
+                        </p>
+                        {recentSearches.map((term, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleRecentClick(term)}
+                            className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors flex items-center gap-2"
+                          >
+                            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 

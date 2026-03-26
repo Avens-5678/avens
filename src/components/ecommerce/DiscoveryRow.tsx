@@ -1,14 +1,15 @@
 import { useRef, useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
 
 interface DiscoveryRowProps {
   title: string;
   subtitle?: string;
   items: any[];
+  accentColor?: string;
 }
 
-const DiscoveryRow = ({ title, subtitle, items }: DiscoveryRowProps) => {
+const DiscoveryRow = ({ title, subtitle, items, accentColor }: DiscoveryRowProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -38,21 +39,26 @@ const DiscoveryRow = ({ title, subtitle, items }: DiscoveryRowProps) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <section className="py-6 sm:py-8">
+    <section className="py-6 sm:py-10 border-b border-border/40 last:border-b-0">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between mb-4">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-5">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-foreground">{title}</h3>
-            {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight leading-tight">
+              {title}
+            </h3>
+            {subtitle && (
+              <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+            )}
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => scroll("left")}
               disabled={!canScrollLeft}
-              className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+              className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                 canScrollLeft
-                  ? "border-border bg-card text-foreground hover:bg-muted shadow-sm"
-                  : "border-border/50 text-muted-foreground/30"
+                  ? "border-primary/30 bg-card text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary shadow-sm"
+                  : "border-border/30 text-muted-foreground/20 cursor-default"
               }`}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -60,10 +66,10 @@ const DiscoveryRow = ({ title, subtitle, items }: DiscoveryRowProps) => {
             <button
               onClick={() => scroll("right")}
               disabled={!canScrollRight}
-              className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+              className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                 canScrollRight
-                  ? "border-border bg-card text-foreground hover:bg-muted shadow-sm"
-                  : "border-border/50 text-muted-foreground/30"
+                  ? "border-primary/30 bg-card text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary shadow-sm"
+                  : "border-border/30 text-muted-foreground/20 cursor-default"
               }`}
             >
               <ChevronRight className="h-4 w-4" />
@@ -71,14 +77,26 @@ const DiscoveryRow = ({ title, subtitle, items }: DiscoveryRowProps) => {
           </div>
         </div>
 
-        <div ref={scrollRef} className="overflow-x-auto scrollbar-hide">
-          <div className="flex gap-4 min-w-max pb-2">
-            {items.map((rental) => (
-              <div key={rental.id} className="w-56 sm:w-64 flex-shrink-0">
-                <EnhancedProductCard rental={rental} viewMode="one" />
-              </div>
-            ))}
+        {/* Scrollable row */}
+        <div className="relative group">
+          <div ref={scrollRef} className="overflow-x-auto scrollbar-hide scroll-smooth">
+            <div className="flex gap-4 min-w-max pb-3">
+              {items.map((rental) => (
+                <div key={rental.id} className="w-56 sm:w-64 flex-shrink-0">
+                  <EnhancedProductCard rental={rental} viewMode="one" />
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Left fade */}
+          {canScrollLeft && (
+            <div className="absolute left-0 top-0 bottom-3 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+          )}
+          {/* Right fade */}
+          {canScrollRight && (
+            <div className="absolute right-0 top-0 bottom-3 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+          )}
         </div>
       </div>
     </section>

@@ -337,7 +337,54 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+                </div>
+
+                {/* Venue-specific fields */}
+                {formData.service_type === 'venue' && (
+                  <>
+                    <div className="space-y-1">
+                      <Label>Guest Capacity</Label>
+                      <Input placeholder="e.g. 200-500" value={formData.guest_capacity || ''} onChange={(e) => setFormData(prev => ({ ...prev, guest_capacity: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Amenities</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {["In-house Catering", "Without Catering", "In-house Decor", "AC Halls", "Parking Available", "DJ Allowed", "Valet Parking", "Swimming Pool", "Lawn Area"].map(a => (
+                          <Badge
+                            key={a}
+                            variant={(formData.amenities || []).includes(a) ? "default" : "outline"}
+                            className="cursor-pointer"
+                            onClick={() => {
+                              const current = formData.amenities || [];
+                              setFormData(prev => ({
+                                ...prev,
+                                amenities: current.includes(a) ? current.filter((x: string) => x !== a) : [...current, a]
+                              }));
+                            }}
+                          >
+                            {a}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Crew-specific fields */}
+                {formData.service_type === 'crew' && (
+                  <div className="space-y-1">
+                    <Label>Experience Level</Label>
+                    <Select value={formData.experience_level || ''} onValueChange={(val) => setFormData(prev => ({ ...prev, experience_level: val }))}>
+                      <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="junior">1–3 Years (Junior)</SelectItem>
+                        <SelectItem value="mid">3–5 Years (Mid)</SelectItem>
+                        <SelectItem value="senior">5–10 Years (Senior)</SelectItem>
+                        <SelectItem value="expert">10+ Years (Expert)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
       {(searchQuery || filterCategory !== "all" || filterStatus !== "all") && (
         <p className="text-sm text-muted-foreground">Showing {filteredRentals.length} of {rentals?.length || 0} items</p>

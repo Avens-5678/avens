@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Layout/Navbar";
 import Layout from "@/components/Layout/Layout";
-import { useAllRentals } from "@/hooks/useData";
+import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench } from "lucide-react";
@@ -71,6 +71,38 @@ const CREW_EXPERIENCE_OPTIONS = [
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
+  const { data: vendorItems } = useVerifiedVendorInventory();
+
+  // Merge vendor items into rentals format
+  const allItems = useMemo(() => {
+    const adminItems = (rentals || []).map((r: any) => ({ ...r, _source: "admin" }));
+    const vendorMapped = (vendorItems || []).map((v: any) => ({
+      id: v.id,
+      title: v.name,
+      description: v.description,
+      short_description: v.short_description,
+      image_url: v.image_url,
+      image_urls: v.image_urls,
+      categories: v.categories,
+      price_value: v.price_value,
+      pricing_unit: v.pricing_unit,
+      price_range: null,
+      address: v.address,
+      quantity: v.quantity,
+      rating: null,
+      is_active: v.is_available,
+      show_on_home: false,
+      service_type: v.service_type || "rental",
+      amenities: v.amenities,
+      guest_capacity: v.guest_capacity,
+      experience_level: v.experience_level,
+      has_variants: v.has_variants,
+      created_at: v.created_at,
+      search_keywords: v.search_keywords,
+      _source: "vendor",
+    }));
+    return [...adminItems, ...vendorMapped];
+  }, [rentals, vendorItems]);
   const { items } = useCart();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -152,30 +184,30 @@ const Ecommerce = () => {
   const activePriceRanges = activeServiceType === "venue" ? VENUE_PRICE_RANGES : activeServiceType === "crew" ? CREW_PRICE_RANGES : RENTAL_PRICE_RANGES;
 
   const categories = useMemo(() => {
-    if (!rentals) return [];
+    if (!allItems.length) return [];
     const cats = new Set<string>();
     const itemsForCats = activeServiceType
-      ? rentals.filter((r: any) => (r.service_type || "rental") === activeServiceType)
-      : rentals;
+      ? allItems.filter((r: any) => (r.service_type || "rental") === activeServiceType)
+      : allItems;
     itemsForCats.forEach((r: any) => r.categories?.forEach((c: string) => cats.add(c)));
     return Array.from(cats).sort();
-  }, [rentals, activeServiceType]);
+  }, [allItems, activeServiceType]);
 
   const quickBrowseCategories = useMemo(() => {
     return [{ label: "All", value: "" }, ...categories.map(c => ({ label: c, value: c }))];
   }, [categories]);
 
   const cities = useMemo(() => {
-    if (!rentals) return [];
+    if (!allItems.length) return [];
     const citySet = new Set<string>();
     const itemsForCities = activeServiceType
-      ? rentals.filter((r: any) => (r.service_type || "rental") === activeServiceType)
-      : rentals;
-    itemsForCities.forEach((r) => {
+      ? allItems.filter((r: any) => (r.service_type || "rental") === activeServiceType)
+      : allItems;
+    itemsForCities.forEach((r: any) => {
       if (r.address?.trim()) citySet.add(r.address.trim());
     });
     return Array.from(citySet).sort();
-  }, [rentals, activeServiceType]);
+  }, [allItems, activeServiceType]);
 
   // Reset service-specific filters when service changes
   useEffect(() => {
@@ -189,19 +221,19 @@ const Ecommerce = () => {
   }, [activeService]);
 
   const filteredRentals = useMemo(() => {
-    if (!rentals) return [];
+    if (!allItems.length) return [];
 
     if (promoFilterIds.length > 0) {
-      let results = rentals.filter((r) => promoFilterIds.includes(r.id));
+      let results = allItems.filter((r: any) => promoFilterIds.includes(r.id));
       if (searchTerm) {
-        results = results.filter((r) =>
+        results = results.filter((r: any) =>
           r.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
       return results;
     }
 
-    let results = rentals.filter((rental) => {
+    let results = allItems.filter((rental: any) => {
       const matchesSearch =
         !searchTerm ||
         rental.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -209,8 +241,8 @@ const Ecommerce = () => {
       if (activeQuickCat && !allCats.includes(activeQuickCat)) allCats.push(activeQuickCat);
       if (searchCategory && !allCats.includes(searchCategory)) allCats.push(searchCategory);
       const matchesCategory =
-        allCats.length === 0 || rental.categories?.some((c) =>
-          allCats.some((selected) => c.toLowerCase() === selected.toLowerCase())
+        allCats.length === 0 || rental.categories?.some((c: string) =>
+          allCats.some((selected: string) => c.toLowerCase() === selected.toLowerCase())
         );
       const matchesCity =
         selectedCities.length === 0 ||
@@ -218,7 +250,7 @@ const Ecommerce = () => {
 
       const matchesPrice =
         selectedPriceRanges.length === 0 ||
-        selectedPriceRanges.some((idx) => {
+        selectedPriceRanges.some((idx: number) => {
           const range = activePriceRanges[idx];
           const price = rental.price_value ?? 0;
           return price >= range.min && price < range.max;
@@ -228,78 +260,72 @@ const Ecommerce = () => {
 
       const matchesService =
         !activeServiceType ||
-        ((rental as any).service_type || "rental") === activeServiceType;
+        (rental.service_type || "rental") === activeServiceType;
 
-      // Venue amenity filter
       const matchesAmenities =
         selectedAmenities.length === 0 ||
-        selectedAmenities.every((a) => ((rental as any).amenities || []).includes(a));
+        selectedAmenities.every((a: string) => (rental.amenities || []).includes(a));
 
-      // Venue capacity filter
       const matchesCapacity =
         selectedCapacity.length === 0 ||
-        selectedCapacity.includes((rental as any).guest_capacity || "");
+        selectedCapacity.includes(rental.guest_capacity || "");
 
-      // Crew experience filter
       const matchesExperience =
         selectedExperience.length === 0 ||
-        selectedExperience.includes((rental as any).experience_level || "");
+        selectedExperience.includes(rental.experience_level || "");
 
       return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience;
     });
 
     switch (sortBy) {
       case "price_low":
-        results.sort((a, b) => (a.price_value ?? Infinity) - (b.price_value ?? Infinity));
+        results.sort((a: any, b: any) => (a.price_value ?? Infinity) - (b.price_value ?? Infinity));
         break;
       case "price_high":
-        results.sort((a, b) => (b.price_value ?? 0) - (a.price_value ?? 0));
+        results.sort((a: any, b: any) => (b.price_value ?? 0) - (a.price_value ?? 0));
         break;
       case "newest":
-        results.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        results.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
       case "rating":
-        results.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        results.sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
     }
 
     return results;
-  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience]);
+  }, [allItems, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience]);
 
   // Discovery rows for default landing view
   const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0;
 
   const discoveryBestRentals = useMemo(() => {
-    if (!rentals) return [];
-    return rentals
-      .filter((r: any) => (r.service_type || "rental") === "rental" && r.is_active)
-      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    return allItems
+      .filter((r: any) => (r.service_type || "rental") === "rental" && r.is_active !== false)
+      .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
       .slice(0, 12);
-  }, [rentals]);
+  }, [allItems]);
 
   const discoveryBestInCity = useMemo(() => {
-    if (!rentals || !userLocation?.cityName) return [];
+    if (!userLocation?.cityName) return [];
     const city = userLocation.cityName.toLowerCase();
-    return rentals
+    return allItems
       .filter((r: any) => r.address?.toLowerCase().includes(city))
       .slice(0, 12);
-  }, [rentals, userLocation]);
+  }, [allItems, userLocation]);
 
   const discoveryBestCrew = useMemo(() => {
-    if (!rentals) return [];
-    return rentals
-      .filter((r: any) => (r.service_type || "rental") === "crew" && r.is_active)
-      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    return allItems
+      .filter((r: any) => (r.service_type || "rental") === "crew" && r.is_active !== false)
+      .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
       .slice(0, 12);
-  }, [rentals]);
+  }, [allItems]);
 
   const discoveryTopVenues = useMemo(() => {
-    if (!rentals) return [];
-    return rentals
-      .filter((r: any) => (r.service_type || "rental") === "venue" && r.is_active)
-      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    return allItems
+      .filter((r: any) => (r.service_type || "rental") === "venue" && r.is_active !== false)
+      .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
       .slice(0, 12);
-  }, [rentals]);
+  }, [allItems]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -532,7 +558,7 @@ const Ecommerce = () => {
         categories={categories}
         selectedSearchCategory={searchCategory}
         onSearchCategoryChange={setSearchCategory}
-        allItems={(rentals || []).map((r) => ({
+        allItems={(allItems || []).map((r: any) => ({
           id: r.id,
           title: r.title,
           service_type: r.service_type,

@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
-import { Star, ShieldCheck, Zap } from "lucide-react";
+import { Star, ShieldCheck, Zap, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 
@@ -23,7 +23,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
   const priceInfo = formatPrice();
   const isAssured = rental.rating && rental.rating >= 4;
-  
+  const isVendor = rental._source === "vendor";
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
 
@@ -58,6 +58,11 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         {/* Badges overlay */}
         {!isList && (
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+            {isVendor && (
+              <Badge className="bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
+                <Store className="h-3 w-3" /> Vendor
+              </Badge>
+            )}
             {isFeatured && (
               <Badge className="bg-secondary text-secondary-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
                 <Zap className="h-3 w-3" /> Featured

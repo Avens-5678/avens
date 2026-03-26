@@ -1460,11 +1460,14 @@ export type Database = {
       vendor_inventory: {
         Row: {
           address: string | null
+          amenities: string[] | null
           categories: string[] | null
           category: string | null
           created_at: string
           description: string | null
           display_order: number | null
+          experience_level: string | null
+          guest_capacity: string | null
           has_variants: boolean | null
           id: string
           image_url: string | null
@@ -1477,6 +1480,7 @@ export type Database = {
           pricing_unit: string | null
           quantity: number
           search_keywords: string | null
+          service_type: string
           short_description: string | null
           updated_at: string
           vendor_id: string
@@ -1485,11 +1489,14 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          amenities?: string[] | null
           categories?: string[] | null
           category?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
+          experience_level?: string | null
+          guest_capacity?: string | null
           has_variants?: boolean | null
           id?: string
           image_url?: string | null
@@ -1502,6 +1509,7 @@ export type Database = {
           pricing_unit?: string | null
           quantity?: number
           search_keywords?: string | null
+          service_type?: string
           short_description?: string | null
           updated_at?: string
           vendor_id: string
@@ -1510,11 +1518,14 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          amenities?: string[] | null
           categories?: string[] | null
           category?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
+          experience_level?: string | null
+          guest_capacity?: string | null
           has_variants?: boolean | null
           id?: string
           image_url?: string | null
@@ -1527,6 +1538,7 @@ export type Database = {
           pricing_unit?: string | null
           quantity?: number
           search_keywords?: string | null
+          service_type?: string
           short_description?: string | null
           updated_at?: string
           vendor_id?: string

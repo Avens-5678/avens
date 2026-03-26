@@ -81,12 +81,6 @@ const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange, activ
       window.removeEventListener("resize", checkScroll);
     };
   }, [displayCategories]);
-    window.addEventListener("resize", checkScroll);
-    return () => {
-      el?.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
-    };
-  }, [categories]);
 
   const scroll = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "left" ? -220 : 220, behavior: "smooth" });

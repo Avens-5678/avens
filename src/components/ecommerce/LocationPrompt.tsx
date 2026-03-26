@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Navigation, X, Loader2 } from "lucide-react";
+import { MapPin, Navigation, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";

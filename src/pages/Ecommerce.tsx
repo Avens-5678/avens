@@ -597,8 +597,8 @@ const Ecommerce = () => {
         />
       )}
 
-      {/* Stats/Social Proof Bar */}
-      <TrustStrip />
+      {/* Stats/Social Proof Bar - only on discovery view */}
+      {isDiscoveryView && <TrustStrip />}
 
       {/* Promotional Banner Carousel */}
       <PromoBannerCarousel

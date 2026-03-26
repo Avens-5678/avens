@@ -493,6 +493,22 @@ const Ecommerce = () => {
       {/* Trust Strip */}
       <TrustStrip />
 
+      {/* Discovery Rows — shown on default landing */}
+      {isDiscoveryView && (
+        <div className="bg-background">
+          <DiscoveryRow title="Discover Best Rentals" subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
+          {discoveryBestInCity.length > 0 && (
+            <DiscoveryRow title={`Discover Best in ${userLocation?.cityName || "Your City"}`} subtitle="Popular items near you" items={discoveryBestInCity} />
+          )}
+          {discoveryBestCrew.length > 0 && (
+            <DiscoveryRow title="Best Crew for Your Event" subtitle="Skilled professionals ready to help" items={discoveryBestCrew} />
+          )}
+          {discoveryTopVenues.length > 0 && (
+            <DiscoveryRow title="Top Venues Near You" subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
+          )}
+        </div>
+      )}
+
       {/* Main Content with Sidebar */}
       <section className="py-4 sm:py-6 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-4">

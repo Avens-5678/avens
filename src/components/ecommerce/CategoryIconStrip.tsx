@@ -123,9 +123,9 @@ const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange, activ
         {/* Scrollable icons */}
         <div
           ref={scrollRef}
-          className="overflow-x-auto scrollbar-hide"
+          className="overflow-x-auto scrollbar-hide -mx-4 sm:-mx-6 px-4 sm:px-6"
         >
-          <div className="flex gap-5 sm:gap-7 min-w-max pb-1">
+          <div className="flex gap-5 sm:gap-7 min-w-max pb-1 pr-4 sm:pr-6">
             {displayCategories.map((cat) => {
               const isActive = (cat.value === "" && !activeCategory) || activeCategory === cat.value;
               const Icon = cat.value === "" ? Sparkles : getIconForCategory(cat.value);

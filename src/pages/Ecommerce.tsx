@@ -475,6 +475,7 @@ const Ecommerce = () => {
         categories={quickBrowseCategories}
         activeCategory={activeQuickCat}
         onCategoryChange={(val) => setActiveQuickCat(val === activeQuickCat ? "" : val)}
+        activeService={activeServiceType}
       />
 
       {/* Promotional Banner Carousel */}

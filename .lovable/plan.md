@@ -1,32 +1,65 @@
 
 
-## Database Duplication Analysis
+## Swiggy-Style Service Tabs & Category Icons for /ecommerce
 
-### Tables Reviewed (27 total)
+### What We're Building
 
-After examining every table, view, and their usage across the codebase, here is the assessment:
+**1. Service Selection Strip** (below search bar, above banners)
+A horizontal row of 3 large clickable cards — similar to Swiggy's "Food Delivery | Instamart | Dineout" — but for your business:
 
-### No True Duplicate Tables Found
+```text
+┌─────────────────────────────────────────────────────────┐
+│  [Search Bar - Amazon style]                            │
+├─────────────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
+│  │ ⚡        │  │ 🏛️        │  │ 👥        │              │
+│  │ Insta-Rent│  │ Venues   │  │ Crew Hub │              │
+│  │ Equipment │  │ Spaces & │  │ Skilled  │              │
+│  │ on demand │  │ Locations│  │ Manpower │              │
+│  └──────────┘  └──────────┘  └──────────┘              │
+├─────────────────────────────────────────────────────────┤
+│  [Promo Banners]                                        │
+└─────────────────────────────────────────────────────────┘
+```
 
-The database is already well-structured with minimal redundancy. Here's why the apparent overlaps are intentional:
+- **Insta-Rent** — Quick equipment & decor rentals (filters to rental categories)
+- **Venues** — Spaces, halls, outdoor locations (filters to venue-related items)
+- **Crew Hub** — Manpower, technicians, staff (filters or navigates to services)
 
-| Apparent Overlap | Type | Why It Exists |
-|---|---|---|
-| `admin_users` / `admin_users_safe` | Table + **View** | `admin_users_safe` is a database VIEW that strips sensitive fields (password_hash, reset_token). This is a security pattern, not duplication. |
-| `portfolio` / `portfolio_view` | Table + **View** | `portfolio_view` is a VIEW joining portfolio with events for convenience. Not used in code currently. |
-| `event_requests` / `service_orders` | Two tables with sync trigger | Intentional dual-table architecture. `event_requests` is client-facing (tied to `client_id`), `service_orders` is admin-facing with different fields (`guest_count`, `service_details`, `event_end_date`). A DB trigger syncs new event requests into service orders. Merging would break RBAC and RLS policies. |
-| `profiles.role` / `user_roles.role` | Column overlap | `profiles.role` is a legacy column. The actual RBAC system uses `user_roles` table with security definer functions (`has_role`, `get_user_role`). |
+Each card has a Lucide icon, title, and subtitle. Clicking filters the product grid or navigates accordingly.
 
-### One Minor Cleanup Possible
+**2. Category Icons on Quick Browse Strip**
+Replace the plain text category pills with icon + text, like Swiggy's circular "What's on your mind?" section. Each category gets a relevant Lucide icon:
 
-**`profiles.role` column**: This is redundant since the app uses the `user_roles` table for all role checks. However, removing it risks breaking edge cases where legacy code reads `profiles.role`. The risk-to-benefit ratio is low.
+| Category | Icon |
+|---|---|
+| Lighting | `Lightbulb` |
+| Sound/Audio | `Speaker` |
+| Stages | `Theater` (or `LayoutDashboard`) |
+| Furniture | `Armchair` |
+| Decor | `Flower2` |
+| Tents/Structures | `Tent` |
+| Catering | `UtensilsCrossed` |
+| Electronics/AV | `Monitor` |
+| Default/All | `Sparkles` |
 
-### Recommendation
+Categories will be displayed as circular icon cards with the label below — scrollable horizontally.
 
-**No merges are needed.** The database does not have duplicate tables storing the same data. The apparent overlaps are either:
-- Security views (safe patterns)
-- Intentional architectural separation (different RLS, different schemas)
-- Legacy columns with negligible overhead
+### Technical Plan
 
-Merging any of these would either break security boundaries, destroy RLS policies, or remove intentional architectural separation with no meaningful benefit.
+**File: `src/pages/Ecommerce.tsx`**
+- Add a new `ServiceSelector` section between `EcommerceHeader` and `PromoBannerCarousel`
+- Three large cards in a responsive flex row with icons, titles, and subtitles
+- Clicking a service card sets a filter or navigates (Insta-Rent = show all, Venues = filter venues category, Crew Hub = navigate to /services)
+- Replace the category quick-browse strip: change from plain pills to circular icon cards with category name below
+- Create an icon mapping object that maps category names to Lucide icons
+- Style as horizontal scrollable row with centered circular icon containers
+
+**File: `src/components/ecommerce/EcommerceHeader.tsx`**
+- No changes needed — search bar stays as-is
+
+### Naming Suggestions
+- **Insta-Rent** — "Rent equipment instantly"
+- **Venues** — "Find the perfect space"  
+- **Crew Hub** — "Hire skilled professionals"
 

@@ -23,7 +23,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Package, Plus, Edit, Trash2, Save, X, ImageIcon, Search, Filter, ShieldCheck, IndianRupee } from "lucide-react";
 import CSVUploader from "./CSVUploader";
 
-const INVENTORY_CATEGORIES = [
+const RENTAL_CATEGORIES = [
   "Event Structures & Venues",
   "Exhibition & Stalls",
   "Climate Control",
@@ -31,6 +31,57 @@ const INVENTORY_CATEGORIES = [
   "Branding & Décor",
   "General",
 ];
+
+const VENUE_CATEGORIES = [
+  "Banquet Halls",
+  "Open Lawns",
+  "Farmhouses",
+  "Convention Centers",
+  "Rooftop Venues",
+  "Resort & Hotels",
+];
+
+const CREW_CATEGORIES = [
+  "Photographers",
+  "Videographers",
+  "Event Managers",
+  "Decorators",
+  "DJs & Musicians",
+  "Anchors & Emcees",
+  "Catering Staff",
+  "Security",
+];
+
+const SERVICE_TYPE_OPTIONS = [
+  { value: "rental", label: "Insta-Rent (Equipment)" },
+  { value: "venue", label: "Venue" },
+  { value: "crew", label: "Crew / Manpower" },
+];
+
+const VENUE_AMENITY_OPTIONS = [
+  "In-house Catering",
+  "Without Catering",
+  "In-house Decor",
+  "AC Halls",
+  "Parking Available",
+  "DJ Allowed",
+  "Valet Parking",
+];
+
+const CREW_EXPERIENCE_OPTIONS = [
+  { label: "1–3 Years", value: "junior" },
+  { label: "3–5 Years", value: "mid" },
+  { label: "5–10 Years", value: "senior" },
+  { label: "10+ Years", value: "expert" },
+];
+
+const getCategoriesForService = (serviceType: string) => {
+  switch (serviceType) {
+    case "venue": return VENUE_CATEGORIES;
+    case "crew": return CREW_CATEGORIES;
+    default: return RENTAL_CATEGORIES;
+  }
+};
 
 const PRICING_UNITS = ["Per Hour", "Per Day", "Per Week", "Per Event", "Fixed Price", "Per Sq.Ft", "Per Sq.M"];
 
@@ -90,6 +141,7 @@ const InventoryManager = () => {
       categories: [], search_keywords: '', display_order: 0,
       quantity: 1, is_available: true,
       image_url: '', image_urls: [],
+      service_type: 'rental', amenities: [], guest_capacity: '', experience_level: '',
     });
   };
 
@@ -101,6 +153,10 @@ const InventoryManager = () => {
       image_urls: item.image_urls || [],
       price_value: item.price_value ?? '',
       pricing_unit: item.pricing_unit || 'Per Day',
+      service_type: item.service_type || 'rental',
+      amenities: item.amenities || [],
+      guest_capacity: item.guest_capacity || '',
+      experience_level: item.experience_level || '',
     });
     setHasVariants(item.has_variants || false);
     if (item.has_variants) {
@@ -248,6 +304,10 @@ const InventoryManager = () => {
         is_available: formData.is_available !== false,
         image_url: formData.image_url || null,
         image_urls: formData.image_urls || [],
+        service_type: formData.service_type || 'rental',
+        amenities: formData.service_type === 'venue' ? (formData.amenities || []) : [],
+        guest_capacity: formData.service_type === 'venue' ? (formData.guest_capacity || null) : null,
+        experience_level: formData.service_type === 'crew' ? (formData.experience_level || null) : null,
       };
 
       let itemId: string;
@@ -337,6 +397,29 @@ const InventoryManager = () => {
               <DialogTitle>{editingItem ? "Edit Inventory Item" : "Add New Item"}</DialogTitle>
             </DialogHeader>
 
+            {/* Service Type Selector */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">What are you listing?</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {SERVICE_TYPE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, service_type: opt.value, categories: [] }))}
+                    className={`p-3 rounded-xl border-2 text-center text-sm font-medium transition-all ${
+                      formData.service_type === opt.value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:border-primary/40 text-muted-foreground"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
             {/* Step 1: Base Product */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Step 1: Item Details</h3>
@@ -362,7 +445,7 @@ const InventoryManager = () => {
                     <Label>Categories</Label>
                     <Select onValueChange={addCategory}>
                       <SelectTrigger><SelectValue placeholder="Add category" /></SelectTrigger>
-                      <SelectContent>{INVENTORY_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      <SelectContent>{getCategoriesForService(formData.service_type || 'rental').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                     </Select>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {(formData.categories || []).map((c: string) => (
@@ -413,6 +496,71 @@ const InventoryManager = () => {
                 </div>
               </div>
             </div>
+
+            {/* Venue-specific fields */}
+            {formData.service_type === 'venue' && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Venue Details</h3>
+                  <div className="space-y-1">
+                    <Label>Guest Capacity</Label>
+                    <Select value={formData.guest_capacity || ''} onValueChange={(v) => setFormData(prev => ({ ...prev, guest_capacity: v }))}>
+                      <SelectTrigger><SelectValue placeholder="Select capacity" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">Up to 100 guests</SelectItem>
+                        <SelectItem value="medium">100 – 300 guests</SelectItem>
+                        <SelectItem value="large">300 – 500 guests</SelectItem>
+                        <SelectItem value="mega">500+ guests</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Amenities</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {VENUE_AMENITY_OPTIONS.map((amenity) => (
+                        <label key={amenity} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(formData.amenities || []).includes(amenity)}
+                            onChange={(e) => {
+                              const current = formData.amenities || [];
+                              setFormData(prev => ({
+                                ...prev,
+                                amenities: e.target.checked ? [...current, amenity] : current.filter((a: string) => a !== amenity),
+                              }));
+                            }}
+                            className="rounded border-border"
+                          />
+                          <span className="text-sm">{amenity}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Crew-specific fields */}
+            {formData.service_type === 'crew' && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Crew Details</h3>
+                  <div className="space-y-1">
+                    <Label>Experience Level</Label>
+                    <Select value={formData.experience_level || ''} onValueChange={(v) => setFormData(prev => ({ ...prev, experience_level: v }))}>
+                      <SelectTrigger><SelectValue placeholder="Select experience" /></SelectTrigger>
+                      <SelectContent>
+                        {CREW_EXPERIENCE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </>
+            )}
 
             <Separator />
 
@@ -538,6 +686,7 @@ const InventoryManager = () => {
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center flex-wrap gap-2">
                         <h3 className="font-medium text-lg">{item.name}</h3>
+                        <Badge variant="outline" className="text-xs capitalize">{item.service_type || 'rental'}</Badge>
                         {item.has_variants && <Badge variant="outline" className="text-xs">Has Variants</Badge>}
                         {(item as any).is_verified && (
                           <Badge className="bg-emerald-500 text-white">

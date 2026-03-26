@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Layout/Navbar";
 import Layout from "@/components/Layout/Layout";
-import { useAllRentals } from "@/hooks/useData";
+import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench } from "lucide-react";
@@ -71,6 +71,38 @@ const CREW_EXPERIENCE_OPTIONS = [
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
+  const { data: vendorItems } = useVerifiedVendorInventory();
+
+  // Merge vendor items into rentals format
+  const allItems = useMemo(() => {
+    const adminItems = (rentals || []).map((r: any) => ({ ...r, _source: "admin" }));
+    const vendorMapped = (vendorItems || []).map((v: any) => ({
+      id: v.id,
+      title: v.name,
+      description: v.description,
+      short_description: v.short_description,
+      image_url: v.image_url,
+      image_urls: v.image_urls,
+      categories: v.categories,
+      price_value: v.price_value,
+      pricing_unit: v.pricing_unit,
+      price_range: null,
+      address: v.address,
+      quantity: v.quantity,
+      rating: null,
+      is_active: v.is_available,
+      show_on_home: false,
+      service_type: v.service_type || "rental",
+      amenities: v.amenities,
+      guest_capacity: v.guest_capacity,
+      experience_level: v.experience_level,
+      has_variants: v.has_variants,
+      created_at: v.created_at,
+      search_keywords: v.search_keywords,
+      _source: "vendor",
+    }));
+    return [...adminItems, ...vendorMapped];
+  }, [rentals, vendorItems]);
   const { items } = useCart();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");

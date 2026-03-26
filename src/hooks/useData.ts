@@ -342,3 +342,21 @@ export const useActiveFAQ = () => {
     },
   });
 };
+
+// Fetch verified vendor inventory for ecommerce
+export const useVerifiedVendorInventory = () => {
+  return useQuery({
+    queryKey: ["verified-vendor-inventory"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vendor_inventory")
+        .select("*")
+        .eq("is_available", true)
+        .eq("is_verified", true)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};

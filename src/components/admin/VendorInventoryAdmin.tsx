@@ -206,10 +206,15 @@ const VendorInventoryAdmin = () => {
     (v.phone || "").includes(search)
   );
 
-  const filteredInventory = inventory?.filter((item) =>
-    item.name.toLowerCase().includes(search.toLowerCase()) ||
-    (item.category || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const [catalogServiceFilter, setCatalogServiceFilter] = useState<string>("all");
+
+  const filteredInventory = inventory?.filter((item) => {
+    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
+      (item.category || "").toLowerCase().includes(search.toLowerCase());
+    const matchesService = catalogServiceFilter === "all" ||
+      ((item as any).service_type || "rental") === catalogServiceFilter;
+    return matchesSearch && matchesService;
+  });
 
   const isLoading = vendorsLoading || inventoryLoading;
 
@@ -310,7 +315,26 @@ const VendorInventoryAdmin = () => {
         </TabsContent>
 
         {/* All Catalog Tab */}
-        <TabsContent value="catalog" className="mt-4">
+        <TabsContent value="catalog" className="mt-4 space-y-4">
+          {/* Service type sub-filter */}
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { value: "all", label: "All Types" },
+              { value: "rental", label: "Rentals" },
+              { value: "venue", label: "Venues" },
+              { value: "crew", label: "Crew" },
+            ].map((opt) => (
+              <Button
+                key={opt.value}
+                variant={catalogServiceFilter === opt.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCatalogServiceFilter(opt.value)}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </div>
+
           {!filteredInventory || filteredInventory.length === 0 ? (
             <Card><CardContent className="py-12 text-center">
               <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -329,7 +353,10 @@ const VendorInventoryAdmin = () => {
                     )}
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-lg">{item.name}</CardTitle>
+                        <div>
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                          <Badge variant="outline" className="text-[10px] capitalize mt-1">{(item as any).service_type || 'rental'}</Badge>
+                        </div>
                         <div className="flex gap-1">
                           {(item as any).is_verified && (
                             <Badge className="bg-emerald-500 text-white shrink-0">

@@ -22,6 +22,10 @@ export interface VendorInventoryItem {
   display_order: number | null;
   is_available: boolean;
   address: string | null;
+  service_type: string;
+  amenities: string[] | null;
+  guest_capacity: string | null;
+  experience_level: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +46,10 @@ export interface VendorInventoryInsert {
   display_order?: number;
   is_available?: boolean;
   address?: string;
+  service_type?: string;
+  amenities?: string[];
+  guest_capacity?: string;
+  experience_level?: string;
 }
 
 // Fetch vendor's own inventory

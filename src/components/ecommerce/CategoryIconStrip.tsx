@@ -80,6 +80,12 @@ const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange, activ
       el?.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", checkScroll);
     };
+  }, [displayCategories]);
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el?.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
   }, [categories]);
 
   const scroll = (dir: "left" | "right") => {
@@ -126,7 +132,7 @@ const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange, activ
           className="overflow-x-auto scrollbar-hide"
         >
           <div className="flex gap-5 sm:gap-7 min-w-max pb-1">
-            {categories.map((cat) => {
+            {displayCategories.map((cat) => {
               const isActive = (cat.value === "" && !activeCategory) || activeCategory === cat.value;
               const Icon = cat.value === "" ? Sparkles : getIconForCategory(cat.value);
 

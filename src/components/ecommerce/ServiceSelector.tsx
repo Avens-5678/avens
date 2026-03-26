@@ -37,10 +37,6 @@ const ServiceSelector = ({ activeService, onServiceChange }: ServiceSelectorProp
   const navigate = useNavigate();
 
   const handleClick = (id: string) => {
-    if (id === "crew-hub") {
-      navigate("/services");
-      return;
-    }
     onServiceChange(activeService === id ? "" : id);
   };
 

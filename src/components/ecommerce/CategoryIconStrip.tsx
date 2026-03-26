@@ -11,6 +11,7 @@ interface CategoryIconStripProps {
   categories: { label: string; value: string }[];
   activeCategory: string;
   onCategoryChange: (value: string) => void;
+  activeService?: string;
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -37,7 +38,28 @@ const getIconForCategory = (category: string): LucideIcon => {
   return Sparkles;
 };
 
-const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange }: CategoryIconStripProps) => {
+const VENUE_CATEGORIES = [
+  "Banquet Halls", "Farmhouses", "Hotels & Resorts", "Party Halls",
+  "Outdoor Venues", "Convention Centers", "Heritage Venues", "Rooftop Venues",
+];
+
+const CREW_CATEGORIES = [
+  "Photographers", "Decorators", "Makeup Artists", "Caterers",
+  "DJs & Music", "Choreographers", "Event Managers", "Anchors & MCs",
+  "Mehendi Artists", "Florists", "Videographers", "Lighting Technicians",
+];
+
+const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange, activeService }: CategoryIconStripProps) => {
+  // Override categories based on active service
+  const displayCategories = useMemo(() => {
+    if (activeService === "venue") {
+      return [{ label: "All Venues", value: "" }, ...VENUE_CATEGORIES.map(c => ({ label: c, value: c }))];
+    }
+    if (activeService === "crew") {
+      return [{ label: "All Crew", value: "" }, ...CREW_CATEGORIES.map(c => ({ label: c, value: c }))];
+    }
+    return categories;
+  }, [categories, activeService]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);

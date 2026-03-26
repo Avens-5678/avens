@@ -16,7 +16,9 @@ import ServiceSelector from "@/components/ecommerce/ServiceSelector";
 import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
+import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
@@ -572,18 +574,7 @@ const Ecommerce = () => {
 
       {/* Discovery Rows — shown on default landing */}
       {isDiscoveryView && (
-        <div className="bg-background py-4 sm:py-6">
-          <DiscoveryRow title="🔥 Discover Best Rentals" subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
-          {discoveryBestInCity.length > 0 && (
-            <DiscoveryRow title={`📍 Discover Best in ${userLocation?.cityName || "Your City"}`} subtitle="Popular items near you" items={discoveryBestInCity} />
-          )}
-          {discoveryBestCrew.length > 0 && (
-            <DiscoveryRow title="👥 Best Crew for Your Event" subtitle="Skilled professionals ready to help" items={discoveryBestCrew} />
-          )}
-          {discoveryTopVenues.length > 0 && (
-            <DiscoveryRow title="🏛️ Top Venues Near You" subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
-          )}
-        </div>
+        <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} />
       )}
 
       {/* Main Content with Sidebar — hidden in discovery view */}

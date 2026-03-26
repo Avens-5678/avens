@@ -17,7 +17,6 @@ import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
-import CategoryGrid from "@/components/ecommerce/CategoryGrid";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";

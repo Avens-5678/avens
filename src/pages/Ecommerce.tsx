@@ -70,6 +70,48 @@ const CREW_EXPERIENCE_OPTIONS = [
   { label: "10+ Years", value: "expert" },
 ];
 
+// ── Discovery section with Top Picks + Recently Viewed ──
+const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues }: any) => {
+  const { recentIds } = useRecentlyViewed();
+
+  const recentlyViewedItems = useMemo(() => {
+    if (recentIds.length === 0) return [];
+    return recentIds.map((id: string) => allItems.find((r: any) => r.id === id)).filter(Boolean);
+  }, [recentIds, allItems]);
+
+  const topPicksForYou = useMemo(() => {
+    if (recentIds.length === 0) return [];
+    const viewedItems = recentIds.map((id: string) => allItems.find((r: any) => r.id === id)).filter(Boolean);
+    const viewedCategories = new Set<string>();
+    viewedItems.forEach((item: any) => item.categories?.forEach((c: string) => viewedCategories.add(c)));
+    if (viewedCategories.size === 0) return [];
+    return allItems
+      .filter((r: any) => !recentIds.includes(r.id) && r.categories?.some((c: string) => viewedCategories.has(c)))
+      .slice(0, 12);
+  }, [allItems, recentIds]);
+
+  return (
+    <div className="bg-background py-4 sm:py-6">
+      <DiscoveryRow title="🔥 Discover Best Rentals" subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
+      {discoveryBestInCity.length > 0 && (
+        <DiscoveryRow title={`📍 Discover Best in ${userLocation?.cityName || "Your City"}`} subtitle="Popular items near you" items={discoveryBestInCity} />
+      )}
+      {topPicksForYou.length > 0 && (
+        <DiscoveryRow title="✨ Top Picks for You" subtitle="Based on your browsing history" items={topPicksForYou} />
+      )}
+      {discoveryBestCrew.length > 0 && (
+        <DiscoveryRow title="👥 Best Crew for Your Event" subtitle="Skilled professionals ready to help" items={discoveryBestCrew} />
+      )}
+      {discoveryTopVenues.length > 0 && (
+        <DiscoveryRow title="🏛️ Top Venues Near You" subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
+      )}
+      {recentlyViewedItems.length > 0 && (
+        <DiscoveryRow title="🕒 Recently Viewed" subtitle="Pick up where you left off" items={recentlyViewedItems} />
+      )}
+    </div>
+  );
+};
+
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
   const { data: vendorItems } = useVerifiedVendorInventory();

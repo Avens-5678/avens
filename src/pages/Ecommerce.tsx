@@ -167,7 +167,7 @@ const Ecommerce = () => {
 
       const matchesService =
         !activeServiceType ||
-        (r.service_type || "rental") === activeServiceType;
+        ((rental as any).service_type || "rental") === activeServiceType;
       return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability;
     });
 

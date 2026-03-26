@@ -12,6 +12,7 @@ interface RentalItem {
   service_type: string;
   categories?: string[] | null;
   image_url?: string | null;
+  short_description?: string | null;
 }
 
 interface EcommerceHeaderProps {
@@ -115,7 +116,12 @@ const EcommerceHeader = ({
     if (!searchTerm.trim() || allItems.length === 0) return [];
     const term = searchTerm.toLowerCase();
     return allItems
-      .filter((item) => item.title.toLowerCase().includes(term))
+      .filter((item) =>
+        item.title.toLowerCase().includes(term) ||
+        (item.categories || []).some((c) => c.toLowerCase().includes(term)) ||
+        (item.short_description || "").toLowerCase().includes(term) ||
+        item.service_type.toLowerCase().includes(term)
+      )
       .slice(0, 8);
   }, [searchTerm, allItems]);
 

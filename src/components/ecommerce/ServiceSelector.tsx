@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import serviceInstarent from "@/assets/service-instarent.png";
 import serviceVenues from "@/assets/service-venues.png";
@@ -34,13 +33,8 @@ const services = [
 ];
 
 const ServiceSelector = ({ activeService, onServiceChange }: ServiceSelectorProps) => {
-  const navigate = useNavigate();
 
   const handleClick = (id: string) => {
-    if (id === "crew-hub") {
-      navigate("/services");
-      return;
-    }
     onServiceChange(activeService === id ? "" : id);
   };
 

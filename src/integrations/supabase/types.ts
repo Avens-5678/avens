@@ -1059,6 +1059,7 @@ export type Database = {
           quantity: number | null
           rating: number | null
           search_keywords: string | null
+          service_type: string
           short_description: string
           show_on_home: boolean | null
           size_options: string[] | null
@@ -1083,6 +1084,7 @@ export type Database = {
           quantity?: number | null
           rating?: number | null
           search_keywords?: string | null
+          service_type?: string
           short_description: string
           show_on_home?: boolean | null
           size_options?: string[] | null
@@ -1107,6 +1109,7 @@ export type Database = {
           quantity?: number | null
           rating?: number | null
           search_keywords?: string | null
+          service_type?: string
           short_description?: string
           show_on_home?: boolean | null
           size_options?: string[] | null

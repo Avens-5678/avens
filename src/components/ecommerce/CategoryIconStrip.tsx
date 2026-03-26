@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Lightbulb, Speaker, Theater, Armchair, Flower2, Tent,
@@ -11,6 +11,7 @@ interface CategoryIconStripProps {
   categories: { label: string; value: string }[];
   activeCategory: string;
   onCategoryChange: (value: string) => void;
+  activeService?: string;
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -37,7 +38,28 @@ const getIconForCategory = (category: string): LucideIcon => {
   return Sparkles;
 };
 
-const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange }: CategoryIconStripProps) => {
+const VENUE_CATEGORIES = [
+  "Banquet Halls", "Farmhouses", "Hotels & Resorts", "Party Halls",
+  "Outdoor Venues", "Convention Centers", "Heritage Venues", "Rooftop Venues",
+];
+
+const CREW_CATEGORIES = [
+  "Photographers", "Decorators", "Makeup Artists", "Caterers",
+  "DJs & Music", "Choreographers", "Event Managers", "Anchors & MCs",
+  "Mehendi Artists", "Florists", "Videographers", "Lighting Technicians",
+];
+
+const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange, activeService }: CategoryIconStripProps) => {
+  // Override categories based on active service
+  const displayCategories = useMemo(() => {
+    if (activeService === "venue") {
+      return [{ label: "All Venues", value: "" }, ...VENUE_CATEGORIES.map(c => ({ label: c, value: c }))];
+    }
+    if (activeService === "crew") {
+      return [{ label: "All Crew", value: "" }, ...CREW_CATEGORIES.map(c => ({ label: c, value: c }))];
+    }
+    return categories;
+  }, [categories, activeService]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -58,7 +80,7 @@ const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange }: Cat
       el?.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", checkScroll);
     };
-  }, [categories]);
+  }, [displayCategories]);
 
   const scroll = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "left" ? -220 : 220, behavior: "smooth" });
@@ -104,7 +126,7 @@ const CategoryIconStrip = ({ categories, activeCategory, onCategoryChange }: Cat
           className="overflow-x-auto scrollbar-hide"
         >
           <div className="flex gap-5 sm:gap-7 min-w-max pb-1">
-            {categories.map((cat) => {
+            {displayCategories.map((cat) => {
               const isActive = (cat.value === "" && !activeCategory) || activeCategory === cat.value;
               const Icon = cat.value === "" ? Sparkles : getIconForCategory(cat.value);
 

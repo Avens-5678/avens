@@ -17,6 +17,7 @@ import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
 import ServiceSelector from "@/components/ecommerce/ServiceSelector";
 import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
+import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import { useUserLocation } from "@/hooks/useUserLocation";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
@@ -93,12 +94,23 @@ const Ecommerce = () => {
     };
   }, [showNavbar, revealNavbar, hideNavbar]);
 
+  // Map activeService card IDs to service_type DB values
+  const serviceTypeMap: Record<string, string> = {
+    "insta-rent": "rental",
+    "venues": "venue",
+    "crew-hub": "crew",
+  };
+  const activeServiceType = activeService ? serviceTypeMap[activeService] || "" : "";
+
   const categories = useMemo(() => {
     if (!rentals) return [];
     const cats = new Set<string>();
-    rentals.forEach((r) => r.categories?.forEach((c) => cats.add(c)));
+    const itemsForCats = activeServiceType
+      ? rentals.filter((r: any) => (r.service_type || "rental") === activeServiceType)
+      : rentals;
+    itemsForCats.forEach((r: any) => r.categories?.forEach((c: string) => cats.add(c)));
     return Array.from(cats).sort();
-  }, [rentals]);
+  }, [rentals, activeServiceType]);
 
   const quickBrowseCategories = useMemo(() => {
     return [{ label: "All", value: "" }, ...categories.map(c => ({ label: c, value: c }))];
@@ -154,11 +166,8 @@ const Ecommerce = () => {
       const matchesAvailability = !showInStock || (rental.quantity != null && rental.quantity > 0);
 
       const matchesService =
-        !activeService ||
-        activeService === "insta-rent" ||
-        (activeService === "venues" && rental.categories?.some((c) =>
-          ["venue", "venues", "hall", "halls", "banquet", "outdoor", "space", "spaces", "location"].some(k => c.toLowerCase().includes(k))
-        ));
+        !activeServiceType ||
+        ((rental as any).service_type || "rental") === activeServiceType;
       return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability;
     });
 
@@ -178,7 +187,42 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeService, selectedPriceRanges, showInStock]);
+  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock]);
+
+  // Discovery rows for default landing view
+  const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0;
+
+  const discoveryBestRentals = useMemo(() => {
+    if (!rentals) return [];
+    return rentals
+      .filter((r: any) => (r.service_type || "rental") === "rental" && r.is_active)
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 12);
+  }, [rentals]);
+
+  const discoveryBestInCity = useMemo(() => {
+    if (!rentals || !userLocation?.cityName) return [];
+    const city = userLocation.cityName.toLowerCase();
+    return rentals
+      .filter((r: any) => r.address?.toLowerCase().includes(city))
+      .slice(0, 12);
+  }, [rentals, userLocation]);
+
+  const discoveryBestCrew = useMemo(() => {
+    if (!rentals) return [];
+    return rentals
+      .filter((r: any) => (r.service_type || "rental") === "crew" && r.is_active)
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 12);
+  }, [rentals]);
+
+  const discoveryTopVenues = useMemo(() => {
+    if (!rentals) return [];
+    return rentals
+      .filter((r: any) => (r.service_type || "rental") === "venue" && r.is_active)
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 12);
+  }, [rentals]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -431,6 +475,7 @@ const Ecommerce = () => {
         categories={quickBrowseCategories}
         activeCategory={activeQuickCat}
         onCategoryChange={(val) => setActiveQuickCat(val === activeQuickCat ? "" : val)}
+        activeService={activeServiceType}
       />
 
       {/* Promotional Banner Carousel */}
@@ -447,6 +492,22 @@ const Ecommerce = () => {
 
       {/* Trust Strip */}
       <TrustStrip />
+
+      {/* Discovery Rows — shown on default landing */}
+      {isDiscoveryView && (
+        <div className="bg-background">
+          <DiscoveryRow title="Discover Best Rentals" subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
+          {discoveryBestInCity.length > 0 && (
+            <DiscoveryRow title={`Discover Best in ${userLocation?.cityName || "Your City"}`} subtitle="Popular items near you" items={discoveryBestInCity} />
+          )}
+          {discoveryBestCrew.length > 0 && (
+            <DiscoveryRow title="Best Crew for Your Event" subtitle="Skilled professionals ready to help" items={discoveryBestCrew} />
+          )}
+          {discoveryTopVenues.length > 0 && (
+            <DiscoveryRow title="Top Venues Near You" subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
+          )}
+        </div>
+      )}
 
       {/* Main Content with Sidebar */}
       <section className="py-4 sm:py-6 bg-muted/30">

@@ -733,15 +733,18 @@ const Ecommerce = () => {
         </section>
       )}
 
-      {/* Floating Cart */}
+      {/* Floating Cart — hidden on mobile where bottom nav takes over */}
       {items.length > 0 && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+        <div className="hidden md:block fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
           <Button onClick={() => navigate("/cart")} size="lg" className="rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl transition-all duration-300">
             <ShoppingCart className="mr-2 h-5 w-5" />
             Cart ({items.length})
           </Button>
         </div>
       )}
+
+      {/* Mobile Bottom Nav */}
+      <MobileBottomNav cartCount={items.length} />
     </Layout>
   );
 };

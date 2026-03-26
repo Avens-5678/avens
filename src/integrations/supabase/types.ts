@@ -1047,10 +1047,13 @@ export type Database = {
       rentals: {
         Row: {
           address: string | null
+          amenities: string[] | null
           categories: string[] | null
           created_at: string
           description: string
           display_order: number | null
+          experience_level: string | null
+          guest_capacity: string | null
           has_variants: boolean | null
           id: string
           image_url: string | null
@@ -1072,10 +1075,13 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          amenities?: string[] | null
           categories?: string[] | null
           created_at?: string
           description: string
           display_order?: number | null
+          experience_level?: string | null
+          guest_capacity?: string | null
           has_variants?: boolean | null
           id?: string
           image_url?: string | null
@@ -1097,10 +1103,13 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          amenities?: string[] | null
           categories?: string[] | null
           created_at?: string
           description?: string
           display_order?: number | null
+          experience_level?: string | null
+          guest_capacity?: string | null
           has_variants?: boolean | null
           id?: string
           image_url?: string | null

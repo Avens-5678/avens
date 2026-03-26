@@ -304,28 +304,15 @@ const Ecommerce = () => {
         onSearchCategoryChange={setSearchCategory}
       />
 
-      {/* Category Quick Browse Strip */}
-      <section className="border-b border-border bg-card/80 sticky top-14 sm:top-16 z-40">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="overflow-x-auto scrollbar-hide py-2.5">
-            <div className="flex gap-2 sm:gap-3 justify-start sm:justify-center min-w-max">
-              {quickBrowseCategories.map((cat) => (
-                <button
-                  key={cat.value}
-                  onClick={() => setActiveQuickCat(cat.value === activeQuickCat ? "" : cat.value)}
-                  className={`flex-shrink-0 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 whitespace-nowrap ${
-                    (cat.value === "" && !activeQuickCat) || activeQuickCat === cat.value
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                      : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Service Selection Strip */}
+      <ServiceSelector activeService={activeService} onServiceChange={setActiveService} />
+
+      {/* Category Quick Browse Strip with Icons */}
+      <CategoryIconStrip
+        categories={quickBrowseCategories}
+        activeCategory={activeQuickCat}
+        onCategoryChange={(val) => setActiveQuickCat(val === activeQuickCat ? "" : val)}
+      />
 
       {/* Promotional Banner Carousel */}
       <PromoBannerCarousel onCtaClick={(ids) => {
@@ -333,7 +320,7 @@ const Ecommerce = () => {
         setSelectedCategories([]);
         setActiveQuickCat("");
         setSearchTerm("");
-        // Scroll to products
+        setActiveService("");
         setTimeout(() => {
           document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
         }, 100);

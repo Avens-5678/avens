@@ -5,9 +5,10 @@ import Layout from "@/components/Layout/Layout";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart } from "lucide-react";
+import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
@@ -15,8 +16,17 @@ import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
 import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
 import ServiceSelector from "@/components/ecommerce/ServiceSelector";
 import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
+import LocationPrompt from "@/components/ecommerce/LocationPrompt";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
+
+const PRICE_RANGES = [
+  { label: "Under ₹5,000", min: 0, max: 5000 },
+  { label: "₹5,000 – ₹15,000", min: 5000, max: 15000 },
+  { label: "₹15,000 – ₹50,000", min: 15000, max: 50000 },
+  { label: "₹50,000+", min: 50000, max: Infinity },
+];
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
@@ -25,18 +35,23 @@ const Ecommerce = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<number[]>([]);
+  const [showInStock, setShowInStock] = useState(false);
   const [searchCategory, setSearchCategory] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     categories: true,
-    city: false,
+    city: true,
     price: false,
+    availability: false,
   });
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
   const [activeQuickCat, setActiveQuickCat] = useState("");
   const [activeService, setActiveService] = useState("");
   const [promoFilterIds, setPromoFilterIds] = useState<string[]>([]);
+
+  const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 
   // Pull-down navbar reveal logic
   const [showNavbar, setShowNavbar] = useState(false);
@@ -63,11 +78,9 @@ const Ecommerce = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
-      // User scrolled up by at least 30px
       if (currentY < lastScrollY.current - 30 && currentY > 60) {
         if (!showNavbar) revealNavbar();
       }
-      // User scrolled back to top — hide immediately
       if (currentY <= 10) {
         hideNavbar();
       }
@@ -103,10 +116,8 @@ const Ecommerce = () => {
   const filteredRentals = useMemo(() => {
     if (!rentals) return [];
 
-    // If promo filter is active, show only those items
     if (promoFilterIds.length > 0) {
       let results = rentals.filter((r) => promoFilterIds.includes(r.id));
-      // Still apply search within promo items
       if (searchTerm) {
         results = results.filter((r) =>
           r.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -129,17 +140,28 @@ const Ecommerce = () => {
       const matchesCity =
         selectedCities.length === 0 ||
         (rental.address?.trim() && selectedCities.includes(rental.address.trim()));
-      // Service filter: "venues" filters to venue-related categories
+
+      // Price filter
+      const matchesPrice =
+        selectedPriceRanges.length === 0 ||
+        selectedPriceRanges.some((idx) => {
+          const range = PRICE_RANGES[idx];
+          const price = rental.price_value ?? 0;
+          return price >= range.min && price < range.max;
+        });
+
+      // Availability filter
+      const matchesAvailability = !showInStock || (rental.quantity != null && rental.quantity > 0);
+
       const matchesService =
         !activeService ||
         activeService === "insta-rent" ||
         (activeService === "venues" && rental.categories?.some((c) =>
           ["venue", "venues", "hall", "halls", "banquet", "outdoor", "space", "spaces", "location"].some(k => c.toLowerCase().includes(k))
         ));
-      return matchesSearch && matchesCategory && matchesCity && matchesService;
+      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability;
     });
 
-    // Sort
     switch (sortBy) {
       case "price_low":
         results.sort((a, b) => (a.price_value ?? Infinity) - (b.price_value ?? Infinity));
@@ -156,7 +178,7 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeService]);
+  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeService, selectedPriceRanges, showInStock]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -174,7 +196,13 @@ const Ecommerce = () => {
     );
   };
 
-  const activeFilterCount = selectedCategories.length + selectedCities.length;
+  const togglePriceRange = (idx: number) => {
+    setSelectedPriceRanges((prev) =>
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
+    );
+  };
+
+  const activeFilterCount = selectedCategories.length + selectedCities.length + selectedPriceRanges.length + (showInStock ? 1 : 0);
   const activeDisplayCategory = activeQuickCat || searchCategory || (selectedCategories.length === 1 ? selectedCategories[0] : "");
 
   if (isLoading) {
@@ -187,45 +215,75 @@ const Ecommerce = () => {
     );
   }
 
-  const SidebarContent = () => (
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setSelectedCities([]);
+    setSelectedPriceRanges([]);
+    setShowInStock(false);
+  };
+
+  const SidebarFilters = () => (
     <div className="space-y-1">
-      <div className="flex items-center justify-between pb-4">
+      {/* Location indicator */}
+      <div className="pb-3">
+        <button
+          onClick={() => clearLocation()}
+          className="flex items-center gap-2 w-full text-left group"
+        >
+          <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+          <span className="text-sm text-foreground truncate">
+            {userLocation ? (
+              <>{userLocation.cityName || userLocation.pinCode || "Location set"}</>
+            ) : (
+              <span className="text-muted-foreground">Set your location</span>
+            )}
+          </span>
+          {userLocation && (
+            <span className="text-[10px] text-muted-foreground group-hover:text-destructive ml-auto">Change</span>
+          )}
+        </button>
+      </div>
+      <Separator />
+
+      <div className="flex items-center justify-between py-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-foreground">Filters</h3>
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">Filters</h3>
           {activeFilterCount > 0 && (
-            <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-medium">
+            <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
               {activeFilterCount}
             </span>
           )}
         </div>
         {activeFilterCount > 0 && (
           <button
-            onClick={() => { setSelectedCategories([]); setSelectedCities([]); }}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            onClick={clearAllFilters}
+            className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
           >
             Clear all
           </button>
         )}
       </div>
       <Separator />
+
+      {/* Category */}
       <div className="py-3">
         <button
           onClick={() => toggleSection("categories")}
-          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-2"
+          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
         >
           <span>Category</span>
           {expandedSections.categories ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
         {expandedSections.categories && categories.length > 0 && (
-          <div className="space-y-2.5 pt-2 pl-1">
+          <div className="space-y-2 pt-2 pl-1 max-h-48 overflow-y-auto">
             {categories.map((category) => (
-              <label key={category} className="flex items-center gap-3 cursor-pointer group">
+              <label key={category} className="flex items-center gap-2.5 cursor-pointer group">
                 <Checkbox
                   checked={selectedCategories.includes(category)}
                   onCheckedChange={() => toggleCategory(category)}
-                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
                 />
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
                   {category}
                 </span>
               </label>
@@ -234,24 +292,26 @@ const Ecommerce = () => {
         )}
       </div>
       <Separator />
+
+      {/* City / Location */}
       <div className="py-3">
         <button
           onClick={() => toggleSection("city")}
-          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-2"
+          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
         >
-          <span>City</span>
+          <span>Location</span>
           {expandedSections.city ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
         {expandedSections.city && cities.length > 0 && (
-          <div className="space-y-2.5 pt-2 pl-1">
+          <div className="space-y-2 pt-2 pl-1 max-h-48 overflow-y-auto">
             {cities.map((city) => (
-              <label key={city} className="flex items-center gap-3 cursor-pointer group">
+              <label key={city} className="flex items-center gap-2.5 cursor-pointer group">
                 <Checkbox
                   checked={selectedCities.includes(city)}
                   onCheckedChange={() => toggleCity(city)}
-                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
                 />
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
                   {city}
                 </span>
               </label>
@@ -260,24 +320,56 @@ const Ecommerce = () => {
         )}
       </div>
       <Separator />
+
+      {/* Price */}
       <div className="py-3">
         <button
           onClick={() => toggleSection("price")}
-          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-2"
+          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
         >
           <span>Price</span>
           {expandedSections.price ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
         {expandedSections.price && (
-          <div className="space-y-2.5 pt-2 pl-1">
-            {["Under ₹5,000", "₹5,000–₹15,000", "₹15,000–₹50,000", "₹50,000+"].map((range) => (
-              <label key={range} className="flex items-center gap-3 cursor-pointer group">
-                <Checkbox className="border-border" />
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                  {range}
+          <div className="space-y-2 pt-2 pl-1">
+            {PRICE_RANGES.map((range, idx) => (
+              <label key={range.label} className="flex items-center gap-2.5 cursor-pointer group">
+                <Checkbox
+                  checked={selectedPriceRanges.includes(idx)}
+                  onCheckedChange={() => togglePriceRange(idx)}
+                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
+                />
+                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                  {range.label}
                 </span>
               </label>
             ))}
+          </div>
+        )}
+      </div>
+      <Separator />
+
+      {/* Availability */}
+      <div className="py-3">
+        <button
+          onClick={() => toggleSection("availability")}
+          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
+        >
+          <span>Availability</span>
+          {expandedSections.availability ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </button>
+        {expandedSections.availability && (
+          <div className="space-y-2 pt-2 pl-1">
+            <label className="flex items-center gap-2.5 cursor-pointer group">
+              <Checkbox
+                checked={showInStock}
+                onCheckedChange={() => setShowInStock(!showInStock)}
+                className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
+              />
+              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                In Stock Only
+              </span>
+            </label>
           </div>
         )}
       </div>
@@ -286,7 +378,15 @@ const Ecommerce = () => {
 
   return (
     <Layout hideNavbar>
-      {/* Pull-down navbar above search bar */}
+      {/* Location Prompt Modal */}
+      <LocationPrompt
+        open={showPrompt}
+        onClose={dismissPrompt}
+        onDetectGPS={detectGPS}
+        onPinCodeSubmit={setFromPinCode}
+      />
+
+      {/* Pull-down navbar */}
       <div
         className={`overflow-hidden transition-all duration-300 ease-out ${
           showNavbar ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
@@ -303,6 +403,25 @@ const Ecommerce = () => {
         selectedSearchCategory={searchCategory}
         onSearchCategoryChange={setSearchCategory}
       />
+
+      {/* Location bar below header */}
+      <div className="bg-muted/50 border-b border-border">
+        <div className="container mx-auto px-4 sm:px-6">
+          <button
+            onClick={() => clearLocation()}
+            className="flex items-center gap-1.5 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <MapPin className="h-3.5 w-3.5 text-primary" />
+            {userLocation ? (
+              <span>
+                Deliver to <span className="font-semibold text-foreground">{userLocation.cityName || userLocation.pinCode || "Your Location"}</span>
+              </span>
+            ) : (
+              <span>Select your location</span>
+            )}
+          </button>
+        </div>
+      </div>
 
       {/* Service Selection Strip */}
       <ServiceSelector activeService={activeService} onServiceChange={setActiveService} />
@@ -329,112 +448,120 @@ const Ecommerce = () => {
       {/* Trust Strip */}
       <TrustStrip />
 
-      {/* Main Content */}
+      {/* Main Content with Sidebar */}
       <section className="py-4 sm:py-6 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-4">
           {/* Breadcrumbs */}
           <EcommerceBreadcrumbs activeCategory={activeDisplayCategory} searchTerm={searchTerm} />
 
-          <div className="max-w-7xl mx-auto">
-            {/* Mobile Sidebar */}
-            {mobileSidebarOpen && (
-              <div className="fixed inset-0 z-50 lg:hidden">
-                <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarOpen(false)} />
-                <div className="absolute left-0 top-0 bottom-0 w-72 bg-background border-r border-border p-6 overflow-y-auto">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Filters</h3>
-                    <button onClick={() => setMobileSidebarOpen(false)}>
-                      <X className="h-5 w-5 text-muted-foreground" />
+          <div className="max-w-7xl mx-auto flex gap-5">
+            {/* LEFT SIDEBAR — Desktop only */}
+            <aside className="hidden lg:block w-56 flex-shrink-0">
+              <div className="sticky top-20 bg-card rounded-xl border border-border/60 p-4 shadow-soft overflow-y-auto max-h-[calc(100vh-6rem)]">
+                <SidebarFilters />
+              </div>
+            </aside>
+
+            {/* MAIN PRODUCT AREA */}
+            <div className="flex-1 min-w-0">
+              {/* Mobile Sidebar */}
+              {mobileSidebarOpen && (
+                <div className="fixed inset-0 z-50 lg:hidden">
+                  <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarOpen(false)} />
+                  <div className="absolute left-0 top-0 bottom-0 w-72 bg-background border-r border-border p-5 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">Filters</h3>
+                      <button onClick={() => setMobileSidebarOpen(false)}>
+                        <X className="h-5 w-5 text-muted-foreground" />
+                      </button>
+                    </div>
+                    <SidebarFilters />
+                  </div>
+                </div>
+              )}
+
+              {/* Toolbar */}
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 bg-card rounded-lg border border-border/60 px-4 py-2.5 shadow-soft">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setMobileSidebarOpen(true)}
+                    className="lg:hidden flex items-center gap-2 text-xs font-medium text-foreground border border-border rounded-md px-2.5 py-1.5 hover:bg-muted transition-colors"
+                  >
+                    Filters
+                    {activeFilterCount > 0 && (
+                      <span className="flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px]">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </button>
+                  <span className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">{filteredRentals.length}</span> result{filteredRentals.length !== 1 ? "s" : ""}
+                    {searchTerm && <span> for "<span className="text-primary">{searchTerm}</span>"</span>}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    className="text-xs bg-background border border-border rounded-md px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                  >
+                    <option value="relevance">Relevance</option>
+                    <option value="price_low">Price: Low to High</option>
+                    <option value="price_high">Price: High to Low</option>
+                    <option value="newest">Newest First</option>
+                    <option value="rating">Rating</option>
+                  </select>
+
+                  <div className="lg:hidden flex items-center border border-border rounded-md overflow-hidden">
+                    <button onClick={() => setMobileView("list")} className={`p-1.5 transition-colors ${mobileView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <List className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => setMobileView("two")} className={`p-1.5 transition-colors ${mobileView === "two" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <Grid2X2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => setMobileView("one")} className={`p-1.5 transition-colors ${mobileView === "one" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <Square className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                  <SidebarContent />
                 </div>
               </div>
-            )}
 
-            {/* Toolbar: Sort + View + Filters */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4 bg-card rounded-lg border border-border/60 px-4 py-2.5 shadow-soft">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setMobileSidebarOpen(true)}
-                  className="lg:hidden flex items-center gap-2 text-xs font-medium text-foreground border border-border rounded-md px-2.5 py-1.5 hover:bg-muted transition-colors"
-                >
-                  Filters
-                  {activeFilterCount > 0 && (
-                    <span className="flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px]">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </button>
-                <span className="text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">{filteredRentals.length}</span> result{filteredRentals.length !== 1 ? "s" : ""}
-                  {searchTerm && <span> for "<span className="text-primary">{searchTerm}</span>"</span>}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* Sort */}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="text-xs bg-background border border-border rounded-md px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-                >
-                  <option value="relevance">Relevance</option>
-                  <option value="price_low">Price: Low to High</option>
-                  <option value="price_high">Price: High to Low</option>
-                  <option value="newest">Newest First</option>
-                  <option value="rating">Rating</option>
-                </select>
-
-                {/* Mobile View Toggle */}
-                <div className="lg:hidden flex items-center border border-border rounded-md overflow-hidden">
-                  <button onClick={() => setMobileView("list")} className={`p-1.5 transition-colors ${mobileView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
-                    <List className="h-3.5 w-3.5" />
-                  </button>
-                  <button onClick={() => setMobileView("two")} className={`p-1.5 transition-colors ${mobileView === "two" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
-                    <Grid2X2 className="h-3.5 w-3.5" />
-                  </button>
-                  <button onClick={() => setMobileView("one")} className={`p-1.5 transition-colors ${mobileView === "one" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
-                    <Square className="h-3.5 w-3.5" />
+              {/* Promo Filter Active Banner */}
+              {promoFilterIds.length > 0 && (
+                <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+                  <span className="text-sm font-medium text-primary">Showing promo items</span>
+                  <button
+                    onClick={() => setPromoFilterIds([])}
+                    className="ml-auto text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1"
+                  >
+                    <X className="h-3.5 w-3.5" /> Clear
                   </button>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Promo Filter Active Banner */}
-            {promoFilterIds.length > 0 && (
-              <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
-                <span className="text-sm font-medium text-primary">Showing promo items</span>
-                <button
-                  onClick={() => setPromoFilterIds([])}
-                  className="ml-auto text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1"
-                >
-                  <X className="h-3.5 w-3.5" /> Clear
-                </button>
+              {/* Product Grid */}
+              <div id="product-grid">
+                {filteredRentals.length === 0 ? (
+                  <div className="text-center py-20">
+                    <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2 text-foreground">No Items Found</h3>
+                    <p className="text-muted-foreground text-sm">
+                      {searchTerm ? "Try adjusting your search terms" : "No rental items available at the moment"}
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    className={`grid gap-3 sm:gap-4 ${
+                      mobileView === "list" ? "grid-cols-1" : mobileView === "two" ? "grid-cols-2" : "grid-cols-1"
+                    } sm:grid-cols-2 lg:grid-cols-3`}
+                  >
+                    {filteredRentals.map((rental) => (
+                      <EnhancedProductCard key={rental.id} rental={rental} viewMode={mobileView} />
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Product Grid */}
-            <div id="product-grid">
-            {filteredRentals.length === 0 ? (
-              <div className="text-center py-20">
-                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2 text-foreground">No Items Found</h3>
-                <p className="text-muted-foreground text-sm">
-                  {searchTerm ? "Try adjusting your search terms" : "No rental items available at the moment"}
-                </p>
-              </div>
-            ) : (
-              <div
-                className={`max-w-5xl mx-auto grid gap-3 sm:gap-4 ${
-                  mobileView === "list" ? "grid-cols-1" : mobileView === "two" ? "grid-cols-2" : "grid-cols-1"
-                } sm:grid-cols-2 md:grid-cols-3`}
-              >
-                {filteredRentals.map((rental) => (
-                  <EnhancedProductCard key={rental.id} rental={rental} viewMode={mobileView} />
-                ))}
-              </div>
-            )}
             </div>
           </div>
         </div>

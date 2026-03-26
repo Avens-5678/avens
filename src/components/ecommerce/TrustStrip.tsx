@@ -1,47 +1,82 @@
-import { Truck, Shield, Headphones, RotateCcw, LucideIcon, Star, Heart, Zap, Package } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useRef } from "react";
+import { CalendarCheck, Star, Users, Headphones } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const iconMap: Record<string, LucideIcon> = {
-  Truck, Shield, Headphones, RotateCcw, Star, Heart, Zap, Package,
-};
-
-interface TrustItem {
-  id: string;
-  icon_name: string;
-  text: string;
-  display_order: number | null;
+interface StatItem {
+  Icon: LucideIcon;
+  value: number;
+  suffix: string;
+  label: string;
+  color: string;
 }
 
-const TrustStrip = () => {
-  const { data: items = [] } = useQuery({
-    queryKey: ["trust-strip-items"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("trust_strip_items")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order");
-      if (error) throw error;
-      return data as TrustItem[];
-    },
-  });
+const STATS: StatItem[] = [
+  { Icon: CalendarCheck, value: 500, suffix: "+", label: "Events Delivered", color: "bg-primary/10 text-primary" },
+  { Icon: Star, value: 4.8, suffix: "★", label: "Average Rating", color: "bg-amber-500/10 text-amber-500" },
+  { Icon: Users, value: 200, suffix: "+", label: "Trusted Vendors", color: "bg-emerald-500/10 text-emerald-500" },
+  { Icon: Headphones, value: 24, suffix: "/7", label: "Support Available", color: "bg-blue-500/10 text-blue-500" },
+];
 
-  if (items.length === 0) return null;
+const AnimatedNumber = ({ target, suffix, isVisible }: { target: number; suffix: string; isVisible: boolean }) => {
+  const [display, setDisplay] = useState("0");
+
+  useEffect(() => {
+    if (!isVisible) return;
+    const isDecimal = !Number.isInteger(target);
+    const duration = 1800;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = ease * target;
+      setDisplay(isDecimal ? current.toFixed(1) : Math.floor(current).toString());
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [isVisible, target]);
 
   return (
-    <section className="border-b border-border bg-muted/30">
+    <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
+      {display}
+      <span className="text-primary">{suffix}</span>
+    </span>
+  );
+};
+
+const TrustStrip = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => { if (ref.current) observer.unobserve(ref.current); };
+  }, []);
+
+  return (
+    <section ref={ref} className="py-8 sm:py-10 bg-gradient-to-r from-muted/60 via-background to-muted/60 border-y border-border">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between gap-4 py-2.5 overflow-x-auto scrollbar-hide">
-          {items.map((item) => {
-            const Icon = iconMap[item.icon_name] || Shield;
-            return (
-              <div key={item.id} className="flex items-center gap-2 flex-shrink-0">
-                <Icon className="h-4 w-4 text-primary" />
-                <span className="text-xs font-medium text-foreground whitespace-nowrap">{item.text}</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 max-w-4xl mx-auto">
+          {STATS.map((stat) => (
+            <div key={stat.label} className="flex flex-col items-center text-center gap-2">
+              <div className={`w-11 h-11 rounded-full ${stat.color} flex items-center justify-center`}>
+                <stat.Icon className="h-5 w-5" strokeWidth={1.8} />
               </div>
-            );
-          })}
+              <AnimatedNumber target={stat.value} suffix={stat.suffix} isVisible={isVisible} />
+              <span className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                {stat.label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </section>

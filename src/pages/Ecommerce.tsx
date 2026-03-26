@@ -13,6 +13,8 @@ import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
 import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
+import ServiceSelector from "@/components/ecommerce/ServiceSelector";
+import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
@@ -33,6 +35,7 @@ const Ecommerce = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
   const [activeQuickCat, setActiveQuickCat] = useState("");
+  const [activeService, setActiveService] = useState("");
   const [promoFilterIds, setPromoFilterIds] = useState<string[]>([]);
 
   // Pull-down navbar reveal logic
@@ -126,7 +129,14 @@ const Ecommerce = () => {
       const matchesCity =
         selectedCities.length === 0 ||
         (rental.address?.trim() && selectedCities.includes(rental.address.trim()));
-      return matchesSearch && matchesCategory && matchesCity;
+      // Service filter: "venues" filters to venue-related categories
+      const matchesService =
+        !activeService ||
+        activeService === "insta-rent" ||
+        (activeService === "venues" && rental.categories?.some((c) =>
+          ["venue", "venues", "hall", "halls", "banquet", "outdoor", "space", "spaces", "location"].some(k => c.toLowerCase().includes(k))
+        ));
+      return matchesSearch && matchesCategory && matchesCity && matchesService;
     });
 
     // Sort
@@ -146,7 +156,7 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds]);
+  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeService]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -294,28 +304,15 @@ const Ecommerce = () => {
         onSearchCategoryChange={setSearchCategory}
       />
 
-      {/* Category Quick Browse Strip */}
-      <section className="border-b border-border bg-card/80 sticky top-14 sm:top-16 z-40">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="overflow-x-auto scrollbar-hide py-2.5">
-            <div className="flex gap-2 sm:gap-3 justify-start sm:justify-center min-w-max">
-              {quickBrowseCategories.map((cat) => (
-                <button
-                  key={cat.value}
-                  onClick={() => setActiveQuickCat(cat.value === activeQuickCat ? "" : cat.value)}
-                  className={`flex-shrink-0 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 whitespace-nowrap ${
-                    (cat.value === "" && !activeQuickCat) || activeQuickCat === cat.value
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                      : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Service Selection Strip */}
+      <ServiceSelector activeService={activeService} onServiceChange={setActiveService} />
+
+      {/* Category Quick Browse Strip with Icons */}
+      <CategoryIconStrip
+        categories={quickBrowseCategories}
+        activeCategory={activeQuickCat}
+        onCategoryChange={(val) => setActiveQuickCat(val === activeQuickCat ? "" : val)}
+      />
 
       {/* Promotional Banner Carousel */}
       <PromoBannerCarousel onCtaClick={(ids) => {
@@ -323,7 +320,7 @@ const Ecommerce = () => {
         setSelectedCategories([]);
         setActiveQuickCat("");
         setSearchTerm("");
-        // Scroll to products
+        setActiveService("");
         setTimeout(() => {
           document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
         }, 100);

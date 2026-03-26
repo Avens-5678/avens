@@ -598,6 +598,9 @@ const Ecommerce = () => {
         />
       )}
 
+      {/* Stats/Social Proof Bar */}
+      <TrustStrip />
+
       {/* Promotional Banner Carousel */}
       <PromoBannerCarousel
         serviceType={activeServiceType}
@@ -613,19 +616,8 @@ const Ecommerce = () => {
         }}
       />
 
-      {/* Category Grid — only in discovery view */}
-      {isDiscoveryView && (
-        <CategoryGrid onCategoryClick={(service, category) => {
-          setActiveService(service);
-          setActiveQuickCat(category);
-        }} />
-      )}
-
       {/* How It Works */}
       {isDiscoveryView && <HowItWorks />}
-
-      {/* Trust Strip */}
-      <TrustStrip />
 
       {/* Discovery Rows — shown on default landing */}
       {isDiscoveryView && (

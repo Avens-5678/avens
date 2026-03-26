@@ -119,7 +119,7 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
       price_value: '', pricing_unit: 'Per Day', price_range: '',
       categories: [], search_keywords: '', display_order: 0,
       rating: 4.5, quantity: 1, is_active: true, show_on_home: true,
-      image_url: '', image_urls: [],
+      image_url: '', image_urls: [], service_type: 'rental',
     });
   };
 
@@ -222,6 +222,7 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
         image_url: formData.image_url || null,
         image_urls: formData.image_urls || [],
         address: formData.address || null,
+        service_type: formData.service_type || 'rental',
       };
 
       let rentalId: string;
@@ -366,6 +367,19 @@ const EnhancedRentalManager = ({ rentals }: EnhancedRentalManagerProps) => {
                 <div className="space-y-1">
                   <Label>Address / Location</Label>
                   <Input value={formData.address || ''} onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))} placeholder="e.g. Warehouse 5, HITEC City, Hyderabad" />
+                </div>
+                <div className="space-y-1">
+                  <Label>Service Type</Label>
+                  <Select value={formData.service_type || 'rental'} onValueChange={(val) => setFormData(prev => ({ ...prev, service_type: val }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rental">Insta-Rent (Equipment)</SelectItem>
+                      <SelectItem value="venue">Venue</SelectItem>
+                      <SelectItem value="crew">Crew / Manpower</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1">
                   <Label>Categories</Label>

@@ -28,6 +28,7 @@ interface PromoBanner {
   display_order: number | null;
   is_active: boolean | null;
   linked_rental_ids: string[] | null;
+  service_type: string;
 }
 
 const defaultBanner: Omit<PromoBanner, "id"> = {

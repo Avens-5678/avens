@@ -17,7 +17,6 @@ import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
-import CategoryGrid from "@/components/ecommerce/CategoryGrid";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
@@ -598,6 +597,9 @@ const Ecommerce = () => {
         />
       )}
 
+      {/* Stats/Social Proof Bar */}
+      <TrustStrip />
+
       {/* Promotional Banner Carousel */}
       <PromoBannerCarousel
         serviceType={activeServiceType}
@@ -613,19 +615,8 @@ const Ecommerce = () => {
         }}
       />
 
-      {/* Category Grid — only in discovery view */}
-      {isDiscoveryView && (
-        <CategoryGrid onCategoryClick={(service, category) => {
-          setActiveService(service);
-          setActiveQuickCat(category);
-        }} />
-      )}
-
       {/* How It Works */}
       {isDiscoveryView && <HowItWorks />}
-
-      {/* Trust Strip */}
-      <TrustStrip />
 
       {/* Discovery Rows — shown on default landing */}
       {isDiscoveryView && (

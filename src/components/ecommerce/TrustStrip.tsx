@@ -37,7 +37,7 @@ const AnimatedNumber = ({ target, suffix, isVisible }: { target: number; suffix:
   }, [isVisible, target]);
 
   return (
-    <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
+    <span className="text-lg sm:text-3xl font-bold text-foreground tabular-nums">
       {display}
       <span className="text-primary">{suffix}</span>
     </span>

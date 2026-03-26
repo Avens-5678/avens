@@ -187,7 +187,42 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeService, selectedPriceRanges, showInStock]);
+  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock]);
+
+  // Discovery rows for default landing view
+  const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0;
+
+  const discoveryBestRentals = useMemo(() => {
+    if (!rentals) return [];
+    return rentals
+      .filter((r: any) => (r.service_type || "rental") === "rental" && r.is_active)
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 12);
+  }, [rentals]);
+
+  const discoveryBestInCity = useMemo(() => {
+    if (!rentals || !userLocation?.cityName) return [];
+    const city = userLocation.cityName.toLowerCase();
+    return rentals
+      .filter((r: any) => r.address?.toLowerCase().includes(city))
+      .slice(0, 12);
+  }, [rentals, userLocation]);
+
+  const discoveryBestCrew = useMemo(() => {
+    if (!rentals) return [];
+    return rentals
+      .filter((r: any) => (r.service_type || "rental") === "crew" && r.is_active)
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 12);
+  }, [rentals]);
+
+  const discoveryTopVenues = useMemo(() => {
+    if (!rentals) return [];
+    return rentals
+      .filter((r: any) => (r.service_type || "rental") === "venue" && r.is_active)
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 12);
+  }, [rentals]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));

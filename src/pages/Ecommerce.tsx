@@ -1,6 +1,5 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import Navbar from "@/components/Layout/Navbar";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
@@ -132,45 +131,6 @@ const Ecommerce = () => {
 
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 
-  // Pull-down navbar reveal logic
-  const [showNavbar, setShowNavbar] = useState(false);
-  const lastScrollY = useRef(0);
-  const navbarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const hideNavbar = useCallback(() => {
-    setShowNavbar(false);
-    if (navbarTimerRef.current) {
-      clearTimeout(navbarTimerRef.current);
-      navbarTimerRef.current = null;
-    }
-  }, []);
-
-  const revealNavbar = useCallback(() => {
-    setShowNavbar(true);
-    if (navbarTimerRef.current) clearTimeout(navbarTimerRef.current);
-    navbarTimerRef.current = setTimeout(() => {
-      setShowNavbar(false);
-      navbarTimerRef.current = null;
-    }, 15000);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      if (currentY < lastScrollY.current - 30 && currentY > 60) {
-        if (!showNavbar) revealNavbar();
-      }
-      if (currentY <= 10) {
-        hideNavbar();
-      }
-      lastScrollY.current = currentY;
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (navbarTimerRef.current) clearTimeout(navbarTimerRef.current);
-    };
-  }, [showNavbar, revealNavbar, hideNavbar]);
 
   // Map activeService card IDs to service_type DB values
   const serviceTypeMap: Record<string, string> = {
@@ -542,14 +502,6 @@ const Ecommerce = () => {
         onPinCodeSubmit={setFromPinCode}
       />
 
-      {/* Pull-down navbar */}
-      <div
-        className={`overflow-hidden transition-all duration-300 ease-out ${
-          showNavbar ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <Navbar />
-      </div>
 
       {/* Compact Amazon-style Header */}
       <EcommerceHeader

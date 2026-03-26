@@ -532,6 +532,13 @@ const Ecommerce = () => {
         categories={categories}
         selectedSearchCategory={searchCategory}
         onSearchCategoryChange={setSearchCategory}
+        allItems={(rentals || []).map((r) => ({
+          id: r.id,
+          title: r.title,
+          service_type: r.service_type,
+          categories: r.categories,
+          image_url: r.image_url,
+        }))}
       />
 
       {/* Location bar below header */}

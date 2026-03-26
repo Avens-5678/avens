@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Navigation, X, Loader2 } from "lucide-react";
+import { MapPin, Navigation, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -48,19 +48,14 @@ const LocationPrompt = ({ open, onClose, onDetectGPS, onPinCodeSubmit }: Locatio
         <DialogTitle className="sr-only">Set your delivery location</DialogTitle>
         {/* Header */}
         <div className="bg-gradient-to-r from-primary to-primary/80 p-6 text-primary-foreground">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
-                <MapPin className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">Set your location</h3>
-                <p className="text-sm text-primary-foreground/70">See items available near you</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+              <MapPin className="h-5 w-5" />
             </div>
-            <button onClick={onClose} className="text-primary-foreground/60 hover:text-primary-foreground">
-              <X className="h-5 w-5" />
-            </button>
+            <div>
+              <h3 className="font-semibold text-lg">Set your location</h3>
+              <p className="text-sm text-primary-foreground/70">See items available near you</p>
+            </div>
           </div>
         </div>
 

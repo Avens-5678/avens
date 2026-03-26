@@ -31,12 +31,21 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
 
-  return (
+  const handleClick = () => {
+    addViewed(rental.id);
+    navigate(`/ecommerce/${rental.id}`);
+  };
+
+  const specs = rental.specifications
+    ? (typeof rental.specifications === "string" ? JSON.parse(rental.specifications) : rental.specifications)
+    : null;
+
+  const cardContent = (
     <Card
       className={`group overflow-hidden border border-border/60 bg-card hover:shadow-medium transition-all duration-300 rounded-xl cursor-pointer ${
         isList ? "flex flex-row sm:flex-col" : ""
       }`}
-      onClick={() => navigate(`/ecommerce/${rental.id}`)}
+      onClick={handleClick}
     >
       {/* Image */}
       <div
@@ -116,7 +125,6 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
           </div>
         )}
 
-
         {/* Location */}
         {rental.address && (
           <p className="text-[10px] text-muted-foreground truncate">
@@ -125,6 +133,59 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         )}
       </CardContent>
     </Card>
+  );
+
+  // Desktop: wrap with HoverCard for quick preview
+  if (isMobile) return cardContent;
+
+  return (
+    <HoverCard openDelay={400} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        {cardContent}
+      </HoverCardTrigger>
+      <HoverCardContent side="right" align="start" className="w-72 p-4 space-y-3 z-[60]">
+        <h4 className="font-bold text-sm text-foreground leading-snug">{rental.title}</h4>
+        
+        <p className="text-xs text-muted-foreground line-clamp-4">{rental.description || rental.short_description}</p>
+
+        {/* Specs */}
+        {specs && typeof specs === "object" && (
+          <div className="space-y-1">
+            {Object.entries(specs).slice(0, 3).map(([key, val]) => (
+              <div key={key} className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
+                <span className="text-foreground font-medium">{String(val)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Amenities for venues */}
+        {rental.amenities && rental.amenities.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {rental.amenities.slice(0, 4).map((a: string) => (
+              <Badge key={a} variant="secondary" className="text-[9px] px-1.5 py-0">
+                {a}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Experience for crew */}
+        {rental.experience_level && (
+          <p className="text-[11px] text-muted-foreground">
+            Experience: <span className="text-foreground font-medium capitalize">{rental.experience_level}</span>
+          </p>
+        )}
+
+        <button
+          onClick={(e) => { e.stopPropagation(); handleClick(); }}
+          className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+        >
+          View Details <ArrowRight className="h-3 w-3" />
+        </button>
+      </HoverCardContent>
+    </HoverCard>
   );
 };
 

@@ -63,16 +63,16 @@ const TrustStrip = () => {
   }, []);
 
   return (
-    <section ref={ref} className="py-8 sm:py-10 bg-gradient-to-r from-muted/60 via-background to-muted/60 border-y border-border">
+    <section ref={ref} className="py-4 sm:py-10 bg-gradient-to-r from-muted/60 via-background to-muted/60 border-y border-border">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 max-w-4xl mx-auto">
+        <div className="flex justify-between md:grid md:grid-cols-4 gap-3 sm:gap-8 max-w-4xl mx-auto">
           {STATS.map((stat) => (
-            <div key={stat.label} className="flex flex-col items-center text-center gap-2">
-              <div className={`w-11 h-11 rounded-full ${stat.color} flex items-center justify-center`}>
-                <stat.Icon className="h-5 w-5" strokeWidth={1.8} />
+            <div key={stat.label} className="flex flex-col items-center text-center gap-1 sm:gap-2">
+              <div className={`w-8 h-8 sm:w-11 sm:h-11 rounded-full ${stat.color} flex items-center justify-center`}>
+                <stat.Icon className="h-3.5 w-3.5 sm:h-5 sm:w-5" strokeWidth={1.8} />
               </div>
               <AnimatedNumber target={stat.value} suffix={stat.suffix} isVisible={isVisible} />
-              <span className="text-[11px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <span className="text-[8px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider leading-tight">
                 {stat.label}
               </span>
             </div>

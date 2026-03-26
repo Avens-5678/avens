@@ -690,6 +690,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           linked_rental_ids: string[] | null
+          service_type: string
           subtitle: string | null
           title: string
           updated_at: string
@@ -704,6 +705,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           linked_rental_ids?: string[] | null
+          service_type?: string
           subtitle?: string | null
           title: string
           updated_at?: string
@@ -718,6 +720,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           linked_rental_ids?: string[] | null
+          service_type?: string
           subtitle?: string | null
           title?: string
           updated_at?: string

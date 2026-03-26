@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,16 +14,18 @@ interface PromoBanner {
   image_url: string | null;
   display_order: number | null;
   linked_rental_ids: string[] | null;
+  service_type: string | null;
 }
 
 interface PromoBannerCarouselProps {
+  serviceType?: string;
   onCtaClick?: (rentalIds: string[]) => void;
 }
 
-const PromoBannerCarousel = ({ onCtaClick }: PromoBannerCarouselProps) => {
+const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselProps) => {
   const [current, setCurrent] = useState(0);
 
-  const { data: banners = [] } = useQuery({
+  const { data: allBanners = [] } = useQuery({
     queryKey: ["promo-banners"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -35,6 +37,19 @@ const PromoBannerCarousel = ({ onCtaClick }: PromoBannerCarouselProps) => {
       return data as PromoBanner[];
     },
   });
+
+  // Filter by service type or shuffle all
+  const banners = useMemo(() => {
+    if (serviceType) {
+      return allBanners.filter((b) => (b.service_type || "rental") === serviceType);
+    }
+    // No service selected — show all banners in random order
+    return [...allBanners].sort(() => Math.random() - 0.5);
+  }, [allBanners, serviceType]);
+
+  useEffect(() => {
+    setCurrent(0);
+  }, [serviceType]);
 
   useEffect(() => {
     if (banners.length <= 1) return;

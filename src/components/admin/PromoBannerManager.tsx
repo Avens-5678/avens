@@ -28,6 +28,7 @@ interface PromoBanner {
   display_order: number | null;
   is_active: boolean | null;
   linked_rental_ids: string[] | null;
+  service_type: string;
 }
 
 const defaultBanner: Omit<PromoBanner, "id"> = {
@@ -40,6 +41,7 @@ const defaultBanner: Omit<PromoBanner, "id"> = {
   display_order: 0,
   is_active: true,
   linked_rental_ids: [],
+  service_type: "rental",
 };
 
 const PromoBannerManager = () => {
@@ -98,6 +100,7 @@ const PromoBannerManager = () => {
       display_order: banner.display_order,
       is_active: banner.is_active,
       linked_rental_ids: banner.linked_rental_ids || [],
+      service_type: banner.service_type || "rental",
     });
     setRentalSearch("");
     setDialogOpen(true);
@@ -309,6 +312,18 @@ const PromoBannerManager = () => {
               </ScrollArea>
             </div>
 
+            <div>
+              <Label>Service Type</Label>
+              <select
+                value={form.service_type}
+                onChange={(e) => setForm({ ...form, service_type: e.target.value })}
+                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="rental">Insta-Rent</option>
+                <option value="venue">Venues</option>
+                <option value="crew">Crew Hub</option>
+              </select>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Display Order</Label>

@@ -166,11 +166,8 @@ const Ecommerce = () => {
       const matchesAvailability = !showInStock || (rental.quantity != null && rental.quantity > 0);
 
       const matchesService =
-        !activeService ||
-        activeService === "insta-rent" ||
-        (activeService === "venues" && rental.categories?.some((c) =>
-          ["venue", "venues", "hall", "halls", "banquet", "outdoor", "space", "spaces", "location"].some(k => c.toLowerCase().includes(k))
-        ));
+        !activeServiceType ||
+        (r.service_type || "rental") === activeServiceType;
       return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability;
     });
 

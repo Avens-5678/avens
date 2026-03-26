@@ -1,10 +1,18 @@
-import { useState } from "react";
-import { Search, X, User, ShoppingCart, Menu, Home, Briefcase, Image, Info, BookOpen, HelpCircle, Users, Package, ChevronRight } from "lucide-react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { Search, X, User, ShoppingCart, Menu, Home, Briefcase, Image, Info, BookOpen, HelpCircle, Users, Package, ChevronRight, Clock, TrendingUp } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+
+interface RentalItem {
+  id: string;
+  title: string;
+  service_type: string;
+  categories?: string[] | null;
+  image_url?: string | null;
+}
 
 interface EcommerceHeaderProps {
   searchTerm: string;
@@ -12,7 +20,11 @@ interface EcommerceHeaderProps {
   categories: string[];
   selectedSearchCategory: string;
   onSearchCategoryChange: (value: string) => void;
+  allItems?: RentalItem[];
 }
+
+const RECENT_SEARCHES_KEY = "evnting_recent_searches";
+const MAX_RECENT = 5;
 
 const menuLinks = [
   { href: "/home", label: "Home", icon: Home },
@@ -30,13 +42,115 @@ const EcommerceHeader = ({
   onSearchChange,
   categories,
   selectedSearchCategory,
-  onSearchCategoryChange
+  onSearchCategoryChange,
+  allItems = [],
 }: EcommerceHeaderProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { role } = useUserRole();
   const { items } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load recent searches
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+      if (stored) setRecentSearches(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Compute suggestions grouped by category
+  const suggestions = useMemo(() => {
+    if (!searchTerm.trim() || allItems.length === 0) return [];
+    const term = searchTerm.toLowerCase();
+    const matches = allItems
+      .filter((item) => item.title.toLowerCase().includes(term))
+      .slice(0, 8);
+    return matches;
+  }, [searchTerm, allItems]);
+
+  const groupedSuggestions = useMemo(() => {
+    const groups: Record<string, RentalItem[]> = {};
+    suggestions.forEach((item) => {
+      const cat = item.categories?.[0] || item.service_type || "Other";
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(item);
+    });
+    return groups;
+  }, [suggestions]);
+
+  const flatSuggestions = useMemo(() => {
+    const flat: { type: "item"; item: RentalItem }[] = [];
+    Object.values(groupedSuggestions).forEach((items) => {
+      items.forEach((item) => flat.push({ type: "item", item }));
+    });
+    return flat;
+  }, [groupedSuggestions]);
+
+  const saveRecentSearch = useCallback((term: string) => {
+    if (!term.trim()) return;
+    setRecentSearches((prev) => {
+      const updated = [term, ...prev.filter((s) => s !== term)].slice(0, MAX_RECENT);
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const handleSelect = useCallback((item: RentalItem) => {
+    onSearchChange(item.title);
+    saveRecentSearch(item.title);
+    setShowDropdown(false);
+    navigate(`/ecommerce/${item.id}`);
+  }, [onSearchChange, saveRecentSearch, navigate]);
+
+  const handleRecentClick = useCallback((term: string) => {
+    onSearchChange(term);
+    setShowDropdown(false);
+  }, [onSearchChange]);
+
+  const handleSubmit = useCallback(() => {
+    if (searchTerm.trim()) {
+      saveRecentSearch(searchTerm.trim());
+    }
+    setShowDropdown(false);
+  }, [searchTerm, saveRecentSearch]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const total = flatSuggestions.length;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev < total - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : total - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (selectedIndex >= 0 && flatSuggestions[selectedIndex]) {
+        handleSelect(flatSuggestions[selectedIndex].item);
+      } else {
+        handleSubmit();
+      }
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+      inputRef.current?.blur();
+    }
+  }, [flatSuggestions, selectedIndex, handleSelect, handleSubmit]);
 
   const getDashboardPath = () => {
     switch (role) {
@@ -46,6 +160,9 @@ const EcommerceHeader = ({
       default: return "/auth";
     }
   };
+
+  const showRecentView = showDropdown && !searchTerm.trim() && recentSearches.length > 0;
+  const showSuggestionsView = showDropdown && searchTerm.trim().length > 0 && flatSuggestions.length > 0;
 
   return (
     <div className="bg-foreground text-primary-foreground sticky top-0 z-50">
@@ -92,13 +209,13 @@ const EcommerceHeader = ({
               className="flex items-center gap-1 hover:opacity-80 transition-opacity"
             >
               <span className="text-lg sm:text-xl font-brand font-bold italic tracking-tight uppercase text-primary-foreground">
-                Evnting
+                Evnting<span className="text-secondary">.com</span>
               </span>
             </button>
           </div>
 
-          {/* Search bar */}
-          <div className="flex-1 flex items-center min-w-0">
+          {/* Search bar with dropdown */}
+          <div className="flex-1 flex items-center min-w-0 relative" ref={dropdownRef}>
             <div className="flex w-full rounded-lg overflow-hidden bg-primary-foreground">
               <select
                 value={selectedSearchCategory}
@@ -112,25 +229,100 @@ const EcommerceHeader = ({
               </select>
               <div className="flex-1 relative">
                 <input
+                  ref={inputRef}
                   type="text"
-                  placeholder="Search equipment, decor, lighting..."
+                  placeholder="Search equipment, venues, services..."
                   value={searchTerm}
-                  onChange={(e) => onSearchChange(e.target.value)}
+                  onChange={(e) => {
+                    onSearchChange(e.target.value);
+                    setShowDropdown(true);
+                    setSelectedIndex(-1);
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  onKeyDown={handleKeyDown}
                   className="w-full px-4 py-2.5 text-foreground text-sm outline-none bg-transparent placeholder:text-muted-foreground"
                 />
                 {searchTerm && (
                   <button
-                    onClick={() => onSearchChange("")}
+                    onClick={() => { onSearchChange(""); setShowDropdown(false); }}
                     className="absolute right-12 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 )}
               </div>
-              <button className="bg-secondary hover:bg-secondary/90 px-4 flex items-center justify-center transition-colors">
+              <button
+                onClick={handleSubmit}
+                className="bg-secondary hover:bg-secondary/90 px-4 flex items-center justify-center transition-colors"
+              >
                 <Search className="h-5 w-5 text-secondary-foreground" />
               </button>
             </div>
+
+            {/* Autocomplete dropdown */}
+            {(showRecentView || showSuggestionsView) && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-xl z-[60] max-h-[400px] overflow-y-auto">
+                {/* Recent searches */}
+                {showRecentView && (
+                  <div className="p-3">
+                    <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+                      <Clock className="h-3 w-3" /> Recent Searches
+                    </p>
+                    {recentSearches.map((term, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleRecentClick(term)}
+                        className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors flex items-center gap-2"
+                      >
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Grouped suggestions */}
+                {showSuggestionsView && (
+                  <div className="py-2">
+                    {(() => {
+                      let idx = -1;
+                      return Object.entries(groupedSuggestions).map(([category, items]) => (
+                        <div key={category}>
+                          <p className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                            <TrendingUp className="h-3 w-3" />
+                            in {category}
+                          </p>
+                          {items.map((item) => {
+                            idx++;
+                            const currentIdx = idx;
+                            return (
+                              <button
+                                key={item.id}
+                                onClick={() => handleSelect(item)}
+                                className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
+                                  currentIdx === selectedIndex
+                                    ? "bg-secondary/10 text-foreground"
+                                    : "text-foreground hover:bg-muted"
+                                }`}
+                              >
+                                {item.image_url ? (
+                                  <img src={item.image_url} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
+                                ) : (
+                                  <div className="h-8 w-8 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                                    <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                                  </div>
+                                )}
+                                <span className="truncate">{item.title}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right actions */}

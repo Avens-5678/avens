@@ -5,10 +5,9 @@ import Layout from "@/components/Layout/Layout";
 import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Loader2 } from "lucide-react";
+import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
@@ -22,11 +21,52 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
-const PRICE_RANGES = [
+// ── Rental-specific filters ──
+const RENTAL_PRICE_RANGES = [
   { label: "Under ₹5,000", min: 0, max: 5000 },
   { label: "₹5,000 – ₹15,000", min: 5000, max: 15000 },
   { label: "₹15,000 – ₹50,000", min: 15000, max: 50000 },
   { label: "₹50,000+", min: 50000, max: Infinity },
+];
+
+// ── Venue-specific filters ──
+const VENUE_PRICE_RANGES = [
+  { label: "Under ₹25,000", min: 0, max: 25000 },
+  { label: "₹25,000 – ₹75,000", min: 25000, max: 75000 },
+  { label: "₹75,000 – ₹2,00,000", min: 75000, max: 200000 },
+  { label: "₹2,00,000+", min: 200000, max: Infinity },
+];
+
+const VENUE_CAPACITY_OPTIONS = [
+  { label: "Up to 100 guests", value: "small" },
+  { label: "100 – 300 guests", value: "medium" },
+  { label: "300 – 500 guests", value: "large" },
+  { label: "500+ guests", value: "mega" },
+];
+
+const VENUE_AMENITY_OPTIONS = [
+  "In-house Catering",
+  "Without Catering",
+  "In-house Decor",
+  "AC Halls",
+  "Parking Available",
+  "DJ Allowed",
+  "Valet Parking",
+];
+
+// ── Crew-specific filters ──
+const CREW_PRICE_RANGES = [
+  { label: "Under ₹10,000", min: 0, max: 10000 },
+  { label: "₹10,000 – ₹25,000", min: 10000, max: 25000 },
+  { label: "₹25,000 – ₹50,000", min: 25000, max: 50000 },
+  { label: "₹50,000+", min: 50000, max: Infinity },
+];
+
+const CREW_EXPERIENCE_OPTIONS = [
+  { label: "1–3 Years", value: "junior" },
+  { label: "3–5 Years", value: "mid" },
+  { label: "5–10 Years", value: "senior" },
+  { label: "10+ Years", value: "expert" },
 ];
 
 const Ecommerce = () => {
@@ -45,12 +85,18 @@ const Ecommerce = () => {
     city: true,
     price: false,
     availability: false,
+    amenities: false,
+    capacity: false,
+    experience: false,
   });
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
   const [activeQuickCat, setActiveQuickCat] = useState("");
   const [activeService, setActiveService] = useState("");
   const [promoFilterIds, setPromoFilterIds] = useState<string[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [selectedCapacity, setSelectedCapacity] = useState<string[]>([]);
+  const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
 
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 
@@ -102,6 +148,9 @@ const Ecommerce = () => {
   };
   const activeServiceType = activeService ? serviceTypeMap[activeService] || "" : "";
 
+  // Get price ranges based on active service
+  const activePriceRanges = activeServiceType === "venue" ? VENUE_PRICE_RANGES : activeServiceType === "crew" ? CREW_PRICE_RANGES : RENTAL_PRICE_RANGES;
+
   const categories = useMemo(() => {
     if (!rentals) return [];
     const cats = new Set<string>();
@@ -119,11 +168,25 @@ const Ecommerce = () => {
   const cities = useMemo(() => {
     if (!rentals) return [];
     const citySet = new Set<string>();
-    rentals.forEach((r) => {
+    const itemsForCities = activeServiceType
+      ? rentals.filter((r: any) => (r.service_type || "rental") === activeServiceType)
+      : rentals;
+    itemsForCities.forEach((r) => {
       if (r.address?.trim()) citySet.add(r.address.trim());
     });
     return Array.from(citySet).sort();
-  }, [rentals]);
+  }, [rentals, activeServiceType]);
+
+  // Reset service-specific filters when service changes
+  useEffect(() => {
+    setSelectedAmenities([]);
+    setSelectedCapacity([]);
+    setSelectedExperience([]);
+    setSelectedPriceRanges([]);
+    setSelectedCategories([]);
+    setSelectedCities([]);
+    setShowInStock(false);
+  }, [activeService]);
 
   const filteredRentals = useMemo(() => {
     if (!rentals) return [];
@@ -153,16 +216,14 @@ const Ecommerce = () => {
         selectedCities.length === 0 ||
         (rental.address?.trim() && selectedCities.includes(rental.address.trim()));
 
-      // Price filter
       const matchesPrice =
         selectedPriceRanges.length === 0 ||
         selectedPriceRanges.some((idx) => {
-          const range = PRICE_RANGES[idx];
+          const range = activePriceRanges[idx];
           const price = rental.price_value ?? 0;
           return price >= range.min && price < range.max;
         });
 
-      // Availability filter
       const matchesAvailability = !showInStock || (rental.quantity != null && rental.quantity > 0);
 
       const matchesService =
@@ -187,7 +248,7 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock]);
+  }, [rentals, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges]);
 
   // Discovery rows for default landing view
   const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0;
@@ -246,7 +307,25 @@ const Ecommerce = () => {
     );
   };
 
-  const activeFilterCount = selectedCategories.length + selectedCities.length + selectedPriceRanges.length + (showInStock ? 1 : 0);
+  const toggleAmenity = (amenity: string) => {
+    setSelectedAmenities((prev) =>
+      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    );
+  };
+
+  const toggleCapacity = (cap: string) => {
+    setSelectedCapacity((prev) =>
+      prev.includes(cap) ? prev.filter((c) => c !== cap) : [...prev, cap]
+    );
+  };
+
+  const toggleExperience = (exp: string) => {
+    setSelectedExperience((prev) =>
+      prev.includes(exp) ? prev.filter((e) => e !== exp) : [...prev, exp]
+    );
+  };
+
+  const activeFilterCount = selectedCategories.length + selectedCities.length + selectedPriceRanges.length + (showInStock ? 1 : 0) + selectedAmenities.length + selectedCapacity.length + selectedExperience.length;
   const activeDisplayCategory = activeQuickCat || searchCategory || (selectedCategories.length === 1 ? selectedCategories[0] : "");
 
   if (isLoading) {
@@ -264,161 +343,152 @@ const Ecommerce = () => {
     setSelectedCities([]);
     setSelectedPriceRanges([]);
     setShowInStock(false);
+    setSelectedAmenities([]);
+    setSelectedCapacity([]);
+    setSelectedExperience([]);
   };
 
-  const SidebarFilters = () => (
-    <div className="space-y-1">
-      {/* Location indicator */}
-      <div className="pb-3">
+  // ── Filter section helper ──
+  const FilterSection = ({ title, sectionKey, children }: { title: string; sectionKey: string; children: React.ReactNode }) => (
+    <>
+      <div className="py-3">
         <button
-          onClick={() => clearLocation()}
-          className="flex items-center gap-2 w-full text-left group"
+          onClick={() => toggleSection(sectionKey)}
+          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
         >
-          <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-          <span className="text-sm text-foreground truncate">
-            {userLocation ? (
-              <>{userLocation.cityName || userLocation.pinCode || "Location set"}</>
-            ) : (
-              <span className="text-muted-foreground">Set your location</span>
-            )}
-          </span>
-          {userLocation && (
-            <span className="text-[10px] text-muted-foreground group-hover:text-destructive ml-auto">Change</span>
-          )}
+          <span>{title}</span>
+          {expandedSections[sectionKey] ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
+        {expandedSections[sectionKey] && (
+          <div className="space-y-2 pt-2 pl-1 max-h-48 overflow-y-auto">
+            {children}
+          </div>
+        )}
       </div>
       <Separator />
+    </>
+  );
 
-      <div className="flex items-center justify-between py-3">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">Filters</h3>
-          {activeFilterCount > 0 && (
-            <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
-              {activeFilterCount}
+  const CheckboxItem = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) => (
+    <label className="flex items-center gap-2.5 cursor-pointer group">
+      <Checkbox
+        checked={checked}
+        onCheckedChange={onChange}
+        className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
+      />
+      <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+        {label}
+      </span>
+    </label>
+  );
+
+  // ── Service-specific sidebar ──
+  const SidebarFilters = () => {
+    const serviceLabel = activeServiceType === "venue" ? "Venues" : activeServiceType === "crew" ? "Crew" : "Rentals";
+    const ServiceIcon = activeServiceType === "venue" ? Building2 : activeServiceType === "crew" ? Users : Wrench;
+
+    return (
+      <div className="space-y-1">
+        {/* Location indicator */}
+        <div className="pb-3">
+          <button
+            onClick={() => clearLocation()}
+            className="flex items-center gap-2 w-full text-left group"
+          >
+            <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+            <span className="text-sm text-foreground truncate">
+              {userLocation ? (
+                <>{userLocation.cityName || userLocation.pinCode || "Location set"}</>
+              ) : (
+                <span className="text-muted-foreground">Set your location</span>
+              )}
             </span>
+            {userLocation && (
+              <span className="text-[10px] text-muted-foreground group-hover:text-destructive ml-auto">Change</span>
+            )}
+          </button>
+        </div>
+        <Separator />
+
+        <div className="flex items-center justify-between py-3">
+          <div className="flex items-center gap-2">
+            <ServiceIcon className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">{serviceLabel} Filters</h3>
+            {activeFilterCount > 0 && (
+              <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                {activeFilterCount}
+              </span>
+            )}
+          </div>
+          {activeFilterCount > 0 && (
+            <button
+              onClick={clearAllFilters}
+              className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+            >
+              Clear all
+            </button>
           )}
         </div>
-        {activeFilterCount > 0 && (
-          <button
-            onClick={clearAllFilters}
-            className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            Clear all
-          </button>
-        )}
-      </div>
-      <Separator />
+        <Separator />
 
-      {/* Category */}
-      <div className="py-3">
-        <button
-          onClick={() => toggleSection("categories")}
-          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
-        >
-          <span>Category</span>
-          {expandedSections.categories ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-        </button>
-        {expandedSections.categories && categories.length > 0 && (
-          <div className="space-y-2 pt-2 pl-1 max-h-48 overflow-y-auto">
-            {categories.map((category) => (
-              <label key={category} className="flex items-center gap-2.5 cursor-pointer group">
-                <Checkbox
-                  checked={selectedCategories.includes(category)}
-                  onCheckedChange={() => toggleCategory(category)}
-                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
-                />
-                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
-                  {category}
-                </span>
-              </label>
+        {/* Category — common to all */}
+        <FilterSection title="Category" sectionKey="categories">
+          {categories.map((category) => (
+            <CheckboxItem key={category} label={category} checked={selectedCategories.includes(category)} onChange={() => toggleCategory(category)} />
+          ))}
+          {categories.length === 0 && <p className="text-xs text-muted-foreground">No categories</p>}
+        </FilterSection>
+
+        {/* City / Location — common to all */}
+        <FilterSection title="Location" sectionKey="city">
+          {cities.map((city) => (
+            <CheckboxItem key={city} label={city} checked={selectedCities.includes(city)} onChange={() => toggleCity(city)} />
+          ))}
+          {cities.length === 0 && <p className="text-xs text-muted-foreground">No locations</p>}
+        </FilterSection>
+
+        {/* Price — different ranges per service */}
+        <FilterSection title="Price Range" sectionKey="price">
+          {activePriceRanges.map((range, idx) => (
+            <CheckboxItem key={range.label} label={range.label} checked={selectedPriceRanges.includes(idx)} onChange={() => togglePriceRange(idx)} />
+          ))}
+        </FilterSection>
+
+        {/* ── Venue-specific filters ── */}
+        {activeServiceType === "venue" && (
+          <>
+            <FilterSection title="Guest Capacity" sectionKey="capacity">
+              {VENUE_CAPACITY_OPTIONS.map((opt) => (
+                <CheckboxItem key={opt.value} label={opt.label} checked={selectedCapacity.includes(opt.value)} onChange={() => toggleCapacity(opt.value)} />
+              ))}
+            </FilterSection>
+
+            <FilterSection title="Amenities" sectionKey="amenities">
+              {VENUE_AMENITY_OPTIONS.map((amenity) => (
+                <CheckboxItem key={amenity} label={amenity} checked={selectedAmenities.includes(amenity)} onChange={() => toggleAmenity(amenity)} />
+              ))}
+            </FilterSection>
+          </>
+        )}
+
+        {/* ── Crew-specific filters ── */}
+        {activeServiceType === "crew" && (
+          <FilterSection title="Experience Level" sectionKey="experience">
+            {CREW_EXPERIENCE_OPTIONS.map((opt) => (
+              <CheckboxItem key={opt.value} label={opt.label} checked={selectedExperience.includes(opt.value)} onChange={() => toggleExperience(opt.value)} />
             ))}
-          </div>
+          </FilterSection>
         )}
-      </div>
-      <Separator />
 
-      {/* City / Location */}
-      <div className="py-3">
-        <button
-          onClick={() => toggleSection("city")}
-          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
-        >
-          <span>Location</span>
-          {expandedSections.city ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-        </button>
-        {expandedSections.city && cities.length > 0 && (
-          <div className="space-y-2 pt-2 pl-1 max-h-48 overflow-y-auto">
-            {cities.map((city) => (
-              <label key={city} className="flex items-center gap-2.5 cursor-pointer group">
-                <Checkbox
-                  checked={selectedCities.includes(city)}
-                  onCheckedChange={() => toggleCity(city)}
-                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
-                />
-                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
-                  {city}
-                </span>
-              </label>
-            ))}
-          </div>
+        {/* ── Rental-specific: Availability ── */}
+        {activeServiceType === "rental" && (
+          <FilterSection title="Availability" sectionKey="availability">
+            <CheckboxItem label="In Stock Only" checked={showInStock} onChange={() => setShowInStock(!showInStock)} />
+          </FilterSection>
         )}
       </div>
-      <Separator />
-
-      {/* Price */}
-      <div className="py-3">
-        <button
-          onClick={() => toggleSection("price")}
-          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
-        >
-          <span>Price</span>
-          {expandedSections.price ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-        </button>
-        {expandedSections.price && (
-          <div className="space-y-2 pt-2 pl-1">
-            {PRICE_RANGES.map((range, idx) => (
-              <label key={range.label} className="flex items-center gap-2.5 cursor-pointer group">
-                <Checkbox
-                  checked={selectedPriceRanges.includes(idx)}
-                  onCheckedChange={() => togglePriceRange(idx)}
-                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
-                />
-                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
-                  {range.label}
-                </span>
-              </label>
-            ))}
-          </div>
-        )}
-      </div>
-      <Separator />
-
-      {/* Availability */}
-      <div className="py-3">
-        <button
-          onClick={() => toggleSection("availability")}
-          className="flex items-center justify-between w-full text-sm font-semibold text-foreground py-1"
-        >
-          <span>Availability</span>
-          {expandedSections.availability ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-        </button>
-        {expandedSections.availability && (
-          <div className="space-y-2 pt-2 pl-1">
-            <label className="flex items-center gap-2.5 cursor-pointer group">
-              <Checkbox
-                checked={showInStock}
-                onCheckedChange={() => setShowInStock(!showInStock)}
-                className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-3.5 w-3.5"
-              />
-              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
-                In Stock Only
-              </span>
-            </label>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Layout hideNavbar>
@@ -607,7 +677,7 @@ const Ecommerce = () => {
                       <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                       <h3 className="text-lg font-semibold mb-2 text-foreground">No Items Found</h3>
                       <p className="text-muted-foreground text-sm">
-                        {searchTerm ? "Try adjusting your search terms" : "No rental items available at the moment"}
+                        {searchTerm ? "Try adjusting your search terms" : "No items available at the moment"}
                       </p>
                     </div>
                   ) : (

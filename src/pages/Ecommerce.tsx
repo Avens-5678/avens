@@ -16,7 +16,9 @@ import ServiceSelector from "@/components/ecommerce/ServiceSelector";
 import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
+import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
@@ -67,6 +69,48 @@ const CREW_EXPERIENCE_OPTIONS = [
   { label: "5–10 Years", value: "senior" },
   { label: "10+ Years", value: "expert" },
 ];
+
+// ── Discovery section with Top Picks + Recently Viewed ──
+const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues }: any) => {
+  const { recentIds } = useRecentlyViewed();
+
+  const recentlyViewedItems = useMemo(() => {
+    if (recentIds.length === 0) return [];
+    return recentIds.map((id: string) => allItems.find((r: any) => r.id === id)).filter(Boolean);
+  }, [recentIds, allItems]);
+
+  const topPicksForYou = useMemo(() => {
+    if (recentIds.length === 0) return [];
+    const viewedItems = recentIds.map((id: string) => allItems.find((r: any) => r.id === id)).filter(Boolean);
+    const viewedCategories = new Set<string>();
+    viewedItems.forEach((item: any) => item.categories?.forEach((c: string) => viewedCategories.add(c)));
+    if (viewedCategories.size === 0) return [];
+    return allItems
+      .filter((r: any) => !recentIds.includes(r.id) && r.categories?.some((c: string) => viewedCategories.has(c)))
+      .slice(0, 12);
+  }, [allItems, recentIds]);
+
+  return (
+    <div className="bg-background py-4 sm:py-6">
+      <DiscoveryRow title="🔥 Discover Best Rentals" subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
+      {discoveryBestInCity.length > 0 && (
+        <DiscoveryRow title={`📍 Discover Best in ${userLocation?.cityName || "Your City"}`} subtitle="Popular items near you" items={discoveryBestInCity} />
+      )}
+      {topPicksForYou.length > 0 && (
+        <DiscoveryRow title="✨ Top Picks for You" subtitle="Based on your browsing history" items={topPicksForYou} />
+      )}
+      {discoveryBestCrew.length > 0 && (
+        <DiscoveryRow title="👥 Best Crew for Your Event" subtitle="Skilled professionals ready to help" items={discoveryBestCrew} />
+      )}
+      {discoveryTopVenues.length > 0 && (
+        <DiscoveryRow title="🏛️ Top Venues Near You" subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
+      )}
+      {recentlyViewedItems.length > 0 && (
+        <DiscoveryRow title="🕒 Recently Viewed" subtitle="Pick up where you left off" items={recentlyViewedItems} />
+      )}
+    </div>
+  );
+};
 
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
@@ -572,18 +616,7 @@ const Ecommerce = () => {
 
       {/* Discovery Rows — shown on default landing */}
       {isDiscoveryView && (
-        <div className="bg-background py-4 sm:py-6">
-          <DiscoveryRow title="🔥 Discover Best Rentals" subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
-          {discoveryBestInCity.length > 0 && (
-            <DiscoveryRow title={`📍 Discover Best in ${userLocation?.cityName || "Your City"}`} subtitle="Popular items near you" items={discoveryBestInCity} />
-          )}
-          {discoveryBestCrew.length > 0 && (
-            <DiscoveryRow title="👥 Best Crew for Your Event" subtitle="Skilled professionals ready to help" items={discoveryBestCrew} />
-          )}
-          {discoveryTopVenues.length > 0 && (
-            <DiscoveryRow title="🏛️ Top Venues Near You" subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
-          )}
-        </div>
+        <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} />
       )}
 
       {/* Main Content with Sidebar — hidden in discovery view */}
@@ -700,15 +733,18 @@ const Ecommerce = () => {
         </section>
       )}
 
-      {/* Floating Cart */}
+      {/* Floating Cart — hidden on mobile where bottom nav takes over */}
       {items.length > 0 && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+        <div className="hidden md:block fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
           <Button onClick={() => navigate("/cart")} size="lg" className="rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl transition-all duration-300">
             <ShoppingCart className="mr-2 h-5 w-5" />
             Cart ({items.length})
           </Button>
         </div>
       )}
+
+      {/* Mobile Bottom Nav */}
+      <MobileBottomNav cartCount={items.length} />
     </Layout>
   );
 };

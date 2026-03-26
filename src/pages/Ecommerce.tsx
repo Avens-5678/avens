@@ -35,6 +35,7 @@ const Ecommerce = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "two" | "one">("two");
   const [activeQuickCat, setActiveQuickCat] = useState("");
+  const [activeService, setActiveService] = useState("");
   const [promoFilterIds, setPromoFilterIds] = useState<string[]>([]);
 
   // Pull-down navbar reveal logic
@@ -128,7 +129,14 @@ const Ecommerce = () => {
       const matchesCity =
         selectedCities.length === 0 ||
         (rental.address?.trim() && selectedCities.includes(rental.address.trim()));
-      return matchesSearch && matchesCategory && matchesCity;
+      // Service filter: "venues" filters to venue-related categories
+      const matchesService =
+        !activeService ||
+        activeService === "insta-rent" ||
+        (activeService === "venues" && rental.categories?.some((c) =>
+          ["venue", "venues", "hall", "halls", "banquet", "outdoor", "space", "spaces", "location"].some(k => c.toLowerCase().includes(k))
+        ));
+      return matchesSearch && matchesCategory && matchesCity && matchesService;
     });
 
     // Sort

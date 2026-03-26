@@ -229,7 +229,23 @@ const Ecommerce = () => {
       const matchesService =
         !activeServiceType ||
         ((rental as any).service_type || "rental") === activeServiceType;
-      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability;
+
+      // Venue amenity filter
+      const matchesAmenities =
+        selectedAmenities.length === 0 ||
+        selectedAmenities.every((a) => ((rental as any).amenities || []).includes(a));
+
+      // Venue capacity filter
+      const matchesCapacity =
+        selectedCapacity.length === 0 ||
+        selectedCapacity.includes((rental as any).guest_capacity || "");
+
+      // Crew experience filter
+      const matchesExperience =
+        selectedExperience.length === 0 ||
+        selectedExperience.includes((rental as any).experience_level || "");
+
+      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience;
     });
 
     switch (sortBy) {

@@ -1,0 +1,1 @@
+ALTER TABLE public.promo_banners ADD COLUMN IF NOT EXISTS service_type text NOT NULL DEFAULT 'rental';

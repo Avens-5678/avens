@@ -600,6 +600,9 @@ const Ecommerce = () => {
       {/* Stats/Social Proof Bar - only on discovery view */}
       {isDiscoveryView && <TrustStrip />}
 
+      {/* How It Works */}
+      {isDiscoveryView && <HowItWorks />}
+
       {/* Promotional Banner Carousel */}
       <PromoBannerCarousel
         serviceType={activeServiceType}
@@ -614,9 +617,6 @@ const Ecommerce = () => {
           }, 100);
         }}
       />
-
-      {/* How It Works */}
-      {isDiscoveryView && <HowItWorks />}
 
       {/* Discovery Rows — shown on default landing */}
       {isDiscoveryView && (

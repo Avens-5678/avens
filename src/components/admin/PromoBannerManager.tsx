@@ -100,6 +100,7 @@ const PromoBannerManager = () => {
       display_order: banner.display_order,
       is_active: banner.is_active,
       linked_rental_ids: banner.linked_rental_ids || [],
+      service_type: banner.service_type || "rental",
     });
     setRentalSearch("");
     setDialogOpen(true);

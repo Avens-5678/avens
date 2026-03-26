@@ -17,6 +17,8 @@ import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
+import CategoryGrid from "@/components/ecommerce/CategoryGrid";
+import HowItWorks from "@/components/ecommerce/HowItWorks";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
@@ -610,6 +612,17 @@ const Ecommerce = () => {
           }, 100);
         }}
       />
+
+      {/* Category Grid — only in discovery view */}
+      {isDiscoveryView && (
+        <CategoryGrid onCategoryClick={(service, category) => {
+          setActiveService(service);
+          setActiveQuickCat(category);
+        }} />
+      )}
+
+      {/* How It Works */}
+      {isDiscoveryView && <HowItWorks />}
 
       {/* Trust Strip */}
       <TrustStrip />

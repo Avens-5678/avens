@@ -538,6 +538,7 @@ const Ecommerce = () => {
           service_type: r.service_type,
           categories: r.categories,
           image_url: r.image_url,
+          short_description: r.short_description,
         }))}
       />
 

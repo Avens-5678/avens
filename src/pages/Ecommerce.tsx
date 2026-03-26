@@ -17,6 +17,7 @@ import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
 import ServiceSelector from "@/components/ecommerce/ServiceSelector";
 import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
+import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import { useUserLocation } from "@/hooks/useUserLocation";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
@@ -93,12 +94,23 @@ const Ecommerce = () => {
     };
   }, [showNavbar, revealNavbar, hideNavbar]);
 
+  // Map activeService card IDs to service_type DB values
+  const serviceTypeMap: Record<string, string> = {
+    "insta-rent": "rental",
+    "venues": "venue",
+    "crew-hub": "crew",
+  };
+  const activeServiceType = activeService ? serviceTypeMap[activeService] || "" : "";
+
   const categories = useMemo(() => {
     if (!rentals) return [];
     const cats = new Set<string>();
-    rentals.forEach((r) => r.categories?.forEach((c) => cats.add(c)));
+    const itemsForCats = activeServiceType
+      ? rentals.filter((r: any) => (r.service_type || "rental") === activeServiceType)
+      : rentals;
+    itemsForCats.forEach((r: any) => r.categories?.forEach((c: string) => cats.add(c)));
     return Array.from(cats).sort();
-  }, [rentals]);
+  }, [rentals, activeServiceType]);
 
   const quickBrowseCategories = useMemo(() => {
     return [{ label: "All", value: "" }, ...categories.map(c => ({ label: c, value: c }))];

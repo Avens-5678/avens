@@ -352,7 +352,6 @@ export const useVerifiedVendorInventory = () => {
         .from("vendor_inventory")
         .select("*")
         .eq("is_available", true)
-        .eq("is_verified", true)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

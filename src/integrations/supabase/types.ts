@@ -876,6 +876,7 @@ export type Database = {
         Row: {
           action_token: string | null
           assigned_vendor_id: string | null
+          booking_source: string | null
           budget: string | null
           client_email: string | null
           client_id: string | null
@@ -886,11 +887,14 @@ export type Database = {
           equipment_details: string | null
           event_date: string | null
           id: string
+          is_offline: boolean | null
+          is_vendor_direct: boolean | null
           location: string | null
           notes: string | null
           status: string
           title: string
           updated_at: string
+          vendor_inventory_item_id: string | null
           vendor_quote_amount: number | null
           vendor_responded_at: string | null
           vendor_response: string | null
@@ -899,6 +903,7 @@ export type Database = {
         Insert: {
           action_token?: string | null
           assigned_vendor_id?: string | null
+          booking_source?: string | null
           budget?: string | null
           client_email?: string | null
           client_id?: string | null
@@ -909,11 +914,14 @@ export type Database = {
           equipment_details?: string | null
           event_date?: string | null
           id?: string
+          is_offline?: boolean | null
+          is_vendor_direct?: boolean | null
           location?: string | null
           notes?: string | null
           status?: string
           title: string
           updated_at?: string
+          vendor_inventory_item_id?: string | null
           vendor_quote_amount?: number | null
           vendor_responded_at?: string | null
           vendor_response?: string | null
@@ -922,6 +930,7 @@ export type Database = {
         Update: {
           action_token?: string | null
           assigned_vendor_id?: string | null
+          booking_source?: string | null
           budget?: string | null
           client_email?: string | null
           client_id?: string | null
@@ -932,11 +941,14 @@ export type Database = {
           equipment_details?: string | null
           event_date?: string | null
           id?: string
+          is_offline?: boolean | null
+          is_vendor_direct?: boolean | null
           location?: string | null
           notes?: string | null
           status?: string
           title?: string
           updated_at?: string
+          vendor_inventory_item_id?: string | null
           vendor_quote_amount?: number | null
           vendor_responded_at?: string | null
           vendor_response?: string | null
@@ -1047,8 +1059,12 @@ export type Database = {
       rentals: {
         Row: {
           address: string | null
+          advance_amount: number | null
           amenities: string[] | null
+          av_equipment: boolean | null
+          cancellation_policy: string | null
           categories: string[] | null
+          catering_type: string | null
           created_at: string
           description: string
           display_order: number | null
@@ -1059,24 +1075,41 @@ export type Database = {
           image_url: string | null
           image_urls: string[] | null
           is_active: boolean | null
+          max_capacity: number | null
+          min_capacity: number | null
+          num_halls: number | null
+          parking_available: boolean | null
           price_range: string | null
           price_value: number | null
+          pricing_packages: Json | null
           pricing_unit: string | null
           quantity: number | null
           rating: number | null
+          refund_rules: string | null
+          rooms_available: number | null
           search_keywords: string | null
+          seating_types: string[] | null
           service_type: string
           short_description: string
           show_on_home: boolean | null
           size_options: string[] | null
+          slot_types: string[] | null
           specifications: Json | null
           title: string
           updated_at: string
+          venue_type: string | null
+          video_url: string | null
+          weekday_price: number | null
+          weekend_price: number | null
         }
         Insert: {
           address?: string | null
+          advance_amount?: number | null
           amenities?: string[] | null
+          av_equipment?: boolean | null
+          cancellation_policy?: string | null
           categories?: string[] | null
+          catering_type?: string | null
           created_at?: string
           description: string
           display_order?: number | null
@@ -1087,24 +1120,41 @@ export type Database = {
           image_url?: string | null
           image_urls?: string[] | null
           is_active?: boolean | null
+          max_capacity?: number | null
+          min_capacity?: number | null
+          num_halls?: number | null
+          parking_available?: boolean | null
           price_range?: string | null
           price_value?: number | null
+          pricing_packages?: Json | null
           pricing_unit?: string | null
           quantity?: number | null
           rating?: number | null
+          refund_rules?: string | null
+          rooms_available?: number | null
           search_keywords?: string | null
+          seating_types?: string[] | null
           service_type?: string
           short_description: string
           show_on_home?: boolean | null
           size_options?: string[] | null
+          slot_types?: string[] | null
           specifications?: Json | null
           title: string
           updated_at?: string
+          venue_type?: string | null
+          video_url?: string | null
+          weekday_price?: number | null
+          weekend_price?: number | null
         }
         Update: {
           address?: string | null
+          advance_amount?: number | null
           amenities?: string[] | null
+          av_equipment?: boolean | null
+          cancellation_policy?: string | null
           categories?: string[] | null
+          catering_type?: string | null
           created_at?: string
           description?: string
           display_order?: number | null
@@ -1115,19 +1165,32 @@ export type Database = {
           image_url?: string | null
           image_urls?: string[] | null
           is_active?: boolean | null
+          max_capacity?: number | null
+          min_capacity?: number | null
+          num_halls?: number | null
+          parking_available?: boolean | null
           price_range?: string | null
           price_value?: number | null
+          pricing_packages?: Json | null
           pricing_unit?: string | null
           quantity?: number | null
           rating?: number | null
+          refund_rules?: string | null
+          rooms_available?: number | null
           search_keywords?: string | null
+          seating_types?: string[] | null
           service_type?: string
           short_description?: string
           show_on_home?: boolean | null
           size_options?: string[] | null
+          slot_types?: string[] | null
           specifications?: Json | null
           title?: string
           updated_at?: string
+          venue_type?: string | null
+          video_url?: string | null
+          weekday_price?: number | null
+          weekend_price?: number | null
         }
         Relationships: []
       }
@@ -1418,32 +1481,41 @@ export type Database = {
       }
       vendor_availability: {
         Row: {
+          booking_order_id: string | null
           created_at: string
           date: string
           id: string
           inventory_item_id: string | null
+          is_auto_blocked: boolean | null
           is_booked: boolean | null
           notes: string | null
+          slot: string | null
           updated_at: string
           vendor_id: string
         }
         Insert: {
+          booking_order_id?: string | null
           created_at?: string
           date: string
           id?: string
           inventory_item_id?: string | null
+          is_auto_blocked?: boolean | null
           is_booked?: boolean | null
           notes?: string | null
+          slot?: string | null
           updated_at?: string
           vendor_id: string
         }
         Update: {
+          booking_order_id?: string | null
           created_at?: string
           date?: string
           id?: string
           inventory_item_id?: string | null
+          is_auto_blocked?: boolean | null
           is_booked?: boolean | null
           notes?: string | null
+          slot?: string | null
           updated_at?: string
           vendor_id?: string
         }
@@ -1460,9 +1532,13 @@ export type Database = {
       vendor_inventory: {
         Row: {
           address: string | null
+          advance_amount: number | null
           amenities: string[] | null
+          av_equipment: boolean | null
+          cancellation_policy: string | null
           categories: string[] | null
           category: string | null
+          catering_type: string | null
           created_at: string
           description: string | null
           display_order: number | null
@@ -1474,24 +1550,41 @@ export type Database = {
           image_urls: string[] | null
           is_available: boolean
           is_verified: boolean | null
+          max_capacity: number | null
+          min_capacity: number | null
           name: string
+          num_halls: number | null
+          parking_available: boolean | null
           price_per_day: number | null
           price_value: number | null
+          pricing_packages: Json | null
           pricing_unit: string | null
           quantity: number
+          refund_rules: string | null
+          rooms_available: number | null
           search_keywords: string | null
+          seating_types: string[] | null
           service_type: string
           short_description: string | null
+          slot_types: string[] | null
           updated_at: string
           vendor_id: string
+          venue_type: string | null
           verified_at: string | null
           verified_by: string | null
+          video_url: string | null
+          weekday_price: number | null
+          weekend_price: number | null
         }
         Insert: {
           address?: string | null
+          advance_amount?: number | null
           amenities?: string[] | null
+          av_equipment?: boolean | null
+          cancellation_policy?: string | null
           categories?: string[] | null
           category?: string | null
+          catering_type?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
@@ -1503,24 +1596,41 @@ export type Database = {
           image_urls?: string[] | null
           is_available?: boolean
           is_verified?: boolean | null
+          max_capacity?: number | null
+          min_capacity?: number | null
           name: string
+          num_halls?: number | null
+          parking_available?: boolean | null
           price_per_day?: number | null
           price_value?: number | null
+          pricing_packages?: Json | null
           pricing_unit?: string | null
           quantity?: number
+          refund_rules?: string | null
+          rooms_available?: number | null
           search_keywords?: string | null
+          seating_types?: string[] | null
           service_type?: string
           short_description?: string | null
+          slot_types?: string[] | null
           updated_at?: string
           vendor_id: string
+          venue_type?: string | null
           verified_at?: string | null
           verified_by?: string | null
+          video_url?: string | null
+          weekday_price?: number | null
+          weekend_price?: number | null
         }
         Update: {
           address?: string | null
+          advance_amount?: number | null
           amenities?: string[] | null
+          av_equipment?: boolean | null
+          cancellation_policy?: string | null
           categories?: string[] | null
           category?: string | null
+          catering_type?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
@@ -1532,18 +1642,31 @@ export type Database = {
           image_urls?: string[] | null
           is_available?: boolean
           is_verified?: boolean | null
+          max_capacity?: number | null
+          min_capacity?: number | null
           name?: string
+          num_halls?: number | null
+          parking_available?: boolean | null
           price_per_day?: number | null
           price_value?: number | null
+          pricing_packages?: Json | null
           pricing_unit?: string | null
           quantity?: number
+          refund_rules?: string | null
+          rooms_available?: number | null
           search_keywords?: string | null
+          seating_types?: string[] | null
           service_type?: string
           short_description?: string | null
+          slot_types?: string[] | null
           updated_at?: string
           vendor_id?: string
+          venue_type?: string | null
           verified_at?: string | null
           verified_by?: string | null
+          video_url?: string | null
+          weekday_price?: number | null
+          weekend_price?: number | null
         }
         Relationships: []
       }
@@ -1602,6 +1725,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vendor_metrics: {
+        Row: {
+          avg_rating: number | null
+          avg_response_time_hours: number | null
+          booking_success_rate: number | null
+          created_at: string | null
+          id: string
+          is_sponsored: boolean | null
+          rank_score: number | null
+          total_reviews: number | null
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          avg_rating?: number | null
+          avg_response_time_hours?: number | null
+          booking_success_rate?: number | null
+          created_at?: string | null
+          id?: string
+          is_sponsored?: boolean | null
+          rank_score?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          avg_rating?: number | null
+          avg_response_time_hours?: number | null
+          booking_success_rate?: number | null
+          created_at?: string | null
+          id?: string
+          is_sponsored?: boolean | null
+          rank_score?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: []
       }
       whatsapp_assignment_rules: {
         Row: {
@@ -1931,6 +2093,15 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_vendor_rank_score: {
+        Args: {
+          _avg_rating: number
+          _avg_response_time_hours: number
+          _booking_success_rate: number
+          _is_sponsored: boolean
+        }
+        Returns: number
+      }
       check_email_type: { Args: { check_email: string }; Returns: Json }
       employee_has_permission: {
         Args: { _category: string; _type?: string; _user_id: string }

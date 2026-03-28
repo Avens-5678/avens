@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Package, Plus, Edit, Trash2, Save, X, ImageIcon, Search, Filter, ShieldCheck, IndianRupee } from "lucide-react";
 import CSVUploader from "./CSVUploader";
+import VenueFormFields from "./VenueFormFields";
 
 const RENTAL_CATEGORIES = [
   "Event Structures & Venues",
@@ -304,11 +305,29 @@ const InventoryManager = () => {
         is_available: formData.is_available !== false,
         image_url: formData.image_url || null,
         image_urls: formData.image_urls || [],
-        service_type: formData.service_type || 'rental',
-        amenities: formData.service_type === 'venue' ? (formData.amenities || []) : [],
-        guest_capacity: formData.service_type === 'venue' ? (formData.guest_capacity || null) : null,
-        experience_level: formData.service_type === 'crew' ? (formData.experience_level || null) : null,
-      };
+      service_type: formData.service_type || 'rental',
+      amenities: formData.service_type === 'venue' ? (formData.amenities || []) : [],
+      guest_capacity: formData.service_type === 'venue' ? (formData.guest_capacity || null) : null,
+      experience_level: formData.service_type === 'crew' ? (formData.experience_level || null) : null,
+      // Venue-specific fields
+      venue_type: formData.venue_type || null,
+      min_capacity: formData.min_capacity || null,
+      max_capacity: formData.max_capacity || null,
+      num_halls: formData.num_halls || null,
+      seating_types: formData.seating_types || [],
+      pricing_packages: formData.pricing_packages || [],
+      weekday_price: formData.weekday_price || null,
+      weekend_price: formData.weekend_price || null,
+      catering_type: formData.catering_type || null,
+      parking_available: formData.parking_available || false,
+      rooms_available: formData.rooms_available || 0,
+      av_equipment: formData.av_equipment || false,
+      cancellation_policy: formData.cancellation_policy || null,
+      advance_amount: formData.advance_amount || null,
+      refund_rules: formData.refund_rules || null,
+      video_url: formData.video_url || null,
+      slot_types: formData.slot_types || [],
+    };
 
       let itemId: string;
 
@@ -499,46 +518,7 @@ const InventoryManager = () => {
 
             {/* Venue-specific fields */}
             {formData.service_type === 'venue' && (
-              <>
-                <Separator />
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Venue Details</h3>
-                  <div className="space-y-1">
-                    <Label>Guest Capacity</Label>
-                    <Select value={formData.guest_capacity || ''} onValueChange={(v) => setFormData(prev => ({ ...prev, guest_capacity: v }))}>
-                      <SelectTrigger><SelectValue placeholder="Select capacity" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="small">Up to 100 guests</SelectItem>
-                        <SelectItem value="medium">100 – 300 guests</SelectItem>
-                        <SelectItem value="large">300 – 500 guests</SelectItem>
-                        <SelectItem value="mega">500+ guests</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Amenities</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {VENUE_AMENITY_OPTIONS.map((amenity) => (
-                        <label key={amenity} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={(formData.amenities || []).includes(amenity)}
-                            onChange={(e) => {
-                              const current = formData.amenities || [];
-                              setFormData(prev => ({
-                                ...prev,
-                                amenities: e.target.checked ? [...current, amenity] : current.filter((a: string) => a !== amenity),
-                              }));
-                            }}
-                            className="rounded border-border"
-                          />
-                          <span className="text-sm">{amenity}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </>
+              <VenueFormFields formData={formData} setFormData={setFormData} />
             )}
 
             {/* Crew-specific fields */}

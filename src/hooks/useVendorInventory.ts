@@ -26,6 +26,24 @@ export interface VendorInventoryItem {
   amenities: string[] | null;
   guest_capacity: string | null;
   experience_level: string | null;
+  // Venue-specific fields
+  venue_type: string | null;
+  min_capacity: number | null;
+  max_capacity: number | null;
+  num_halls: number | null;
+  seating_types: string[] | null;
+  pricing_packages: any[] | null;
+  weekday_price: number | null;
+  weekend_price: number | null;
+  catering_type: string | null;
+  parking_available: boolean | null;
+  rooms_available: number | null;
+  av_equipment: boolean | null;
+  cancellation_policy: string | null;
+  advance_amount: number | null;
+  refund_rules: string | null;
+  video_url: string | null;
+  slot_types: string[] | null;
   created_at: string;
   updated_at: string;
 }

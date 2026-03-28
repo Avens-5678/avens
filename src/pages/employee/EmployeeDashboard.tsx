@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Loader2, LogOut, ArrowLeft, ShoppingBag, ClipboardList, Briefcase, Lock } from "lucide-react";
+import { Loader2, LogOut, ArrowLeft, ShoppingBag, ClipboardList, Briefcase, Lock, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
@@ -26,6 +26,7 @@ import LiveRentalOrders from "@/components/admin/LiveRentalOrders";
 import LiveServiceOrders from "@/components/admin/LiveServiceOrders";
 import QuoteMaker from "@/components/admin/QuoteMaker";
 import { useAllRentals, useEvents, usePortfolio, useFormSubmissions } from "@/hooks/useData";
+import WhatsAppLiveChat from "@/components/admin/WhatsAppLiveChat";
 
 interface SubTab {
   label: string;
@@ -67,6 +68,7 @@ const allMenuGroups: MenuGroup[] = [
       { label: "Rental Orders", value: "rental-orders", category: "operations" },
       { label: "Event Requests", value: "service-orders", category: "operations" },
       { label: "Quote Maker", value: "quote-maker", category: "operations" },
+      { label: "Live Chat", value: "wa-live-chat", category: "operations" },
     ],
   },
 ];
@@ -223,6 +225,8 @@ const EmployeeDashboard = () => {
         return <LiveServiceOrders />;
       case "quote-maker":
         return <QuoteMaker />;
+      case "wa-live-chat":
+        return <WhatsAppLiveChat employeeMode />;
       default:
         return null;
     }

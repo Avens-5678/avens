@@ -319,7 +319,7 @@ const Ecommerce = () => {
   }, [allItems, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience, vendorFilterId]);
 
   // Discovery rows for default landing view
-  const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0;
+  const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0 && !vendorFilterId;
 
   const discoveryBestRentals = useMemo(() => {
     return allItems

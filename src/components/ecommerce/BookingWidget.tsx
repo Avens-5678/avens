@@ -241,7 +241,7 @@ const BookingWidget = ({ rental, selectedVariant }: BookingWidgetProps) => {
           <PopoverTrigger asChild>
             <Button variant="outline" className={cn("justify-start text-left font-normal h-10 text-xs", !checkIn && "text-muted-foreground")}>
               <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
-              {checkIn ? format(checkIn, "dd MMM") : "Check-in"}
+              {checkIn ? format(checkIn, "dd MMM") : "Booking From"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -260,7 +260,7 @@ const BookingWidget = ({ rental, selectedVariant }: BookingWidgetProps) => {
           <PopoverTrigger asChild>
             <Button variant="outline" className={cn("justify-start text-left font-normal h-10 text-xs", !checkOut && "text-muted-foreground")}>
               <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
-              {checkOut ? format(checkOut, "dd MMM") : "Check-out"}
+              {checkOut ? format(checkOut, "dd MMM") : "Booking Till"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">

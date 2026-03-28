@@ -1,186 +1,139 @@
 
 
-## Marketplace Redesign — Phased Implementation Plan
+## Booking System with Search, Availability Check & Hold Logic
 
-This is a large-scale architectural shift from an admin-centric model to a vendor-driven marketplace. It must be broken into phases to avoid breaking existing functionality.
+### What This Builds
 
----
+A complete booking flow (like MMT/OYO/Agoda) for venues, rentals, and crew — with date-based search, real-time availability checking, a 10-minute hold/lock system, and automatic inventory blocking.
 
-### Phase 1: Enhanced Venue Form + Database Schema Expansion
+### Current State
 
-**Database Migration — New columns on `vendor_inventory`:**
-- `venue_type` (text) — banquet hall, lawn, rooftop, farmhouse, etc.
-- `min_capacity` / `max_capacity` (integer)
-- `num_halls` (integer)
-- `seating_types` (text[]) — floating, theatre, cluster, classroom
-- `pricing_packages` (jsonb) — `[{name: "Wedding", price: 50000, unit: "per event"}, ...]`
-- `weekday_price` / `weekend_price` (numeric) — dynamic pricing
-- `catering_type` (text) — in-house, external, both
-- `parking_available` (boolean)
-- `rooms_available` (integer)
-- `av_equipment` (boolean)
-- `cancellation_policy` (text)
-- `advance_amount` (numeric)
-- `refund_rules` (text)
-- `video_url` (text) — walkthrough link
-- `slot_types` (text[]) — morning, evening, full_day
+- Product detail page has add-to-cart flow (quantity-based), no date selection or availability checking
+- `vendor_availability` table exists with slot support (morning/evening/full_day) but is only used by vendors to manually block dates
+- No hold/reservation system exists
+- No date-based search on the ecommerce page
 
-**Same columns added to `rentals` table** so admin catalog mirrors vendor fields.
+### Architecture
 
-**UI: Redesign venue form in `InventoryManager.tsx`**
-- When `service_type = 'venue'`, show a dedicated multi-step form inspired by Spalba/MakeMyTrip:
-  - Step 1: Basic Info (name, location with address, venue type dropdown)
-  - Step 2: Capacity & Spaces (min/max, halls, seating types checkboxes)
-  - Step 3: Pricing (per day/event/plate, weekday vs weekend, packages builder)
-  - Step 4: Media (cover + gallery uploads, video URL)
-  - Step 5: Amenities (catering, parking, rooms, AV, decoration toggles)
-  - Step 6: Policies (cancellation, advance, refund)
-- Same form also surfaces in `RentalItemFormDialog.tsx` for admin
-
----
-
-### Phase 2: Calendar Booking & Slot System
-
-**Database Migration:**
-- Expand `vendor_availability` table:
-  - Add `slot` (text) — 'morning', 'evening', 'full_day'
-  - Add `booking_order_id` (uuid, nullable) — link to the order that booked it
-  - Add `is_auto_blocked` (boolean, default false)
-  - Add unique constraint on `(inventory_item_id, date, slot)` to prevent double-booking
-
-**UI: Enhanced `AvailabilityCalendar.tsx`**
-- Show slot-level blocking (morning/evening/full-day) per date
-- Color-coded: green = available, yellow = partially booked, red = fully booked
-- Auto-block dates when an order is confirmed (via DB trigger)
-- "Limited availability" badge on product cards when only 1 slot remains
-
-**DB Trigger:** On `rental_orders.status` change to 'confirmed', auto-insert into `vendor_availability` with `is_auto_blocked = true`
-
----
-
-### Phase 3: Direct Vendor Order Routing (Critical Architecture Change)
-
-**Current flow:** Customer → Order → Admin → Manually assigns vendor
-**New flow:** Customer → Order → Goes directly to the listing vendor
-
-**Database Changes:**
-- When a customer orders a `vendor_inventory` item, set `rental_orders.assigned_vendor_id = vendor_inventory.vendor_id` automatically
-- Add `is_vendor_direct` (boolean) column to `rental_orders` — true for marketplace orders, false for admin-managed
-- Add DB trigger: on `rental_orders` INSERT, if the ordered item is from `vendor_inventory`, auto-set `assigned_vendor_id`
-
-**Vendor Dashboard updates:**
-- `OrderTracker.tsx` — show rental_orders where `assigned_vendor_id = auth.uid()` (already partially works via RLS)
-- Add accept/reject/quote flow directly in vendor order view
-- Real-time notifications via Supabase subscription on new orders
-
-**Admin role change:**
-- Admin sees all orders but with a "Marketplace" badge for vendor-direct ones
-- Admin can intervene/override but doesn't bottleneck the flow
-
----
-
-### Phase 4: Vendor Ranking System
-
-**Database Migration:**
-- New table `vendor_metrics`:
-  - `vendor_id` (uuid, unique)
-  - `avg_rating` (numeric)
-  - `total_reviews` (integer)
-  - `avg_response_time_hours` (numeric)
-  - `booking_success_rate` (numeric) — completed/total
-  - `is_sponsored` (boolean, default false)
-  - `rank_score` (numeric, computed)
-
-**Ranking formula (DB function):**
-```
-rank_score = (avg_rating * 0.3) + (booking_success_rate * 0.25) + 
-             (response_time_score * 0.2) + (price_score * 0.15) + 
-             (sponsored_boost * 0.1)
+```text
+┌─────────────────────────────────────────────────────┐
+│  STEP 1: SEARCH (Ecommerce Page)                    │
+│  User picks: Location + Check-in/Check-out dates     │
+│  → Filter listings by availability + location        │
+│  → Show "Available" / "Sold Out" badges              │
+└──────────────────────┬──────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│  STEP 2: PRODUCT DETAIL PAGE                         │
+│  Show calendar with available dates (green/red)      │
+│  User selects dates → real-time price calculation    │
+│  → System checks vendor_availability for conflicts   │
+└──────────────────────┬──────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│  STEP 3: BOOK NOW → CREATE HOLD                      │
+│  Insert into reservation_holds table:                │
+│    status = 'held', expires_at = now() + 10 min      │
+│  Temporarily reduce available inventory              │
+│  Show countdown timer to user                        │
+└──────────────────────┬──────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│  STEP 4: CONFIRM / EXPIRE                            │
+│  User submits details → status = 'confirmed'         │
+│  → Trigger auto-blocks vendor_availability           │
+│  OR timer expires → status = 'expired'               │
+│  → Inventory reverts automatically                   │
+└─────────────────────────────────────────────────────┘
 ```
 
-**Frontend:**
-- Sort vendor listings by `rank_score` descending
-- Show "Top Rated" / "Fast Responder" badges on product cards
-- Admin can toggle `is_sponsored` for revenue model
+### Database Changes
 
-**DB Trigger:** Recalculate `vendor_metrics` on new review, order status change, or vendor response
-
----
-
-### Phase 5: Offline Booking + Vendor Quotation Maker
-
-**Database Changes:**
-- Add `booking_source` column to `rental_orders` — 'online' or 'offline'
-- Add `is_offline` (boolean, default false) to `rental_orders`
-
-**Vendor Dashboard — New tabs:**
-1. **"Create Offline Booking"** — simplified order form:
-   - Select items from own inventory
-   - Enter client name/phone
-   - Set dates → auto-blocks calendar
-   - Mark as "offline booking"
-   - Auto-adjusts stock quantity
-
-2. **"Quotation Maker"** — vendor version of admin QuoteMaker:
-   - Pick items from own `vendor_inventory`
-   - Add custom line items
-   - Generate PDF quote
-   - Send via WhatsApp/email
-   - Track quote status
-
-**Unified stock:** Both online and offline bookings deduct from the same `quantity` field, preventing mismatches.
-
----
-
-### Phase 6: Enhanced Vendor Dashboard
-
-**New sidebar structure for `VendorDashboard.tsx`:**
-
-| Tab | Component | Status |
+**New table: `reservation_holds`**
+| Column | Type | Notes |
 |---|---|---|
-| AI Assistant | DashboardChatbot | Exists |
-| My Orders | OrderTracker (enhanced) | Update |
-| Add/Edit Listing | InventoryManager (enhanced) | Update |
-| Calendar | AvailabilityCalendar (enhanced) | Update |
-| Offline Booking | VendorOfflineBooking (new) | New |
-| Quotation Maker | VendorQuoteMaker (new) | New |
-| Earnings | VendorEarnings (new) | New |
-| Profile | VendorProfileSettings | Exists |
+| `id` | uuid PK | |
+| `rental_id` | uuid | The listing being held |
+| `variant_id` | uuid, nullable | If variant-specific |
+| `user_id` | uuid, nullable | Authenticated user (null for guest) |
+| `session_id` | text | For guest tracking |
+| `check_in` | date | Start date |
+| `check_out` | date | End date |
+| `slot` | text | morning/evening/full_day |
+| `quantity` | integer, default 1 | Units held |
+| `status` | text | 'held', 'confirmed', 'expired', 'cancelled' |
+| `expires_at` | timestamptz | now() + 10 minutes |
+| `created_at` | timestamptz | |
 
-**Earnings tab:** Simple analytics showing total orders, revenue, pending payments, monthly chart.
+RLS: Public can INSERT (to create holds). Users can SELECT/UPDATE own holds (by user_id or session_id). Admins full access.
 
----
+**New DB function: `get_available_inventory()`**
+- Takes `rental_id`, `check_in`, `check_out`, `slot`
+- Returns available quantity = base `quantity` minus:
+  - Active holds (status='held' AND expires_at > now())
+  - Confirmed bookings in `vendor_availability`
+- Used by both search filtering and product detail availability check
 
-### Files Changed (All Phases)
+**New DB function: `cleanup_expired_holds()`**
+- Sets status='expired' where expires_at < now() AND status='held'
+- Called periodically via pg_cron or on each availability check
+
+**Add columns to `rental_orders`:**
+- `check_in` (date) — booking start
+- `check_out` (date) — booking end
+- `hold_id` (uuid, nullable) — link back to reservation_holds
+
+### Frontend Changes
+
+**1. Ecommerce Page — Date Search Bar**
+- Add a search bar below `ServiceSelector` with: Location input + Date picker (check-in/check-out) + Search button
+- When dates are set, filter product cards to show only items with available inventory for those dates
+- Add "Available" / "Sold Out" / "Limited" badges on product cards based on `get_available_inventory()`
+
+**2. Product Detail Page — Booking Flow**
+- Replace simple quantity+add-to-cart with a booking widget:
+  - Date picker for check-in / check-out
+  - Slot selector (for venues: morning/evening/full day)
+  - Real-time availability calendar (fetch `vendor_availability` + active holds)
+  - Price calculation: (price × days × quantity)
+  - "Book Now" button → creates hold → navigates to checkout/confirmation
+- Show 10-minute countdown timer after hold is created
+- If hold expires, show "Session expired, try again" message
+
+**3. New Hook: `useReservationHold`**
+- `createHold()` — inserts into `reservation_holds`, returns hold ID
+- `confirmHold()` — updates status to 'confirmed', creates rental_order
+- `cancelHold()` — updates status to 'cancelled'
+- Polls hold status to detect expiry
+
+**4. New Hook: `useAvailability(rentalId, checkIn, checkOut)`**
+- Public query (no auth required) that calls `get_available_inventory()`
+- Returns: available quantity, is_available boolean, held count
+
+**5. Checkout/Confirmation Page Update**
+- After hold → show booking summary with countdown
+- Collect customer details (name, phone, email)
+- On submit → confirm hold → create rental_order → auto-block vendor_availability via existing trigger
+
+### Files Changed
 
 | File | Change |
 |---|---|
-| Migration (Phase 1) | Add venue-specific columns to `vendor_inventory` and `rentals` |
-| Migration (Phase 2) | Expand `vendor_availability` with slots, add double-booking constraint, auto-block trigger |
-| Migration (Phase 3) | Add `is_vendor_direct` to `rental_orders`, auto-assign trigger |
-| Migration (Phase 4) | New `vendor_metrics` table + rank calculation function |
-| Migration (Phase 5) | Add `booking_source`/`is_offline` to `rental_orders` |
-| `src/components/vendor/InventoryManager.tsx` | Multi-step venue form, enhanced UI |
-| `src/components/admin/RentalItemFormDialog.tsx` | Mirror venue fields for admin |
-| `src/components/vendor/AvailabilityCalendar.tsx` | Slot-based booking calendar |
-| `src/components/vendor/OrderTracker.tsx` | Direct order management with accept/reject |
-| `src/components/vendor/VendorOfflineBooking.tsx` | New — offline order creation |
-| `src/components/vendor/VendorQuoteMaker.tsx` | New — vendor quotation tool |
-| `src/components/vendor/VendorEarnings.tsx` | New — earnings analytics |
-| `src/pages/vendor/VendorDashboard.tsx` | Restructured sidebar with new tabs |
-| `src/hooks/useVendorInventory.ts` | Updated types for new fields |
-| `src/hooks/useVendorAvailability.ts` | Slot-aware queries |
-| `src/hooks/useRentalOrders.ts` | Auto-assign logic awareness |
-| `src/pages/ProductDetail.tsx` | Show availability calendar, vendor badge, booking slots |
+| Migration | New `reservation_holds` table, `get_available_inventory()` function, `cleanup_expired_holds()` function, add `check_in`/`check_out`/`hold_id` to `rental_orders` |
+| `src/hooks/useReservationHold.ts` | New — hold creation, confirmation, cancellation, expiry polling |
+| `src/hooks/useAvailability.ts` | New — real-time availability check for a listing + date range |
+| `src/pages/Ecommerce.tsx` | Add date search bar, filter by availability, availability badges on cards |
+| `src/pages/ProductDetail.tsx` | Replace cart flow with booking widget: date picker, slot selector, availability calendar, hold creation, countdown timer |
+| `src/components/ecommerce/EnhancedProductCard.tsx` | Show Available/Sold Out badge when search dates are active |
+| `src/components/ecommerce/BookingSearchBar.tsx` | New — location + date range search component |
+| `src/components/ecommerce/BookingWidget.tsx` | New — date selection, slot picker, price calc, Book Now with hold |
+| `src/components/ecommerce/AvailabilityCalendarPublic.tsx` | New — public-facing calendar showing available/blocked dates |
 
----
+### Hold System Flow Detail
 
-### Recommended Implementation Order
-
-**Start with Phase 1 + 2** (venue form + calendar) — these are self-contained and immediately visible.
-Then **Phase 3** (order routing) — the critical architecture shift.
-Then **Phase 5** (offline bookings) — vendor operational need.
-Then **Phase 4 + 6** (ranking + dashboard polish) — marketplace maturity features.
-
-Each phase can be approved and built independently. Which phase should we start with?
+1. User clicks "Book Now" → `useReservationHold.createHold()` inserts row with 10-min expiry
+2. `get_available_inventory()` always subtracts active holds from total — so other users see reduced stock immediately
+3. Countdown timer shows on UI — if it hits 0, hold auto-expires (DB function marks it expired)
+4. User fills details and confirms → hold status → 'confirmed' → rental_order created → existing `auto_block_on_order_confirmed` trigger blocks vendor calendar
+5. If vendor declines → rental_order status changes → hold cancelled → inventory reverts (availability row removed)
 

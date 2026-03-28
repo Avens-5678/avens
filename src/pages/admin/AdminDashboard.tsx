@@ -8,7 +8,7 @@ import CrudInterface from "@/components/admin/CrudInterface";
 import AdminDataTable from "@/components/admin/AdminDataTable";
 import { useAllServices, useAllRentals, useHeroBanners, useEvents, usePortfolio, useTrustedClients, useFormSubmissions, useAllNewsAchievements, useAllAwards, useAllFAQ } from "@/hooks/useData";
 import { useEventTypes } from "@/hooks/useEventTypes";
-import { 
+import {
   LogOut, 
   Home, 
   Users, 
@@ -28,7 +28,8 @@ import {
   ShieldCheck,
   Truck,
   Briefcase,
-  ShoppingBag
+  ShoppingBag,
+  MessageCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -49,6 +50,11 @@ import LiveServiceOrders from "@/components/admin/LiveServiceOrders";
 import QuoteMaker from "@/components/admin/QuoteMaker";
 import PromoBannerManager from "@/components/admin/PromoBannerManager";
 import TrustStripManager from "@/components/admin/TrustStripManager";
+import WhatsAppLiveChat from "@/components/admin/WhatsAppLiveChat";
+import WhatsAppCampaigns from "@/components/admin/WhatsAppCampaigns";
+import WhatsAppContacts from "@/components/admin/WhatsAppContacts";
+import WhatsAppTemplates from "@/components/admin/WhatsAppTemplates";
+import WhatsAppSettings from "@/components/admin/WhatsAppSettings";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -119,6 +125,16 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
+    icon: MessageCircle, label: "WhatsApp", value: "whatsapp",
+    subTabs: [
+      { label: "Live Chat", value: "wa-live-chat" },
+      { label: "Campaigns", value: "wa-campaigns" },
+      { label: "Contacts", value: "wa-contacts" },
+      { label: "Templates", value: "wa-templates" },
+      { label: "Settings", value: "wa-settings" },
+    ],
+  },
+  {
     icon: Settings, label: "Settings", value: "settings-group",
     subTabs: [
       { label: "Integrations", value: "integrations" },
@@ -133,7 +149,7 @@ const sidebarItems: SidebarItem[] = menuGroups.map((g) => ({
   value: g.value,
 }));
 
-const mobilePrimaryItems = ["overview", "operations", "user-mgmt", "ecommerce", "content"];
+const mobilePrimaryItems = ["overview", "operations", "user-mgmt", "ecommerce", "whatsapp"];
 
 const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const [activeGroup, setActiveGroup] = useState("overview");
@@ -442,6 +458,16 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <AboutContentManager />;
       case "profile":
         return <ProfileManager adminUser={currentAdminUser} onProfileUpdate={handleProfileUpdate} />;
+      case "wa-live-chat":
+        return <WhatsAppLiveChat />;
+      case "wa-campaigns":
+        return <WhatsAppCampaigns />;
+      case "wa-contacts":
+        return <WhatsAppContacts />;
+      case "wa-templates":
+        return <WhatsAppTemplates />;
+      case "wa-settings":
+        return <WhatsAppSettings />;
       default:
         return null;
     }

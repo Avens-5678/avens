@@ -18,6 +18,7 @@ import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
+import BookingSearchBar from "@/components/ecommerce/BookingSearchBar";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
@@ -173,7 +174,7 @@ const Ecommerce = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [selectedCapacity, setSelectedCapacity] = useState<string[]>([]);
   const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
-
+  const [bookingDates, setBookingDates] = useState<{ checkIn?: Date; checkOut?: Date; location?: string }>({});
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 
 

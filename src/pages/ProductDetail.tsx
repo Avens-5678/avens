@@ -41,6 +41,7 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: rentals, isLoading } = useAllRentals();
+  const { data: vendorItems, isLoading: vendorLoading } = useVerifiedVendorInventory();
   const { data: variants } = useRentalVariants(id);
   const { addItem, removeItem, isInCart, getItemCount } = useCart();
   const { toast } = useToast();
@@ -59,7 +60,41 @@ const ProductDetail = () => {
 
   const ctaRef = useRef<HTMLDivElement>(null);
 
-  const rental = useMemo(() => rentals?.find((r) => r.id === id), [rentals, id]);
+  // Merge admin rentals + vendor inventory
+  const allItems = useMemo(() => {
+    const adminItems = (rentals || []).map((r: any) => ({ ...r, _source: "admin" }));
+    const vendorMapped = (vendorItems || []).map((v: any) => ({
+      id: v.id,
+      title: v.name,
+      description: v.description,
+      short_description: v.short_description,
+      image_url: v.image_url,
+      image_urls: v.image_urls,
+      categories: v.categories,
+      price_value: v.price_value,
+      pricing_unit: v.pricing_unit,
+      price_range: null,
+      address: v.address,
+      quantity: v.quantity,
+      rating: null,
+      is_active: v.is_available,
+      show_on_home: true,
+      service_type: v.service_type || "rental",
+      amenities: v.amenities,
+      guest_capacity: v.guest_capacity,
+      experience_level: v.experience_level,
+      has_variants: v.has_variants,
+      specifications: v.specifications || null,
+      created_at: v.created_at,
+      vendor_id: v.vendor_id,
+      _source: "vendor",
+    }));
+    return [...adminItems, ...vendorMapped];
+  }, [rentals, vendorItems]);
+
+  const rental = useMemo(() => allItems.find((r: any) => r.id === id), [allItems, id]);
+  const vendorId = rental?._source === "vendor" ? rental.vendor_id : undefined;
+  const { data: vendorProfile } = useVendorProfile(vendorId);
 
   // Track recently viewed
   useEffect(() => { if (id) addToRecentlyViewed(id); }, [id]);

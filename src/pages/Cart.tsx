@@ -39,13 +39,10 @@ const Cart = () => {
     notes: "",
   });
 
-  // Check if cart contains only venue items (no venue address needed for venue bookings)
-  const isVenueOnlyCart = items.length > 0 && items.every((item) => {
-    const title = (item.title || "").toLowerCase();
-    return title.includes("venue") || title.includes("banquet") || title.includes("hall") || title.includes("farmhouse") || title.includes("lawn");
-  });
-  // Also check via service_type if available on cart items
+  // Detect if cart has venue items — venue bookings skip venue address fields
   const hasVenueItem = items.some((item: any) => item.service_type === "venue");
+  const isVenueOnlyCart = items.length > 0 && items.every((item: any) => item.service_type === "venue");
+  const showVenueAddressFields = !isVenueOnlyCart && !hasVenueItem;
 
   const formatItemPrice = (item: any) => {
     if (item.price_value != null) {

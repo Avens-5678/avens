@@ -237,6 +237,15 @@ const Ecommerce = () => {
   const filteredRentals = useMemo(() => {
     if (!allItems.length) return [];
 
+    // Vendor store filter
+    if (vendorFilterId) {
+      let results = allItems.filter((r: any) => r._source === "vendor" && r.vendor_id === vendorFilterId);
+      if (searchTerm) {
+        results = results.filter((r: any) => r.title.toLowerCase().includes(searchTerm.toLowerCase()));
+      }
+      return results;
+    }
+
     if (promoFilterIds.length > 0) {
       let results = allItems.filter((r: any) => promoFilterIds.includes(r.id));
       if (searchTerm) {
@@ -307,7 +316,7 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [allItems, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience]);
+  }, [allItems, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience, vendorFilterId]);
 
   // Discovery rows for default landing view
   const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0;

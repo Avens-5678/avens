@@ -140,6 +140,9 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
             📍 {rental.address}
           </p>
         )}
+
+        {/* Vendor label */}
+        {rental._source === "vendor" && <VendorLabel name={rental.vendor_name} />}
       </CardContent>
     </Card>
   );

@@ -542,6 +542,38 @@ const InventoryManager = () => {
               </>
             )}
 
+            {/* Availability Slots — for all service types */}
+            <Separator />
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Availability & Time Slots</h3>
+              <p className="text-xs text-muted-foreground">Select when this item/service is available for booking</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "morning", label: "Morning (8AM – 2PM)" },
+                  { value: "evening", label: "Evening (4PM – 11PM)" },
+                  { value: "full_day", label: "Full Day" },
+                ].map(slot => (
+                  <Badge
+                    key={slot.value}
+                    variant={(formData.slot_types || []).includes(slot.value) ? "default" : "outline"}
+                    className="cursor-pointer transition-all px-4 py-2 text-sm"
+                    onClick={() => {
+                      const current: string[] = formData.slot_types || [];
+                      const updated = current.includes(slot.value)
+                        ? current.filter((v: string) => v !== slot.value)
+                        : [...current, slot.value];
+                      setFormData(prev => ({ ...prev, slot_types: updated }));
+                    }}
+                  >
+                    {slot.label}
+                  </Badge>
+                ))}
+              </div>
+              {(formData.slot_types || []).length === 0 && (
+                <p className="text-xs text-amber-600 dark:text-amber-400">⚠ No slots selected — item will default to Full Day availability</p>
+              )}
+            </div>
+
             <Separator />
 
             {/* Step 2: Variant Toggle */}

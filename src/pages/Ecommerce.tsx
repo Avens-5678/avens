@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
-import { useNavigate } from "react-router-dom";
-import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft } from "lucide-react";
+import { useVendorProfile } from "@/hooks/useVendorProfile";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
@@ -117,6 +118,11 @@ const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discov
 const Ecommerce = () => {
   const { data: rentals, isLoading } = useAllRentals();
   const { data: vendorItems } = useVerifiedVendorInventory();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const vendorFilterId = searchParams.get("vendor") || "";
+
+  // Fetch vendor profile for vendor store header
+  const { data: vendorStoreProfile } = useVendorProfile(vendorFilterId || undefined);
 
   // Merge vendor items into rentals format
   const allItems = useMemo(() => {
@@ -145,6 +151,7 @@ const Ecommerce = () => {
       created_at: v.created_at,
       search_keywords: v.search_keywords,
       slot_types: v.slot_types,
+      vendor_id: v.vendor_id,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];

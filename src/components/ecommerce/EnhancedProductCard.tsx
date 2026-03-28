@@ -12,6 +12,15 @@ interface EnhancedProductCardProps {
   viewMode: "list" | "two" | "one";
 }
 
+const VendorLabel = ({ name }: { name?: string }) => {
+  if (!name) return null;
+  return (
+    <p className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
+      <Store className="h-3 w-3" /> Sold by: <span className="font-medium text-foreground">{name}</span>
+    </p>
+  );
+};
+
 const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();

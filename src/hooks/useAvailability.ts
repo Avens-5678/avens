@@ -25,7 +25,7 @@ export const useAvailability = (
       });
 
       if (error) throw error;
-      return data as AvailabilityResult;
+      return data as unknown as AvailabilityResult;
     },
     enabled: !!rentalId && !!checkIn && !!checkOut,
     refetchInterval: 30000, // Refresh every 30s for real-time feel

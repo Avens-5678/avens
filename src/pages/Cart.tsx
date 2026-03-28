@@ -325,7 +325,7 @@ const Cart = () => {
                         </div>
                       </div>
                       {/* Venue address fields — only for rental/crew orders, NOT for venue bookings */}
-                      {!isVenueOnlyCart && !hasVenueItem && (
+                      {showVenueAddressFields && (
                         <>
                           <div className="space-y-1">
                             <Label className="text-xs">Venue Address Line 1 *</Label>

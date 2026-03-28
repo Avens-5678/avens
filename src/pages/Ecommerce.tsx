@@ -735,6 +735,27 @@ const Ecommerce = () => {
                   </div>
                 </div>
 
+                {/* Vendor store banner */}
+                {vendorFilterId && (
+                  <div className="flex items-center gap-3 mb-4 px-4 py-3 rounded-lg bg-accent/10 border border-accent/20">
+                    <Store className="h-5 w-5 text-accent-foreground" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        All items by {vendorStoreProfile?.company_name || vendorStoreProfile?.full_name || "Vendor"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Browse their full catalog</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => { searchParams.delete("vendor"); setSearchParams(searchParams); }}
+                      className="text-xs gap-1"
+                    >
+                      <X className="h-3.5 w-3.5" /> Clear
+                    </Button>
+                  </div>
+                )}
+
                 {promoFilterIds.length > 0 && (
                   <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
                     <span className="text-sm font-medium text-primary">Showing promo items</span>

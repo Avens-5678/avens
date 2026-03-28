@@ -39,6 +39,11 @@ const Cart = () => {
     notes: "",
   });
 
+  // Detect if cart has venue items — venue bookings skip venue address fields
+  const hasVenueItem = items.some((item: any) => item.service_type === "venue");
+  const isVenueOnlyCart = items.length > 0 && items.every((item: any) => item.service_type === "venue");
+  const showVenueAddressFields = !isVenueOnlyCart && !hasVenueItem;
+
   const formatItemPrice = (item: any) => {
     if (item.price_value != null) {
       return `₹${item.price_value.toLocaleString()}`;
@@ -79,8 +84,13 @@ const Cart = () => {
       navigate("/client");
       return;
     }
-    if (!eventDetails.event_start_date || !eventDetails.venue_address_line1) {
-      toast({ title: "Missing information", description: "Please fill in start date and venue address.", variant: "destructive" });
+    // For venue bookings, only require dates; for rentals, require date + venue address
+    if (!eventDetails.event_start_date) {
+      toast({ title: "Missing information", description: "Please select a start date.", variant: "destructive" });
+      return;
+    }
+    if (showVenueAddressFields && !eventDetails.venue_address_line1) {
+      toast({ title: "Missing information", description: "Please fill in the venue address.", variant: "destructive" });
       return;
     }
     setSubmitting(true);
@@ -288,7 +298,9 @@ const Cart = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <CalendarDays className="h-5 w-5 text-primary" />
-                        <h3 className="text-base font-bold text-foreground">Event Details</h3>
+                        <h3 className="text-base font-bold text-foreground">
+                          {isVenueOnlyCart || hasVenueItem ? "Booking Details" : "Event Details"}
+                        </h3>
                       </div>
                       <button onClick={() => setShowEnquiry(false)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
                     </div>
@@ -312,18 +324,23 @@ const Cart = () => {
                           <Input type="date" value={eventDetails.event_end_date} onChange={e => setEventDetails(p => ({ ...p, event_end_date: e.target.value }))} />
                         </div>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Venue Address Line 1 *</Label>
-                        <Input value={eventDetails.venue_address_line1} onChange={e => setEventDetails(p => ({ ...p, venue_address_line1: e.target.value }))} placeholder="Street address, building name" />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Venue Address Line 2</Label>
-                        <Input value={eventDetails.venue_address_line2} onChange={e => setEventDetails(p => ({ ...p, venue_address_line2: e.target.value }))} placeholder="Area, landmark" />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Pin Code</Label>
-                        <Input value={eventDetails.venue_pincode} onChange={e => setEventDetails(p => ({ ...p, venue_pincode: e.target.value }))} placeholder="500001" maxLength={6} />
-                      </div>
+                      {/* Venue address fields — only for rental/crew orders, NOT for venue bookings */}
+                      {showVenueAddressFields && (
+                        <>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Venue Address Line 1 *</Label>
+                            <Input value={eventDetails.venue_address_line1} onChange={e => setEventDetails(p => ({ ...p, venue_address_line1: e.target.value }))} placeholder="Street address, building name" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Venue Address Line 2</Label>
+                            <Input value={eventDetails.venue_address_line2} onChange={e => setEventDetails(p => ({ ...p, venue_address_line2: e.target.value }))} placeholder="Area, landmark" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Pin Code</Label>
+                            <Input value={eventDetails.venue_pincode} onChange={e => setEventDetails(p => ({ ...p, venue_pincode: e.target.value }))} placeholder="500001" maxLength={6} />
+                          </div>
+                        </>
+                      )}
                       <div className="space-y-1">
                         <Label className="text-xs">Additional Notes</Label>
                         <Textarea value={eventDetails.notes} onChange={e => setEventDetails(p => ({ ...p, notes: e.target.value }))} placeholder="Any special requirements..." rows={3} />

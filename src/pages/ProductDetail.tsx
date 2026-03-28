@@ -152,6 +152,7 @@ const ProductDetail = () => {
       quantity: finalQuantity,
       variant_id: selectedVariant?.id,
       variant_label: selectedVariant?.attribute_value,
+      service_type: (rental as any).service_type || "rental",
       length: isMeasurable ? length : undefined,
       breadth: isMeasurable ? breadth : undefined,
     });

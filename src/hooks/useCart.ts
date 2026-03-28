@@ -11,6 +11,7 @@ export interface CartItem {
   quantity: number;
   variant_id?: string;
   variant_label?: string;
+  service_type?: string;
   /** For measurable items (sq.ft/sq.m): length dimension */
   length?: number;
   /** For measurable items (sq.ft/sq.m): breadth dimension */

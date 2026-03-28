@@ -585,7 +585,14 @@ const Ecommerce = () => {
       </div>
 
       {/* Service Selection Strip */}
-      <ServiceSelector activeService={activeService} onServiceChange={setActiveService} />
+      <ServiceSelector activeService={activeService} onServiceChange={(service) => {
+        setActiveService(service);
+        if (service) {
+          setTimeout(() => {
+            document.getElementById("promo-banner")?.scrollIntoView({ behavior: "smooth" });
+          }, 150);
+        }
+      }} />
 
       {/* Category Quick Browse Strip with Icons — only when a service is selected */}
       {!isDiscoveryView && (
@@ -600,11 +607,9 @@ const Ecommerce = () => {
       {/* Stats/Social Proof Bar - only on discovery view */}
       {isDiscoveryView && <TrustStrip />}
 
-      {/* How It Works */}
-      {isDiscoveryView && <HowItWorks />}
-
       {/* Promotional Banner Carousel */}
-      <PromoBannerCarousel
+      <div id="promo-banner">
+        <PromoBannerCarousel
         serviceType={activeServiceType}
         onCtaClick={(ids) => {
           setPromoFilterIds(ids);
@@ -617,10 +622,14 @@ const Ecommerce = () => {
           }, 100);
         }}
       />
+      </div>
 
       {/* Discovery Rows — shown on default landing */}
       {isDiscoveryView && (
-        <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} />
+        <>
+          <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} />
+          <HowItWorks />
+        </>
       )}
 
       {/* Main Content with Sidebar — hidden in discovery view */}

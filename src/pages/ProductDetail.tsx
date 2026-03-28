@@ -221,10 +221,10 @@ const ProductDetail = () => {
       {/* Main Product Section */}
       <section className="py-4 sm:py-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_440px] gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_460px] gap-6 lg:gap-8">
 
             {/* ── IMAGE GALLERY ── */}
-            <div className="flex flex-col-reverse sm:flex-row gap-3">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 min-w-0">
               {/* Thumbnails — vertical on desktop, horizontal on mobile */}
               {displayImages.length > 1 && (
                 <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto sm:max-h-[500px] scrollbar-hide pb-1 sm:pb-0 sm:pr-1">
@@ -243,7 +243,7 @@ const ProductDetail = () => {
               )}
 
               {/* Main Image with Zoom */}
-              <div className="relative flex-1 aspect-square rounded-xl overflow-hidden bg-muted border border-border group">
+              <div className="relative flex-1 aspect-square lg:aspect-[4/3] rounded-xl overflow-hidden bg-muted border border-border group">
                 {displayImages.length > 0 ? (
                   <div
                     className="w-full h-full cursor-crosshair overflow-hidden"
@@ -292,7 +292,7 @@ const ProductDetail = () => {
             </div>
 
             {/* ── PRODUCT INFO ── */}
-            <div className="space-y-4">
+            <div className="space-y-4 min-w-0">
               {/* Category tags */}
               {rental.categories && rental.categories.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">

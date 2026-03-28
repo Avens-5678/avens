@@ -89,7 +89,7 @@ const Cart = () => {
       toast({ title: "Missing information", description: "Please select a start date.", variant: "destructive" });
       return;
     }
-    if (!isVenueOnlyCart && !hasVenueItem && !eventDetails.venue_address_line1) {
+    if (showVenueAddressFields && !eventDetails.venue_address_line1) {
       toast({ title: "Missing information", description: "Please fill in the venue address.", variant: "destructive" });
       return;
     }

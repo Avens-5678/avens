@@ -208,7 +208,7 @@ const ProductDetail = () => {
     setZoomOrigin(`${x}% ${y}%`);
   }, []);
 
-  if (isLoading) {
+  if (isLoading || vendorLoading) {
     return <Layout hideNavbar><div className="flex items-center justify-center min-h-screen"><LoadingSpinner /></div></Layout>;
   }
 

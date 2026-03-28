@@ -19,8 +19,12 @@ import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
-import BookingSearchBar from "@/components/ecommerce/BookingSearchBar";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
@@ -612,15 +616,8 @@ const Ecommerce = () => {
         }
       }} />
 
-      {/* Booking Search Bar — date-based availability search */}
-      <div className="container mx-auto px-4 sm:px-6 py-3">
-        <BookingSearchBar
-          onSearch={({ location, checkIn, checkOut }) => {
-            setBookingDates({ checkIn, checkOut, location });
-            if (location) setSearchTerm(location);
-          }}
-        />
-      </div>
+
+
 
       {/* Category Quick Browse Strip with Icons — only when a service is selected */}
       {!isDiscoveryView && (

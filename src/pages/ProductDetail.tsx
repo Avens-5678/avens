@@ -4,14 +4,14 @@ import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import QuickCartSheet from "@/components/ecommerce/QuickCartSheet";
 import BookingWidget from "@/components/ecommerce/BookingWidget";
-import AvailabilityCalendarPublic from "@/components/ecommerce/AvailabilityCalendarPublic";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAllRentals } from "@/hooks/useData";
+import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
+import { useVendorProfile } from "@/hooks/useVendorProfile";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
-  Star, Share2, Plus, MessageSquare, Bookmark, ZoomIn,
+  Star, Share2, Plus, MessageSquare, Bookmark, ZoomIn, Store,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -41,6 +41,7 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: rentals, isLoading } = useAllRentals();
+  const { data: vendorItems, isLoading: vendorLoading } = useVerifiedVendorInventory();
   const { data: variants } = useRentalVariants(id);
   const { addItem, removeItem, isInCart, getItemCount } = useCart();
   const { toast } = useToast();
@@ -59,7 +60,41 @@ const ProductDetail = () => {
 
   const ctaRef = useRef<HTMLDivElement>(null);
 
-  const rental = useMemo(() => rentals?.find((r) => r.id === id), [rentals, id]);
+  // Merge admin rentals + vendor inventory
+  const allItems = useMemo(() => {
+    const adminItems = (rentals || []).map((r: any) => ({ ...r, _source: "admin" }));
+    const vendorMapped = (vendorItems || []).map((v: any) => ({
+      id: v.id,
+      title: v.name,
+      description: v.description,
+      short_description: v.short_description,
+      image_url: v.image_url,
+      image_urls: v.image_urls,
+      categories: v.categories,
+      price_value: v.price_value,
+      pricing_unit: v.pricing_unit,
+      price_range: null,
+      address: v.address,
+      quantity: v.quantity,
+      rating: null,
+      is_active: v.is_available,
+      show_on_home: true,
+      service_type: v.service_type || "rental",
+      amenities: v.amenities,
+      guest_capacity: v.guest_capacity,
+      experience_level: v.experience_level,
+      has_variants: v.has_variants,
+      specifications: v.specifications || null,
+      created_at: v.created_at,
+      vendor_id: v.vendor_id,
+      _source: "vendor",
+    }));
+    return [...adminItems, ...vendorMapped];
+  }, [rentals, vendorItems]);
+
+  const rental = useMemo(() => allItems.find((r: any) => r.id === id), [allItems, id]);
+  const vendorId = rental?._source === "vendor" ? rental.vendor_id : undefined;
+  const { data: vendorProfile } = useVendorProfile(vendorId);
 
   // Track recently viewed
   useEffect(() => { if (id) addToRecentlyViewed(id); }, [id]);
@@ -115,25 +150,25 @@ const ProductDetail = () => {
   const computedArea = isMeasurable ? (length || 0) * (breadth || 0) : quantity;
 
   const allCategories = useMemo(() => {
-    if (!rentals) return [];
+    if (!allItems.length) return [];
     const cats = new Set<string>();
-    rentals.forEach((r) => r.categories?.forEach((c: string) => cats.add(c)));
+    allItems.forEach((r: any) => r.categories?.forEach((c: string) => cats.add(c)));
     return Array.from(cats).sort();
-  }, [rentals]);
+  }, [allItems]);
 
   const suggestions = useMemo(() => {
-    if (!rentals || !rental) return [];
+    if (!allItems.length || !rental) return [];
     const cats = rental.categories || [];
-    const sameCat = rentals.filter((r) => r.id !== id && r.is_active !== false && r.categories?.some((c: string) => cats.includes(c)));
-    const pool = sameCat.length >= 4 ? sameCat : rentals.filter((r) => r.id !== id && r.is_active !== false);
+    const sameCat = allItems.filter((r: any) => r.id !== id && r.is_active !== false && r.categories?.some((c: string) => cats.includes(c)));
+    const pool = sameCat.length >= 4 ? sameCat : allItems.filter((r: any) => r.id !== id && r.is_active !== false);
     return [...pool].sort(() => Math.random() - 0.5).slice(0, 8);
-  }, [rentals, rental, id]);
+  }, [allItems, rental, id]);
 
   const recentlyViewedItems = useMemo(() => {
-    if (!rentals) return [];
+    if (!allItems.length) return [];
     const ids = getRecentlyViewed().filter((rid) => rid !== id);
-    return ids.map((rid) => rentals.find((r) => r.id === rid)).filter(Boolean).slice(0, 8);
-  }, [rentals, id]);
+    return ids.map((rid) => allItems.find((r: any) => r.id === rid)).filter(Boolean).slice(0, 8);
+  }, [allItems, id]);
 
   const handleAddToCart = () => {
     if (!rental) return;
@@ -173,7 +208,7 @@ const ProductDetail = () => {
     setZoomOrigin(`${x}% ${y}%`);
   }, []);
 
-  if (isLoading) {
+  if (isLoading || vendorLoading) {
     return <Layout hideNavbar><div className="flex items-center justify-center min-h-screen"><LoadingSpinner /></div></Layout>;
   }
 
@@ -305,7 +340,16 @@ const ProductDetail = () => {
               {/* Title */}
               <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground leading-tight">{rental.title}</h1>
 
-              {/* Rating + Actions row */}
+              {/* Vendor / Sold by */}
+              {rental._source === "vendor" && vendorProfile && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(`/ecommerce?vendor=${rental.vendor_id}`); }}
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors group"
+                >
+                  <Store className="h-3.5 w-3.5" />
+                  <span>Sold by: <span className="font-semibold text-foreground group-hover:text-primary">{vendorProfile.company_name || vendorProfile.full_name}</span></span>
+                </button>
+              )}
               <div className="flex items-center gap-3 flex-wrap">
                 {rental.rating && (
                   <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">

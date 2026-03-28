@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import QuickCartSheet from "@/components/ecommerce/QuickCartSheet";
+import BookingWidget from "@/components/ecommerce/BookingWidget";
+import AvailabilityCalendarPublic from "@/components/ecommerce/AvailabilityCalendarPublic";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

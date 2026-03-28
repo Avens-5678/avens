@@ -878,6 +878,8 @@ export type Database = {
           assigned_vendor_id: string | null
           booking_source: string | null
           budget: string | null
+          check_in: string | null
+          check_out: string | null
           client_email: string | null
           client_id: string | null
           client_name: string | null
@@ -886,6 +888,7 @@ export type Database = {
           equipment_category: string
           equipment_details: string | null
           event_date: string | null
+          hold_id: string | null
           id: string
           is_offline: boolean | null
           is_vendor_direct: boolean | null
@@ -905,6 +908,8 @@ export type Database = {
           assigned_vendor_id?: string | null
           booking_source?: string | null
           budget?: string | null
+          check_in?: string | null
+          check_out?: string | null
           client_email?: string | null
           client_id?: string | null
           client_name?: string | null
@@ -913,6 +918,7 @@ export type Database = {
           equipment_category?: string
           equipment_details?: string | null
           event_date?: string | null
+          hold_id?: string | null
           id?: string
           is_offline?: boolean | null
           is_vendor_direct?: boolean | null
@@ -932,6 +938,8 @@ export type Database = {
           assigned_vendor_id?: string | null
           booking_source?: string | null
           budget?: string | null
+          check_in?: string | null
+          check_out?: string | null
           client_email?: string | null
           client_id?: string | null
           client_name?: string | null
@@ -940,6 +948,7 @@ export type Database = {
           equipment_category?: string
           equipment_details?: string | null
           event_date?: string | null
+          hold_id?: string | null
           id?: string
           is_offline?: boolean | null
           is_vendor_direct?: boolean | null
@@ -954,7 +963,15 @@ export type Database = {
           vendor_response?: string | null
           whatsapp_sent_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rental_orders_hold_id_fkey"
+            columns: ["hold_id"]
+            isOneToOne: false
+            referencedRelation: "reservation_holds"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rental_reviews: {
         Row: {
@@ -1191,6 +1208,51 @@ export type Database = {
           video_url?: string | null
           weekday_price?: number | null
           weekend_price?: number | null
+        }
+        Relationships: []
+      }
+      reservation_holds: {
+        Row: {
+          check_in: string
+          check_out: string
+          created_at: string
+          expires_at: string
+          id: string
+          quantity: number
+          rental_id: string
+          session_id: string
+          slot: string
+          status: string
+          user_id: string | null
+          variant_id: string | null
+        }
+        Insert: {
+          check_in: string
+          check_out: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          quantity?: number
+          rental_id: string
+          session_id: string
+          slot?: string
+          status?: string
+          user_id?: string | null
+          variant_id?: string | null
+        }
+        Update: {
+          check_in?: string
+          check_out?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          quantity?: number
+          rental_id?: string
+          session_id?: string
+          slot?: string
+          status?: string
+          user_id?: string | null
+          variant_id?: string | null
         }
         Relationships: []
       }
@@ -2103,9 +2165,19 @@ export type Database = {
         Returns: number
       }
       check_email_type: { Args: { check_email: string }; Returns: Json }
+      cleanup_expired_holds: { Args: never; Returns: undefined }
       employee_has_permission: {
         Args: { _category: string; _type?: string; _user_id: string }
         Returns: boolean
+      }
+      get_available_inventory: {
+        Args: {
+          p_check_in: string
+          p_check_out: string
+          p_rental_id: string
+          p_slot?: string
+        }
+        Returns: Json
       }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_role: {

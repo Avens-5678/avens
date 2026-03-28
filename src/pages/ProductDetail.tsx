@@ -150,25 +150,25 @@ const ProductDetail = () => {
   const computedArea = isMeasurable ? (length || 0) * (breadth || 0) : quantity;
 
   const allCategories = useMemo(() => {
-    if (!rentals) return [];
+    if (!allItems.length) return [];
     const cats = new Set<string>();
-    rentals.forEach((r) => r.categories?.forEach((c: string) => cats.add(c)));
+    allItems.forEach((r: any) => r.categories?.forEach((c: string) => cats.add(c)));
     return Array.from(cats).sort();
-  }, [rentals]);
+  }, [allItems]);
 
   const suggestions = useMemo(() => {
-    if (!rentals || !rental) return [];
+    if (!allItems.length || !rental) return [];
     const cats = rental.categories || [];
-    const sameCat = rentals.filter((r) => r.id !== id && r.is_active !== false && r.categories?.some((c: string) => cats.includes(c)));
-    const pool = sameCat.length >= 4 ? sameCat : rentals.filter((r) => r.id !== id && r.is_active !== false);
+    const sameCat = allItems.filter((r: any) => r.id !== id && r.is_active !== false && r.categories?.some((c: string) => cats.includes(c)));
+    const pool = sameCat.length >= 4 ? sameCat : allItems.filter((r: any) => r.id !== id && r.is_active !== false);
     return [...pool].sort(() => Math.random() - 0.5).slice(0, 8);
-  }, [rentals, rental, id]);
+  }, [allItems, rental, id]);
 
   const recentlyViewedItems = useMemo(() => {
-    if (!rentals) return [];
+    if (!allItems.length) return [];
     const ids = getRecentlyViewed().filter((rid) => rid !== id);
-    return ids.map((rid) => rentals.find((r) => r.id === rid)).filter(Boolean).slice(0, 8);
-  }, [rentals, id]);
+    return ids.map((rid) => allItems.find((r: any) => r.id === rid)).filter(Boolean).slice(0, 8);
+  }, [allItems, id]);
 
   const handleAddToCart = () => {
     if (!rental) return;

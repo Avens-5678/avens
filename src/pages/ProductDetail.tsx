@@ -411,8 +411,6 @@ const ProductDetail = () => {
               {/* Booking Widget — date-based booking */}
               <BookingWidget rental={rental} selectedVariant={selectedVariant} />
 
-              {/* Availability Calendar */}
-              <AvailabilityCalendarPublic rentalId={rental.id} />
 
               {/* Legacy CTA Row (Add to Cart for quick enquiry) */}
               <div ref={ctaRef} className="flex gap-3 pt-2">

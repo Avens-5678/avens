@@ -136,7 +136,7 @@ const Ecommerce = () => {
       quantity: v.quantity,
       rating: null,
       is_active: v.is_available,
-      show_on_home: false,
+      show_on_home: true,
       service_type: v.service_type || "rental",
       amenities: v.amenities,
       guest_capacity: v.guest_capacity,
@@ -144,6 +144,7 @@ const Ecommerce = () => {
       has_variants: v.has_variants,
       created_at: v.created_at,
       search_keywords: v.search_keywords,
+      slot_types: v.slot_types,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];

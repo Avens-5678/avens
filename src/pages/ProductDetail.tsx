@@ -4,14 +4,15 @@ import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import QuickCartSheet from "@/components/ecommerce/QuickCartSheet";
 import BookingWidget from "@/components/ecommerce/BookingWidget";
-import AvailabilityCalendarPublic from "@/components/ecommerce/AvailabilityCalendarPublic";
+import { Button } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAllRentals } from "@/hooks/useData";
+import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
+import { useVendorProfile } from "@/hooks/useVendorProfile";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
-  Star, Share2, Plus, MessageSquare, Bookmark, ZoomIn,
+  Star, Share2, Plus, MessageSquare, Bookmark, ZoomIn, Store,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 

@@ -340,7 +340,16 @@ const ProductDetail = () => {
               {/* Title */}
               <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground leading-tight">{rental.title}</h1>
 
-              {/* Rating + Actions row */}
+              {/* Vendor / Sold by */}
+              {rental._source === "vendor" && vendorProfile && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(`/ecommerce?vendor=${rental.vendor_id}`); }}
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors group"
+                >
+                  <Store className="h-3.5 w-3.5" />
+                  <span>Sold by: <span className="font-semibold text-foreground group-hover:text-primary">{vendorProfile.company_name || vendorProfile.full_name}</span></span>
+                </button>
+              )}
               <div className="flex items-center gap-3 flex-wrap">
                 {rental.rating && (
                   <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">

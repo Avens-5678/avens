@@ -595,6 +595,16 @@ const Ecommerce = () => {
         }
       }} />
 
+      {/* Booking Search Bar — date-based availability search */}
+      <div className="container mx-auto px-4 sm:px-6 py-3">
+        <BookingSearchBar
+          onSearch={({ location, checkIn, checkOut }) => {
+            setBookingDates({ checkIn, checkOut, location });
+            if (location) setSearchTerm(location);
+          }}
+        />
+      </div>
+
       {/* Category Quick Browse Strip with Icons — only when a service is selected */}
       {!isDiscoveryView && (
         <CategoryIconStrip

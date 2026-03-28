@@ -19,8 +19,12 @@ import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
-import BookingSearchBar from "@/components/ecommerce/BookingSearchBar";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
@@ -168,6 +172,7 @@ const Ecommerce = () => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     categories: true,
     city: true,
+    dates: true,
     price: false,
     availability: false,
     amenities: false,
@@ -512,7 +517,71 @@ const Ecommerce = () => {
           {cities.length === 0 && <p className="text-xs text-muted-foreground">No locations</p>}
         </FilterSection>
 
-        {/* Price — different ranges per service */}
+        {/* Booking Dates */}
+        <FilterSection title="Booking Dates" sectionKey="dates">
+          <div className="space-y-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className={cn(
+                  "flex items-center gap-2 w-full text-left text-xs px-2.5 py-2 rounded-md border border-border bg-background hover:bg-muted transition-colors",
+                  !bookingDates.checkIn && "text-muted-foreground"
+                )}>
+                  <CalendarIcon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                  {bookingDates.checkIn ? format(bookingDates.checkIn, "dd MMM yyyy") : "Booking From"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={bookingDates.checkIn}
+                  onSelect={(d) => {
+                    setBookingDates(prev => ({
+                      ...prev,
+                      checkIn: d || undefined,
+                      checkOut: d && prev.checkOut && d >= prev.checkOut ? undefined : prev.checkOut,
+                    }));
+                  }}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className={cn(
+                  "flex items-center gap-2 w-full text-left text-xs px-2.5 py-2 rounded-md border border-border bg-background hover:bg-muted transition-colors",
+                  !bookingDates.checkOut && "text-muted-foreground"
+                )}>
+                  <CalendarIcon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                  {bookingDates.checkOut ? format(bookingDates.checkOut, "dd MMM yyyy") : "Booking Till"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={bookingDates.checkOut}
+                  onSelect={(d) => setBookingDates(prev => ({ ...prev, checkOut: d || undefined }))}
+                  disabled={(date) => date < (bookingDates.checkIn || new Date())}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+
+            {(bookingDates.checkIn || bookingDates.checkOut) && (
+              <button
+                onClick={() => setBookingDates({})}
+                className="text-[10px] text-primary hover:text-primary/80 font-medium"
+              >
+                Clear dates
+              </button>
+            )}
+          </div>
+        </FilterSection>
+
+
         <FilterSection title="Price Range" sectionKey="price">
           {activePriceRanges.map((range, idx) => (
             <CheckboxItem key={range.label} label={range.label} checked={selectedPriceRanges.includes(idx)} onChange={() => togglePriceRange(idx)} />
@@ -612,15 +681,8 @@ const Ecommerce = () => {
         }
       }} />
 
-      {/* Booking Search Bar — date-based availability search */}
-      <div className="container mx-auto px-4 sm:px-6 py-3">
-        <BookingSearchBar
-          onSearch={({ location, checkIn, checkOut }) => {
-            setBookingDates({ checkIn, checkOut, location });
-            if (location) setSearchTerm(location);
-          }}
-        />
-      </div>
+
+
 
       {/* Category Quick Browse Strip with Icons — only when a service is selected */}
       {!isDiscoveryView && (

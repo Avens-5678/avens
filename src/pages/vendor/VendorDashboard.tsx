@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Briefcase, Package, User, ArrowLeft, Bot, Plus, Calendar, ClipboardList } from "lucide-react";
+import { LogOut, Briefcase, Package, User, ArrowLeft, Bot, Plus, Calendar, ClipboardList, CalendarDays, FileText, TrendingUp, BookOpen } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import JobBoard from "@/components/vendor/JobBoard";
@@ -14,14 +14,22 @@ import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import EventRequestForm from "@/components/client/EventRequestForm";
 import OrderTracker from "@/components/vendor/OrderTracker";
 import PastOrders from "@/components/client/PastOrders";
+import AvailabilityCalendar from "@/components/vendor/AvailabilityCalendar";
+import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
+import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
+import VendorEarnings from "@/components/vendor/VendorEarnings";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Briefcase, label: "Job Board", value: "jobs" },
   { icon: Plus, label: "New Request", value: "request" },
-  { icon: Calendar, label: "Past Orders", value: "past-orders" },
   { icon: Package, label: "Inventory", value: "inventory" },
+  { icon: CalendarDays, label: "Calendar", value: "calendar" },
+  { icon: BookOpen, label: "Offline Booking", value: "offline" },
+  { icon: FileText, label: "Quotation Maker", value: "quotes" },
+  { icon: TrendingUp, label: "Earnings", value: "earnings" },
+  { icon: Calendar, label: "Past Orders", value: "past-orders" },
   { icon: User, label: "Profile", value: "profile" },
 ];
 
@@ -109,6 +117,14 @@ const VendorDashboard = () => {
         return <PastOrders />;
       case "inventory":
         return <InventoryManager />;
+      case "calendar":
+        return <AvailabilityCalendar />;
+      case "offline":
+        return <VendorOfflineBooking />;
+      case "quotes":
+        return <VendorQuoteMaker />;
+      case "earnings":
+        return <VendorEarnings />;
       case "profile":
         return <VendorProfileSettings />;
       default:

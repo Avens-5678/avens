@@ -39,6 +39,14 @@ const Cart = () => {
     notes: "",
   });
 
+  // Check if cart contains only venue items (no venue address needed for venue bookings)
+  const isVenueOnlyCart = items.length > 0 && items.every((item) => {
+    const title = (item.title || "").toLowerCase();
+    return title.includes("venue") || title.includes("banquet") || title.includes("hall") || title.includes("farmhouse") || title.includes("lawn");
+  });
+  // Also check via service_type if available on cart items
+  const hasVenueItem = items.some((item: any) => item.service_type === "venue");
+
   const formatItemPrice = (item: any) => {
     if (item.price_value != null) {
       return `₹${item.price_value.toLocaleString()}`;

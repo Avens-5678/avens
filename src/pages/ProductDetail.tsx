@@ -5,7 +5,6 @@ import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import QuickCartSheet from "@/components/ecommerce/QuickCartSheet";
 import BookingWidget from "@/components/ecommerce/BookingWidget";
 import { Button } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

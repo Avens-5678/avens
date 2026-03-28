@@ -1603,6 +1603,259 @@ export type Database = {
           },
         ]
       }
+      whatsapp_assignment_rules: {
+        Row: {
+          created_at: string | null
+          eligible_employee_ids: string[] | null
+          id: string
+          is_auto_assign: boolean | null
+          last_assigned_index: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          eligible_employee_ids?: string[] | null
+          id?: string
+          is_auto_assign?: boolean | null
+          last_assigned_index?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          eligible_employee_ids?: string[] | null
+          id?: string
+          is_auto_assign?: boolean | null
+          last_assigned_index?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_campaign_recipients: {
+        Row: {
+          campaign_id: string
+          created_at: string | null
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          phone_number: string
+          read_at: string | null
+          sent_at: string | null
+          status: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          phone_number: string
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          phone_number?: string
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_campaigns: {
+        Row: {
+          audience_filter: Json | null
+          created_at: string | null
+          created_by: string | null
+          delivered_count: number | null
+          failed_count: number | null
+          id: string
+          read_count: number | null
+          scheduled_at: string | null
+          sent_at: string | null
+          sent_count: number | null
+          status: string | null
+          template_name: string
+          total_recipients: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          audience_filter?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          delivered_count?: number | null
+          failed_count?: number | null
+          id?: string
+          read_count?: number | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string | null
+          template_name: string
+          total_recipients?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          audience_filter?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          delivered_count?: number | null
+          failed_count?: number | null
+          id?: string
+          read_count?: number | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string | null
+          template_name?: string
+          total_recipients?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_contacts: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          name: string | null
+          opted_in: boolean | null
+          opted_in_at: string | null
+          phone_number: string
+          tags: string[] | null
+          total_conversations: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          name?: string | null
+          opted_in?: boolean | null
+          opted_in_at?: string | null
+          phone_number: string
+          tags?: string[] | null
+          total_conversations?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          name?: string | null
+          opted_in?: boolean | null
+          opted_in_at?: string | null
+          phone_number?: string
+          tags?: string[] | null
+          total_conversations?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_conversations: {
+        Row: {
+          admin_user_id: string | null
+          created_at: string | null
+          direction: string
+          id: string
+          is_resolved: boolean | null
+          message_text: string
+          phone_number: string
+          sent_by: string
+          session_id: string
+        }
+        Insert: {
+          admin_user_id?: string | null
+          created_at?: string | null
+          direction?: string
+          id?: string
+          is_resolved?: boolean | null
+          message_text: string
+          phone_number: string
+          sent_by?: string
+          session_id: string
+        }
+        Update: {
+          admin_user_id?: string | null
+          created_at?: string | null
+          direction?: string
+          id?: string
+          is_resolved?: boolean | null
+          message_text?: string
+          phone_number?: string
+          sent_by?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_conversations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_sessions: {
+        Row: {
+          assigned_at: string | null
+          assigned_employee_id: string | null
+          assignment_type: string | null
+          created_at: string | null
+          current_flow: string | null
+          flow_data: Json | null
+          id: string
+          last_message_at: string | null
+          phone_number: string
+          updated_at: string | null
+          user_id: string | null
+          user_type: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_employee_id?: string | null
+          assignment_type?: string | null
+          created_at?: string | null
+          current_flow?: string | null
+          flow_data?: Json | null
+          id?: string
+          last_message_at?: string | null
+          phone_number: string
+          updated_at?: string | null
+          user_id?: string | null
+          user_type?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_employee_id?: string | null
+          assignment_type?: string | null
+          created_at?: string | null
+          current_flow?: string | null
+          flow_data?: Json | null
+          id?: string
+          last_message_at?: string | null
+          phone_number?: string
+          updated_at?: string | null
+          user_id?: string | null
+          user_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       admin_users_safe: {

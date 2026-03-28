@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import QuickCartSheet from "@/components/ecommerce/QuickCartSheet";
+import BookingWidget from "@/components/ecommerce/BookingWidget";
+import AvailabilityCalendarPublic from "@/components/ecommerce/AvailabilityCalendarPublic";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -405,7 +407,13 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* CTA Row */}
+              {/* Booking Widget — date-based booking */}
+              <BookingWidget rental={rental} selectedVariant={selectedVariant} />
+
+              {/* Availability Calendar */}
+              <AvailabilityCalendarPublic rentalId={rental.id} />
+
+              {/* Legacy CTA Row (Add to Cart for quick enquiry) */}
               <div ref={ctaRef} className="flex gap-3 pt-2">
                 {inCart ? (
                   <>
@@ -420,14 +428,9 @@ const ProductDetail = () => {
                     </Button>
                   </>
                 ) : (
-                  <>
-                    <Button onClick={handleAddToCart} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12 border-primary text-primary hover:bg-primary/5">
-                      <ShoppingCart className="h-4 w-4" /> Add to Cart
-                    </Button>
-                    <Button onClick={handleAddToCart} size="lg" className="flex-1 text-sm gap-2 h-12">
-                      <MessageSquare className="h-4 w-4" /> Enquire Now
-                    </Button>
-                  </>
+                  <Button onClick={handleAddToCart} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12 border-primary text-primary hover:bg-primary/5">
+                    <ShoppingCart className="h-4 w-4" /> Add to Cart (Quick Enquiry)
+                  </Button>
                 )}
               </div>
 

@@ -18,6 +18,7 @@ import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
+import BookingSearchBar from "@/components/ecommerce/BookingSearchBar";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
@@ -173,7 +174,7 @@ const Ecommerce = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [selectedCapacity, setSelectedCapacity] = useState<string[]>([]);
   const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
-
+  const [bookingDates, setBookingDates] = useState<{ checkIn?: Date; checkOut?: Date; location?: string }>({});
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 
 
@@ -593,6 +594,16 @@ const Ecommerce = () => {
           }, 150);
         }
       }} />
+
+      {/* Booking Search Bar — date-based availability search */}
+      <div className="container mx-auto px-4 sm:px-6 py-3">
+        <BookingSearchBar
+          onSearch={({ location, checkIn, checkOut }) => {
+            setBookingDates({ checkIn, checkOut, location });
+            if (location) setSearchTerm(location);
+          }}
+        />
+      </div>
 
       {/* Category Quick Browse Strip with Icons — only when a service is selected */}
       {!isDiscoveryView && (

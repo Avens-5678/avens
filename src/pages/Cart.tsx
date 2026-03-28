@@ -300,6 +300,7 @@ const Cart = () => {
                   <div className="bg-background border border-border rounded-xl p-5 space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
+                        <CalendarDays className="h-5 w-5 text-primary" />
                         <h3 className="text-base font-bold text-foreground">
                           {isVenueOnlyCart || hasVenueItem ? "Booking Details" : "Event Details"}
                         </h3>

@@ -4,8 +4,9 @@ import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft } from "lucide-react";
+import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows } from "lucide-react";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
+import VenueCompare from "@/components/ecommerce/VenueCompare";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
@@ -152,6 +153,14 @@ const Ecommerce = () => {
       search_keywords: v.search_keywords,
       slot_types: v.slot_types,
       vendor_id: v.vendor_id,
+      virtual_tour_url: v.virtual_tour_url || null,
+      is_verified: v.is_verified || false,
+      venue_type: v.venue_type || null,
+      min_capacity: v.min_capacity,
+      max_capacity: v.max_capacity,
+      catering_type: v.catering_type,
+      parking_available: v.parking_available,
+      av_equipment: v.av_equipment,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];
@@ -182,6 +191,8 @@ const Ecommerce = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [selectedCapacity, setSelectedCapacity] = useState<string[]>([]);
   const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
   
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 
@@ -389,6 +400,18 @@ const Ecommerce = () => {
       prev.includes(exp) ? prev.filter((e) => e !== exp) : [...prev, exp]
     );
   };
+
+  const toggleCompare = (id: string) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= 3) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const compareItems = useMemo(() => {
+    return compareIds.map((cid) => allItems.find((r: any) => r.id === cid)).filter(Boolean);
+  }, [compareIds, allItems]);
 
   const activeFilterCount = selectedCategories.length + selectedCities.length + selectedPriceRanges.length + (showInStock ? 1 : 0) + selectedAmenities.length + selectedCapacity.length + selectedExperience.length;
   const activeDisplayCategory = activeQuickCat || searchCategory || (selectedCategories.length === 1 ? selectedCategories[0] : "");
@@ -778,7 +801,19 @@ const Ecommerce = () => {
                       } sm:grid-cols-2 lg:grid-cols-3`}
                     >
                       {filteredRentals.map((rental) => (
-                        <EnhancedProductCard key={rental.id} rental={rental} viewMode={mobileView} />
+                        <div key={rental.id} className="relative">
+                          <EnhancedProductCard rental={rental} viewMode={mobileView} />
+                          {activeServiceType === "venue" && (
+                            <label className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-background/90 backdrop-blur-sm rounded-md px-1.5 py-1 cursor-pointer border border-border shadow-sm">
+                              <Checkbox
+                                checked={compareIds.includes(rental.id)}
+                                onCheckedChange={() => toggleCompare(rental.id)}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className="text-[10px] font-medium">Compare</span>
+                            </label>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}
@@ -788,6 +823,26 @@ const Ecommerce = () => {
           </div>
         </section>
       )}
+
+      {/* Compare sticky bar */}
+      {compareIds.length >= 2 && (
+        <div className="fixed bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 z-50">
+          <Button
+            onClick={() => setCompareOpen(true)}
+            className="rounded-full shadow-xl gap-2 px-6"
+          >
+            <GitCompareArrows className="h-4 w-4" />
+            Compare {compareIds.length} Venues
+          </Button>
+        </div>
+      )}
+
+      <VenueCompare
+        items={compareItems}
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+        onRemove={(id) => setCompareIds((prev) => prev.filter((x) => x !== id))}
+      />
 
       {/* Floating Cart — hidden on mobile where bottom nav takes over */}
       {items.length > 0 && (

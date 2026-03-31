@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import BookingWidget from "@/components/ecommerce/BookingWidget";
+import SmartRecommendations from "@/components/ecommerce/SmartRecommendations";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
-  Star, Share2, Plus, MessageSquare, ZoomIn, Store,
+  Star, Share2, Plus, MessageSquare, ZoomIn, Store, BadgeCheck, Eye,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -83,6 +84,8 @@ const ProductDetail = () => {
       experience_level: v.experience_level,
       has_variants: v.has_variants,
       specifications: v.specifications || null,
+      virtual_tour_url: v.virtual_tour_url || null,
+      is_verified: v.is_verified || false,
       created_at: v.created_at,
       vendor_id: v.vendor_id,
       _source: "vendor",
@@ -348,6 +351,11 @@ const ProductDetail = () => {
                 >
                   <Store className="h-3.5 w-3.5" />
                   <span>Sold by: <span className="font-semibold text-foreground group-hover:text-primary">{vendorProfile.company_name || vendorProfile.full_name}</span></span>
+                  {rental.is_verified && (
+                    <span className="inline-flex items-center gap-0.5 text-amber-600 text-[10px] font-bold ml-1">
+                      <BadgeCheck className="h-3 w-3" /> Verified
+                    </span>
+                  )}
                 </button>
               )}
               <div className="flex items-center gap-3 flex-wrap">
@@ -492,6 +500,11 @@ const ProductDetail = () => {
               <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-5 py-3 text-sm font-medium">
                 Reviews
               </TabsTrigger>
+              {(rental as any).virtual_tour_url && (
+                <TabsTrigger value="virtual-tour" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-5 py-3 text-sm font-medium flex items-center gap-1.5">
+                  <Eye className="h-3.5 w-3.5" /> 360° Tour
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <TabsContent value="description" className="pt-5">
@@ -531,9 +544,39 @@ const ProductDetail = () => {
             <TabsContent value="reviews" className="pt-5">
               <ReviewsSection rentalId={id!} />
             </TabsContent>
+
+            {(rental as any).virtual_tour_url && (
+              <TabsContent value="virtual-tour" className="pt-5">
+                <div className="rounded-xl overflow-hidden border border-border bg-muted">
+                  <iframe
+                    src={(() => {
+                      const url = (rental as any).virtual_tour_url;
+                      // Convert YouTube watch URLs to embed
+                      if (url.includes("youtube.com/watch")) {
+                        const vid = new URL(url).searchParams.get("v");
+                        return `https://www.youtube.com/embed/${vid}`;
+                      }
+                      if (url.includes("youtu.be/")) {
+                        const vid = url.split("youtu.be/")[1]?.split("?")[0];
+                        return `https://www.youtube.com/embed/${vid}`;
+                      }
+                      return url;
+                    })()}
+                    className="w-full aspect-video"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking"
+                    title="360° Virtual Tour"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Use your mouse or touch to look around in the 360° tour.</p>
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </section>
+
+      {/* ── SMART RECOMMENDATIONS ── */}
+      <SmartRecommendations currentItem={rental} allItems={allItems} />
 
       {/* ── YOU MAY ALSO LIKE ── */}
       {suggestions.length > 0 && (

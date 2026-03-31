@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
-import { Star, ShieldCheck, Zap, Store, ArrowRight } from "lucide-react";
+import { Star, ShieldCheck, Zap, Store, ArrowRight, Eye, BadgeCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,6 +39,8 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
   const isVendor = rental._source === "vendor";
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
+  const hasVirtualTour = !!rental.virtual_tour_url;
+  const isVerified = rental.is_verified;
 
   const handleClick = () => {
     addViewed(rental.id);
@@ -80,7 +82,17 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         {/* Badges overlay */}
         {!isList && (
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
-            {isVendor && (
+            {isVerified && (
+              <Badge className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
+                <BadgeCheck className="h-3 w-3" /> Verified
+              </Badge>
+            )}
+            {hasVirtualTour && (
+              <Badge className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
+                <Eye className="h-3 w-3" /> 360° Tour
+              </Badge>
+            )}
+            {isVendor && !isVerified && (
               <Badge className="bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
                 <Store className="h-3 w-3" /> Vendor
               </Badge>

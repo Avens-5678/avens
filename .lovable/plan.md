@@ -1,108 +1,157 @@
 
 
-## Venue Enhancement — Virtual Tours, Compare, Seasonal Pricing, Verified Badge & Smart Recommendations
+## Venue + Crew Hub — Full Architecture Plan
 
-### Overview
-
-Five professional features to elevate the venue marketplace to MMT/OYO level.
+This is a massive multi-phase overhaul. Below is a prioritized, buildable plan broken into increments. Each phase builds on the previous one.
 
 ---
 
-### 1. Virtual Tour Integration
+### Phase 1: Smart Search & Venue/Crew Discovery (Priority: HIGH)
 
-**Database:** Add `virtual_tour_url` column to `vendor_inventory` (text, nullable). Already has `video_url` — this is separate for Matterport/360° embeds.
+**Goal:** Constraint-based search replacing the current generic filter sidebar for Venues and Crew Hub.
 
-**Vendor Form (`VenueFormFields.tsx`):** Add "Virtual Tour URL" input field (accepts Matterport, YouTube 360, or any embed URL).
+**Database Changes:**
+- Add to `vendor_inventory`: `house_rules` (text[]), `amenities_matrix` (jsonb — structured key-value like `{valet_parking: true, bridal_rooms: 2, generator: true}`), `crew_type` (enum: `commodity` | `creative`), `packages` (jsonb — array of `{name, description, base_price, deliverables[]}`), `portfolio_urls` (text[]), `instagram_url` (text)
+- Add to `vendor_availability`: no changes needed (already has `slot` column with morning/evening/full_day)
 
-**Product Detail Page (`ProductDetail.tsx`):** Add a "Virtual Tour" tab in the existing Tabs component. If `virtual_tour_url` exists, render an iframe embed. If YouTube, convert to embed URL. If Matterport, embed directly. Show a "360° Tour Available" badge on the product card.
+**Ecommerce.tsx — Venue Search Bar:**
+- When `activeService === "venues"`, replace the sidebar filters with a prominent 3-field search bar: **Date + Session Slot** (Morning/Evening/Full Day), **Event Type** dropdown (Wedding, Haldi, Corporate, Birthday, etc.), **Guest Count** input
+- Filter logic: query `vendor_availability` to exclude venues booked for the selected date+slot, filter by `min_capacity ≤ guest_count ≤ max_capacity`, filter by matching event types from categories
 
-**Product Card (`EnhancedProductCard.tsx`):** Show a small "360° Tour" badge icon if the item has a `virtual_tour_url`.
+**Ecommerce.tsx — Crew Hub Split:**
+- When `activeService === "crew-hub"`, show two sub-tabs: **"Quick Hire"** (commodity crew — flat cards, no profiles, add-to-cart style) and **"Creative Pros"** (portfolio-driven cards with gallery previews, ratings, Instagram links)
+- Commodity crew cards: clean minimal UI showing "4 Waiters — ₹800/shift", quantity selector, add to cart
+- Creative crew cards: rich visual cards with portfolio thumbnail grid, star rating, "View Portfolio" CTA
 
----
+**Pricing Display:**
+- Venue cards: show `₹X / Day` for dry rental, `₹X / Veg Plate` for per-plate (already have `venue_pricing_model` column)
+- Per-plate venues: when guest count is entered in search bar, show calculated total on card: "~₹X for Y guests"
 
-### 2. Venue Comparison Feature
-
-**New Component: `src/components/ecommerce/VenueCompare.tsx`**
-- A comparison drawer/sheet that slides up from bottom
-- State managed via React context or URL params
-- Users click "Compare" checkbox on venue cards (max 3)
-- Sticky bottom bar shows "Compare X venues" button when 2+ selected
-- Clicking opens a side-by-side table: capacity, amenities (checkmarks), price, ratings, catering type, parking, AC, virtual tour availability
-
-**Changes:**
-- `EnhancedProductCard.tsx`: Add a "Compare" checkbox for venue items
-- `Ecommerce.tsx`: Add comparison state, render `VenueCompare` sheet
-- Comparison data pulled from already-loaded items (no extra queries)
+**Files:** `Ecommerce.tsx`, `EnhancedProductCard.tsx`, new `VenueSearchBar.tsx`, new `CrewSubTabs.tsx`, DB migration
 
 ---
 
-### 3. Seasonal Pricing
+### Phase 2: Venue Display Page Enhancement (Priority: HIGH)
 
-**Database:** Create `seasonal_pricing` table:
-- `id` (uuid, PK)
-- `inventory_item_id` (uuid, references vendor_inventory)
-- `season_name` (text — e.g., "Wedding Season", "Diwali")
-- `start_date` (date)
-- `end_date` (date)
-- `price_multiplier` (numeric, default 1.0 — e.g., 1.25 for 25% markup)
-- `is_active` (boolean, default true)
-- RLS: vendors can manage own (via inventory_item_id join), public can read active
+**ProductDetail.tsx — Venue-specific sections:**
+- **Amenities Matrix**: Structured icon grid from `amenities_matrix` jsonb — checkmark/cross for each amenity (Valet Parking, Bridal Rooms, Generator, Outside Catering, DJ Allowed, etc.)
+- **House Rules**: Styled card listing restrictions from `house_rules[]` (e.g., "Music stops at 10 PM", "No cold pyros inside hall")
+- **Virtual Tour**: Already implemented (iframe tab)
+- **Capacity & Pricing Breakdown**: For per-plate venues, show Veg/Non-Veg plate prices with a guest count calculator
 
-**Vendor Dashboard:** Add "Seasonal Pricing" section in venue form — vendor sets date ranges + multiplier (e.g., "Wedding Season: Nov 15 – Feb 28, +25%").
-
-**Marketplace Logic:** When displaying venue price on PDP/cards, check if today (or selected booking dates) falls within any active seasonal pricing range. If yes, show original price struck through + seasonal price. Use a utility function `getSeasonalPrice(basePrice, itemId, checkIn)`.
+**Files:** `ProductDetail.tsx`, DB migration for `house_rules` and `amenities_matrix`
 
 ---
 
-### 4. Evnting Verified Badge
+### Phase 3: Site Visit Booking Funnel (Priority: HIGH)
 
-**Logic (no new table needed):** Compute badge eligibility client-side from existing data:
-- Profile completeness: `company_name`, `phone`, `address`, `avatar_url` all filled → ✓
-- Virtual tour: `virtual_tour_url` is set → ✓
-- Reviews: 3+ approved reviews from `rental_reviews` → ✓
-- All three conditions met = "Evnting Verified"
+**Database:**
+- Create `site_visit_requests` table: `id`, `venue_id`, `client_id`, `client_name`, `client_phone`, `client_email`, `preferred_date`, `preferred_slot`, `deposit_amount` (default 499), `deposit_status` (pending/paid/refunded/credited), `visit_status` (scheduled/completed/cancelled/no_show), `notes`, `created_at`, `updated_at`
 
-**New hook: `src/hooks/useVerifiedStatus.ts`**
-- Takes `itemId` and `vendorId`
-- Queries `profiles` (vendor profile fields), checks `virtual_tour_url` on item, counts `rental_reviews`
-- Returns `{ isVerified, completionPercent, missingItems[] }`
+**BookingWidget.tsx:**
+- For venues: replace "Book Now" primary CTA with "Schedule Site Visit — ₹499 (Refundable)"
+- Clicking opens a mini-form: preferred date, slot, name, phone (pre-filled from profile)
+- Creates `site_visit_requests` record
+- Show refund policy text: "100% credited toward booking advance, or refunded if you don't proceed"
+- Secondary CTA: "Direct Booking" for returning clients who've already visited
 
-**UI Changes:**
-- `EnhancedProductCard.tsx`: Show gold "Evnting Verified ✓" badge if verified
-- `ProductDetail.tsx`: Show verified badge near vendor name with tooltip showing what's verified
-- `VendorProfileSettings.tsx`: Show verification progress bar — "Complete X more steps to get Evnting Verified"
+**Vendor Dashboard — Site Visit Tab:**
+- New `SiteVisitManager.tsx` component showing incoming visit requests
+- Accept/Reschedule/Decline actions
+- Accepted visits create a 24h soft-block on the calendar
 
----
-
-### 5. Smart Recommendations
-
-**New Component: `src/components/ecommerce/SmartRecommendations.tsx`**
-- Appears on venue PDP below the booking widget
-- Heading: "Based on your requirements, we also recommend"
-- Algorithm: from the already-loaded venue items, filter by:
-  - Same city/location (fuzzy match on `address`)
-  - `min_capacity ≤ guest_count ≤ max_capacity` (if user entered guest count in booking widget)
-  - Price within ±30% of current venue
-  - Exclude current venue
-  - Sort by rating descending, take top 3
-- Renders as a horizontal scroll of `EnhancedProductCard` components
-
-**Also show on Ecommerce page:** If user has applied guest count or budget filters, show a "Recommended for you" row at top using same algorithm.
+**Files:** `BookingWidget.tsx`, new `SiteVisitManager.tsx`, `VendorDashboard.tsx`, DB migration
 
 ---
 
-### File Changes Summary
+### Phase 4: Split Checkout & Payment Milestones (Priority: MEDIUM)
 
-| # | File | Change |
-|---|---|---|
-| 1 | DB Migration | Add `virtual_tour_url` to `vendor_inventory`; create `seasonal_pricing` table with RLS |
-| 2 | `VenueFormFields.tsx` | Add virtual tour URL input + seasonal pricing date range manager |
-| 3 | `ProductDetail.tsx` | Add Virtual Tour tab, verified badge, smart recommendations section |
-| 4 | `EnhancedProductCard.tsx` | Add 360° tour badge, compare checkbox, verified badge |
-| 5 | New: `VenueCompare.tsx` | Side-by-side comparison sheet for up to 3 venues |
-| 6 | `Ecommerce.tsx` | Add compare state/UI, recommended row |
-| 7 | New: `SmartRecommendations.tsx` | Recommendation algorithm + horizontal scroller |
-| 8 | New: `useVerifiedStatus.ts` | Hook to compute Evnting Verified eligibility |
-| 9 | `VendorProfileSettings.tsx` | Show verification progress bar |
-| 10 | `useVendorInventory.ts` | Add `virtual_tour_url` to interfaces |
+**Checkout Logic (BookingWidget + Cart):**
+- After site visit completion, client can "Finalize Booking"
+- Show split payment breakdown: "Platform Advance: ₹25,000 (covers confirmation)" + "Balance to Venue: ₹95,000 (pay in milestones)"
+- Platform advance = markup amount + small venue lock-in deposit
+- On advance payment confirmation → hard-block dates in `vendor_availability`
+
+**Payment Milestones:**
+- `payment_milestones` table already planned — create it: `id`, `order_id`, `vendor_id`, `milestone_name`, `amount`, `due_date`, `status` (pending/paid/overdue), `paid_at`, `payment_reference`
+- DB trigger: auto-create 3 milestones on order confirmation (25% immediate, 50% 15 days before, 25% 3 days before)
+- Vendor dashboard: `VenuePaymentTracker.tsx` — milestone cards with color-coded status, "Mark as Paid" action, WhatsApp reminder button
+
+**Files:** `BookingWidget.tsx`, `Cart.tsx`, new `VenuePaymentTracker.tsx`, `VendorDashboard.tsx`, DB migration
+
+---
+
+### Phase 5: Event Folder System (Priority: MEDIUM)
+
+**Database:**
+- Create `event_folders` table: `id`, `client_id`, `event_name`, `event_date`, `venue_order_id`, `created_at`
+- Create `event_folder_members` table: `id`, `folder_id`, `vendor_id`, `role` (venue_owner/photographer/decorator/etc), `order_id`, `added_at`
+
+**Logic:**
+- Auto-create an Event Folder when a venue booking is confirmed
+- When client books crew/services for the same event date, prompt to add them to the existing folder
+- Client Dashboard: "My Events" tab showing event folders with member cards
+
+**Client Dashboard:**
+- Event folder view with venue details card, list of attached crew/vendors
+- Each member shows their role, booking status, and contact CTA
+
+**Note:** In-app chat with regex filtering is a major feature requiring real-time infrastructure (Supabase Realtime channels). This will be planned as a separate phase.
+
+**Files:** `ClientDashboard.tsx`, new `EventFolder.tsx`, new `EventFolderMembers.tsx`, DB migration
+
+---
+
+### Phase 6: Crew Hub — Commodity Broadcast & Creative Packages (Priority: MEDIUM)
+
+**Commodity Crew Broadcast:**
+- When client books commodity crew (waiters, bouncers, pandits), create order with `crew_type: 'commodity'`
+- Edge function `crew-broadcast`: sends WhatsApp notifications to all available commodity crew in the area
+- First to accept via token link gets assigned (similar to existing `vendor-action` pattern)
+
+**Creative Crew Packages:**
+- Vendors with `crew_type: 'creative'` can create packages via `packages` jsonb field
+- PDP shows package cards: "Silver Wedding Photo Package — ₹46,000" with deliverables list
+- Direct booking or Custom RFQ button
+
+**Files:** `ProductDetail.tsx`, `InventoryManager.tsx`, new edge function `crew-broadcast/index.ts`
+
+---
+
+### Phase 7: Venue Owner CRM Enhancements (Priority: LOW)
+
+- Session Calendar: Already partially built — enhance with color-coded AM/PM/Full Day visual blocks
+- Package Builder: Enhance existing `VendorQuoteMaker` to auto-create 24h soft-blocks
+- Payment Tracker: Built in Phase 4
+
+---
+
+### Phase 8: Quality Control & Penalties (Priority: LOW — Future)
+
+- GPS check-in on event day (requires mobile app or PWA geolocation API)
+- Penalty wallet system (requires payment gateway integration)
+- Shadow-ban logic for no-shows
+- Deliverable checklist with milestone-linked auto-reminders
+
+**Note:** These require payment gateway (Razorpay/Stripe) and are best built after core booking flow is solid.
+
+---
+
+### Recommended Build Order
+
+| Step | What | Effort |
+|------|-------|--------|
+| 1 | DB migration: house_rules, amenities_matrix, crew_type, packages, portfolio_urls, instagram_url | Small |
+| 2 | Venue search bar with date+slot+event type+guest count | Medium |
+| 3 | Crew Hub sub-tabs (commodity vs creative) | Medium |
+| 4 | Venue PDP: amenities matrix + house rules | Small |
+| 5 | Site visit booking funnel + vendor management | Medium |
+| 6 | Payment milestones table + tracker UI | Medium |
+| 7 | Event folder system (auto-create on venue booking) | Medium |
+| 8 | Commodity crew broadcast edge function | Medium |
+| 9 | Creative crew packages on PDP | Small |
+| 10 | In-app chat + regex filtering (separate major feature) | Large |
+| 11 | GPS check-in + penalty system (future) | Large |
+
+Steps 1-6 can be implemented now. Steps 7-9 follow. Steps 10-11 are future phases requiring additional infrastructure decisions.
 

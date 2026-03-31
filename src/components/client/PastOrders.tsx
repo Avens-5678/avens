@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEventRequests } from "@/hooks/useEventRequests";
-import { useVendorRentalOrders } from "@/hooks/useRentalOrders";
+import { useClientRentalOrders } from "@/hooks/useRentalOrders";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Calendar, MapPin, Users, Package, Clock } from "lucide-react";
 import { format } from "date-fns";

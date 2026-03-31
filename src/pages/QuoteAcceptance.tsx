@@ -34,27 +34,22 @@ const QuoteAcceptance = () => {
   useEffect(() => {
     if (!token) return;
     const fetchData = async () => {
-      // Fetch quote
+      // Fetch quote via secure RPC (requires token match)
       const { data: q, error } = await supabase
-        .from("quotes")
-        .select("*")
-        .eq("acceptance_token", token)
-        .single();
+        .rpc("get_quote_by_token", { _token: token });
 
-      if (error || !q) {
+      if (error || !q || (Array.isArray(q) && q.length === 0)) {
         setLoading(false);
         return;
       }
 
-      setQuote(q);
-      if (q.signed_at) setSigned(true);
+      const quoteData = Array.isArray(q) ? q[0] : q;
+      setQuote(quoteData);
+      if (quoteData.signed_at) setSigned(true);
 
-      // Fetch line items
+      // Fetch line items via secure RPC
       const { data: items } = await supabase
-        .from("quote_line_items")
-        .select("*")
-        .eq("quote_id", q.id)
-        .order("display_order", { ascending: true });
+        .rpc("get_quote_line_items_by_token", { _token: token });
       setLineItems(items || []);
 
       // Fetch company settings

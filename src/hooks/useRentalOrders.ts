@@ -41,6 +41,7 @@ export interface RentalOrder {
   client_name: string | null;
   client_phone: string | null;
   client_email: string | null;
+  client_id: string | null;
   status: string;
   assigned_vendor_id: string | null;
   vendor_response: string | null;
@@ -83,6 +84,22 @@ export const useVendorRentalOrders = (vendorId?: string) => {
       return data as RentalOrder[];
     },
     enabled: !!vendorId,
+  });
+};
+
+export const useClientRentalOrders = (clientId?: string) => {
+  return useQuery({
+    queryKey: ["client_rental_orders", clientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rental_orders")
+        .select("*")
+        .eq("client_id", clientId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as RentalOrder[];
+    },
+    enabled: !!clientId,
   });
 };
 

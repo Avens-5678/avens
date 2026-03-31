@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
-  Star, Share2, Plus, MessageSquare, Bookmark, ZoomIn, Store,
+  Star, Share2, Plus, MessageSquare, ZoomIn, Store,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -356,13 +356,9 @@ const ProductDetail = () => {
                     {rental.rating} <Star className="h-3 w-3 fill-current" />
                   </span>
                 )}
-                <span className="text-xs text-muted-foreground">({Math.floor(Math.random() * 50 + 10)} Reviews)</span>
                 <div className="flex-1" />
                 <button onClick={handleShare} className="p-2 rounded-full hover:bg-muted transition-colors" title="Share">
                   <Share2 className="h-4 w-4 text-muted-foreground" />
-                </button>
-                <button className="p-2 rounded-full hover:bg-muted transition-colors" title="Save">
-                  <Bookmark className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
 
@@ -456,11 +452,11 @@ const ProductDetail = () => {
               <BookingWidget rental={rental} selectedVariant={selectedVariant} />
 
 
-              {/* Legacy CTA Row (Add to Cart for quick enquiry) */}
+              {/* CTA Row */}
               <div ref={ctaRef} className="flex gap-3 pt-2">
                 {inCart ? (
                   <>
-                    <Button onClick={() => navigate("/cart")} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12">
+                    <Button onClick={() => navigate("/cart")} size="lg" className="flex-1 text-sm gap-2 h-12">
                       <ShoppingCart className="h-4 w-4" /> View Cart
                     </Button>
                     <Button
@@ -471,8 +467,8 @@ const ProductDetail = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={handleAddToCart} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12 border-primary text-primary hover:bg-primary/5">
-                    <ShoppingCart className="h-4 w-4" /> Add to Cart (Quick Enquiry)
+                  <Button onClick={handleAddToCart} size="lg" className="flex-1 text-sm gap-2 h-12">
+                    <ShoppingCart className="h-4 w-4" /> Add to Cart
                   </Button>
                 )}
               </div>

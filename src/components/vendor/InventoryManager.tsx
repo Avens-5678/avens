@@ -598,21 +598,35 @@ const InventoryManager = () => {
               </div>
 
               {!hasVariants ? (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="space-y-1">
-                    <Label>Price Value</Label>
-                    <Input type="number" value={formData.price_value || ''} onChange={(e) => setFormData(prev => ({ ...prev, price_value: e.target.value }))} placeholder="e.g. 500" />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <Label>Your Base Price (per unit) *</Label>
+                      <Input type="number" value={formData.vendor_base_price || ''} onChange={(e) => setFormData(prev => ({ ...prev, vendor_base_price: e.target.value }))} placeholder="e.g. 10" />
+                      <p className="text-xs text-muted-foreground">This is your cost. Hidden from clients.</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Pricing Unit</Label>
+                      <Select value={formData.pricing_unit || 'Per Day'} onValueChange={(v) => setFormData(prev => ({ ...prev, pricing_unit: v }))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>{PRICING_UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Stock Quantity</Label>
+                      <Input type="number" min="1" value={formData.quantity || 1} onChange={(e) => setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))} />
+                    </div>
                   </div>
+                  {formData.vendor_base_price && parseFloat(formData.vendor_base_price) > 0 && (
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center gap-2">
+                      <IndianRupee className="h-4 w-4 text-primary" />
+                      <span className="text-sm">Client will see: <span className="font-bold text-primary">₹{Math.round(parseFloat(formData.vendor_base_price) * 1.3).toLocaleString()}</span> / {formData.pricing_unit || 'Per Day'}</span>
+                    </div>
+                  )}
                   <div className="space-y-1">
-                    <Label>Pricing Unit</Label>
-                    <Select value={formData.pricing_unit || 'Per Day'} onValueChange={(v) => setFormData(prev => ({ ...prev, pricing_unit: v }))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{PRICING_UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Stock Quantity</Label>
-                    <Input type="number" min="1" value={formData.quantity || 1} onChange={(e) => setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))} />
+                    <Label>Volume Units (for manpower calc)</Label>
+                    <Input type="number" min="1" value={formData.labor_weight || 1} onChange={(e) => setFormData(prev => ({ ...prev, labor_weight: parseInt(e.target.value) || 1 }))} placeholder="1" />
+                    <p className="text-xs text-muted-foreground">Weight/volume per unit: 1 chair = 1, 1 sofa = 10, 1 truss = 20</p>
                   </div>
                 </div>
               ) : (

@@ -101,6 +101,7 @@ const menuGroups: MenuGroup[] = [
       { label: "Vendor Inventory", value: "vendor-inventory" },
       { label: "Promo Banners", value: "promo-banners" },
       { label: "Trust Strip", value: "trust-strip" },
+      { label: "Logistics Config", value: "logistics-config" },
     ],
   },
   {

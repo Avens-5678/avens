@@ -19,13 +19,11 @@ import VendorEarnings from "@/components/vendor/VendorEarnings";
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
-  { icon: Plus, label: "New Request", value: "request" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: CalendarDays, label: "Calendar", value: "calendar" },
   { icon: BookOpen, label: "Offline Booking", value: "offline" },
   { icon: FileText, label: "Quotation Maker", value: "quotes" },
   { icon: TrendingUp, label: "Earnings", value: "earnings" },
-  { icon: Calendar, label: "Past Orders", value: "past-orders" },
   { icon: User, label: "Profile", value: "profile" },
 ];
 

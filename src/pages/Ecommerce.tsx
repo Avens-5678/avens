@@ -401,6 +401,18 @@ const Ecommerce = () => {
     );
   };
 
+  const toggleCompare = (id: string) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= 3) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const compareItems = useMemo(() => {
+    return compareIds.map((cid) => allItems.find((r: any) => r.id === cid)).filter(Boolean);
+  }, [compareIds, allItems]);
+
   const activeFilterCount = selectedCategories.length + selectedCities.length + selectedPriceRanges.length + (showInStock ? 1 : 0) + selectedAmenities.length + selectedCapacity.length + selectedExperience.length;
   const activeDisplayCategory = activeQuickCat || searchCategory || (selectedCategories.length === 1 ? selectedCategories[0] : "");
 

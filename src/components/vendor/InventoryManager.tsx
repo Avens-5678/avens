@@ -110,6 +110,7 @@ const InventoryManager = () => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [expandedCalendarId, setExpandedCalendarId] = useState<string | null>(null);
 
   // Variant state
   const [hasVariants, setHasVariants] = useState(false);

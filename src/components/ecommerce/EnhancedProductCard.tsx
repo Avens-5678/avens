@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
-import { Star, ShieldCheck, Zap, Store, ArrowRight } from "lucide-react";
+import { Star, ShieldCheck, Zap, Store, ArrowRight, Eye, BadgeCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { useIsMobile } from "@/hooks/use-mobile";

@@ -25,6 +25,7 @@ const VendorProfileSettings = () => {
     city: "",
     gst_number: "",
     pan_number: "",
+    warehouse_pincode: "",
   });
 
   useEffect(() => {

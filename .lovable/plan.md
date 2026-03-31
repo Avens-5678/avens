@@ -1,49 +1,48 @@
 
 
-## Move Availability Calendar Inline Per Item + Unified Dashboard
+## Full Platform Documentation — PDF Generation
 
-### Problem
-The current Availability Calendar is a separate global tab that requires vendors to select an item from a dropdown — it's disconnected from the actual inventory items. Vendors who list venues, rentals, AND crew need per-item calendars because availability differs per item (a venue can be booked morning while a rental is available all day).
+### What I'll Do
 
-### Solution
-**One unified dashboard** with the calendar embedded directly under each inventory item card. Remove the standalone "Calendar" sidebar tab entirely.
+Generate a comprehensive **downloadable PDF** documenting every feature, route, database table, dashboard, and integration of the Evnting.com platform.
 
----
+### Document Structure (20 Sections, ~15 Pages)
 
-### Changes
+1. **Cover Page** — Evnting.com Platform Documentation, Version 1.0, March 2026
+2. **Table of Contents**
+3. **Platform Overview** — Multi-vertical marketplace + corporate site + 4 role-based dashboards
+4. **Technology Stack** — React 18, Vite 5, Tailwind, Supabase, Zustand, Framer Motion (table)
+5. **Authentication & RBAC** — 4-tier system (Admin/Employee/Client/Vendor), unified sign-in flow, role storage in user_roles table, security definer functions, Google OAuth, OTP for admins
+6. **Public Website** — Homepage (hero carousel, stats, services, rentals, testimonials, trusted clients), plus 15+ public pages (Services, Portfolio, Gallery, About, Blog, FAQ, Team, Dynamic Events, Privacy, Terms, Quote Acceptance)
+7. **E-Commerce Marketplace** — 3 verticals (Insta-Rent, Venues, Crew Hub), discovery rows, service-specific filters, location detection, promo banners, product cards, comparison feature
+8. **Product Detail Page** — Image gallery with zoom, variant chips, specifications, reviews, venue-specific sections (amenities matrix, house rules, site visit form), MMT-style date selector with auto-transition, slot selection, add to cart flow
+9. **Cart & Checkout** — Zustand cart state, enquiry form with auto-fill, venue address detection, order creation with auto vendor routing
+10. **Instant Booking Engine** — 30% markup, manpower fee calculation, transport fee (edge function + tiers), 48-hour buffer, seasonal pricing
+11. **Venue Marketplace** — Dual pricing (dry rental vs per-plate), amenities matrix, house rules, site visit funnel (Rs.499 deposit), comparison, verified badge
+12. **Crew Hub** — Commodity (broadcast model) vs Creative (portfolio-driven), categories, experience levels
+13. **Admin Dashboard** — All 8 menu groups with sub-tabs: Overview, Operations (Event Center, Rental Orders, Service Orders, Quote Maker), Users, Ecommerce (Rentals, Vendor Inventory, Promos, Trust Strip, Logistics Config), Content, Website CMS, WhatsApp, Settings
+14. **Vendor Dashboard** — 8 tabs: AI Assistant, My Orders (pending/completed with status updates), Inventory (with per-item inline calendar), Site Visits, Offline Booking, Quotation Maker, Earnings, Profile
+15. **Client Dashboard** — 5 tabs: AI Assistant, My Requests, New Request, Past Orders, Profile
+16. **Employee Dashboard** — Permission-gated subset of admin tools (ecommerce, content, operations, whatsapp categories)
+17. **Quote Maker System** — Templates, catalog picking, tax engine, version history, email/WhatsApp dispatch, digital acceptance portal, auto-sync
+18. **WhatsApp Integration** — Live Chat, Campaigns, Contacts, Templates, Settings + 6 automated notification functions
+19. **Edge Functions** — 21 serverless functions documented (calculate-transport, check-user-type, dashboard-chat, notify-admin-order, sync-quote-to-order, vendor-action, WATI functions, Zoho CRM)
+20. **Database Architecture** — 35+ tables with purpose and key fields
+21. **Security Model** — RLS, security definer functions, admin isolation, role anti-escalation, vendor/client scoping, audit logging, account lockout
+22. **Complete Route Map** — All 30 routes with type and description
 
-**1. Remove Calendar sidebar tab (`VendorDashboard.tsx`)**
-- Remove `CalendarDays` / "Calendar" entry from `sidebarItems`
-- Remove `AvailabilityCalendar` import and its `case "calendar"` in `renderContent()`
+### Implementation
 
-**2. Add inline calendar toggle to each item card (`InventoryManager.tsx`)**
-- Add a `CalendarDays` icon button to each item card's action row (next to Edit/Delete)
-- Clicking it expands/collapses an `ItemAvailabilityCalendar` component below the card content
-- Track expanded state: `expandedCalendarId` (string | null)
+Single script using **reportlab** (Python) to generate a professionally styled PDF with:
+- Brand colors (navy primary, purple accent)
+- Styled tables with alternating row backgrounds
+- Bullet-point feature lists
+- Section headers and horizontal rules
+- Cover page with company branding
 
-**3. New component: `ItemAvailabilityCalendar.tsx`**
-- Receives `itemId` and `serviceType` as props
-- Uses `useVendorAvailability(itemId)` to fetch availability for that specific item
-- Uses `useToggleBookedDate()` to toggle dates
-- For **venues**: shows slot selector (Morning / Evening / Full Day) — venues commonly have session-based booking
-- For **rentals**: shows Full Day only by default (equipment is rented by the day)
-- For **crew**: shows slot selector (Morning / Evening / Full Day) — crew can do multiple gigs per day
-- Compact single-month calendar with color-coded modifiers (red = fully booked, amber = partial, white = available)
-- Shows a small list of upcoming booked dates below the calendar
-- Uses the existing `useToggleBookedDate` mutation which already handles slot via `notes` field — will update to pass `slot` properly via the insert payload
+Output: `/mnt/documents/Evnting_Platform_Documentation.pdf`
 
-**4. Fix `useToggleBookedDate` slot handling**
-- Currently stores slot in `notes` field as text — change to pass `slot` as a proper column value in the insert
-- The `vendor_availability` table already has a `slot` column (used by `get_available_inventory` function)
-- Update the delete logic to also match by `slot`
+### Effort
 
-### File Summary
-
-| File | Change |
-|---|---|
-| `src/pages/vendor/VendorDashboard.tsx` | Remove "Calendar" sidebar item |
-| `src/components/vendor/InventoryManager.tsx` | Add calendar toggle button per item, render `ItemAvailabilityCalendar` inline |
-| `src/components/vendor/ItemAvailabilityCalendar.tsx` | New — compact per-item calendar with service-type-aware slot logic |
-| `src/hooks/useVendorAvailability.ts` | Fix slot handling in insert/delete mutations |
-| `src/components/vendor/AvailabilityCalendar.tsx` | Can be deleted (replaced by per-item version) |
+One implementation step — the script is already written and ready to execute once approved.
 

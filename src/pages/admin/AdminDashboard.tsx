@@ -49,6 +49,7 @@ import LiveRentalOrders from "@/components/admin/LiveRentalOrders";
 import LiveServiceOrders from "@/components/admin/LiveServiceOrders";
 import QuoteMaker from "@/components/admin/QuoteMaker";
 import PromoBannerManager from "@/components/admin/PromoBannerManager";
+import LogisticsConfigManager from "@/components/admin/LogisticsConfigManager";
 import TrustStripManager from "@/components/admin/TrustStripManager";
 import WhatsAppLiveChat from "@/components/admin/WhatsAppLiveChat";
 import WhatsAppCampaigns from "@/components/admin/WhatsAppCampaigns";

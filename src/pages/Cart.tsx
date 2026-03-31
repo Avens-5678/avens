@@ -161,7 +161,7 @@ const Cart = () => {
         client_name: profileData.full_name,
         client_email: profileData.email,
         client_phone: normalizedPhone,
-        event_date: eventDetails.event_start_date || null,
+        event_date: derivedStartDate || null,
         location: venueLocation,
         notes: eventDetails.notes || null,
         status: isInstant ? "confirmed" : "new",

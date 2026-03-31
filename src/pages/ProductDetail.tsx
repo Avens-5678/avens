@@ -356,13 +356,9 @@ const ProductDetail = () => {
                     {rental.rating} <Star className="h-3 w-3 fill-current" />
                   </span>
                 )}
-                <span className="text-xs text-muted-foreground">({Math.floor(Math.random() * 50 + 10)} Reviews)</span>
                 <div className="flex-1" />
                 <button onClick={handleShare} className="p-2 rounded-full hover:bg-muted transition-colors" title="Share">
                   <Share2 className="h-4 w-4 text-muted-foreground" />
-                </button>
-                <button className="p-2 rounded-full hover:bg-muted transition-colors" title="Save">
-                  <Bookmark className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
 

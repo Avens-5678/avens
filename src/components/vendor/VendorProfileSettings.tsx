@@ -232,6 +232,20 @@ const VendorProfileSettings = () => {
               placeholder="Where your equipment / inventory is stored"
               className="min-h-[80px]"
             />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="warehouse_pincode">Warehouse / Godown PIN Code</Label>
+              <Input
+                id="warehouse_pincode"
+                value={profile.warehouse_pincode}
+                onChange={(e) => setProfile({ ...profile, warehouse_pincode: e.target.value })}
+                placeholder="e.g. 500081"
+                maxLength={6}
+              />
+              <p className="text-xs text-muted-foreground">
+                Used for transport cost calculation to client delivery address.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -501,102 +501,156 @@ const ProductDetail = () => {
 
               <div className="h-px bg-border" />
 
-              {/* ── INLINE DATE PICKERS ── */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Select Booking Dates</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("justify-start text-left font-normal h-10 text-xs", !bookingFrom && "text-muted-foreground")}>
-                        <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
-                        {bookingFrom ? format(bookingFrom, "dd MMM yyyy") : "Booking From"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={bookingFrom}
-                        onSelect={(d) => { setBookingFrom(d); if (d && bookingTill && d >= bookingTill) setBookingTill(undefined); }}
-                        disabled={(date) => date < today}
-                        initialFocus
-                        className="p-3 pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("justify-start text-left font-normal h-10 text-xs", !bookingTill && "text-muted-foreground")}>
-                        <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
-                        {bookingTill ? format(bookingTill, "dd MMM yyyy") : "Booking Till"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={bookingTill}
-                        onSelect={setBookingTill}
-                        disabled={(date) => date < (bookingFrom || today)}
-                        initialFocus
-                        className="p-3 pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
+              {/* ── MMT-STYLE BOOKING DATE SELECTOR ── */}
+              <div className="rounded-xl border-2 border-primary/20 bg-gradient-to-b from-primary/[0.03] to-transparent overflow-hidden">
+                {/* Header strip */}
+                <div className="bg-primary/10 px-4 py-2.5 flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-bold text-primary uppercase tracking-wider">Select Booking Dates</span>
                 </div>
 
-                {/* Slot selector for venues */}
-                {isVenue && (
-                  <div className="space-y-2">
-                    <span className="text-xs font-semibold text-foreground">Select Slot</span>
-                    <div className="grid grid-cols-3 gap-2">
-                      {SLOTS.map((s) => (
-                        <button
-                          key={s.value}
-                          onClick={() => setBookingSlot(s.value)}
-                          className={cn(
-                            "rounded-lg border px-2 py-2 text-center transition-all",
-                            bookingSlot === s.value
-                              ? "border-primary bg-primary/5 text-primary"
-                              : "border-border text-muted-foreground hover:border-primary/40"
+                {/* Date selector cards */}
+                <div className="p-3">
+                  <div className="grid grid-cols-2 gap-0 rounded-lg border border-border overflow-hidden">
+                    {/* Booking From */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className={cn(
+                          "flex flex-col items-start px-4 py-3 text-left transition-all hover:bg-muted/50 border-r border-border relative",
+                          bookingFrom && "bg-primary/[0.03]"
+                        )}>
+                          <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Booking From</span>
+                          {bookingFrom ? (
+                            <div className="flex items-baseline gap-1.5 mt-1">
+                              <span className="text-2xl font-black text-foreground leading-none">{format(bookingFrom, "dd")}</span>
+                              <div className="flex flex-col">
+                                <span className="text-xs font-semibold text-foreground leading-tight">{format(bookingFrom, "MMM''yy")}</span>
+                                <span className="text-[10px] text-muted-foreground leading-tight">{format(bookingFrom, "EEEE")}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="mt-1">
+                              <span className="text-sm text-muted-foreground">Select date</span>
+                            </div>
                           )}
-                        >
-                          <div className="text-xs font-medium">{s.label}</div>
-                          <div className="text-[10px] text-muted-foreground">{s.time}</div>
                         </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={bookingFrom}
+                          onSelect={(d) => { setBookingFrom(d); if (d && bookingTill && d >= bookingTill) setBookingTill(undefined); }}
+                          disabled={(date) => date < today}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
 
-                {/* Availability status */}
-                {bookingFrom && bookingTill && (
-                  <div className="flex items-center gap-2">
-                    {availLoading ? (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" /> Checking availability...
-                      </span>
-                    ) : isAvailable ? (
-                      <Badge variant="secondary" className={cn("text-xs gap-1", isLimited ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400")}>
-                        <CheckCircle2 className="h-3 w-3" />
-                        {isLimited ? "Limited Availability" : "Available"}
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive" className="text-xs gap-1">
-                        <AlertTriangle className="h-3 w-3" /> Sold Out
-                      </Badge>
-                    )}
+                    {/* Booking Till */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className={cn(
+                          "flex flex-col items-start px-4 py-3 text-left transition-all hover:bg-muted/50 relative",
+                          bookingTill && "bg-primary/[0.03]"
+                        )}>
+                          <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Booking Till</span>
+                          {bookingTill ? (
+                            <div className="flex items-baseline gap-1.5 mt-1">
+                              <span className="text-2xl font-black text-foreground leading-none">{format(bookingTill, "dd")}</span>
+                              <div className="flex flex-col">
+                                <span className="text-xs font-semibold text-foreground leading-tight">{format(bookingTill, "MMM''yy")}</span>
+                                <span className="text-[10px] text-muted-foreground leading-tight">{format(bookingTill, "EEEE")}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="mt-1">
+                              <span className="text-sm text-muted-foreground">Select date</span>
+                            </div>
+                          )}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar
+                          mode="single"
+                          selected={bookingTill}
+                          onSelect={setBookingTill}
+                          disabled={(date) => date < (bookingFrom || today)}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                )}
 
-                {/* Price calculation for multi-day */}
-                {bookingFrom && bookingTill && pricePerUnit > 0 && numDays > 1 && (
-                  <div className="bg-muted/50 rounded-lg p-3 space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">₹{pricePerUnit.toLocaleString()} × {numDays} days</span>
-                      <span className="font-medium text-foreground">₹{totalPrice.toLocaleString()}</span>
+                  {/* Duration badge */}
+                  {bookingFrom && bookingTill && (
+                    <div className="flex items-center justify-center mt-2">
+                      <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">
+                        <Clock className="h-3 w-3" />
+                        {numDays} {numDays === 1 ? "Day" : "Days"}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {/* Slot selector for venues */}
+                  {isVenue && (
+                    <div className="mt-3 space-y-2">
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Select Slot</span>
+                      <div className="grid grid-cols-3 gap-2">
+                        {SLOTS.map((s) => (
+                          <button
+                            key={s.value}
+                            onClick={() => setBookingSlot(s.value)}
+                            className={cn(
+                              "rounded-lg border px-2 py-2 text-center transition-all",
+                              bookingSlot === s.value
+                                ? "border-primary bg-primary/10 text-primary shadow-sm"
+                                : "border-border text-muted-foreground hover:border-primary/40"
+                            )}
+                          >
+                            <div className="text-xs font-semibold">{s.label}</div>
+                            <div className="text-[10px] text-muted-foreground">{s.time}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Availability status */}
+                  {bookingFrom && bookingTill && (
+                    <div className="flex items-center gap-2 mt-3">
+                      {availLoading ? (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Loader2 className="h-3 w-3 animate-spin" /> Checking availability...
+                        </span>
+                      ) : isAvailable ? (
+                        <Badge variant="secondary" className={cn("text-xs gap-1", isLimited ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400")}>
+                          <CheckCircle2 className="h-3 w-3" />
+                          {isLimited ? "Limited Availability" : "Available"}
+                        </Badge>
+                      ) : (
+                        <Badge variant="destructive" className="text-xs gap-1">
+                          <AlertTriangle className="h-3 w-3" /> Sold Out
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Price calculation */}
+                  {bookingFrom && bookingTill && pricePerUnit > 0 && (
+                    <div className="mt-3 bg-muted/60 rounded-lg p-3 space-y-1.5">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">₹{pricePerUnit.toLocaleString()} × {numDays} {numDays === 1 ? "day" : "days"}</span>
+                        <span className="font-semibold text-foreground">₹{totalPrice.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm font-bold pt-1 border-t border-border/60">
+                        <span className="text-foreground">Total</span>
+                        <span className="text-primary">₹{totalPrice.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* CTA Row */}

@@ -460,7 +460,7 @@ const ProductDetail = () => {
               <div ref={ctaRef} className="flex gap-3 pt-2">
                 {inCart ? (
                   <>
-                    <Button onClick={() => setQuickCartOpen(true)} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12">
+                    <Button onClick={() => navigate("/cart")} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12">
                       <ShoppingCart className="h-4 w-4" /> View Cart
                     </Button>
                     <Button

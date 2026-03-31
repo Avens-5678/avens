@@ -222,9 +222,10 @@ const VendorProfileSettings = () => {
               className="min-h-[80px]"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="godown_address">Godown / Warehouse Address</Label>
-            <Textarea
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="godown_address">Godown / Warehouse Address</Label>
+              <Textarea
               id="godown_address"
               value={profile.godown_address}
               onChange={(e) => setProfile({ ...profile, godown_address: e.target.value })}

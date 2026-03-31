@@ -75,7 +75,8 @@ const ProductDetail = () => {
   const [bookingFrom, setBookingFrom] = useState<Date>();
   const [bookingTill, setBookingTill] = useState<Date>();
   const [bookingSlot, setBookingSlot] = useState("full_day");
-
+  const [fromOpen, setFromOpen] = useState(false);
+  const [tillOpen, setTillOpen] = useState(false);
   const ctaRef = useRef<HTMLDivElement>(null);
   const today = new Date();
 

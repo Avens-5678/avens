@@ -39,6 +39,8 @@ const statusLabels: Record<string, string> = {
   accepted: "Accepted",
   confirmed: "Confirmed",
   declined: "Declined",
+  out_for_delivery: "Out for Delivery",
+  delivered: "Delivered",
 };
 
 const generateGoogleCalendarUrl = (title: string, date: string | null, location: string | null) => {

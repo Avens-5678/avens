@@ -462,14 +462,36 @@ const LiveRentalOrders = () => {
               </Select>
             </div>
             <div className="flex-1">
+              <Label className="text-xs mb-1 block"><Users className="inline h-3 w-3 mr-1" />Vendor</Label>
+              <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Vendors</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {uniqueVendors.map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1">
               <Label className="text-xs mb-1 block"><MapPin className="inline h-3 w-3 mr-1" />Location</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} placeholder="Search by city..." className="pl-9" />
               </div>
             </div>
-            {(statusFilter !== "all" || categoryFilter !== "all" || locationSearch) && (
-              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); setLocationSearch(""); }}>
+            <div className="flex-1">
+              <Label className="text-xs mb-1 block"><Search className="inline h-3 w-3 mr-1" />Search</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input value={orderSearch} onChange={(e) => setOrderSearch(e.target.value)} placeholder="Search orders..." className="pl-9" />
+              </div>
+            </div>
+            {(statusFilter !== "all" || categoryFilter !== "all" || locationSearch || vendorFilter !== "all" || orderSearch) && (
+              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); setLocationSearch(""); setVendorFilter("all"); setOrderSearch(""); }}>
                 <X className="h-4 w-4 mr-1" />Clear
               </Button>
             )}

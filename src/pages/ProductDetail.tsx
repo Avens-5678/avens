@@ -611,7 +611,7 @@ const ProductDetail = () => {
             ) : null}
           </div>
           {inCart ? (
-            <Button onClick={() => setQuickCartOpen(true)} size="sm" className="h-10 px-6 text-sm">
+            <Button onClick={() => navigate("/cart")} size="sm" className="h-10 px-6 text-sm">
               <ShoppingCart className="h-4 w-4 mr-1.5" /> View Cart
             </Button>
           ) : (

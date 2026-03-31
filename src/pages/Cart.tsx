@@ -284,6 +284,17 @@ const Cart = () => {
                               )}
                             </div>
 
+                            {/* Show booking dates per item */}
+                            {(item.booking_from || item.booking_till) && (
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <CalendarDays className="h-3.5 w-3.5" />
+                                <span>{item.booking_from} → {item.booking_till}</span>
+                                {item.booking_slot && item.booking_slot !== "full_day" && (
+                                  <Badge variant="outline" className="text-[10px] capitalize">{item.booking_slot.replace("_", " ")}</Badge>
+                                )}
+                              </div>
+                            )}
+
                             <div className="flex items-center justify-between gap-3 flex-wrap">
                               {isMeasurableUnit(item.pricing_unit) ? (
                                 <div className="space-y-1.5">

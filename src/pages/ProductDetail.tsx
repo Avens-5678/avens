@@ -84,6 +84,8 @@ const ProductDetail = () => {
       experience_level: v.experience_level,
       has_variants: v.has_variants,
       specifications: v.specifications || null,
+      virtual_tour_url: v.virtual_tour_url || null,
+      is_verified: v.is_verified || false,
       created_at: v.created_at,
       vendor_id: v.vendor_id,
       _source: "vendor",

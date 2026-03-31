@@ -152,6 +152,14 @@ const Ecommerce = () => {
       search_keywords: v.search_keywords,
       slot_types: v.slot_types,
       vendor_id: v.vendor_id,
+      virtual_tour_url: v.virtual_tour_url || null,
+      is_verified: v.is_verified || false,
+      venue_type: v.venue_type || null,
+      min_capacity: v.min_capacity,
+      max_capacity: v.max_capacity,
+      catering_type: v.catering_type,
+      parking_available: v.parking_available,
+      av_equipment: v.av_equipment,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];

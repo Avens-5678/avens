@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Save, User, Building2, MapPin, FileText } from "lucide-react";
+import { Loader2, Save, User, Building2, MapPin, FileText, BadgeCheck } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const VendorProfileSettings = () => {
   const { user } = useAuth();

@@ -1298,6 +1298,50 @@ export type Database = {
         }
         Relationships: []
       }
+      seasonal_pricing: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          inventory_item_id: string
+          is_active: boolean
+          price_multiplier: number
+          season_name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          inventory_item_id: string
+          is_active?: boolean
+          price_multiplier?: number
+          season_name: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          inventory_item_id?: string
+          is_active?: boolean
+          price_multiplier?: number
+          season_name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_pricing_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -1709,6 +1753,7 @@ export type Database = {
           verified_at: string | null
           verified_by: string | null
           video_url: string | null
+          virtual_tour_url: string | null
           weekday_price: number | null
           weekend_price: number | null
         }
@@ -1757,6 +1802,7 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           video_url?: string | null
+          virtual_tour_url?: string | null
           weekday_price?: number | null
           weekend_price?: number | null
         }
@@ -1805,6 +1851,7 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           video_url?: string | null
+          virtual_tour_url?: string | null
           weekday_price?: number | null
           weekend_price?: number | null
         }

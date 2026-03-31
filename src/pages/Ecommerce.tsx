@@ -182,7 +182,7 @@ const Ecommerce = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [selectedCapacity, setSelectedCapacity] = useState<string[]>([]);
   const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
-  const [bookingDates, setBookingDates] = useState<{ checkIn?: Date; checkOut?: Date; location?: string }>({});
+  
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 
 

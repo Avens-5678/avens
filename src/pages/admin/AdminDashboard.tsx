@@ -394,6 +394,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <PromoBannerManager />;
       case "trust-strip":
         return <TrustStripManager />;
+      case "logistics-config":
+        return <LogisticsConfigManager />;
       case "portfolio":
         return <NewEnhancedPortfolioManager portfolio={portfolio || []} events={events || []} />;
       case "clients":

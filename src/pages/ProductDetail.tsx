@@ -542,6 +542,33 @@ const ProductDetail = () => {
             <TabsContent value="reviews" className="pt-5">
               <ReviewsSection rentalId={id!} />
             </TabsContent>
+
+            {(rental as any).virtual_tour_url && (
+              <TabsContent value="virtual-tour" className="pt-5">
+                <div className="rounded-xl overflow-hidden border border-border bg-muted">
+                  <iframe
+                    src={(() => {
+                      const url = (rental as any).virtual_tour_url;
+                      // Convert YouTube watch URLs to embed
+                      if (url.includes("youtube.com/watch")) {
+                        const vid = new URL(url).searchParams.get("v");
+                        return `https://www.youtube.com/embed/${vid}`;
+                      }
+                      if (url.includes("youtu.be/")) {
+                        const vid = url.split("youtu.be/")[1]?.split("?")[0];
+                        return `https://www.youtube.com/embed/${vid}`;
+                      }
+                      return url;
+                    })()}
+                    className="w-full aspect-video"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking"
+                    title="360° Virtual Tour"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Use your mouse or touch to look around in the 360° tour.</p>
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </section>

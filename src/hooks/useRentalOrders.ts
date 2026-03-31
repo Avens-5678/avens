@@ -41,6 +41,7 @@ export interface RentalOrder {
   client_name: string | null;
   client_phone: string | null;
   client_email: string | null;
+  client_id: string | null;
   status: string;
   assigned_vendor_id: string | null;
   vendor_response: string | null;

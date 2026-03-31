@@ -555,7 +555,7 @@ const ProductDetail = () => {
                     </Popover>
 
                     {/* Booking Till */}
-                    <Popover>
+                    <Popover open={tillOpen} onOpenChange={setTillOpen}>
                       <PopoverTrigger asChild>
                         <button className={cn(
                           "flex flex-col items-start px-4 py-3 text-left transition-all hover:bg-muted/50 relative",
@@ -581,7 +581,7 @@ const ProductDetail = () => {
                         <Calendar
                           mode="single"
                           selected={bookingTill}
-                          onSelect={setBookingTill}
+                          onSelect={(d) => { setBookingTill(d); setTillOpen(false); }}
                           disabled={(date) => date < (bookingFrom || today)}
                           initialFocus
                           className="p-3 pointer-events-auto"

@@ -125,9 +125,7 @@ const QuoteAcceptance = () => {
       const signatureUrl = urlData.publicUrl;
 
       const { error: updateError } = await supabase
-        .from("quotes")
-        .update({ signature_url: signatureUrl, signed_at: new Date().toISOString(), status: "accepted" })
-        .eq("acceptance_token", token);
+        .rpc("sign_quote_by_token", { _token: token!, _signature_url: signatureUrl });
 
       if (updateError) throw updateError;
 

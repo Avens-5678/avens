@@ -15,6 +15,7 @@ import AvailabilityCalendar from "@/components/vendor/AvailabilityCalendar";
 import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
 import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 import VendorEarnings from "@/components/vendor/VendorEarnings";
+import SiteVisitManager from "@/components/vendor/SiteVisitManager";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },

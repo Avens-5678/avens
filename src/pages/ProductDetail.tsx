@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { format, differenceInDays } from "date-fns";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
-import BookingWidget from "@/components/ecommerce/BookingWidget";
+import SiteVisitForm from "@/components/ecommerce/BookingWidget";
 import SmartRecommendations from "@/components/ecommerce/SmartRecommendations";
 import AmenitiesMatrix from "@/components/ecommerce/AmenitiesMatrix";
 import HouseRules from "@/components/ecommerce/HouseRules";
@@ -12,19 +13,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
+import { useAvailability } from "@/hooks/useAvailability";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
+import { cn } from "@/lib/utils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
   Star, Share2, Plus, MessageSquare, ZoomIn, Store, BadgeCheck, Eye,
+  CalendarIcon, Clock, CheckCircle2, AlertTriangle, Loader2,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+
+const SLOTS = [
+  { value: "morning", label: "Morning", time: "8 AM – 2 PM" },
+  { value: "evening", label: "Evening", time: "3 PM – 10 PM" },
+  { value: "full_day", label: "Full Day", time: "8 AM – 10 PM" },
+];
 
 // Recently viewed helper
 const RECENT_KEY = "evnting_recently_viewed";
@@ -59,7 +71,13 @@ const ProductDetail = () => {
   const [zoomOrigin, setZoomOrigin] = useState("50% 50%");
   const [showStickyBar, setShowStickyBar] = useState(false);
 
+  // Booking dates state (inline on PDP)
+  const [bookingFrom, setBookingFrom] = useState<Date>();
+  const [bookingTill, setBookingTill] = useState<Date>();
+  const [bookingSlot, setBookingSlot] = useState("full_day");
+
   const ctaRef = useRef<HTMLDivElement>(null);
+  const today = new Date();
 
   // Merge admin rentals + vendor inventory
   const allItems = useMemo(() => {
@@ -102,6 +120,19 @@ const ProductDetail = () => {
   const rental = useMemo(() => allItems.find((r: any) => r.id === id), [allItems, id]);
   const vendorId = rental?._source === "vendor" ? rental.vendor_id : undefined;
   const { data: vendorProfile } = useVendorProfile(vendorId);
+  const isVenue = (rental?.service_type || "rental") === "venue";
+
+  // Availability check
+  const checkInStr = bookingFrom ? format(bookingFrom, "yyyy-MM-dd") : undefined;
+  const checkOutStr = bookingTill ? format(bookingTill, "yyyy-MM-dd") : undefined;
+  const { data: availability, isLoading: availLoading } = useAvailability(
+    rental?.id,
+    checkInStr,
+    checkOutStr,
+    bookingSlot
+  );
+  const isAvailable = availability ? availability.available > 0 : true;
+  const isLimited = availability ? availability.available === 1 : false;
 
   // Track recently viewed
   useEffect(() => { if (id) addToRecentlyViewed(id); }, [id]);
@@ -145,6 +176,10 @@ const ProductDetail = () => {
   const currentUnit = displayPrice && "unit" in displayPrice ? displayPrice.unit : undefined;
   const isMeasurable = isMeasurableUnit(currentUnit);
 
+  const numDays = bookingFrom && bookingTill ? Math.max(differenceInDays(bookingTill, bookingFrom), 1) : 1;
+  const pricePerUnit = selectedVariant?.price_value ?? rental?.price_value ?? 0;
+  const totalPrice = pricePerUnit * numDays;
+
   const variantGroups = useMemo(() => {
     if (!variants?.length) return {};
     const groups: Record<string, RentalVariant[]> = {};
@@ -179,6 +214,10 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (!rental) return;
+    if (!bookingFrom || !bookingTill) {
+      toast({ title: "Select dates", description: "Please pick Booking From and Booking Till dates.", variant: "destructive" });
+      return;
+    }
     const finalQuantity = isMeasurable ? computedArea : quantity;
     if (isMeasurable && finalQuantity <= 0) {
       toast({ title: "Enter dimensions", description: "Please enter valid Length and Breadth.", variant: "destructive" });
@@ -199,8 +238,10 @@ const ProductDetail = () => {
       breadth: isMeasurable ? breadth : undefined,
       vendor_id: rental._source === "vendor" ? rental.vendor_id : undefined,
       vendor_pincode: vendorProfile?.warehouse_pincode || undefined,
+      booking_from: format(bookingFrom, "yyyy-MM-dd"),
+      booking_till: format(bookingTill, "yyyy-MM-dd"),
+      booking_slot: isVenue ? bookingSlot : undefined,
     });
-    // Navigate to cart
     navigate("/cart");
   };
 
@@ -269,7 +310,7 @@ const ProductDetail = () => {
 
             {/* ── IMAGE GALLERY ── */}
             <div className="flex flex-col-reverse sm:flex-row gap-3 min-w-0">
-              {/* Thumbnails — vertical on desktop, horizontal on mobile */}
+              {/* Thumbnails */}
               {displayImages.length > 1 && (
                 <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto sm:max-h-[500px] scrollbar-hide pb-1 sm:pb-0 sm:pr-1">
                   {displayImages.map((img, i) => (
@@ -309,7 +350,6 @@ const ProductDetail = () => {
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">No Image</div>
                 )}
 
-                {/* Nav arrows */}
                 {displayImages.length > 1 && (
                   <>
                     <button onClick={() => setCurrentImageIndex((i) => (i - 1 + displayImages.length) % displayImages.length)} className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm transition-colors z-10">
@@ -321,12 +361,10 @@ const ProductDetail = () => {
                   </>
                 )}
 
-                {/* Zoom hint */}
                 <div className="absolute top-3 right-3 bg-foreground/60 text-primary-foreground text-[10px] font-medium px-2 py-1 rounded-full backdrop-blur-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                   <ZoomIn className="h-3 w-3" /> Hover to zoom
                 </div>
 
-                {/* Counter on mobile */}
                 {displayImages.length > 1 && (
                   <span className="absolute bottom-3 right-3 sm:hidden bg-foreground/70 text-primary-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
                     {currentImageIndex + 1}/{displayImages.length}
@@ -346,7 +384,6 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              {/* Title */}
               <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground leading-tight">{rental.title}</h1>
 
               {/* Vendor / Sold by */}
@@ -462,14 +499,110 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Booking Widget — date-based booking */}
-              <BookingWidget rental={rental} selectedVariant={selectedVariant} />
+              <div className="h-px bg-border" />
 
+              {/* ── INLINE DATE PICKERS ── */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Select Booking Dates</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("justify-start text-left font-normal h-10 text-xs", !bookingFrom && "text-muted-foreground")}>
+                        <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
+                        {bookingFrom ? format(bookingFrom, "dd MMM yyyy") : "Booking From"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={bookingFrom}
+                        onSelect={(d) => { setBookingFrom(d); if (d && bookingTill && d >= bookingTill) setBookingTill(undefined); }}
+                        disabled={(date) => date < today}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("justify-start text-left font-normal h-10 text-xs", !bookingTill && "text-muted-foreground")}>
+                        <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
+                        {bookingTill ? format(bookingTill, "dd MMM yyyy") : "Booking Till"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={bookingTill}
+                        onSelect={setBookingTill}
+                        disabled={(date) => date < (bookingFrom || today)}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Slot selector for venues */}
+                {isVenue && (
+                  <div className="space-y-2">
+                    <span className="text-xs font-semibold text-foreground">Select Slot</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {SLOTS.map((s) => (
+                        <button
+                          key={s.value}
+                          onClick={() => setBookingSlot(s.value)}
+                          className={cn(
+                            "rounded-lg border px-2 py-2 text-center transition-all",
+                            bookingSlot === s.value
+                              ? "border-primary bg-primary/5 text-primary"
+                              : "border-border text-muted-foreground hover:border-primary/40"
+                          )}
+                        >
+                          <div className="text-xs font-medium">{s.label}</div>
+                          <div className="text-[10px] text-muted-foreground">{s.time}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Availability status */}
+                {bookingFrom && bookingTill && (
+                  <div className="flex items-center gap-2">
+                    {availLoading ? (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Checking availability...
+                      </span>
+                    ) : isAvailable ? (
+                      <Badge variant="secondary" className={cn("text-xs gap-1", isLimited ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400")}>
+                        <CheckCircle2 className="h-3 w-3" />
+                        {isLimited ? "Limited Availability" : "Available"}
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="text-xs gap-1">
+                        <AlertTriangle className="h-3 w-3" /> Sold Out
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* Price calculation for multi-day */}
+                {bookingFrom && bookingTill && pricePerUnit > 0 && numDays > 1 && (
+                  <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">₹{pricePerUnit.toLocaleString()} × {numDays} days</span>
+                      <span className="font-medium text-foreground">₹{totalPrice.toLocaleString()}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* CTA Row */}
-              <div ref={ctaRef} className="flex gap-3 pt-2">
+              <div ref={ctaRef} className="flex flex-col gap-3 pt-2">
                 {inCart ? (
-                  <>
+                  <div className="flex gap-3">
                     <Button onClick={() => navigate("/cart")} size="lg" className="flex-1 text-sm gap-2 h-12">
                       <ShoppingCart className="h-4 w-4" /> View Cart
                     </Button>
@@ -479,11 +612,16 @@ const ProductDetail = () => {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </>
+                  </div>
                 ) : (
-                  <Button onClick={handleAddToCart} size="lg" className="flex-1 text-sm gap-2 h-12">
-                    <ShoppingCart className="h-4 w-4" /> Add to Cart
+                  <Button onClick={handleAddToCart} size="lg" className="w-full text-sm gap-2 h-12" disabled={!isAvailable}>
+                    <ShoppingCart className="h-4 w-4" /> {!isAvailable ? "Sold Out" : "Add to Cart"}
                   </Button>
+                )}
+
+                {/* Site Visit CTA for venues only */}
+                {isVenue && (
+                  <SiteVisitForm rental={rental} />
                 )}
               </div>
 
@@ -502,7 +640,6 @@ const ProductDetail = () => {
             />
             <HouseRules rules={rental.house_rules || []} />
 
-            {/* Per-plate pricing calculator */}
             {rental.venue_pricing_model === "per_plate" && rental.price_value && (
               <div className="bg-muted/50 rounded-xl p-4 space-y-2">
                 <h3 className="text-sm font-bold text-foreground">Estimated Cost Calculator</h3>
@@ -520,7 +657,6 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Packages display */}
             {rental.packages && rental.packages.length > 0 && (
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-foreground">Available Packages</h3>
@@ -578,7 +714,6 @@ const ProductDetail = () => {
 
             <TabsContent value="specifications" className="pt-5">
               <div className="max-w-2xl space-y-2">
-                {/* Dynamic specifications from DB */}
                 {(rental as any).specifications && Array.isArray((rental as any).specifications) && (rental as any).specifications.length > 0 && (
                   (rental as any).specifications.map((spec: { key: string; value: string }, i: number) => (
                     <div key={i} className={`flex items-start py-2.5 px-3 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""} rounded`}>
@@ -587,7 +722,6 @@ const ProductDetail = () => {
                     </div>
                   ))
                 )}
-                {/* Fallback specs */}
                 {[
                   { label: "Category", value: rental.categories?.join(", ") },
                   { label: "Pricing", value: displayPrice && "value" in displayPrice ? `₹${displayPrice.value.toLocaleString()} ${displayPrice.unit}` : displayPrice?.text },
@@ -616,7 +750,6 @@ const ProductDetail = () => {
                   <iframe
                     src={(() => {
                       const url = (rental as any).virtual_tour_url;
-                      // Convert YouTube watch URLs to embed
                       if (url.includes("youtube.com/watch")) {
                         const vid = new URL(url).searchParams.get("v");
                         return `https://www.youtube.com/embed/${vid}`;
@@ -726,8 +859,6 @@ const ProductDetail = () => {
         </div>
       )}
 
-
-
     </Layout>
   );
 };
@@ -781,7 +912,6 @@ const ReviewsSection = ({ rentalId }: { rentalId: string }) => {
 
   return (
     <div className="space-y-6">
-      {/* Existing reviews */}
       {reviews.length > 0 ? (
         <div className="space-y-4 max-w-2xl">
           {reviews.map((review: any) => (
@@ -806,7 +936,6 @@ const ReviewsSection = ({ rentalId }: { rentalId: string }) => {
         </div>
       ) : null}
 
-      {/* Write review form */}
       {showForm ? (
         <div className="max-w-lg border border-border rounded-xl p-5 space-y-4 bg-muted/20">
           <h3 className="text-sm font-semibold text-foreground">Write a Review</h3>

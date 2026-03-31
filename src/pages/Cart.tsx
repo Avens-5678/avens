@@ -115,8 +115,13 @@ const Cart = () => {
       navigate("/client");
       return;
     }
-    if (!eventDetails.event_start_date) {
-      toast({ title: "Missing information", description: "Please select a start date.", variant: "destructive" });
+    // Derive dates from cart items
+    const bookingFromDates = items.map(i => i.booking_from).filter(Boolean) as string[];
+    const bookingTillDates = items.map(i => i.booking_till).filter(Boolean) as string[];
+    const derivedStartDate = bookingFromDates.length > 0 ? bookingFromDates.sort()[0] : "";
+    const derivedEndDate = bookingTillDates.length > 0 ? bookingTillDates.sort().reverse()[0] : "";
+    if (!derivedStartDate) {
+      toast({ title: "Missing dates", description: "Please add items with booking dates.", variant: "destructive" });
       return;
     }
     if (showVenueAddressFields && !eventDetails.venue_address_line1) {
@@ -156,7 +161,7 @@ const Cart = () => {
         client_name: profileData.full_name,
         client_email: profileData.email,
         client_phone: normalizedPhone,
-        event_date: eventDetails.event_start_date || null,
+        event_date: derivedStartDate || null,
         location: venueLocation,
         notes: eventDetails.notes || null,
         status: isInstant ? "confirmed" : "new",
@@ -284,6 +289,17 @@ const Cart = () => {
                               )}
                             </div>
 
+                            {/* Show booking dates per item */}
+                            {(item.booking_from || item.booking_till) && (
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <CalendarDays className="h-3.5 w-3.5" />
+                                <span>{item.booking_from} → {item.booking_till}</span>
+                                {item.booking_slot && item.booking_slot !== "full_day" && (
+                                  <Badge variant="outline" className="text-[10px] capitalize">{item.booking_slot.replace("_", " ")}</Badge>
+                                )}
+                              </div>
+                            )}
+
                             <div className="flex items-center justify-between gap-3 flex-wrap">
                               {isMeasurableUnit(item.pricing_unit) ? (
                                 <div className="space-y-1.5">
@@ -361,15 +377,17 @@ const Cart = () => {
                           <p className="text-muted-foreground text-xs">{profileData.phone}</p>
                         </div>
                       )}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Start Date *</Label>
-                          <Input type="date" min={new Date().toISOString().split("T")[0]} value={eventDetails.event_start_date} onChange={e => setEventDetails(p => ({ ...p, event_start_date: e.target.value, event_end_date: p.event_end_date && p.event_end_date < e.target.value ? e.target.value : p.event_end_date }))} />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">End Date</Label>
-                          <Input type="date" min={eventDetails.event_start_date || new Date().toISOString().split("T")[0]} value={eventDetails.event_end_date} onChange={e => setEventDetails(p => ({ ...p, event_end_date: e.target.value }))} />
-                        </div>
+                      {/* Booking dates derived from cart items */}
+                      <div className="bg-muted/50 rounded-lg p-3 space-y-1.5">
+                        <p className="text-xs font-semibold text-foreground">Booking Dates (from cart)</p>
+                        {items.map(item => (
+                          item.booking_from ? (
+                            <div key={`${item.id}-${item.variant_id || ''}-dates`} className="flex justify-between text-xs">
+                              <span className="text-muted-foreground line-clamp-1">{item.title}</span>
+                              <span className="font-medium text-foreground flex-shrink-0">{item.booking_from} → {item.booking_till}</span>
+                            </div>
+                          ) : null
+                        ))}
                       </div>
                       {showVenueAddressFields && (
                         <>

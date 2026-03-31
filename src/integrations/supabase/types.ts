@@ -2257,6 +2257,65 @@ export type Database = {
         }
         Returns: Json
       }
+      get_quote_by_token: {
+        Args: { _token: string }
+        Returns: {
+          acceptance_token: string | null
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          created_by: string | null
+          discount_amount: number | null
+          discount_type: string | null
+          discount_value: number | null
+          gst_amount: number | null
+          gst_percent: number | null
+          id: string
+          notes: string | null
+          parent_quote_id: string | null
+          quote_number: string
+          sent_at: string | null
+          sent_via: string | null
+          signature_url: string | null
+          signed_at: string | null
+          source_order_id: string | null
+          source_type: string
+          status: string
+          subtotal: number
+          tax_type: string | null
+          template: string | null
+          total: number
+          updated_at: string
+          version: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_quote_line_items_by_token: {
+        Args: { _token: string }
+        Returns: {
+          created_at: string
+          display_order: number | null
+          id: string
+          item_description: string
+          quantity: number
+          quote_id: string
+          total_price: number
+          unit: string | null
+          unit_price: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "quote_line_items"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -2269,6 +2328,10 @@ export type Database = {
       is_admin_secure: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       lookup_order_by_id: { Args: { order_id: string }; Returns: Json }
+      sign_quote_by_token: {
+        Args: { _signature_url: string; _token: string }
+        Returns: boolean
+      }
       validate_admin_email: { Args: { check_email: string }; Returns: boolean }
     }
     Enums: {

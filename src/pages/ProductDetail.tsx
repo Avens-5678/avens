@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
-  Star, Share2, Plus, MessageSquare, Bookmark, ZoomIn, Store,
+  Star, Share2, Plus, MessageSquare, ZoomIn, Store,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 

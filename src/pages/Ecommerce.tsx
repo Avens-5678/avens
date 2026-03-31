@@ -195,6 +195,10 @@ const Ecommerce = () => {
   const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [crewSubTab, setCrewSubTab] = useState<"commodity" | "creative">("commodity");
+  const [venueSearchFilters, setVenueSearchFilters] = useState<{
+    date?: string; slot?: string; eventType?: string; guestCount?: number;
+  }>({});
   
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 

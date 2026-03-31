@@ -45,6 +45,14 @@ export interface VendorInventoryItem {
   video_url: string | null;
   virtual_tour_url: string | null;
   slot_types: string[] | null;
+  // New Phase 1 fields
+  house_rules: string[] | null;
+  amenities_matrix: Record<string, any> | null;
+  crew_type: string | null;
+  packages: any[] | null;
+  portfolio_urls: string[] | null;
+  instagram_url: string | null;
+  venue_pricing_model: string | null;
   created_at: string;
   updated_at: string;
 }

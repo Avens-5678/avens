@@ -239,8 +239,24 @@ const VenueFormFields = ({ formData, setFormData }: VenueFormFieldsProps) => {
             <Input type="number" value={formData.advance_amount || ''} onChange={(e) => setFormData(prev => ({ ...prev, advance_amount: parseFloat(e.target.value) || null }))} placeholder="e.g. 25000" />
           </div>
           <div className="space-y-1">
+            <Label>Pricing Model</Label>
+            <Select value={formData.venue_pricing_model || 'dry_rental'} onValueChange={(v) => setFormData(prev => ({ ...prev, venue_pricing_model: v }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dry_rental">Dry Rental (Flat Rate)</SelectItem>
+                <SelectItem value="per_plate">Per Plate (Catering)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
             <Label>Video Walkthrough URL</Label>
             <Input value={formData.video_url || ''} onChange={(e) => setFormData(prev => ({ ...prev, video_url: e.target.value }))} placeholder="https://youtube.com/..." />
+          </div>
+          <div className="space-y-1">
+            <Label>Instagram URL</Label>
+            <Input value={formData.instagram_url || ''} onChange={(e) => setFormData(prev => ({ ...prev, instagram_url: e.target.value }))} placeholder="https://instagram.com/..." />
           </div>
         </div>
         <div className="space-y-1">
@@ -255,6 +271,92 @@ const VenueFormFields = ({ formData, setFormData }: VenueFormFieldsProps) => {
         <div className="space-y-1">
           <Label>Refund Rules</Label>
           <Textarea value={formData.refund_rules || ''} onChange={(e) => setFormData(prev => ({ ...prev, refund_rules: e.target.value }))} rows={2} placeholder="e.g. 50% refund within 15 days, no refund within 7 days" />
+        </div>
+      </div>
+
+      {/* House Rules */}
+      <Separator />
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">House Rules & Restrictions</h3>
+        <div className="space-y-2">
+          {(formData.house_rules || []).map((rule: string, i: number) => (
+            <div key={i} className="flex items-center gap-2">
+              <Input
+                value={rule}
+                onChange={(e) => {
+                  const updated = [...(formData.house_rules || [])];
+                  updated[i] = e.target.value;
+                  setFormData(prev => ({ ...prev, house_rules: updated }));
+                }}
+                placeholder="e.g. Music stops at 10 PM"
+                className="flex-1"
+              />
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                const updated = (formData.house_rules || []).filter((_: string, idx: number) => idx !== i);
+                setFormData(prev => ({ ...prev, house_rules: updated }));
+              }}>
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFormData(prev => ({ ...prev, house_rules: [...(prev.house_rules || []), ""] }))}
+            className="gap-1"
+          >
+            <Plus className="h-3 w-3" /> Add Rule
+          </Button>
+        </div>
+      </div>
+
+      {/* Amenities Matrix (structured) */}
+      <Separator />
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Detailed Amenities Matrix</h3>
+        <p className="text-xs text-muted-foreground">Set specific amenity details shown to clients as a structured grid.</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {[
+            { key: "valet_parking", label: "Valet Parking" },
+            { key: "bridal_rooms", label: "Bridal Rooms", type: "number" },
+            { key: "generator", label: "Generator Backup" },
+            { key: "outside_catering", label: "Outside Catering Allowed" },
+            { key: "dj_allowed", label: "DJ Allowed" },
+            { key: "ac", label: "Air Conditioning" },
+            { key: "swimming_pool", label: "Swimming Pool" },
+            { key: "elevator", label: "Elevator Access" },
+            { key: "wifi", label: "Wi-Fi" },
+          ].map(({ key, label, type }) => {
+            const matrix = formData.amenities_matrix || {};
+            if (type === "number") {
+              return (
+                <div key={key} className="space-y-1">
+                  <Label className="text-xs">{label}</Label>
+                  <Input
+                    type="number"
+                    value={matrix[key] || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      amenities_matrix: { ...(prev.amenities_matrix || {}), [key]: parseInt(e.target.value) || 0 },
+                    }))}
+                    placeholder="0"
+                  />
+                </div>
+              );
+            }
+            return (
+              <label key={key} className="flex items-center gap-2 cursor-pointer">
+                <Checkbox
+                  checked={!!matrix[key]}
+                  onCheckedChange={(checked) => setFormData(prev => ({
+                    ...prev,
+                    amenities_matrix: { ...(prev.amenities_matrix || {}), [key]: !!checked },
+                  }))}
+                />
+                <span className="text-sm">{label}</span>
+              </label>
+            );
+          })}
         </div>
       </div>
     </>

@@ -338,6 +338,22 @@ const BookingWidget = ({ rental, selectedVariant }: BookingWidgetProps) => {
         </div>
       )}
 
+      {/* Venue-specific: Schedule Site Visit */}
+      {isVenue && (
+        <div className="border-t border-border pt-3 space-y-2">
+          <Button
+            variant="outline"
+            onClick={() => setStep("site-visit")}
+            className="w-full h-10 text-xs font-semibold gap-1.5 border-primary/30 text-primary hover:bg-primary/5"
+          >
+            <MapPin className="h-3.5 w-3.5" /> Schedule Site Visit — ₹499
+          </Button>
+          <p className="text-[10px] text-muted-foreground text-center">
+            100% credited toward booking advance, or refunded if you don't proceed
+          </p>
+        </div>
+      )}
+
       {/* Book Now */}
       <Button
         onClick={handleBookNow}
@@ -345,11 +361,226 @@ const BookingWidget = ({ rental, selectedVariant }: BookingWidgetProps) => {
         disabled={!checkIn || !checkOut || !isAvailable || holdLoading}
       >
         {holdLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-        {!isAvailable ? "Sold Out" : "Book Now"}
+        {!isAvailable ? "Sold Out" : isVenue ? "Direct Booking" : "Book Now"}
       </Button>
 
       <p className="text-[10px] text-muted-foreground text-center">
-        Your slot will be held for 10 minutes after clicking Book Now
+        Your slot will be held for 10 minutes after clicking {isVenue ? "Direct Booking" : "Book Now"}
+      </p>
+    </div>
+  );
+
+  // Site Visit form step
+  if (step === "site-visit") {
+    const handleSiteVisit = async () => {
+      if (!clientName.trim() || !clientPhone.trim() || !checkIn) {
+        toast({ title: "Required", description: "Please fill name, phone, and select a date.", variant: "destructive" });
+        return;
+      }
+      setSiteVisitLoading(true);
+      try {
+        const { error } = await (supabase.from("site_visit_requests" as any) as any).insert({
+          venue_id: rental.id,
+          client_id: user?.id || "00000000-0000-0000-0000-000000000000",
+          client_name: clientName,
+          client_phone: clientPhone,
+          client_email: clientEmail || null,
+          preferred_date: format(checkIn, "yyyy-MM-dd"),
+          preferred_slot: slot,
+        });
+        if (error) throw error;
+        toast({ title: "Site Visit Scheduled!", description: "The venue owner will confirm your appointment shortly." });
+        setStep("dates");
+      } catch (err: any) {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      } finally {
+        setSiteVisitLoading(false);
+      }
+    };
+
+    return (
+      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-primary" /> Schedule Site Visit
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          Visit the venue in person. ₹499 deposit is fully refundable or credited toward your booking.
+        </p>
+
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Preferred Date *</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 text-xs", !checkIn && "text-muted-foreground")}>
+                  <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
+                  {checkIn ? format(checkIn, "dd MMM yyyy") : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={checkIn} onSelect={setCheckIn} disabled={(d) => d < today} initialFocus className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Name *</Label>
+            <Input value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Your name" className="h-9 text-sm" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Phone *</Label>
+            <Input value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+91 98765 43210" className="h-9 text-sm" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Email</Label>
+            <Input value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="email@example.com" className="h-9 text-sm" />
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Button onClick={handleSiteVisit} className="flex-1 h-11" disabled={siteVisitLoading}>
+            {siteVisitLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Confirm Visit — ₹499
+          </Button>
+          <Button variant="outline" onClick={() => setStep("dates")} className="h-11">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 1: Select dates (default)
+  return (
+    <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+      <h3 className="text-sm font-bold text-foreground">Book this item</h3>
+
+      {/* Date pickers */}
+      <div className="grid grid-cols-2 gap-3">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("justify-start text-left font-normal h-10 text-xs", !checkIn && "text-muted-foreground")}>
+              <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
+              {checkIn ? format(checkIn, "dd MMM") : "Booking From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={checkIn}
+              onSelect={(d) => { setCheckIn(d); if (d && checkOut && d >= checkOut) setCheckOut(undefined); }}
+              disabled={(date) => date < today}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("justify-start text-left font-normal h-10 text-xs", !checkOut && "text-muted-foreground")}>
+              <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
+              {checkOut ? format(checkOut, "dd MMM") : "Booking Till"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={checkOut}
+              onSelect={setCheckOut}
+              disabled={(date) => date < (checkIn || today)}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {/* Slot selector for venues */}
+      {isVenue && (
+        <div className="space-y-2">
+          <span className="text-xs font-semibold text-foreground">Select Slot</span>
+          <div className="grid grid-cols-3 gap-2">
+            {SLOTS.map((s) => (
+              <button
+                key={s.value}
+                onClick={() => setSlot(s.value)}
+                className={cn(
+                  "rounded-lg border px-2 py-2 text-center transition-all",
+                  slot === s.value
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                <div className="text-xs font-medium">{s.label}</div>
+                <div className="text-[10px] text-muted-foreground">{s.time}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Availability status */}
+      {checkIn && checkOut && (
+        <div className="flex items-center gap-2">
+          {availLoading ? (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Loader2 className="h-3 w-3 animate-spin" /> Checking availability...
+            </span>
+          ) : isAvailable ? (
+            <Badge variant="secondary" className={cn("text-xs gap-1", isLimited ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400")}>
+              <CheckCircle2 className="h-3 w-3" />
+              {isLimited ? "Limited Availability" : "Available"}
+            </Badge>
+          ) : (
+            <Badge variant="destructive" className="text-xs gap-1">
+              <AlertTriangle className="h-3 w-3" /> Sold Out
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {/* Price calculation */}
+      {checkIn && checkOut && pricePerUnit > 0 && (
+        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+          <div className="flex justify-between text-xs">
+            <span className="text-muted-foreground">₹{pricePerUnit.toLocaleString()} × {numDays} day{numDays > 1 ? "s" : ""}</span>
+            <span className="font-medium text-foreground">₹{totalPrice.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between text-sm font-bold pt-1 border-t border-border">
+            <span>Total</span>
+            <span className="text-primary">₹{totalPrice.toLocaleString()}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Venue-specific: Schedule Site Visit */}
+      {isVenue && (
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            onClick={() => setStep("site-visit")}
+            className="w-full h-10 text-xs font-semibold gap-1.5 border-primary/30 text-primary hover:bg-primary/5"
+          >
+            <MapPin className="h-3.5 w-3.5" /> Schedule Site Visit — ₹499
+          </Button>
+          <p className="text-[10px] text-muted-foreground text-center">
+            100% credited toward booking, or refunded if you don't proceed
+          </p>
+        </div>
+      )}
+
+      {/* Book Now */}
+      <Button
+        onClick={handleBookNow}
+        className="w-full h-12 text-sm font-semibold"
+        disabled={!checkIn || !checkOut || !isAvailable || holdLoading}
+      >
+        {holdLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        {!isAvailable ? "Sold Out" : isVenue ? "Direct Booking" : "Book Now"}
+      </Button>
+
+      <p className="text-[10px] text-muted-foreground text-center">
+        Your slot will be held for 10 minutes after clicking {isVenue ? "Direct Booking" : "Book Now"}
       </p>
     </div>
   );

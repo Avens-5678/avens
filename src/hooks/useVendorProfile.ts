@@ -7,7 +7,7 @@ export const useVendorProfile = (vendorId?: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, company_name, avatar_url, city")
+        .select("full_name, company_name, avatar_url, city, warehouse_pincode")
         .eq("user_id", vendorId!)
         .maybeSingle();
 

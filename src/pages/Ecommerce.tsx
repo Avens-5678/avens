@@ -7,6 +7,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows } from "lucide-react";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
 import VenueCompare from "@/components/ecommerce/VenueCompare";
+import VenueSearchBar from "@/components/ecommerce/VenueSearchBar";
+import CrewSubTabs from "@/components/ecommerce/CrewSubTabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";

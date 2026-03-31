@@ -191,6 +191,8 @@ const Ecommerce = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [selectedCapacity, setSelectedCapacity] = useState<string[]>([]);
   const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
   
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 

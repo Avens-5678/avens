@@ -86,6 +86,22 @@ export const useVendorRentalOrders = (vendorId?: string) => {
   });
 };
 
+export const useClientRentalOrders = (clientId?: string) => {
+  return useQuery({
+    queryKey: ["client_rental_orders", clientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rental_orders")
+        .select("*")
+        .eq("client_id", clientId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as RentalOrder[];
+    },
+    enabled: !!clientId,
+  });
+};
+
 export const useRentalOrders = (filters?: {
   status?: string;
   category?: string;

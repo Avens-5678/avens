@@ -517,69 +517,6 @@ const Ecommerce = () => {
           {cities.length === 0 && <p className="text-xs text-muted-foreground">No locations</p>}
         </FilterSection>
 
-        {/* Booking Dates */}
-        <FilterSection title="Booking Dates" sectionKey="dates">
-          <div className="space-y-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className={cn(
-                  "flex items-center gap-2 w-full text-left text-xs px-2.5 py-2 rounded-md border border-border bg-background hover:bg-muted transition-colors",
-                  !bookingDates.checkIn && "text-muted-foreground"
-                )}>
-                  <CalendarIcon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                  {bookingDates.checkIn ? format(bookingDates.checkIn, "dd MMM yyyy") : "Booking From"}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={bookingDates.checkIn}
-                  onSelect={(d) => {
-                    setBookingDates(prev => ({
-                      ...prev,
-                      checkIn: d || undefined,
-                      checkOut: d && prev.checkOut && d >= prev.checkOut ? undefined : prev.checkOut,
-                    }));
-                  }}
-                  disabled={(date) => date < new Date()}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className={cn(
-                  "flex items-center gap-2 w-full text-left text-xs px-2.5 py-2 rounded-md border border-border bg-background hover:bg-muted transition-colors",
-                  !bookingDates.checkOut && "text-muted-foreground"
-                )}>
-                  <CalendarIcon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                  {bookingDates.checkOut ? format(bookingDates.checkOut, "dd MMM yyyy") : "Booking Till"}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={bookingDates.checkOut}
-                  onSelect={(d) => setBookingDates(prev => ({ ...prev, checkOut: d || undefined }))}
-                  disabled={(date) => date < (bookingDates.checkIn || new Date())}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-
-            {(bookingDates.checkIn || bookingDates.checkOut) && (
-              <button
-                onClick={() => setBookingDates({})}
-                className="text-[10px] text-primary hover:text-primary/80 font-medium"
-              >
-                Clear dates
-              </button>
-            )}
-          </div>
-        </FilterSection>
 
 
         <FilterSection title="Price Range" sectionKey="price">

@@ -30,7 +30,7 @@ const COMPLETED_STATUSES = ["completed", "confirmed", "cancelled", "declined"];
 const PastOrders = () => {
   const { user } = useAuth();
   const { data: serviceRequests, isLoading: loadingServices } = useEventRequests();
-  const { data: rentalOrders, isLoading: loadingRentals } = useVendorRentalOrders(user?.id);
+  const { data: rentalOrders, isLoading: loadingRentals } = useClientRentalOrders(user?.id);
 
   const isLoading = loadingServices || loadingRentals;
 

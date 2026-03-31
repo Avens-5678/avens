@@ -60,11 +60,11 @@ const EcommerceOrders = () => {
   const userEmail = user?.email;
 
   const myRentalOrders = useMemo(() => {
-    if (!rentalOrders || !userEmail) return [];
+    if (!rentalOrders || !user?.id) return [];
     return rentalOrders.filter(
-      (o) => o.client_email?.toLowerCase() === userEmail.toLowerCase() || o.assigned_vendor_id === user?.id
+      (o) => o.client_id === user.id
     );
-  }, [rentalOrders, userEmail, user?.id]);
+  }, [rentalOrders, user?.id]);
 
   const myServiceOrders = useMemo(() => {
     if (!serviceOrders || !userEmail) return [];

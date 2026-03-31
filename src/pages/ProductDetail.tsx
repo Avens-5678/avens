@@ -452,11 +452,11 @@ const ProductDetail = () => {
               <BookingWidget rental={rental} selectedVariant={selectedVariant} />
 
 
-              {/* Legacy CTA Row (Add to Cart for quick enquiry) */}
+              {/* CTA Row */}
               <div ref={ctaRef} className="flex gap-3 pt-2">
                 {inCart ? (
                   <>
-                    <Button onClick={() => navigate("/cart")} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12">
+                    <Button onClick={() => navigate("/cart")} size="lg" className="flex-1 text-sm gap-2 h-12">
                       <ShoppingCart className="h-4 w-4" /> View Cart
                     </Button>
                     <Button
@@ -467,8 +467,8 @@ const ProductDetail = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={handleAddToCart} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12 border-primary text-primary hover:bg-primary/5">
-                    <ShoppingCart className="h-4 w-4" /> Add to Cart (Quick Enquiry)
+                  <Button onClick={handleAddToCart} size="lg" className="flex-1 text-sm gap-2 h-12">
+                    <ShoppingCart className="h-4 w-4" /> Add to Cart
                   </Button>
                 )}
               </div>

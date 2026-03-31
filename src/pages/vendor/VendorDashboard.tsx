@@ -22,7 +22,6 @@ import VendorEarnings from "@/components/vendor/VendorEarnings";
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
-  { icon: Briefcase, label: "Job Board", value: "jobs" },
   { icon: Plus, label: "New Request", value: "request" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: CalendarDays, label: "Calendar", value: "calendar" },

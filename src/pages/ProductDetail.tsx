@@ -50,7 +50,6 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [length, setLength] = useState<number>(0);
   const [breadth, setBreadth] = useState<number>(0);
-  const [quickCartOpen, setQuickCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCat, setSearchCat] = useState("");
   const [isZooming, setIsZooming] = useState(false);

@@ -106,8 +106,39 @@ const VendorProfileSettings = () => {
     );
   }
 
+  // Verification progress
+  const verificationChecks = [
+    { label: "Full Name", done: !!profile.full_name },
+    { label: "Phone Number", done: !!profile.phone },
+    { label: "Company Name", done: !!profile.company_name },
+    { label: "Business Address", done: !!profile.address },
+    { label: "City", done: !!profile.city },
+  ];
+  const verifiedCount = verificationChecks.filter(c => c.done).length;
+  const verifiedPercent = Math.round((verifiedCount / verificationChecks.length) * 100);
+
   return (
     <div className="space-y-6">
+      {/* Verification Progress */}
+      <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <BadgeCheck className="h-5 w-5 text-amber-600" />
+            <h3 className="font-semibold text-sm">Evnting Verified Progress</h3>
+            <span className="ml-auto text-xs font-bold text-amber-700">{verifiedPercent}%</span>
+          </div>
+          <Progress value={verifiedPercent} className="h-2" />
+          <div className="flex flex-wrap gap-2">
+            {verificationChecks.map((check) => (
+              <span key={check.label} className={`text-[10px] px-2 py-0.5 rounded-full ${check.done ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                {check.done ? "✓" : "○"} {check.label}
+              </span>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">Complete your profile + add a virtual tour + get 3 reviews to earn the <strong className="text-amber-700">Evnting Verified</strong> badge.</p>
+        </CardContent>
+      </Card>
+
       {/* Personal Details */}
       <Card>
         <CardHeader>

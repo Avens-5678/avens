@@ -82,7 +82,17 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         {/* Badges overlay */}
         {!isList && (
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
-            {isVendor && (
+            {isVerified && (
+              <Badge className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
+                <BadgeCheck className="h-3 w-3" /> Verified
+              </Badge>
+            )}
+            {hasVirtualTour && (
+              <Badge className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
+                <Eye className="h-3 w-3" /> 360° Tour
+              </Badge>
+            )}
+            {isVendor && !isVerified && (
               <Badge className="bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
                 <Store className="h-3 w-3" /> Vendor
               </Badge>

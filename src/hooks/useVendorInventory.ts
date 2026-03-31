@@ -43,6 +43,7 @@ export interface VendorInventoryItem {
   advance_amount: number | null;
   refund_rules: string | null;
   video_url: string | null;
+  virtual_tour_url: string | null;
   slot_types: string[] | null;
   created_at: string;
   updated_at: string;

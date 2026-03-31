@@ -244,6 +244,11 @@ const VenueFormFields = ({ formData, setFormData }: VenueFormFieldsProps) => {
           </div>
         </div>
         <div className="space-y-1">
+          <Label>360° Virtual Tour URL</Label>
+          <Input value={formData.virtual_tour_url || ''} onChange={(e) => setFormData(prev => ({ ...prev, virtual_tour_url: e.target.value }))} placeholder="https://my.matterport.com/show/... or YouTube 360 link" />
+          <p className="text-xs text-muted-foreground">Matterport, YouTube 360, or any embeddable tour link. Helps earn the "Evnting Verified" badge.</p>
+        </div>
+        <div className="space-y-1">
           <Label>Cancellation Policy</Label>
           <Textarea value={formData.cancellation_policy || ''} onChange={(e) => setFormData(prev => ({ ...prev, cancellation_policy: e.target.value }))} rows={2} placeholder="e.g. Full refund if cancelled 30 days before event" />
         </div>

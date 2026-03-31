@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
-import QuickCartSheet from "@/components/ecommerce/QuickCartSheet";
 import BookingWidget from "@/components/ecommerce/BookingWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,7 +50,6 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [length, setLength] = useState<number>(0);
   const [breadth, setBreadth] = useState<number>(0);
-  const [quickCartOpen, setQuickCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCat, setSearchCat] = useState("");
   const [isZooming, setIsZooming] = useState(false);
@@ -193,8 +191,8 @@ const ProductDetail = () => {
       vendor_id: rental._source === "vendor" ? rental.vendor_id : undefined,
       vendor_pincode: vendorProfile?.warehouse_pincode || undefined,
     });
-    // Quick cart sheet opens automatically - no toast needed
-    setQuickCartOpen(true);
+    // Navigate to cart
+    navigate("/cart");
   };
 
   const handleShare = async () => {
@@ -462,7 +460,7 @@ const ProductDetail = () => {
               <div ref={ctaRef} className="flex gap-3 pt-2">
                 {inCart ? (
                   <>
-                    <Button onClick={() => setQuickCartOpen(true)} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12">
+                    <Button onClick={() => navigate("/cart")} size="lg" variant="outline" className="flex-1 text-sm gap-2 h-12">
                       <ShoppingCart className="h-4 w-4" /> View Cart
                     </Button>
                     <Button
@@ -613,7 +611,7 @@ const ProductDetail = () => {
             ) : null}
           </div>
           {inCart ? (
-            <Button onClick={() => setQuickCartOpen(true)} size="sm" className="h-10 px-6 text-sm">
+            <Button onClick={() => navigate("/cart")} size="sm" className="h-10 px-6 text-sm">
               <ShoppingCart className="h-4 w-4 mr-1.5" /> View Cart
             </Button>
           ) : (
@@ -624,14 +622,8 @@ const ProductDetail = () => {
         </div>
       )}
 
-      {/* Quick Cart Sheet */}
-      <QuickCartSheet
-        open={quickCartOpen}
-        onOpenChange={setQuickCartOpen}
-        allRentals={rentals || []}
-        currentCategories={rental.categories || []}
-        currentProductId={id}
-      />
+
+
     </Layout>
   );
 };

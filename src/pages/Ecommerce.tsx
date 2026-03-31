@@ -168,7 +168,6 @@ const Ecommerce = () => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     categories: true,
     city: true,
-    dates: true,
     price: false,
     availability: false,
     amenities: false,

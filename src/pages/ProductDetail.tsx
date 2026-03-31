@@ -190,6 +190,8 @@ const ProductDetail = () => {
       service_type: (rental as any).service_type || "rental",
       length: isMeasurable ? length : undefined,
       breadth: isMeasurable ? breadth : undefined,
+      vendor_id: rental._source === "vendor" ? rental.vendor_id : undefined,
+      vendor_pincode: vendorProfile?.warehouse_pincode || undefined,
     });
     // Quick cart sheet opens automatically - no toast needed
     setQuickCartOpen(true);

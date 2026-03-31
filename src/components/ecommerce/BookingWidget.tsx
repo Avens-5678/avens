@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { format, differenceInDays, addDays } from "date-fns";
-import { CalendarIcon, Clock, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { CalendarIcon, Clock, AlertTriangle, CheckCircle2, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,6 +12,8 @@ import { useCreateRentalOrder } from "@/hooks/useRentalOrders";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingWidgetProps {
   rental: any;

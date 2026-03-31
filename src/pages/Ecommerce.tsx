@@ -663,6 +663,20 @@ const Ecommerce = () => {
 
 
 
+      {/* Venue Search Bar — when venues selected */}
+      {activeServiceType === "venue" && (
+        <div className="container mx-auto px-4 sm:px-6 py-3">
+          <VenueSearchBar onSearch={(filters) => setVenueSearchFilters(filters)} />
+        </div>
+      )}
+
+      {/* Crew Sub-tabs — when crew selected */}
+      {activeServiceType === "crew" && (
+        <div className="container mx-auto px-4 sm:px-6 py-3">
+          <CrewSubTabs activeTab={crewSubTab} onTabChange={setCrewSubTab} />
+        </div>
+      )}
+
       {/* Category Quick Browse Strip with Icons — only when a service is selected */}
       {!isDiscoveryView && (
         <CategoryIconStrip

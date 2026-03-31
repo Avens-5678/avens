@@ -94,6 +94,8 @@ const VendorDashboard = () => {
         return <InventoryManager />;
       case "calendar":
         return <AvailabilityCalendar />;
+      case "site-visits":
+        return <SiteVisitManager />;
       case "offline":
         return <VendorOfflineBooking />;
       case "quotes":

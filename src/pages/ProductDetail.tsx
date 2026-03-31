@@ -492,6 +492,65 @@ const ProductDetail = () => {
         </div>
       </section>
 
+      {/* ── AMENITIES + HOUSE RULES (Venues only) ── */}
+      {(rental.service_type === "venue") && (
+        <section className="border-t border-border">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-6 space-y-6">
+            <AmenitiesMatrix
+              amenitiesMatrix={rental.amenities_matrix || {}}
+              amenities={rental.amenities}
+            />
+            <HouseRules rules={rental.house_rules || []} />
+
+            {/* Per-plate pricing calculator */}
+            {rental.venue_pricing_model === "per_plate" && rental.price_value && (
+              <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+                <h3 className="text-sm font-bold text-foreground">Estimated Cost Calculator</h3>
+                <p className="text-xs text-muted-foreground">
+                  Base rate: ₹{rental.price_value.toLocaleString()} / Plate
+                </p>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-muted-foreground">For 100 guests:</span>
+                  <span className="font-bold text-primary">~₹{(rental.price_value * 100).toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-muted-foreground">For 300 guests:</span>
+                  <span className="font-bold text-primary">~₹{(rental.price_value * 300).toLocaleString()}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Packages display */}
+            {rental.packages && rental.packages.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-foreground">Available Packages</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {rental.packages.map((pkg: any, i: number) => (
+                    <div key={i} className="border border-border rounded-lg p-4 space-y-1">
+                      <p className="text-sm font-semibold text-foreground">{pkg.name}</p>
+                      {pkg.description && (
+                        <p className="text-xs text-muted-foreground">{pkg.description}</p>
+                      )}
+                      <p className="text-base font-bold text-primary">
+                        ₹{(pkg.base_price || pkg.price || 0).toLocaleString()}
+                        {pkg.unit && <span className="text-xs font-normal text-muted-foreground"> / {pkg.unit}</span>}
+                      </p>
+                      {pkg.deliverables && pkg.deliverables.length > 0 && (
+                        <ul className="text-xs text-muted-foreground space-y-0.5 pt-1">
+                          {pkg.deliverables.map((d: string, j: number) => (
+                            <li key={j}>✓ {d}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* ── BELOW-THE-FOLD TABS ── */}
       <section className="border-t border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-6">

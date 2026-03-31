@@ -39,6 +39,8 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
   const isVendor = rental._source === "vendor";
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
+  const hasVirtualTour = !!rental.virtual_tour_url;
+  const isVerified = rental.is_verified;
 
   const handleClick = () => {
     addViewed(rental.id);

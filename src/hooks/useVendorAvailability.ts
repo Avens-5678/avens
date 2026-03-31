@@ -48,31 +48,33 @@ export const useToggleBookedDate = () => {
       inventoryItemId,
       isBooked,
       notes,
+      slot = "full_day",
     }: {
       date: string;
       inventoryItemId?: string;
       isBooked: boolean;
       notes?: string;
+      slot?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
 
       if (isBooked) {
-        // Add booked date
         const { error } = await supabase.from("vendor_availability").insert({
           vendor_id: user.id,
           inventory_item_id: inventoryItemId || null,
           date,
           is_booked: true,
+          slot,
           notes: notes || null,
         });
         if (error) throw error;
       } else {
-        // Remove booked date
         let query = supabase
           .from("vendor_availability")
           .delete()
           .eq("vendor_id", user.id)
-          .eq("date", date);
+          .eq("date", date)
+          .eq("slot", slot);
 
         if (inventoryItemId) {
           query = query.eq("inventory_item_id", inventoryItemId);

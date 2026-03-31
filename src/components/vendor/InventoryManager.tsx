@@ -20,9 +20,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Package, Plus, Edit, Trash2, Save, X, ImageIcon, Search, Filter, ShieldCheck, IndianRupee } from "lucide-react";
+import { Loader2, Package, Plus, Edit, Trash2, Save, X, ImageIcon, Search, Filter, ShieldCheck, IndianRupee, CalendarDays } from "lucide-react";
 import CSVUploader from "./CSVUploader";
 import VenueFormFields from "./VenueFormFields";
+import ItemAvailabilityCalendar from "./ItemAvailabilityCalendar";
 
 const RENTAL_CATEGORIES = [
   "Event Structures & Venues",
@@ -109,6 +110,7 @@ const InventoryManager = () => {
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [expandedCalendarId, setExpandedCalendarId] = useState<string | null>(null);
 
   // Variant state
   const [hasVariants, setHasVariants] = useState(false);
@@ -747,10 +749,24 @@ const InventoryManager = () => {
                         checked={item.is_available}
                         onCheckedChange={(checked) => toggleAvailability({ id: item.id, is_available: checked })}
                       />
+                      <Button
+                        onClick={() => setExpandedCalendarId(expandedCalendarId === item.id ? null : item.id)}
+                        variant={expandedCalendarId === item.id ? "default" : "outline"}
+                        size="sm"
+                        title="Availability Calendar"
+                      >
+                        <CalendarDays className="h-4 w-4" />
+                      </Button>
                       <Button onClick={() => handleEdit(item)} variant="outline" size="sm"><Edit className="h-4 w-4" /></Button>
                       <Button onClick={() => handleDelete(item.id)} variant="outline" size="sm"><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </div>
+                  {expandedCalendarId === item.id && (
+                    <ItemAvailabilityCalendar
+                      itemId={item.id}
+                      serviceType={item.service_type || "rental"}
+                    />
+                  )}
                 </CardContent>
               </Card>
             ))}

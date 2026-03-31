@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, CalendarDays, FileText, TrendingUp, BookOpen, MapPin } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import InventoryManager from "@/components/vendor/InventoryManager";
@@ -11,7 +11,7 @@ import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import OrderTracker from "@/components/vendor/OrderTracker";
-import AvailabilityCalendar from "@/components/vendor/AvailabilityCalendar";
+
 import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
 import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 import VendorEarnings from "@/components/vendor/VendorEarnings";
@@ -21,7 +21,6 @@ const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Package, label: "Inventory", value: "inventory" },
-  { icon: CalendarDays, label: "Calendar", value: "calendar" },
   { icon: MapPin, label: "Site Visits", value: "site-visits" },
   { icon: BookOpen, label: "Offline Booking", value: "offline" },
   { icon: FileText, label: "Quotation Maker", value: "quotes" },
@@ -92,8 +91,6 @@ const VendorDashboard = () => {
         return <OrderTracker />;
       case "inventory":
         return <InventoryManager />;
-      case "calendar":
-        return <AvailabilityCalendar />;
       case "site-visits":
         return <SiteVisitManager />;
       case "offline":

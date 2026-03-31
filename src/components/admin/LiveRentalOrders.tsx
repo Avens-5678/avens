@@ -525,7 +525,7 @@ const LiveRentalOrders = () => {
       {/* Orders List */}
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading orders...</div>
-      ) : !orders?.length ? (
+      ) : !filteredOrders.length ? (
         <Card>
           <CardContent className="text-center py-12">
             <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -535,7 +535,7 @@ const LiveRentalOrders = () => {
         </Card>
       ) : (
         <div className="space-y-3">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <Card key={order.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">

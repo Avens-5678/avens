@@ -4,6 +4,8 @@ import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import BookingWidget from "@/components/ecommerce/BookingWidget";
 import SmartRecommendations from "@/components/ecommerce/SmartRecommendations";
+import AmenitiesMatrix from "@/components/ecommerce/AmenitiesMatrix";
+import HouseRules from "@/components/ecommerce/HouseRules";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

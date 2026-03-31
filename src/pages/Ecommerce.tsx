@@ -321,7 +321,18 @@ const Ecommerce = () => {
         selectedExperience.length === 0 ||
         selectedExperience.includes(rental.experience_level || "");
 
-      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience;
+      // Crew sub-tab filter
+      const matchesCrewType = activeServiceType !== "crew" || !rental.crew_type ||
+        (crewSubTab === "commodity" ? rental.crew_type === "commodity" : rental.crew_type === "creative");
+
+      // Venue search bar: guest count filter
+      const matchesVenueGuestCount = !venueSearchFilters.guestCount || activeServiceType !== "venue" ||
+        (rental.min_capacity && rental.max_capacity &&
+          venueSearchFilters.guestCount >= rental.min_capacity &&
+          venueSearchFilters.guestCount <= rental.max_capacity) ||
+        (!rental.min_capacity && !rental.max_capacity);
+
+      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience && matchesCrewType && matchesVenueGuestCount;
     });
 
     switch (sortBy) {

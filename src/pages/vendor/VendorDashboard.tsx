@@ -92,8 +92,7 @@ const VendorDashboard = () => {
         return null;
       case "orders":
         return <OrderTracker />;
-      case "jobs":
-        return <JobBoard />;
+      case "request":
       case "request":
         return (
           <Card className="rounded-2xl">

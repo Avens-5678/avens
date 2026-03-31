@@ -115,8 +115,13 @@ const Cart = () => {
       navigate("/client");
       return;
     }
-    if (!eventDetails.event_start_date) {
-      toast({ title: "Missing information", description: "Please select a start date.", variant: "destructive" });
+    // Derive dates from cart items
+    const bookingFromDates = items.map(i => i.booking_from).filter(Boolean) as string[];
+    const bookingTillDates = items.map(i => i.booking_till).filter(Boolean) as string[];
+    const derivedStartDate = bookingFromDates.length > 0 ? bookingFromDates.sort()[0] : "";
+    const derivedEndDate = bookingTillDates.length > 0 ? bookingTillDates.sort().reverse()[0] : "";
+    if (!derivedStartDate) {
+      toast({ title: "Missing dates", description: "Please add items with booking dates.", variant: "destructive" });
       return;
     }
     if (showVenueAddressFields && !eventDetails.venue_address_line1) {

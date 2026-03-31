@@ -349,6 +349,11 @@ const ProductDetail = () => {
                 >
                   <Store className="h-3.5 w-3.5" />
                   <span>Sold by: <span className="font-semibold text-foreground group-hover:text-primary">{vendorProfile.company_name || vendorProfile.full_name}</span></span>
+                  {rental.is_verified && (
+                    <span className="inline-flex items-center gap-0.5 text-amber-600 text-[10px] font-bold ml-1">
+                      <BadgeCheck className="h-3 w-3" /> Verified
+                    </span>
+                  )}
                 </button>
               )}
               <div className="flex items-center gap-3 flex-wrap">

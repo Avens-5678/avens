@@ -824,6 +824,26 @@ const Ecommerce = () => {
         </section>
       )}
 
+      {/* Compare sticky bar */}
+      {compareIds.length >= 2 && (
+        <div className="fixed bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 z-50">
+          <Button
+            onClick={() => setCompareOpen(true)}
+            className="rounded-full shadow-xl gap-2 px-6"
+          >
+            <GitCompareArrows className="h-4 w-4" />
+            Compare {compareIds.length} Venues
+          </Button>
+        </div>
+      )}
+
+      <VenueCompare
+        items={compareItems}
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+        onRemove={(id) => setCompareIds((prev) => prev.filter((x) => x !== id))}
+      />
+
       {/* Floating Cart — hidden on mobile where bottom nav takes over */}
       {items.length > 0 && (
         <div className="hidden md:block fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">

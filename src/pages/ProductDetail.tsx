@@ -191,8 +191,8 @@ const ProductDetail = () => {
       vendor_id: rental._source === "vendor" ? rental.vendor_id : undefined,
       vendor_pincode: vendorProfile?.warehouse_pincode || undefined,
     });
-    // Quick cart sheet opens automatically - no toast needed
-    setQuickCartOpen(true);
+    // Navigate to cart
+    navigate("/cart");
   };
 
   const handleShare = async () => {

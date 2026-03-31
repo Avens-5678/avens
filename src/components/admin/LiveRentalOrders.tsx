@@ -57,7 +57,8 @@ const LiveRentalOrders = () => {
   const [vendorSearch, setVendorSearch] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [localityFilter, setLocalityFilter] = useState("");
-
+  const [vendorFilter, setVendorFilter] = useState("all");
+  const [orderSearch, setOrderSearch] = useState("");
   const [newOrder, setNewOrder] = useState<RentalOrderInsert>({
     title: "", equipment_category: "General", equipment_details: "",
     location: "", event_date: "", budget: "", client_name: "",

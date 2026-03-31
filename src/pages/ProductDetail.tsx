@@ -575,6 +575,9 @@ const ProductDetail = () => {
         </div>
       </section>
 
+      {/* ── SMART RECOMMENDATIONS ── */}
+      <SmartRecommendations currentItem={rental} allItems={allItems} />
+
       {/* ── YOU MAY ALSO LIKE ── */}
       {suggestions.length > 0 && (
         <section className="py-8 border-t border-border bg-muted/20">

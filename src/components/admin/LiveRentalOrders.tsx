@@ -360,13 +360,35 @@ const LiveRentalOrders = () => {
     return true;
   });
 
+  // Build unique vendor list for filter dropdown
+  const uniqueVendors = Object.entries(vendorProfiles || {}).map(([id, p]: [string, any]) => ({
+    id,
+    name: p.company_name || p.full_name || "Unknown Vendor",
+  })).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Apply client-side vendor + search filters
+  const filteredOrders = (orders || []).filter((o) => {
+    if (vendorFilter === "unassigned" && o.assigned_vendor_id) return false;
+    if (vendorFilter !== "all" && vendorFilter !== "unassigned" && o.assigned_vendor_id !== vendorFilter) return false;
+    if (orderSearch) {
+      const q = orderSearch.toLowerCase();
+      const vp = vendorProfiles?.[o.assigned_vendor_id || ""];
+      const searchable = [
+        o.title, o.client_name, o.equipment_category, o.location,
+        vp?.full_name, vp?.company_name,
+      ].filter(Boolean).join(" ").toLowerCase();
+      if (!searchable.includes(q)) return false;
+    }
+    return true;
+  });
+
   const stats = {
-    total: orders?.length || 0,
-    new: orders?.filter((o) => o.status === "new").length || 0,
-    sent: orders?.filter((o) => o.status === "sent_to_vendors").length || 0,
-    quoted: orders?.filter((o) => o.status === "quoted").length || 0,
-    accepted: orders?.filter((o) => o.status === "accepted").length || 0,
-    declined: orders?.filter((o) => o.status === "declined").length || 0,
+    total: filteredOrders.length,
+    new: filteredOrders.filter((o) => o.status === "new").length,
+    sent: filteredOrders.filter((o) => o.status === "sent_to_vendors").length,
+    quoted: filteredOrders.filter((o) => o.status === "quoted").length,
+    accepted: filteredOrders.filter((o) => o.status === "accepted").length,
+    declined: filteredOrders.filter((o) => o.status === "declined").length,
   };
 
   return (

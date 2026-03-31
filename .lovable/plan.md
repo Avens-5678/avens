@@ -1,69 +1,108 @@
 
 
-## Ecommerce Flow & Dashboard Audit — Issues Found + Improvement Ideas
+## Venue Enhancement — Virtual Tours, Compare, Seasonal Pricing, Verified Badge & Smart Recommendations
 
-### Issues to Fix
+### Overview
 
-**1. Duplicate "Book this item" + "Add to Cart" on Product Detail Page**
-The PDP shows BOTH a `BookingWidget` (date-based booking with hold system) AND a legacy "Add to Cart (Quick Enquiry)" button below it. These are two competing checkout paths on the same page. The BookingWidget already handles dates + booking. The legacy cart button creates confusion.
-- **Fix**: Remove the legacy "Add to Cart (Quick Enquiry)" CTA from PDP. Keep only the BookingWidget for date-based booking AND an "Add to Cart" flow for multi-item enquiries. Clarify the two paths: BookingWidget = instant single-item booking, Cart = multi-item enquiry.
-
-**2. Vendor Dashboard: "My Orders" and "Past Orders" show the same data**
-- `OrderTracker` (tab: "orders") uses `useVendorRentalOrders` — splits into Pending vs Completed tabs.
-- `PastOrders` (tab: "past-orders") also uses `useVendorRentalOrders` — splits into Pending, Completed, and Events tabs.
-- These are essentially duplicate views of the same rental orders data. Vendor sees the same orders in two places.
-- **Fix**: Remove "Past Orders" from vendor sidebar entirely. `OrderTracker` already covers both active and completed orders.
-
-**3. Vendor Dashboard: "New Request" tab is irrelevant**
-- The vendor dashboard has a "New Request" tab that renders `EventRequestForm` — this is a CLIENT form for submitting event requests. Vendors should not be submitting event requests to themselves.
-- **Fix**: Remove the "New Request" sidebar item from vendor dashboard.
-
-**4. Client Dashboard: "Past Orders" uses vendor-scoped hook**
-- `PastOrders.tsx` uses `useVendorRentalOrders(user?.id)` which filters by `assigned_vendor_id`. For a CLIENT, this returns nothing because clients are not vendors. Clients should see orders where `client_id = user.id`.
-- **Fix**: Create/use a client-scoped query (`client_id = user.id`) for the client dashboard's Past Orders.
-
-**5. EcommerceOrders page filters by email match — fragile**
-- `EcommerceOrders.tsx` filters rental orders by `client_email` match against `user.email`. This is fragile (email can change, case issues). Should filter by `client_id = user.id`.
-- **Fix**: Filter by `client_id` instead of email.
-
-**6. Fake review count on PDP**
-- Line 359: `({Math.floor(Math.random() * 50 + 10)} Reviews)` — shows random fake review counts that change on every render.
-- **Fix**: Show actual review count from the reviews query, or hide if no reviews.
-
-**7. Booking dates in sidebar filters don't actually filter products**
-- The ecommerce sidebar has "Booking Dates" filter section with check-in/check-out date pickers, but `bookingDates` state is never used in the `filteredRentals` logic. It's a dead filter.
-- **Fix**: Either connect it to availability checking or remove it to avoid confusing users.
+Five professional features to elevate the venue marketplace to MMT/OYO level.
 
 ---
 
-### Improvement Ideas
+### 1. Virtual Tour Integration
 
-**A. Unified "Add to Cart" + Booking Flow**
-Currently there are two paths: BookingWidget (hold-based) and Cart (enquiry-based). Merge them: when user selects dates in BookingWidget and clicks "Book Now", it should add to cart WITH dates attached, then redirect to cart for checkout. This matches how MMT/OYO work — select dates, then proceed to payment page.
+**Database:** Add `virtual_tour_url` column to `vendor_inventory` (text, nullable). Already has `video_url` — this is separate for Matterport/360° embeds.
 
-**B. Client Dashboard: Add "My Orders" tab linked to EcommerceOrders**
-Client dashboard currently has "My Requests" (event tracker) and "Past Orders" (broken). Replace "Past Orders" with a proper "My Rental Orders" tab that shows the client's rental orders filtered by `client_id`.
+**Vendor Form (`VenueFormFields.tsx`):** Add "Virtual Tour URL" input field (accepts Matterport, YouTube 360, or any embed URL).
 
-**C. Product card should show price per day clearly**
-Add "/ day" or "/ event" suffix on product cards in the grid to set pricing expectations upfront.
+**Product Detail Page (`ProductDetail.tsx`):** Add a "Virtual Tour" tab in the existing Tabs component. If `virtual_tour_url` exists, render an iframe embed. If YouTube, convert to embed URL. If Matterport, embed directly. Show a "360° Tour Available" badge on the product card.
 
-**D. Wishlist/Save for Later**
-The PDP has a Bookmark icon but it does nothing. Either implement save-for-later or remove the button.
-
-**E. Order confirmation page**
-After placing an order, user is just shown a toast. Add a proper order confirmation page with order details, estimated timeline, and a "Track Order" CTA.
+**Product Card (`EnhancedProductCard.tsx`):** Show a small "360° Tour" badge icon if the item has a `virtual_tour_url`.
 
 ---
 
-### Recommended Plan (Prioritized)
+### 2. Venue Comparison Feature
 
-| # | Change | Files |
+**New Component: `src/components/ecommerce/VenueCompare.tsx`**
+- A comparison drawer/sheet that slides up from bottom
+- State managed via React context or URL params
+- Users click "Compare" checkbox on venue cards (max 3)
+- Sticky bottom bar shows "Compare X venues" button when 2+ selected
+- Clicking opens a side-by-side table: capacity, amenities (checkmarks), price, ratings, catering type, parking, AC, virtual tour availability
+
+**Changes:**
+- `EnhancedProductCard.tsx`: Add a "Compare" checkbox for venue items
+- `Ecommerce.tsx`: Add comparison state, render `VenueCompare` sheet
+- Comparison data pulled from already-loaded items (no extra queries)
+
+---
+
+### 3. Seasonal Pricing
+
+**Database:** Create `seasonal_pricing` table:
+- `id` (uuid, PK)
+- `inventory_item_id` (uuid, references vendor_inventory)
+- `season_name` (text — e.g., "Wedding Season", "Diwali")
+- `start_date` (date)
+- `end_date` (date)
+- `price_multiplier` (numeric, default 1.0 — e.g., 1.25 for 25% markup)
+- `is_active` (boolean, default true)
+- RLS: vendors can manage own (via inventory_item_id join), public can read active
+
+**Vendor Dashboard:** Add "Seasonal Pricing" section in venue form — vendor sets date ranges + multiplier (e.g., "Wedding Season: Nov 15 – Feb 28, +25%").
+
+**Marketplace Logic:** When displaying venue price on PDP/cards, check if today (or selected booking dates) falls within any active seasonal pricing range. If yes, show original price struck through + seasonal price. Use a utility function `getSeasonalPrice(basePrice, itemId, checkIn)`.
+
+---
+
+### 4. Evnting Verified Badge
+
+**Logic (no new table needed):** Compute badge eligibility client-side from existing data:
+- Profile completeness: `company_name`, `phone`, `address`, `avatar_url` all filled → ✓
+- Virtual tour: `virtual_tour_url` is set → ✓
+- Reviews: 3+ approved reviews from `rental_reviews` → ✓
+- All three conditions met = "Evnting Verified"
+
+**New hook: `src/hooks/useVerifiedStatus.ts`**
+- Takes `itemId` and `vendorId`
+- Queries `profiles` (vendor profile fields), checks `virtual_tour_url` on item, counts `rental_reviews`
+- Returns `{ isVerified, completionPercent, missingItems[] }`
+
+**UI Changes:**
+- `EnhancedProductCard.tsx`: Show gold "Evnting Verified ✓" badge if verified
+- `ProductDetail.tsx`: Show verified badge near vendor name with tooltip showing what's verified
+- `VendorProfileSettings.tsx`: Show verification progress bar — "Complete X more steps to get Evnting Verified"
+
+---
+
+### 5. Smart Recommendations
+
+**New Component: `src/components/ecommerce/SmartRecommendations.tsx`**
+- Appears on venue PDP below the booking widget
+- Heading: "Based on your requirements, we also recommend"
+- Algorithm: from the already-loaded venue items, filter by:
+  - Same city/location (fuzzy match on `address`)
+  - `min_capacity ≤ guest_count ≤ max_capacity` (if user entered guest count in booking widget)
+  - Price within ±30% of current venue
+  - Exclude current venue
+  - Sort by rating descending, take top 3
+- Renders as a horizontal scroll of `EnhancedProductCard` components
+
+**Also show on Ecommerce page:** If user has applied guest count or budget filters, show a "Recommended for you" row at top using same algorithm.
+
+---
+
+### File Changes Summary
+
+| # | File | Change |
 |---|---|---|
-| 1 | Remove duplicate "Past Orders" from vendor dashboard; keep only "My Orders" (OrderTracker) | `VendorDashboard.tsx` |
-| 2 | Remove "New Request" from vendor sidebar (client-only feature) | `VendorDashboard.tsx` |
-| 3 | Fix client PastOrders to query by `client_id` instead of `assigned_vendor_id` | `PastOrders.tsx`, `useRentalOrders.ts` |
-| 4 | Fix EcommerceOrders to filter by `client_id` instead of email | `EcommerceOrders.tsx` |
-| 5 | Remove fake review count on PDP; show real count | `ProductDetail.tsx` |
-| 6 | Remove dead booking dates filter from sidebar (not connected to filtering logic) | `Ecommerce.tsx` |
-| 7 | Remove non-functional Bookmark button from PDP | `ProductDetail.tsx` |
+| 1 | DB Migration | Add `virtual_tour_url` to `vendor_inventory`; create `seasonal_pricing` table with RLS |
+| 2 | `VenueFormFields.tsx` | Add virtual tour URL input + seasonal pricing date range manager |
+| 3 | `ProductDetail.tsx` | Add Virtual Tour tab, verified badge, smart recommendations section |
+| 4 | `EnhancedProductCard.tsx` | Add 360° tour badge, compare checkbox, verified badge |
+| 5 | New: `VenueCompare.tsx` | Side-by-side comparison sheet for up to 3 venues |
+| 6 | `Ecommerce.tsx` | Add compare state/UI, recommended row |
+| 7 | New: `SmartRecommendations.tsx` | Recommendation algorithm + horizontal scroller |
+| 8 | New: `useVerifiedStatus.ts` | Hook to compute Evnting Verified eligibility |
+| 9 | `VendorProfileSettings.tsx` | Show verification progress bar |
+| 10 | `useVendorInventory.ts` | Add `virtual_tour_url` to interfaces |
 

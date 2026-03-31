@@ -622,14 +622,8 @@ const ProductDetail = () => {
         </div>
       )}
 
-      {/* Quick Cart Sheet */}
-      <QuickCartSheet
-        open={quickCartOpen}
-        onOpenChange={setQuickCartOpen}
-        allRentals={rentals || []}
-        currentCategories={rental.categories || []}
-        currentProductId={id}
-      />
+
+
     </Layout>
   );
 };

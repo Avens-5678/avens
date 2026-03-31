@@ -801,7 +801,19 @@ const Ecommerce = () => {
                       } sm:grid-cols-2 lg:grid-cols-3`}
                     >
                       {filteredRentals.map((rental) => (
-                        <EnhancedProductCard key={rental.id} rental={rental} viewMode={mobileView} />
+                        <div key={rental.id} className="relative">
+                          <EnhancedProductCard rental={rental} viewMode={mobileView} />
+                          {activeServiceType === "venue" && (
+                            <label className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-background/90 backdrop-blur-sm rounded-md px-1.5 py-1 cursor-pointer border border-border shadow-sm">
+                              <Checkbox
+                                checked={compareIds.includes(rental.id)}
+                                onCheckedChange={() => toggleCompare(rental.id)}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className="text-[10px] font-medium">Compare</span>
+                            </label>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}

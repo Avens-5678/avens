@@ -20,9 +20,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Package, Plus, Edit, Trash2, Save, X, ImageIcon, Search, Filter, ShieldCheck, IndianRupee } from "lucide-react";
+import { Loader2, Package, Plus, Edit, Trash2, Save, X, ImageIcon, Search, Filter, ShieldCheck, IndianRupee, CalendarDays } from "lucide-react";
 import CSVUploader from "./CSVUploader";
 import VenueFormFields from "./VenueFormFields";
+import ItemAvailabilityCalendar from "./ItemAvailabilityCalendar";
 
 const RENTAL_CATEGORIES = [
   "Event Structures & Venues",

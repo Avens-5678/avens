@@ -25,6 +25,7 @@ const VendorProfileSettings = () => {
     city: "",
     gst_number: "",
     pan_number: "",
+    warehouse_pincode: "",
   });
 
   useEffect(() => {
@@ -50,6 +51,7 @@ const VendorProfileSettings = () => {
           city: (data as any).city || "",
           gst_number: (data as any).gst_number || "",
           pan_number: (data as any).pan_number || "",
+          warehouse_pincode: (data as any).warehouse_pincode || "",
         });
       }
 
@@ -75,7 +77,8 @@ const VendorProfileSettings = () => {
         city: profile.city,
         gst_number: profile.gst_number,
         pan_number: profile.pan_number,
-      })
+        warehouse_pincode: profile.warehouse_pincode,
+      } as any)
       .eq("user_id", user.id);
 
     if (error) {
@@ -219,15 +222,30 @@ const VendorProfileSettings = () => {
               className="min-h-[80px]"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="godown_address">Godown / Warehouse Address</Label>
-            <Textarea
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="godown_address">Godown / Warehouse Address</Label>
+              <Textarea
               id="godown_address"
               value={profile.godown_address}
               onChange={(e) => setProfile({ ...profile, godown_address: e.target.value })}
               placeholder="Where your equipment / inventory is stored"
               className="min-h-[80px]"
             />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="warehouse_pincode">Warehouse / Godown PIN Code</Label>
+              <Input
+                id="warehouse_pincode"
+                value={profile.warehouse_pincode}
+                onChange={(e) => setProfile({ ...profile, warehouse_pincode: e.target.value })}
+                placeholder="e.g. 500081"
+                maxLength={6}
+              />
+              <p className="text-xs text-muted-foreground">
+                Used for transport cost calculation to client delivery address.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

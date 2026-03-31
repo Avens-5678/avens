@@ -524,6 +524,33 @@ export type Database = {
         }
         Relationships: []
       }
+      logistics_config: {
+        Row: {
+          id: string
+          labor_units_per_loader: number
+          loader_daily_rate: number
+          markup_percent: number
+          min_booking_hours: number
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          labor_units_per_loader?: number
+          loader_daily_rate?: number
+          markup_percent?: number
+          min_booking_hours?: number
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          labor_units_per_loader?: number
+          loader_daily_rate?: number
+          markup_percent?: number
+          min_booking_hours?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       news_achievements: {
         Row: {
           content: string
@@ -640,6 +667,7 @@ export type Database = {
           role: string | null
           updated_at: string
           user_id: string
+          warehouse_pincode: string | null
         }
         Insert: {
           address?: string | null
@@ -658,6 +686,7 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id: string
+          warehouse_pincode?: string | null
         }
         Update: {
           address?: string | null
@@ -676,6 +705,7 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id?: string
+          warehouse_pincode?: string | null
         }
         Relationships: []
       }
@@ -893,11 +923,15 @@ export type Database = {
           is_offline: boolean | null
           is_vendor_direct: boolean | null
           location: string | null
+          manpower_fee: number | null
           notes: string | null
+          platform_fee: number | null
           status: string
           title: string
+          transport_fee: number | null
           updated_at: string
           vendor_inventory_item_id: string | null
+          vendor_payout: number | null
           vendor_quote_amount: number | null
           vendor_responded_at: string | null
           vendor_response: string | null
@@ -923,11 +957,15 @@ export type Database = {
           is_offline?: boolean | null
           is_vendor_direct?: boolean | null
           location?: string | null
+          manpower_fee?: number | null
           notes?: string | null
+          platform_fee?: number | null
           status?: string
           title: string
+          transport_fee?: number | null
           updated_at?: string
           vendor_inventory_item_id?: string | null
+          vendor_payout?: number | null
           vendor_quote_amount?: number | null
           vendor_responded_at?: string | null
           vendor_response?: string | null
@@ -953,11 +991,15 @@ export type Database = {
           is_offline?: boolean | null
           is_vendor_direct?: boolean | null
           location?: string | null
+          manpower_fee?: number | null
           notes?: string | null
+          platform_fee?: number | null
           status?: string
           title?: string
+          transport_fee?: number | null
           updated_at?: string
           vendor_inventory_item_id?: string | null
+          vendor_payout?: number | null
           vendor_quote_amount?: number | null
           vendor_responded_at?: string | null
           vendor_response?: string | null
@@ -1460,6 +1502,36 @@ export type Database = {
         }
         Relationships: []
       }
+      transport_tiers: {
+        Row: {
+          base_fee: number
+          created_at: string | null
+          id: string
+          max_km: number | null
+          min_km: number
+          per_km_fee: number | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          base_fee: number
+          created_at?: string | null
+          id?: string
+          max_km?: number | null
+          min_km?: number
+          per_km_fee?: number | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          base_fee?: number
+          created_at?: string | null
+          id?: string
+          max_km?: number | null
+          min_km?: number
+          per_km_fee?: number | null
+          vehicle_type?: string | null
+        }
+        Relationships: []
+      }
       trust_strip_items: {
         Row: {
           created_at: string
@@ -1612,6 +1684,7 @@ export type Database = {
           image_urls: string[] | null
           is_available: boolean
           is_verified: boolean | null
+          labor_weight: number
           max_capacity: number | null
           min_capacity: number | null
           name: string
@@ -1630,6 +1703,7 @@ export type Database = {
           short_description: string | null
           slot_types: string[] | null
           updated_at: string
+          vendor_base_price: number | null
           vendor_id: string
           venue_type: string | null
           verified_at: string | null
@@ -1658,6 +1732,7 @@ export type Database = {
           image_urls?: string[] | null
           is_available?: boolean
           is_verified?: boolean | null
+          labor_weight?: number
           max_capacity?: number | null
           min_capacity?: number | null
           name: string
@@ -1676,6 +1751,7 @@ export type Database = {
           short_description?: string | null
           slot_types?: string[] | null
           updated_at?: string
+          vendor_base_price?: number | null
           vendor_id: string
           venue_type?: string | null
           verified_at?: string | null
@@ -1704,6 +1780,7 @@ export type Database = {
           image_urls?: string[] | null
           is_available?: boolean
           is_verified?: boolean | null
+          labor_weight?: number
           max_capacity?: number | null
           min_capacity?: number | null
           name?: string
@@ -1722,6 +1799,7 @@ export type Database = {
           short_description?: string | null
           slot_types?: string[] | null
           updated_at?: string
+          vendor_base_price?: number | null
           vendor_id?: string
           venue_type?: string | null
           verified_at?: string | null

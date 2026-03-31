@@ -16,6 +16,12 @@ export interface CartItem {
   length?: number;
   /** For measurable items (sq.ft/sq.m): breadth dimension */
   breadth?: number;
+  /** Volume/weight units for manpower calculation */
+  labor_weight?: number;
+  /** Vendor ID for vendor-sourced items */
+  vendor_id?: string;
+  /** Vendor's warehouse pincode for transport calculation */
+  vendor_pincode?: string;
 }
 
 interface CartStore {

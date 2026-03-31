@@ -22,6 +22,7 @@ const sidebarItems: SidebarItem[] = [
   { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: CalendarDays, label: "Calendar", value: "calendar" },
+  { icon: MapPin, label: "Site Visits", value: "site-visits" },
   { icon: BookOpen, label: "Offline Booking", value: "offline" },
   { icon: FileText, label: "Quotation Maker", value: "quotes" },
   { icon: TrendingUp, label: "Earnings", value: "earnings" },

@@ -90,6 +90,10 @@ const ProductDetail = () => {
       is_verified: v.is_verified || false,
       created_at: v.created_at,
       vendor_id: v.vendor_id,
+      house_rules: v.house_rules || [],
+      amenities_matrix: v.amenities_matrix || {},
+      venue_pricing_model: v.venue_pricing_model || "dry_rental",
+      packages: v.packages || [],
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];

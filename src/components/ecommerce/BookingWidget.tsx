@@ -28,13 +28,15 @@ const SLOTS = [
 
 const BookingWidget = ({ rental, selectedVariant }: BookingWidgetProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [checkIn, setCheckIn] = useState<Date>();
   const [checkOut, setCheckOut] = useState<Date>();
   const [slot, setSlot] = useState("full_day");
-  const [step, setStep] = useState<"dates" | "details" | "countdown">("dates");
+  const [step, setStep] = useState<"dates" | "details" | "countdown" | "site-visit">("dates");
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientEmail, setClientEmail] = useState("");
+  const [siteVisitLoading, setSiteVisitLoading] = useState(false);
 
   const checkInStr = checkIn ? format(checkIn, "yyyy-MM-dd") : undefined;
   const checkOutStr = checkOut ? format(checkOut, "yyyy-MM-dd") : undefined;

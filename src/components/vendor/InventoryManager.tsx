@@ -749,10 +749,24 @@ const InventoryManager = () => {
                         checked={item.is_available}
                         onCheckedChange={(checked) => toggleAvailability({ id: item.id, is_available: checked })}
                       />
+                      <Button
+                        onClick={() => setExpandedCalendarId(expandedCalendarId === item.id ? null : item.id)}
+                        variant={expandedCalendarId === item.id ? "default" : "outline"}
+                        size="sm"
+                        title="Availability Calendar"
+                      >
+                        <CalendarDays className="h-4 w-4" />
+                      </Button>
                       <Button onClick={() => handleEdit(item)} variant="outline" size="sm"><Edit className="h-4 w-4" /></Button>
                       <Button onClick={() => handleDelete(item.id)} variant="outline" size="sm"><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </div>
+                  {expandedCalendarId === item.id && (
+                    <ItemAvailabilityCalendar
+                      itemId={item.id}
+                      serviceType={item.service_type || "rental"}
+                    />
+                  )}
                 </CardContent>
               </Card>
             ))}

@@ -143,6 +143,11 @@ const Cart = () => {
       // Determine if instant book
       const isInstant = canInstantBook && showVenueAddressFields;
 
+      // Determine the vendor from cart items (first vendor item found)
+      const vendorItem = items.find(i => i.vendor_id);
+      const assignedVendorId = vendorItem?.vendor_id || null;
+      const vendorInventoryItemId = vendorItem ? vendorItem.id : null;
+
       const orderData: Record<string, any> = {
         id: orderId,
         title: `${isInstant ? "Instant Booking" : "Cart Enquiry"} - ${items.length} item(s)`,
@@ -156,6 +161,8 @@ const Cart = () => {
         notes: eventDetails.notes || null,
         status: isInstant ? "confirmed" : "new",
         client_id: user.id,
+        assigned_vendor_id: assignedVendorId,
+        vendor_inventory_item_id: vendorInventoryItemId,
       };
 
       if (isInstant) {

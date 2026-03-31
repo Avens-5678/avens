@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
-import QuickCartSheet from "@/components/ecommerce/QuickCartSheet";
 import BookingWidget from "@/components/ecommerce/BookingWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

@@ -3,10 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Briefcase, Package, User, ArrowLeft, Bot, Plus, Calendar, ClipboardList, CalendarDays, FileText, TrendingUp, BookOpen } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, Plus, Calendar, ClipboardList, CalendarDays, FileText, TrendingUp, BookOpen } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
-import JobBoard from "@/components/vendor/JobBoard";
 import InventoryManager from "@/components/vendor/InventoryManager";
 import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
@@ -22,7 +21,6 @@ import VendorEarnings from "@/components/vendor/VendorEarnings";
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
-  { icon: Briefcase, label: "Job Board", value: "jobs" },
   { icon: Plus, label: "New Request", value: "request" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: CalendarDays, label: "Calendar", value: "calendar" },
@@ -94,8 +92,7 @@ const VendorDashboard = () => {
         return null;
       case "orders":
         return <OrderTracker />;
-      case "jobs":
-        return <JobBoard />;
+      case "request":
       case "request":
         return (
           <Card className="rounded-2xl">

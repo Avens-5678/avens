@@ -51,6 +51,10 @@ export interface RentalOrder {
   action_token: string | null;
   created_at: string;
   updated_at: string;
+  vendor_payout: number | null;
+  manpower_fee: number | null;
+  transport_fee: number | null;
+  platform_fee: number | null;
 }
 
 export interface RentalOrderInsert {

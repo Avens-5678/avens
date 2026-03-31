@@ -1,54 +1,49 @@
 
 
-## Merge Booking Widget into Add to Cart — Remove Duplicate Flows
+## Move Availability Calendar Inline Per Item + Unified Dashboard
 
 ### Problem
-The PDP currently has TWO competing booking paths:
-1. **BookingWidget** — date picker + "Book Now" (creates reservation hold, collects customer details inline)
-2. **Add to Cart** button — adds item without dates, then Cart page asks for dates again
-
-This confuses users. The screenshot shows both buttons stacked on the same page.
+The current Availability Calendar is a separate global tab that requires vendors to select an item from a dropdown — it's disconnected from the actual inventory items. Vendors who list venues, rentals, AND crew need per-item calendars because availability differs per item (a venue can be booked morning while a rental is available all day).
 
 ### Solution
-Merge into a single flow: **select dates on PDP → Add to Cart with dates → checkout in Cart page** (no more "Book Now" / reservation hold on PDP).
+**One unified dashboard** with the calendar embedded directly under each inventory item card. Remove the standalone "Calendar" sidebar tab entirely.
 
 ---
 
 ### Changes
 
-**1. CartItem interface (`useCart.ts`)**
-- Add `booking_from?: string` and `booking_till?: string` fields
-- Add `booking_slot?: string` field
+**1. Remove Calendar sidebar tab (`VendorDashboard.tsx`)**
+- Remove `CalendarDays` / "Calendar" entry from `sidebarItems`
+- Remove `AvailabilityCalendar` import and its `case "calendar"` in `renderContent()`
 
-**2. Remove BookingWidget as standalone component from PDP (`ProductDetail.tsx`)**
-- Remove the `<BookingWidget>` component from the product info column
-- Move the date pickers (Booking From / Booking Till) and slot selector directly into the PDP info section, above the Add to Cart button
-- When user clicks "Add to Cart":
-  - Validate that dates are selected (required)
-  - Store `booking_from`, `booking_till`, `booking_slot` in the cart item
-  - Navigate to `/cart`
-- Remove the "Book Now" button entirely
-- Keep the Site Visit CTA for venues (it serves a different purpose)
+**2. Add inline calendar toggle to each item card (`InventoryManager.tsx`)**
+- Add a `CalendarDays` icon button to each item card's action row (next to Edit/Delete)
+- Clicking it expands/collapses an `ItemAvailabilityCalendar` component below the card content
+- Track expanded state: `expandedCalendarId` (string | null)
 
-**3. Cart page (`Cart.tsx`)**
-- Remove the Start Date / End Date inputs from the enquiry form (dates now come from cart items)
-- Display the selected dates per item in the cart item cards (read-only, from `booking_from`/`booking_till`)
-- Use the earliest `booking_from` from cart items as the `event_start_date` for the order
-- Use the latest `booking_till` as `event_end_date`
+**3. New component: `ItemAvailabilityCalendar.tsx`**
+- Receives `itemId` and `serviceType` as props
+- Uses `useVendorAvailability(itemId)` to fetch availability for that specific item
+- Uses `useToggleBookedDate()` to toggle dates
+- For **venues**: shows slot selector (Morning / Evening / Full Day) — venues commonly have session-based booking
+- For **rentals**: shows Full Day only by default (equipment is rented by the day)
+- For **crew**: shows slot selector (Morning / Evening / Full Day) — crew can do multiple gigs per day
+- Compact single-month calendar with color-coded modifiers (red = fully booked, amber = partial, white = available)
+- Shows a small list of upcoming booked dates below the calendar
+- Uses the existing `useToggleBookedDate` mutation which already handles slot via `notes` field — will update to pass `slot` properly via the insert payload
 
-**4. BookingWidget.tsx cleanup**
-- Keep the file but simplify it: remove "Book Now" / hold logic, keep only the site-visit form for venues
-- OR inline the date pickers directly in ProductDetail and delete BookingWidget entirely (cleaner)
+**4. Fix `useToggleBookedDate` slot handling**
+- Currently stores slot in `notes` field as text — change to pass `slot` as a proper column value in the insert
+- The `vendor_availability` table already has a `slot` column (used by `get_available_inventory` function)
+- Update the delete logic to also match by `slot`
 
-**5. Remove dummy/non-functional buttons audit**
-- BookingWidget site-visit form has unreachable code (returns JSX after an earlier return statement at line 370 — the `if (step === "site-visit")` block at line 374 is dead code). Fix by restructuring the component.
-
-### File Changes
+### File Summary
 
 | File | Change |
 |---|---|
-| `src/hooks/useCart.ts` | Add `booking_from`, `booking_till`, `booking_slot` to CartItem |
-| `src/pages/ProductDetail.tsx` | Replace BookingWidget with inline date pickers above Add to Cart; pass dates into `addItem()` |
-| `src/pages/Cart.tsx` | Remove date inputs from enquiry form; show dates per cart item; derive event dates from cart |
-| `src/components/ecommerce/BookingWidget.tsx` | Refactor to only export SiteVisitForm for venues (or remove entirely) |
+| `src/pages/vendor/VendorDashboard.tsx` | Remove "Calendar" sidebar item |
+| `src/components/vendor/InventoryManager.tsx` | Add calendar toggle button per item, render `ItemAvailabilityCalendar` inline |
+| `src/components/vendor/ItemAvailabilityCalendar.tsx` | New — compact per-item calendar with service-type-aware slot logic |
+| `src/hooks/useVendorAvailability.ts` | Fix slot handling in insert/delete mutations |
+| `src/components/vendor/AvailabilityCalendar.tsx` | Can be deleted (replaced by per-item version) |
 

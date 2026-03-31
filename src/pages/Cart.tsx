@@ -364,11 +364,11 @@ const Cart = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <Label className="text-xs">Start Date *</Label>
-                          <Input type="date" value={eventDetails.event_start_date} onChange={e => setEventDetails(p => ({ ...p, event_start_date: e.target.value }))} />
+                          <Input type="date" min={new Date().toISOString().split("T")[0]} value={eventDetails.event_start_date} onChange={e => setEventDetails(p => ({ ...p, event_start_date: e.target.value, event_end_date: p.event_end_date && p.event_end_date < e.target.value ? e.target.value : p.event_end_date }))} />
                         </div>
                         <div className="space-y-1">
                           <Label className="text-xs">End Date</Label>
-                          <Input type="date" value={eventDetails.event_end_date} onChange={e => setEventDetails(p => ({ ...p, event_end_date: e.target.value }))} />
+                          <Input type="date" min={eventDetails.event_start_date || new Date().toISOString().split("T")[0]} value={eventDetails.event_end_date} onChange={e => setEventDetails(p => ({ ...p, event_end_date: e.target.value }))} />
                         </div>
                       </div>
                       {showVenueAddressFields && (

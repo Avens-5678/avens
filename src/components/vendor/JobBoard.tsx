@@ -39,6 +39,8 @@ const statusLabels: Record<string, string> = {
   accepted: "Accepted",
   confirmed: "Confirmed",
   declined: "Declined",
+  out_for_delivery: "Out for Delivery",
+  delivered: "Delivered",
 };
 
 const generateGoogleCalendarUrl = (title: string, date: string | null, location: string | null) => {
@@ -289,6 +291,31 @@ const JobBoard = () => {
                     {order.status === "accepted" ? "You accepted this order" : "You declined this order"}
                   </p>
                   {order.vendor_response && <p className="text-muted-foreground mt-1">{order.vendor_response}</p>}
+                </div>
+              )}
+
+              {/* Vendor Status Progression */}
+              {["accepted", "confirmed", "in_progress", "out_for_delivery", "delivered"].includes(order.status) && (
+                <div className="flex items-center gap-4 pt-2 border-t">
+                  <span className="text-sm font-medium">Update Status:</span>
+                  <Select
+                    value={order.status}
+                    onValueChange={(value) => {
+                      respondToOrder.mutate({ orderId: order.id, action: value as any, note: value });
+                    }}
+                    disabled={respondToOrder.isPending}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="accepted">Accepted</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                      <SelectItem value="delivered">Delivered</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </CardContent>

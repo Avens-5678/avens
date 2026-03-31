@@ -57,7 +57,8 @@ const LiveRentalOrders = () => {
   const [vendorSearch, setVendorSearch] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [localityFilter, setLocalityFilter] = useState("");
-
+  const [vendorFilter, setVendorFilter] = useState("all");
+  const [orderSearch, setOrderSearch] = useState("");
   const [newOrder, setNewOrder] = useState<RentalOrderInsert>({
     title: "", equipment_category: "General", equipment_details: "",
     location: "", event_date: "", budget: "", client_name: "",
@@ -359,13 +360,35 @@ const LiveRentalOrders = () => {
     return true;
   });
 
+  // Build unique vendor list for filter dropdown
+  const uniqueVendors = Object.entries(vendorProfiles || {}).map(([id, p]: [string, any]) => ({
+    id,
+    name: p.company_name || p.full_name || "Unknown Vendor",
+  })).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Apply client-side vendor + search filters
+  const filteredOrders = (orders || []).filter((o) => {
+    if (vendorFilter === "unassigned" && o.assigned_vendor_id) return false;
+    if (vendorFilter !== "all" && vendorFilter !== "unassigned" && o.assigned_vendor_id !== vendorFilter) return false;
+    if (orderSearch) {
+      const q = orderSearch.toLowerCase();
+      const vp = vendorProfiles?.[o.assigned_vendor_id || ""];
+      const searchable = [
+        o.title, o.client_name, o.equipment_category, o.location,
+        vp?.full_name, vp?.company_name,
+      ].filter(Boolean).join(" ").toLowerCase();
+      if (!searchable.includes(q)) return false;
+    }
+    return true;
+  });
+
   const stats = {
-    total: orders?.length || 0,
-    new: orders?.filter((o) => o.status === "new").length || 0,
-    sent: orders?.filter((o) => o.status === "sent_to_vendors").length || 0,
-    quoted: orders?.filter((o) => o.status === "quoted").length || 0,
-    accepted: orders?.filter((o) => o.status === "accepted").length || 0,
-    declined: orders?.filter((o) => o.status === "declined").length || 0,
+    total: filteredOrders.length,
+    new: filteredOrders.filter((o) => o.status === "new").length,
+    sent: filteredOrders.filter((o) => o.status === "sent_to_vendors").length,
+    quoted: filteredOrders.filter((o) => o.status === "quoted").length,
+    accepted: filteredOrders.filter((o) => o.status === "accepted").length,
+    declined: filteredOrders.filter((o) => o.status === "declined").length,
   };
 
   return (
@@ -462,14 +485,36 @@ const LiveRentalOrders = () => {
               </Select>
             </div>
             <div className="flex-1">
+              <Label className="text-xs mb-1 block"><Users className="inline h-3 w-3 mr-1" />Vendor</Label>
+              <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Vendors</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {uniqueVendors.map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1">
               <Label className="text-xs mb-1 block"><MapPin className="inline h-3 w-3 mr-1" />Location</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} placeholder="Search by city..." className="pl-9" />
               </div>
             </div>
-            {(statusFilter !== "all" || categoryFilter !== "all" || locationSearch) && (
-              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); setLocationSearch(""); }}>
+            <div className="flex-1">
+              <Label className="text-xs mb-1 block"><Search className="inline h-3 w-3 mr-1" />Search</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input value={orderSearch} onChange={(e) => setOrderSearch(e.target.value)} placeholder="Search orders..." className="pl-9" />
+              </div>
+            </div>
+            {(statusFilter !== "all" || categoryFilter !== "all" || locationSearch || vendorFilter !== "all" || orderSearch) && (
+              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); setLocationSearch(""); setVendorFilter("all"); setOrderSearch(""); }}>
                 <X className="h-4 w-4 mr-1" />Clear
               </Button>
             )}
@@ -480,7 +525,7 @@ const LiveRentalOrders = () => {
       {/* Orders List */}
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading orders...</div>
-      ) : !orders?.length ? (
+      ) : !filteredOrders.length ? (
         <Card>
           <CardContent className="text-center py-12">
             <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -490,7 +535,7 @@ const LiveRentalOrders = () => {
         </Card>
       ) : (
         <div className="space-y-3">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <Card key={order.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">

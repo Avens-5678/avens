@@ -66,6 +66,22 @@ export interface RentalOrderInsert {
   notes?: string;
 }
 
+export const useVendorRentalOrders = (vendorId?: string) => {
+  return useQuery({
+    queryKey: ["vendor_rental_orders", vendorId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rental_orders")
+        .select("*")
+        .eq("assigned_vendor_id", vendorId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as RentalOrder[];
+    },
+    enabled: !!vendorId,
+  });
+};
+
 export const useRentalOrders = (filters?: {
   status?: string;
   category?: string;

@@ -88,26 +88,6 @@ const VendorDashboard = () => {
         return null;
       case "orders":
         return <OrderTracker />;
-      case "request":
-      case "request":
-        return (
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                New Event Request
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Fill out the form below to submit an event request. Our team will review and assign resources.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <EventRequestForm onSuccess={() => setActiveTab("orders")} />
-            </CardContent>
-          </Card>
-        );
-      case "past-orders":
-        return <PastOrders />;
       case "inventory":
         return <InventoryManager />;
       case "calendar":

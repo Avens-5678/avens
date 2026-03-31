@@ -292,13 +292,20 @@ const InventoryManager = () => {
       }
       if (!user) throw new Error("Not authenticated");
 
+      const vendorBasePrice = hasVariants ? null : (formData.vendor_base_price ? parseFloat(formData.vendor_base_price) : null);
+      // Auto-calculate retail price from base price with 30% markup
+      const calculatedRetail = vendorBasePrice != null ? Math.round(vendorBasePrice * 1.3) : null;
+      const manualPrice = hasVariants ? null : (formData.price_value ? parseFloat(formData.price_value) : null);
+      
       const itemData: Record<string, any> = {
         name: formData.name,
         description: formData.description,
         short_description: formData.short_description || null,
         address: formData.address || null,
+        vendor_base_price: vendorBasePrice,
+        labor_weight: formData.labor_weight || 1,
         price_per_day: hasVariants ? null : (formData.price_per_day ? parseFloat(formData.price_per_day) : null),
-        price_value: hasVariants ? null : (formData.price_value ? parseFloat(formData.price_value) : null),
+        price_value: calculatedRetail || manualPrice,
         pricing_unit: hasVariants ? null : (formData.pricing_unit || 'Per Day'),
         has_variants: hasVariants,
         categories: formData.categories || [],

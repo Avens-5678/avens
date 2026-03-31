@@ -372,15 +372,17 @@ const Cart = () => {
                           <p className="text-muted-foreground text-xs">{profileData.phone}</p>
                         </div>
                       )}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Start Date *</Label>
-                          <Input type="date" min={new Date().toISOString().split("T")[0]} value={eventDetails.event_start_date} onChange={e => setEventDetails(p => ({ ...p, event_start_date: e.target.value, event_end_date: p.event_end_date && p.event_end_date < e.target.value ? e.target.value : p.event_end_date }))} />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">End Date</Label>
-                          <Input type="date" min={eventDetails.event_start_date || new Date().toISOString().split("T")[0]} value={eventDetails.event_end_date} onChange={e => setEventDetails(p => ({ ...p, event_end_date: e.target.value }))} />
-                        </div>
+                      {/* Booking dates derived from cart items */}
+                      <div className="bg-muted/50 rounded-lg p-3 space-y-1.5">
+                        <p className="text-xs font-semibold text-foreground">Booking Dates (from cart)</p>
+                        {items.map(item => (
+                          item.booking_from ? (
+                            <div key={`${item.id}-${item.variant_id || ''}-dates`} className="flex justify-between text-xs">
+                              <span className="text-muted-foreground line-clamp-1">{item.title}</span>
+                              <span className="font-medium text-foreground flex-shrink-0">{item.booking_from} → {item.booking_till}</span>
+                            </div>
+                          ) : null
+                        ))}
                       </div>
                       {showVenueAddressFields && (
                         <>

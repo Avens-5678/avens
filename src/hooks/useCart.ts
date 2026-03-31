@@ -22,6 +22,12 @@ export interface CartItem {
   vendor_id?: string;
   /** Vendor's warehouse pincode for transport calculation */
   vendor_pincode?: string;
+  /** Booking start date (YYYY-MM-DD) */
+  booking_from?: string;
+  /** Booking end date (YYYY-MM-DD) */
+  booking_till?: string;
+  /** Booking slot (morning/evening/full_day) */
+  booking_slot?: string;
 }
 
 interface CartStore {

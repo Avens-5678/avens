@@ -1507,6 +1507,65 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visit_requests: {
+        Row: {
+          client_email: string | null
+          client_id: string
+          client_name: string
+          client_phone: string
+          created_at: string
+          deposit_amount: number | null
+          deposit_status: string | null
+          id: string
+          notes: string | null
+          preferred_date: string
+          preferred_slot: string | null
+          updated_at: string
+          venue_id: string
+          visit_status: string | null
+        }
+        Insert: {
+          client_email?: string | null
+          client_id: string
+          client_name: string
+          client_phone: string
+          created_at?: string
+          deposit_amount?: number | null
+          deposit_status?: string | null
+          id?: string
+          notes?: string | null
+          preferred_date: string
+          preferred_slot?: string | null
+          updated_at?: string
+          venue_id: string
+          visit_status?: string | null
+        }
+        Update: {
+          client_email?: string | null
+          client_id?: string
+          client_name?: string
+          client_phone?: string
+          created_at?: string
+          deposit_amount?: number | null
+          deposit_status?: string | null
+          id?: string
+          notes?: string | null
+          preferred_date?: string
+          preferred_slot?: string | null
+          updated_at?: string
+          venue_id?: string
+          visit_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_visit_requests_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           created_at: string
@@ -1712,20 +1771,24 @@ export type Database = {
           address: string | null
           advance_amount: number | null
           amenities: string[] | null
+          amenities_matrix: Json | null
           av_equipment: boolean | null
           cancellation_policy: string | null
           categories: string[] | null
           category: string | null
           catering_type: string | null
           created_at: string
+          crew_type: string | null
           description: string | null
           display_order: number | null
           experience_level: string | null
           guest_capacity: string | null
           has_variants: boolean | null
+          house_rules: string[] | null
           id: string
           image_url: string | null
           image_urls: string[] | null
+          instagram_url: string | null
           is_available: boolean
           is_verified: boolean | null
           labor_weight: number
@@ -1733,7 +1796,9 @@ export type Database = {
           min_capacity: number | null
           name: string
           num_halls: number | null
+          packages: Json | null
           parking_available: boolean | null
+          portfolio_urls: string[] | null
           price_per_day: number | null
           price_value: number | null
           pricing_packages: Json | null
@@ -1749,6 +1814,7 @@ export type Database = {
           updated_at: string
           vendor_base_price: number | null
           vendor_id: string
+          venue_pricing_model: string | null
           venue_type: string | null
           verified_at: string | null
           verified_by: string | null
@@ -1761,20 +1827,24 @@ export type Database = {
           address?: string | null
           advance_amount?: number | null
           amenities?: string[] | null
+          amenities_matrix?: Json | null
           av_equipment?: boolean | null
           cancellation_policy?: string | null
           categories?: string[] | null
           category?: string | null
           catering_type?: string | null
           created_at?: string
+          crew_type?: string | null
           description?: string | null
           display_order?: number | null
           experience_level?: string | null
           guest_capacity?: string | null
           has_variants?: boolean | null
+          house_rules?: string[] | null
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
+          instagram_url?: string | null
           is_available?: boolean
           is_verified?: boolean | null
           labor_weight?: number
@@ -1782,7 +1852,9 @@ export type Database = {
           min_capacity?: number | null
           name: string
           num_halls?: number | null
+          packages?: Json | null
           parking_available?: boolean | null
+          portfolio_urls?: string[] | null
           price_per_day?: number | null
           price_value?: number | null
           pricing_packages?: Json | null
@@ -1798,6 +1870,7 @@ export type Database = {
           updated_at?: string
           vendor_base_price?: number | null
           vendor_id: string
+          venue_pricing_model?: string | null
           venue_type?: string | null
           verified_at?: string | null
           verified_by?: string | null
@@ -1810,20 +1883,24 @@ export type Database = {
           address?: string | null
           advance_amount?: number | null
           amenities?: string[] | null
+          amenities_matrix?: Json | null
           av_equipment?: boolean | null
           cancellation_policy?: string | null
           categories?: string[] | null
           category?: string | null
           catering_type?: string | null
           created_at?: string
+          crew_type?: string | null
           description?: string | null
           display_order?: number | null
           experience_level?: string | null
           guest_capacity?: string | null
           has_variants?: boolean | null
+          house_rules?: string[] | null
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
+          instagram_url?: string | null
           is_available?: boolean
           is_verified?: boolean | null
           labor_weight?: number
@@ -1831,7 +1908,9 @@ export type Database = {
           min_capacity?: number | null
           name?: string
           num_halls?: number | null
+          packages?: Json | null
           parking_available?: boolean | null
+          portfolio_urls?: string[] | null
           price_per_day?: number | null
           price_value?: number | null
           pricing_packages?: Json | null
@@ -1847,6 +1926,7 @@ export type Database = {
           updated_at?: string
           vendor_base_price?: number | null
           vendor_id?: string
+          venue_pricing_model?: string | null
           venue_type?: string | null
           verified_at?: string | null
           verified_by?: string | null

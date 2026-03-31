@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, CalendarDays, FileText, TrendingUp, BookOpen } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, CalendarDays, FileText, TrendingUp, BookOpen, MapPin } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import InventoryManager from "@/components/vendor/InventoryManager";
@@ -15,12 +15,14 @@ import AvailabilityCalendar from "@/components/vendor/AvailabilityCalendar";
 import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
 import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 import VendorEarnings from "@/components/vendor/VendorEarnings";
+import SiteVisitManager from "@/components/vendor/SiteVisitManager";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: CalendarDays, label: "Calendar", value: "calendar" },
+  { icon: MapPin, label: "Site Visits", value: "site-visits" },
   { icon: BookOpen, label: "Offline Booking", value: "offline" },
   { icon: FileText, label: "Quotation Maker", value: "quotes" },
   { icon: TrendingUp, label: "Earnings", value: "earnings" },
@@ -92,6 +94,8 @@ const VendorDashboard = () => {
         return <InventoryManager />;
       case "calendar":
         return <AvailabilityCalendar />;
+      case "site-visits":
+        return <SiteVisitManager />;
       case "offline":
         return <VendorOfflineBooking />;
       case "quotes":

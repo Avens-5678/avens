@@ -7,6 +7,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows } from "lucide-react";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
 import VenueCompare from "@/components/ecommerce/VenueCompare";
+import VenueSearchBar from "@/components/ecommerce/VenueSearchBar";
+import CrewSubTabs from "@/components/ecommerce/CrewSubTabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
@@ -161,6 +163,13 @@ const Ecommerce = () => {
       catering_type: v.catering_type,
       parking_available: v.parking_available,
       av_equipment: v.av_equipment,
+      crew_type: v.crew_type || null,
+      venue_pricing_model: v.venue_pricing_model || "dry_rental",
+      house_rules: v.house_rules || [],
+      amenities_matrix: v.amenities_matrix || {},
+      packages: v.packages || [],
+      portfolio_urls: v.portfolio_urls || [],
+      instagram_url: v.instagram_url || null,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];
@@ -193,6 +202,10 @@ const Ecommerce = () => {
   const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [crewSubTab, setCrewSubTab] = useState<"commodity" | "creative">("commodity");
+  const [venueSearchFilters, setVenueSearchFilters] = useState<{
+    date?: string; slot?: string; eventType?: string; guestCount?: number;
+  }>({});
   
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
 
@@ -308,7 +321,18 @@ const Ecommerce = () => {
         selectedExperience.length === 0 ||
         selectedExperience.includes(rental.experience_level || "");
 
-      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience;
+      // Crew sub-tab filter
+      const matchesCrewType = activeServiceType !== "crew" || !rental.crew_type ||
+        (crewSubTab === "commodity" ? rental.crew_type === "commodity" : rental.crew_type === "creative");
+
+      // Venue search bar: guest count filter
+      const matchesVenueGuestCount = !venueSearchFilters.guestCount || activeServiceType !== "venue" ||
+        (rental.min_capacity && rental.max_capacity &&
+          venueSearchFilters.guestCount >= rental.min_capacity &&
+          venueSearchFilters.guestCount <= rental.max_capacity) ||
+        (!rental.min_capacity && !rental.max_capacity);
+
+      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience && matchesCrewType && matchesVenueGuestCount;
     });
 
     switch (sortBy) {
@@ -327,7 +351,7 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [allItems, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience, vendorFilterId]);
+  }, [allItems, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience, vendorFilterId, crewSubTab, venueSearchFilters]);
 
   // Discovery rows for default landing view
   const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0 && !vendorFilterId;
@@ -638,6 +662,20 @@ const Ecommerce = () => {
 
 
 
+
+      {/* Venue Search Bar — when venues selected */}
+      {activeServiceType === "venue" && (
+        <div className="container mx-auto px-4 sm:px-6 py-3">
+          <VenueSearchBar onSearch={(filters) => setVenueSearchFilters(filters)} />
+        </div>
+      )}
+
+      {/* Crew Sub-tabs — when crew selected */}
+      {activeServiceType === "crew" && (
+        <div className="container mx-auto px-4 sm:px-6 py-3">
+          <CrewSubTabs activeTab={crewSubTab} onTabChange={setCrewSubTab} />
+        </div>
+      )}
 
       {/* Category Quick Browse Strip with Icons — only when a service is selected */}
       {!isDiscoveryView && (

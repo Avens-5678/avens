@@ -498,6 +498,11 @@ const ProductDetail = () => {
               <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-5 py-3 text-sm font-medium">
                 Reviews
               </TabsTrigger>
+              {(rental as any).virtual_tour_url && (
+                <TabsTrigger value="virtual-tour" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-5 py-3 text-sm font-medium flex items-center gap-1.5">
+                  <Eye className="h-3.5 w-3.5" /> 360° Tour
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <TabsContent value="description" className="pt-5">

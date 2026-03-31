@@ -163,6 +163,13 @@ const Ecommerce = () => {
       catering_type: v.catering_type,
       parking_available: v.parking_available,
       av_equipment: v.av_equipment,
+      crew_type: v.crew_type || null,
+      venue_pricing_model: v.venue_pricing_model || "dry_rental",
+      house_rules: v.house_rules || [],
+      amenities_matrix: v.amenities_matrix || {},
+      packages: v.packages || [],
+      portfolio_urls: v.portfolio_urls || [],
+      instagram_url: v.instagram_url || null,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];

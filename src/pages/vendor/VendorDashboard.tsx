@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Briefcase, Package, User, ArrowLeft, Bot, Plus, Calendar, ClipboardList, CalendarDays, FileText, TrendingUp, BookOpen } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, Plus, Calendar, ClipboardList, CalendarDays, FileText, TrendingUp, BookOpen } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import JobBoard from "@/components/vendor/JobBoard";

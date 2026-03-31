@@ -11,7 +11,7 @@ import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import OrderTracker from "@/components/vendor/OrderTracker";
-import AvailabilityCalendar from "@/components/vendor/AvailabilityCalendar";
+
 import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
 import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 import VendorEarnings from "@/components/vendor/VendorEarnings";

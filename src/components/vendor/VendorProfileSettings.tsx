@@ -77,7 +77,8 @@ const VendorProfileSettings = () => {
         city: profile.city,
         gst_number: profile.gst_number,
         pan_number: profile.pan_number,
-      })
+        warehouse_pincode: profile.warehouse_pincode,
+      } as any)
       .eq("user_id", user.id);
 
     if (error) {

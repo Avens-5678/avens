@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
@@ -13,10 +13,12 @@ import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { isMeasurableUnit, calculateCartTotal } from "@/utils/pricingUtils";
+import { isMeasurableUnit, calculateCartTotal, calculateManpowerFee, isInstantBookable } from "@/utils/pricingUtils";
+import { useLogisticsConfig, useTransportTiers } from "@/hooks/useLogisticsConfig";
+import { useTransportFee } from "@/hooks/useTransportFee";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
-  CalendarDays, Tag, ChevronRight,
+  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 
@@ -25,6 +27,10 @@ const Cart = () => {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const { data: logisticsConfig } = useLogisticsConfig();
+  const { data: transportTiers } = useTransportTiers();
+  const { calculate: calcTransport, result: transportResult, loading: transportLoading } = useTransportFee();
 
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -43,6 +49,31 @@ const Cart = () => {
   const hasVenueItem = items.some((item: any) => item.service_type === "venue");
   const isVenueOnlyCart = items.length > 0 && items.every((item: any) => item.service_type === "venue");
   const showVenueAddressFields = !isVenueOnlyCart && !hasVenueItem;
+
+  // Instant booking logic
+  const allItemsPriced = items.length > 0 && items.every(i => i.price_value != null);
+  const minBookingHours = logisticsConfig?.min_booking_hours || 48;
+  const dateIsSet = !!eventDetails.event_start_date;
+  const canInstantBook = allItemsPriced && dateIsSet && isInstantBookable(eventDetails.event_start_date, minBookingHours);
+  const showInstantBookFlow = allItemsPriced; // Show the flow if all items are priced, but enable button only if date qualifies
+
+  // Calculate manpower fee
+  const manpowerFee = logisticsConfig
+    ? calculateManpowerFee(items, logisticsConfig.labor_units_per_loader, logisticsConfig.loader_daily_rate)
+    : 0;
+
+  // Auto-calc transport when pincode changes
+  useEffect(() => {
+    if (eventDetails.venue_pincode && eventDetails.venue_pincode.length >= 5) {
+      // Find vendor pincode from first vendor item
+      const vendorItem = items.find(i => i.vendor_pincode);
+      if (vendorItem?.vendor_pincode) {
+        calcTransport(vendorItem.vendor_pincode, eventDetails.venue_pincode);
+      }
+    }
+  }, [eventDetails.venue_pincode]);
+
+  const transportFee = transportResult?.fee || 0;
 
   const formatItemPrice = (item: any) => {
     if (item.price_value != null) {
@@ -84,7 +115,6 @@ const Cart = () => {
       navigate("/client");
       return;
     }
-    // For venue bookings, only require dates; for rentals, require date + venue address
     if (!eventDetails.event_start_date) {
       toast({ title: "Missing information", description: "Please select a start date.", variant: "destructive" });
       return;
@@ -109,9 +139,13 @@ const Cart = () => {
       const normalizedPhone = profileData.phone ? normalizePhoneNumber(profileData.phone) : null;
       const venueLocation = [eventDetails.venue_address_line1, eventDetails.venue_address_line2, eventDetails.venue_pincode].filter(Boolean).join(", ");
       const orderId = crypto.randomUUID();
-      const { error } = await supabase.from("rental_orders").insert({
+
+      // Determine if instant book
+      const isInstant = canInstantBook && showVenueAddressFields;
+
+      const orderData: Record<string, any> = {
         id: orderId,
-        title: `Cart Enquiry - ${items.length} item(s)`,
+        title: `${isInstant ? "Instant Booking" : "Cart Enquiry"} - ${items.length} item(s)`,
         equipment_category: "Cart Order",
         equipment_details: JSON.stringify({ cart_items: cartPayload, event_details: { ...eventDetails, customer_name: profileData.full_name, email: profileData.email, contact_number: profileData.phone } }),
         client_name: profileData.full_name,
@@ -120,10 +154,20 @@ const Cart = () => {
         event_date: eventDetails.event_start_date || null,
         location: venueLocation,
         notes: eventDetails.notes || null,
-        status: "new",
+        status: isInstant ? "confirmed" : "new",
         client_id: user.id,
-      } as any);
+      };
+
+      if (isInstant) {
+        orderData.manpower_fee = manpowerFee;
+        orderData.transport_fee = transportFee;
+        orderData.platform_fee = calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0);
+        orderData.vendor_payout = items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee;
+      }
+
+      const { error } = await supabase.from("rental_orders").insert(orderData as any);
       if (error) throw error;
+
       if (normalizedPhone) {
         try {
           await supabase.functions.invoke("wati-rental-confirmation", {
@@ -133,7 +177,8 @@ const Cart = () => {
           console.error("WhatsApp rental confirmation failed:", whatsappErr);
         }
       }
-      toast({ title: "Enquiry Sent!", description: "Our team will respond within 24 hours." });
+
+      toast({ title: isInstant ? "Booking Confirmed!" : "Enquiry Sent!", description: isInstant ? "Your booking is confirmed. Vendor will be notified." : "Our team will respond within 24 hours." });
       clearCart();
       setShowEnquiry(false);
       setEventDetails({ event_start_date: "", event_end_date: "", venue_address_line1: "", venue_address_line2: "", venue_pincode: "", notes: "" });
@@ -145,6 +190,7 @@ const Cart = () => {
   };
 
   const { calculatedTotal, hasQuoteItems } = calculateCartTotal(items);
+  const grandTotal = calculatedTotal + manpowerFee + transportFee;
 
   return (
     <Layout hideNavbar>
@@ -199,7 +245,6 @@ const Cart = () => {
                     return (
                       <div key={`${item.id}-${item.variant_id || ''}`} className="bg-background border border-border rounded-xl p-4 sm:p-5">
                         <div className="flex gap-4">
-                          {/* Image */}
                           <button onClick={() => navigate(`/ecommerce/${item.id}`)} className="flex-shrink-0">
                             {item.image_url ? (
                               <img src={item.image_url} alt={item.title} className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-border" />
@@ -210,7 +255,6 @@ const Cart = () => {
                             )}
                           </button>
 
-                          {/* Details */}
                           <div className="flex-1 min-w-0 space-y-2">
                             <div className="flex items-start justify-between gap-2">
                               <div className="min-w-0">
@@ -226,7 +270,6 @@ const Cart = () => {
                               </button>
                             </div>
 
-                            {/* Price per unit */}
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-bold text-foreground">{formatItemPrice(item)}</span>
                               {item.pricing_unit && (
@@ -234,7 +277,6 @@ const Cart = () => {
                               )}
                             </div>
 
-                            {/* Quantity / Dimensions */}
                             <div className="flex items-center justify-between gap-3 flex-wrap">
                               {isMeasurableUnit(item.pricing_unit) ? (
                                 <div className="space-y-1.5">
@@ -274,7 +316,6 @@ const Cart = () => {
                                 </div>
                               )}
 
-                              {/* Line total */}
                               {itemTotal != null && (
                                 <span className="text-base font-bold text-foreground">₹{itemTotal.toLocaleString()}</span>
                               )}
@@ -306,7 +347,6 @@ const Cart = () => {
                     </div>
                     <Separator />
                     <div className="space-y-3">
-                      {/* Profile info summary */}
                       {profileData && (
                         <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
                           <p className="font-medium text-foreground">{profileData.full_name}</p>
@@ -324,7 +364,6 @@ const Cart = () => {
                           <Input type="date" value={eventDetails.event_end_date} onChange={e => setEventDetails(p => ({ ...p, event_end_date: e.target.value }))} />
                         </div>
                       </div>
-                      {/* Venue address fields — only for rental/crew orders, NOT for venue bookings */}
                       {showVenueAddressFields && (
                         <>
                           <div className="space-y-1">
@@ -336,7 +375,7 @@ const Cart = () => {
                             <Input value={eventDetails.venue_address_line2} onChange={e => setEventDetails(p => ({ ...p, venue_address_line2: e.target.value }))} placeholder="Area, landmark" />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs">Pin Code</Label>
+                            <Label className="text-xs">Pin Code *</Label>
                             <Input value={eventDetails.venue_pincode} onChange={e => setEventDetails(p => ({ ...p, venue_pincode: e.target.value }))} placeholder="500001" maxLength={6} />
                           </div>
                         </>
@@ -345,10 +384,60 @@ const Cart = () => {
                         <Label className="text-xs">Additional Notes</Label>
                         <Textarea value={eventDetails.notes} onChange={e => setEventDetails(p => ({ ...p, notes: e.target.value }))} placeholder="Any special requirements..." rows={3} />
                       </div>
+
+                      {/* Logistics breakdown for instant book */}
+                      {showInstantBookFlow && dateIsSet && (
+                        <div className="space-y-2 pt-2">
+                          <Separator />
+                          <h4 className="text-xs font-semibold text-muted-foreground uppercase">Logistics Breakdown</h4>
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between text-sm">
+                              <span className="flex items-center gap-1.5 text-muted-foreground"><Package className="h-3.5 w-3.5" /> Items Subtotal</span>
+                              <span className="font-medium">₹{calculatedTotal.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="flex items-center gap-1.5 text-muted-foreground"><Users className="h-3.5 w-3.5" /> Manpower</span>
+                              <span className="font-medium">₹{manpowerFee.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="flex items-center gap-1.5 text-muted-foreground">
+                                <Truck className="h-3.5 w-3.5" /> Transport
+                                {transportLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                              </span>
+                              <span className="font-medium">
+                                {transportResult ? `₹${transportFee.toLocaleString()}` : eventDetails.venue_pincode ? "Calculating..." : "Enter PIN"}
+                              </span>
+                            </div>
+                            {transportResult && (
+                              <p className="text-[10px] text-muted-foreground">
+                                {transportResult.distance_km} km · {transportResult.vehicle_type}
+                              </p>
+                            )}
+                          </div>
+                          <Separator />
+                          <div className="flex justify-between items-center">
+                            <span className="text-base font-bold">Grand Total</span>
+                            <span className="text-lg font-bold text-primary">₹{grandTotal.toLocaleString()}</span>
+                          </div>
+
+                          {!canInstantBook && dateIsSet && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400">
+                              ⚠ Event is less than {minBookingHours} hours away — falls back to enquiry mode.
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>
-                      <Send className="h-4 w-4" /> {submitting ? "Sending..." : "Send Enquiry"}
-                    </Button>
+
+                    {canInstantBook && showVenueAddressFields ? (
+                      <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>
+                        <Zap className="h-4 w-4" /> {submitting ? "Confirming..." : "Confirm & Book Instantly"}
+                      </Button>
+                    ) : (
+                      <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>
+                        <Send className="h-4 w-4" /> {submitting ? "Sending..." : "Send Enquiry"}
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -377,6 +466,22 @@ const Cart = () => {
                         })}
                       </div>
                       <Separator />
+
+                      {/* Show logistics preview if all priced */}
+                      {showInstantBookFlow && (
+                        <div className="space-y-1.5 text-sm">
+                          <div className="flex justify-between text-muted-foreground">
+                            <span>+ Manpower (est.)</span>
+                            <span>₹{manpowerFee.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between text-muted-foreground">
+                            <span>+ Transport (est.)</span>
+                            <span>Calculated at checkout</span>
+                          </div>
+                          <Separator />
+                        </div>
+                      )}
+
                       {calculatedTotal > 0 && (
                         <div className="flex justify-between items-center">
                           <span className="text-base font-bold text-foreground">Estimated Total</span>
@@ -386,6 +491,13 @@ const Cart = () => {
                       {hasQuoteItems && (
                         <p className="text-[11px] text-muted-foreground">* Some items require a custom quote. Final price confirmed by our team.</p>
                       )}
+
+                      {showInstantBookFlow && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Zap className="h-3 w-3" /> Instant Book eligible
+                        </Badge>
+                      )}
+
                       <Button
                         onClick={async () => {
                           if (!user && !authLoading) {
@@ -393,7 +505,6 @@ const Cart = () => {
                             navigate("/auth");
                             return;
                           }
-                          // Fetch profile and check completeness
                           if (user) {
                             const { data } = await supabase
                               .from("profiles")
@@ -413,11 +524,16 @@ const Cart = () => {
                         className="w-full gap-2"
                         size="lg"
                       >
-                        <Send className="h-4 w-4" /> Proceed to Enquiry
+                        {showInstantBookFlow ? (
+                          <><Zap className="h-4 w-4" /> Proceed to Book</>
+                        ) : (
+                          <><Send className="h-4 w-4" /> Proceed to Enquiry</>
+                        )}
                       </Button>
-                      <p className="text-[11px] text-muted-foreground text-center">Our team will respond within 24 hours.</p>
+                      <p className="text-[11px] text-muted-foreground text-center">
+                        {showInstantBookFlow ? "Instant booking with real-time pricing." : "Our team will respond within 24 hours."}
+                      </p>
                     </div>
-
                   </>
                 )}
               </div>

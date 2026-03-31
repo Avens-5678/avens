@@ -91,8 +91,6 @@ const VendorDashboard = () => {
         return <OrderTracker />;
       case "inventory":
         return <InventoryManager />;
-      case "calendar":
-        return <AvailabilityCalendar />;
       case "site-visits":
         return <SiteVisitManager />;
       case "offline":

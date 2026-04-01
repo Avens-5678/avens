@@ -8,6 +8,7 @@ import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
 import { Loader2, Calendar, MapPin, Package, Clock, CheckCircle2, IndianRupee } from "lucide-react";
 import { format } from "date-fns";
 import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
+import MilestoneTracker from "@/components/vendor/MilestoneTracker";
 
 const statusColors: Record<string, string> = {
   new: "bg-blue-500/10 text-blue-600 border-blue-500/20",
@@ -140,7 +141,7 @@ const OrderTracker = () => {
         )}
 
         <OrderQuoteCard orderId={order.id} />
-
+        <MilestoneTracker orderId={order.id} />
         {showStatusUpdate && ["new", "accepted", "confirmed", "in_progress", "out_for_delivery", "delivered"].includes(order.status) && (
           <div className="flex items-center gap-3 pt-2 border-t">
             <span className="text-sm font-medium">Update Status:</span>

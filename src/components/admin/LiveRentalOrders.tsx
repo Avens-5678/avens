@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MilestoneTracker from "@/components/vendor/MilestoneTracker";
 import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -874,6 +875,7 @@ const LiveRentalOrders = () => {
               {viewOrder.notes && (
                 <div><Label className="text-muted-foreground">Notes</Label><p>{viewOrder.notes}</p></div>
               )}
+              <MilestoneTracker orderId={viewOrder.id} />
             </div>
           )}
         </DialogContent>

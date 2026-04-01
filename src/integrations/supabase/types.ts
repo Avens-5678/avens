@@ -839,6 +839,62 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_milestones: {
+        Row: {
+          amount_due: number
+          created_at: string
+          due_date: string | null
+          id: string
+          milestone_name: string
+          milestone_order: number
+          order_id: string
+          paid_at: string | null
+          payment_plan: string
+          razorpay_link_id: string | null
+          razorpay_payment_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_due?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          milestone_name: string
+          milestone_order?: number
+          order_id: string
+          paid_at?: string | null
+          payment_plan?: string
+          razorpay_link_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_due?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          milestone_name?: string
+          milestone_order?: number
+          order_id?: string
+          paid_at?: string | null
+          payment_plan?: string
+          razorpay_link_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_milestones_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "rental_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolio: {
         Row: {
           after_image_url: string | null
@@ -1285,6 +1341,7 @@ export type Database = {
           location: string | null
           manpower_fee: number | null
           notes: string | null
+          payment_plan: string | null
           platform_fee: number | null
           status: string
           title: string
@@ -1322,6 +1379,7 @@ export type Database = {
           location?: string | null
           manpower_fee?: number | null
           notes?: string | null
+          payment_plan?: string | null
           platform_fee?: number | null
           status?: string
           title: string
@@ -1359,6 +1417,7 @@ export type Database = {
           location?: string | null
           manpower_fee?: number | null
           notes?: string | null
+          payment_plan?: string | null
           platform_fee?: number | null
           status?: string
           title?: string

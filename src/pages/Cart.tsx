@@ -17,6 +17,8 @@ import { isMeasurableUnit, calculateCartTotal, calculateManpowerFee, isInstantBo
 import { useLogisticsConfig } from "@/hooks/useLogisticsConfig";
 import { useDynamicTransport } from "@/hooks/useDynamicTransport";
 import MapPinPicker from "@/components/ecommerce/MapPinPicker";
+import PaymentPlanSelector from "@/components/ecommerce/PaymentPlanSelector";
+import { PaymentPlan, MilestoneBreakdown, calculateMilestoneBreakdown, useCreateMilestones } from "@/hooks/usePaymentMilestones";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
   CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin,
@@ -36,6 +38,9 @@ const Cart = () => {
   const [submitting, setSubmitting] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [profileData, setProfileData] = useState<{ full_name: string; email: string; phone: string } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PaymentPlan>("advance");
+  const [milestoneBreakdown, setMilestoneBreakdown] = useState<MilestoneBreakdown | null>(null);
+  const { mutateAsync: createMilestones } = useCreateMilestones();
   const [eventDetails, setEventDetails] = useState({
     event_start_date: "",
     event_end_date: "",
@@ -193,17 +198,29 @@ const Cart = () => {
         client_id: user.id,
         assigned_vendor_id: assignedVendorId,
         vendor_inventory_item_id: vendorInventoryItemId,
+        payment_plan: selectedPlan,
       };
 
       if (isInstant) {
+        const pFee = calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0);
+        const vPayout = items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee;
         orderData.manpower_fee = manpowerFee;
         orderData.transport_fee = transportFee;
-        orderData.platform_fee = calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0);
-        orderData.vendor_payout = items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee;
+        orderData.platform_fee = pFee;
+        orderData.vendor_payout = vPayout;
       }
 
       const { error } = await supabase.from("rental_orders").insert(orderData as any);
       if (error) throw error;
+
+      // Create payment milestones
+      if (isInstant && milestoneBreakdown) {
+        try {
+          await createMilestones({ orderId, breakdown: milestoneBreakdown });
+        } catch (mErr) {
+          console.error("Failed to create milestones:", mErr);
+        }
+      }
 
       if (normalizedPhone) {
         try {
@@ -500,11 +517,26 @@ const Cart = () => {
                           )}
                         </div>
                       )}
+
+                      {/* Payment Plan Selector — only for instant book eligible orders */}
+                      {canInstantBook && showVenueAddressFields && grandTotal > 0 && (
+                        <PaymentPlanSelector
+                          grandTotal={grandTotal}
+                          platformFee={calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0)}
+                          vendorPayout={items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee}
+                          eventDate={items.map(i => i.booking_from).filter(Boolean).sort()[0] || null}
+                          selectedPlan={selectedPlan}
+                          onPlanSelect={(plan, breakdown) => {
+                            setSelectedPlan(plan);
+                            setMilestoneBreakdown(breakdown);
+                          }}
+                        />
+                      )}
                     </div>
 
                     {canInstantBook && showVenueAddressFields ? (
                       <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>
-                        <Zap className="h-4 w-4" /> {submitting ? "Confirming..." : "Confirm & Book Instantly"}
+                        <Zap className="h-4 w-4" /> {submitting ? "Confirming..." : `Pay ₹${milestoneBreakdown?.milestones[0]?.amount?.toLocaleString("en-IN") || grandTotal.toLocaleString()} & Book`}
                       </Button>
                     ) : (
                       <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>

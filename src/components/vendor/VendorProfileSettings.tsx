@@ -28,6 +28,8 @@ const VendorProfileSettings = () => {
     gst_number: "",
     pan_number: "",
     warehouse_pincode: "",
+    warehouse_lat: 0,
+    warehouse_lng: 0,
   });
 
   useEffect(() => {

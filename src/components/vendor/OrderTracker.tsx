@@ -141,6 +141,14 @@ const OrderTracker = () => {
           <p className="text-sm text-muted-foreground">📞 {order.client_phone}</p>
         )}
 
+        {order.venue_lat && order.venue_lng && (
+          <OrderLocationMap
+            lat={order.venue_lat}
+            lng={order.venue_lng}
+            address={order.location || undefined}
+          />
+        )}
+
         <OrderQuoteCard orderId={order.id} />
         <MilestoneTracker orderId={order.id} />
         {showStatusUpdate && ["new", "accepted", "confirmed", "in_progress", "out_for_delivery", "delivered"].includes(order.status) && (

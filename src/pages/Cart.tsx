@@ -14,11 +14,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit, calculateCartTotal, calculateManpowerFee, isInstantBookable } from "@/utils/pricingUtils";
-import { useLogisticsConfig, useTransportTiers } from "@/hooks/useLogisticsConfig";
-import { useTransportFee } from "@/hooks/useTransportFee";
+import { useLogisticsConfig } from "@/hooks/useLogisticsConfig";
+import { useDynamicTransport } from "@/hooks/useDynamicTransport";
+import MapPinPicker from "@/components/ecommerce/MapPinPicker";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
-  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2,
+  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 

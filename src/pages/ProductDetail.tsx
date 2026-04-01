@@ -5,6 +5,8 @@ import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import SiteVisitForm from "@/components/ecommerce/BookingWidget";
 import SmartRecommendations from "@/components/ecommerce/SmartRecommendations";
+import VenueHoldButton from "@/components/ecommerce/VenueHoldButton";
+import BundleSuggestion from "@/components/ecommerce/BundleSuggestion";
 import AmenitiesMatrix from "@/components/ecommerce/AmenitiesMatrix";
 import HouseRules from "@/components/ecommerce/HouseRules";
 import { Button } from "@/components/ui/button";
@@ -684,6 +686,14 @@ const ProductDetail = () => {
                 {isVenue && (
                   <SiteVisitForm rental={rental} />
                 )}
+
+                {/* Instant 24-Hour Hold for venues */}
+                {isVenue && id && (
+                  <VenueHoldButton venueId={id} venueName={rental.title || rental.name || "Venue"} />
+                )}
+
+                {/* Smart Bundle suggestion */}
+                <BundleSuggestion serviceType={rental.service_type} categories={rental.categories} />
               </div>
 
             </div>

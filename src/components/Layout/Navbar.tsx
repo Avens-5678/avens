@@ -27,20 +27,15 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { href: "/services", label: "Services" },
-    { href: "/portfolio", label: "Portfolio" },
-    { href: "/ecommerce", label: "Rental" },
+    { href: "/ecommerce", label: "Marketplace" },
     { href: "/about", label: "About" },
+    { href: "/faq", label: "FAQ" },
   ];
 
   const mobileNavLinks = [
-    { href: "/services", label: "Services" },
-    { href: "/portfolio", label: "Portfolio" },
-    { href: "/ecommerce", label: "Rental" },
+    { href: "/ecommerce", label: "Marketplace" },
     { href: "/about", label: "About" },
-    { href: "/blog", label: "Blog" },
     { href: "/faq", label: "FAQ" },
-    { href: "/team", label: "Team" },
   ];
 
   const isActive = (path: string) => location.pathname === path;

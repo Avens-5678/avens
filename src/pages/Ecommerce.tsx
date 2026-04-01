@@ -25,7 +25,7 @@ import HowItWorks from "@/components/ecommerce/HowItWorks";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
-
+import LookbookSection from "@/components/ecommerce/LookbookSection";
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
 // ── Rental-specific filters ──
@@ -711,6 +711,9 @@ const Ecommerce = () => {
       {isDiscoveryView && (
         <>
           <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} />
+          <div className="container mx-auto px-4 sm:px-6">
+            <LookbookSection />
+          </div>
           <HowItWorks />
         </>
       )}

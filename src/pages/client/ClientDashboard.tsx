@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot } from "lucide-react";
+import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
@@ -12,9 +12,11 @@ import PastOrders from "@/components/client/PastOrders";
 import ClientProfileSettings from "@/components/client/ClientProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
+import EventWorkspace from "@/components/client/EventWorkspace";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
+  { icon: FolderOpen, label: "Event Hub", value: "workspace" },
   { icon: FileText, label: "My Requests", value: "tracker" },
   { icon: Plus, label: "New Request", value: "request" },
   { icon: Calendar, label: "Past Orders", value: "past-orders" },
@@ -83,6 +85,8 @@ const ClientDashboard = () => {
     switch (activeTab) {
       case "ai":
         return null; // Rendered persistently below
+      case "workspace":
+        return <EventWorkspace />;
       case "tracker":
         return <EventTracker />;
       case "request":

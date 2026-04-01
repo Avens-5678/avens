@@ -26,10 +26,19 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { addViewed } = useRecentlyViewed();
+  const { data: pricingRules } = usePricingRules();
+
+  const isVendor = rental._source === "vendor";
+  const tierKey = rental.markup_tier || "mid";
 
   const formatPrice = () => {
     if (rental.price_value != null) {
-      return { price: `₹${rental.price_value.toLocaleString()}`, unit: `/ ${rental.pricing_unit || "Per Day"}` };
+      let price = rental.price_value;
+      if (isVendor && pricingRules?.length) {
+        const { clientPrice } = applyTieredMarkup(price, tierKey, pricingRules);
+        price = clientPrice;
+      }
+      return { price: `₹${price.toLocaleString()}`, unit: `/ ${rental.pricing_unit || "Per Day"}` };
     }
     if (rental.price_range) return { price: `₹${rental.price_range}`, unit: "" };
     return null;

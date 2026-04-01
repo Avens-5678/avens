@@ -628,9 +628,14 @@ const InventoryManager = () => {
                     </div>
                   )}
                   <div className="space-y-1">
-                    <Label>Volume Units (for manpower calc)</Label>
+                    <Label>Labor Weight (for manpower calc)</Label>
                     <Input type="number" min="1" value={formData.labor_weight || 1} onChange={(e) => setFormData(prev => ({ ...prev, labor_weight: parseInt(e.target.value) || 1 }))} placeholder="1" />
-                    <p className="text-xs text-muted-foreground">Weight/volume per unit: 1 chair = 1, 1 sofa = 10, 1 truss = 20</p>
+                    <p className="text-xs text-muted-foreground">Weight per unit for loader calculation: 1 chair = 1, 1 sofa = 10</p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Volume Units (for vehicle matching)</Label>
+                    <Input type="number" min="1" value={formData.volume_units || 1} onChange={(e) => setFormData(prev => ({ ...prev, volume_units: parseInt(e.target.value) || 1 }))} placeholder="1" />
+                    <p className="text-xs text-muted-foreground">Space in vehicle: 1 chair = 1, 1 sofa = 15, 1 DJ console = 30, 1 LED wall = 50</p>
                   </div>
                 </div>
               ) : (

@@ -157,6 +157,7 @@ const Ecommerce = () => {
       vendor_id: v.vendor_id,
       virtual_tour_url: v.virtual_tour_url || null,
       is_verified: v.is_verified || false,
+      markup_tier: v.markup_tier || "mid",
       venue_type: v.venue_type || null,
       min_capacity: v.min_capacity,
       max_capacity: v.max_capacity,

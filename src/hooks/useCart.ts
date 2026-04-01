@@ -28,6 +28,10 @@ export interface CartItem {
   booking_till?: string;
   /** Booking slot (morning/evening/full_day) */
   booking_slot?: string;
+  /** Pricing tier key for tiered markup */
+  markup_tier?: string;
+  /** Vendor's base price before platform markup */
+  vendor_base_price?: number;
 }
 
 interface CartStore {

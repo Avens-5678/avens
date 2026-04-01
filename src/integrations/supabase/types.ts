@@ -149,6 +149,89 @@ export type Database = {
         }
         Relationships: []
       }
+      b2b_hire_offers: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          offering_vendor_id: string
+          price_per_unit: number
+          quantity_available: number
+          request_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          offering_vendor_id: string
+          price_per_unit: number
+          quantity_available?: number
+          request_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          offering_vendor_id?: string
+          price_per_unit?: number
+          quantity_available?: number
+          request_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_hire_offers_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "b2b_hire_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_hire_requests: {
+        Row: {
+          budget_per_unit: number | null
+          created_at: string
+          id: string
+          item_name: string
+          needed_date: string
+          needed_till_date: string | null
+          notes: string | null
+          quantity_needed: number
+          requesting_vendor_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget_per_unit?: number | null
+          created_at?: string
+          id?: string
+          item_name: string
+          needed_date: string
+          needed_till_date?: string | null
+          notes?: string | null
+          quantity_needed?: number
+          requesting_vendor_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget_per_unit?: number | null
+          created_at?: string
+          id?: string
+          item_name?: string
+          needed_date?: string
+          needed_till_date?: string | null
+          notes?: string | null
+          quantity_needed?: number
+          requesting_vendor_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_testimonials: {
         Row: {
           client_name: string
@@ -263,6 +346,80 @@ export type Database = {
         }
         Relationships: []
       }
+      event_folder_members: {
+        Row: {
+          created_at: string
+          folder_id: string
+          id: string
+          order_id: string | null
+          role: string | null
+          service_type: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          folder_id: string
+          id?: string
+          order_id?: string | null
+          role?: string | null
+          service_type?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          folder_id?: string
+          id?: string
+          order_id?: string | null
+          role?: string | null
+          service_type?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_folder_members_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "event_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_folders: {
+        Row: {
+          client_id: string
+          created_at: string
+          event_date: string | null
+          id: string
+          notes: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          venue_order_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          venue_order_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          venue_order_id?: string | null
+        }
+        Relationships: []
+      }
       event_requests: {
         Row: {
           admin_notes: string | null
@@ -310,6 +467,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      event_timeline: {
+        Row: {
+          assigned_vendor_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          folder_id: string
+          id: string
+          reminder_sent: boolean | null
+          time: string
+          title: string
+        }
+        Insert: {
+          assigned_vendor_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          folder_id: string
+          id?: string
+          reminder_sent?: boolean | null
+          time: string
+          title: string
+        }
+        Update: {
+          assigned_vendor_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          folder_id?: string
+          id?: string
+          reminder_sent?: boolean | null
+          time?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_timeline_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "event_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       events: {
         Row: {
@@ -524,6 +725,54 @@ export type Database = {
         }
         Relationships: []
       }
+      labor_shifts: {
+        Row: {
+          created_at: string
+          daily_rate: number
+          hours_worked: number | null
+          id: string
+          notes: string | null
+          order_id: string | null
+          paid_at: string | null
+          shift_date: string
+          status: string | null
+          total_pay: number | null
+          vendor_id: string
+          worker_name: string
+          worker_phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          daily_rate?: number
+          hours_worked?: number | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          shift_date: string
+          status?: string | null
+          total_pay?: number | null
+          vendor_id: string
+          worker_name: string
+          worker_phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          daily_rate?: number
+          hours_worked?: number | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          shift_date?: string
+          status?: string | null
+          total_pay?: number | null
+          vendor_id?: string
+          worker_name?: string
+          worker_phone?: string | null
+        }
+        Relationships: []
+      }
       logistics_config: {
         Row: {
           id: string
@@ -602,6 +851,9 @@ export type Database = {
           image_url: string
           is_before: boolean | null
           is_before_after: boolean | null
+          is_lookbook: boolean | null
+          linked_rental_ids: string[] | null
+          lookbook_description: string | null
           show_on_home: boolean | null
           tag: string | null
           title: string
@@ -618,6 +870,9 @@ export type Database = {
           image_url: string
           is_before?: boolean | null
           is_before_after?: boolean | null
+          is_lookbook?: boolean | null
+          linked_rental_ids?: string[] | null
+          lookbook_description?: string | null
           show_on_home?: boolean | null
           tag?: string | null
           title: string
@@ -634,6 +889,9 @@ export type Database = {
           image_url?: string
           is_before?: boolean | null
           is_before_after?: boolean | null
+          is_lookbook?: boolean | null
+          linked_rental_ids?: string[] | null
+          lookbook_description?: string | null
           show_on_home?: boolean | null
           tag?: string | null
           title?: string
@@ -648,6 +906,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      product_bundles: {
+        Row: {
+          bundle_items: Json
+          created_at: string
+          description: string | null
+          discount_percent: number | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          total_price: number | null
+          trigger_categories: string[] | null
+          trigger_service_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          bundle_items?: Json
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          total_price?: number | null
+          trigger_categories?: string[] | null
+          trigger_service_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bundle_items?: Json
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          total_price?: number | null
+          trigger_categories?: string[] | null
+          trigger_service_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -2029,6 +2335,48 @@ export type Database = {
           total_reviews?: number | null
           updated_at?: string | null
           vendor_id?: string
+        }
+        Relationships: []
+      }
+      venue_holds: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          expires_at: string
+          hold_date: string
+          id: string
+          payment_id: string | null
+          slot: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          venue_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          created_at?: string
+          expires_at?: string
+          hold_date: string
+          id?: string
+          payment_id?: string | null
+          slot?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          venue_id: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          expires_at?: string
+          hold_date?: string
+          id?: string
+          payment_id?: string | null
+          slot?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          venue_id?: string
         }
         Relationships: []
       }

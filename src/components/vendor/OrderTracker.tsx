@@ -8,6 +8,7 @@ import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
 import { Loader2, Calendar, MapPin, Package, Clock, CheckCircle2, IndianRupee } from "lucide-react";
 import { format } from "date-fns";
 import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
+import MilestoneTracker from "@/components/vendor/MilestoneTracker";
 
 const statusColors: Record<string, string> = {
   new: "bg-blue-500/10 text-blue-600 border-blue-500/20",

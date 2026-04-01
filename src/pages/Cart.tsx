@@ -517,11 +517,26 @@ const Cart = () => {
                           )}
                         </div>
                       )}
+
+                      {/* Payment Plan Selector — only for instant book eligible orders */}
+                      {canInstantBook && showVenueAddressFields && grandTotal > 0 && (
+                        <PaymentPlanSelector
+                          grandTotal={grandTotal}
+                          platformFee={calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0)}
+                          vendorPayout={items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee}
+                          eventDate={items.map(i => i.booking_from).filter(Boolean).sort()[0] || null}
+                          selectedPlan={selectedPlan}
+                          onPlanSelect={(plan, breakdown) => {
+                            setSelectedPlan(plan);
+                            setMilestoneBreakdown(breakdown);
+                          }}
+                        />
+                      )}
                     </div>
 
                     {canInstantBook && showVenueAddressFields ? (
                       <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>
-                        <Zap className="h-4 w-4" /> {submitting ? "Confirming..." : "Confirm & Book Instantly"}
+                        <Zap className="h-4 w-4" /> {submitting ? "Confirming..." : `Pay ₹${milestoneBreakdown?.milestones[0]?.amount?.toLocaleString("en-IN") || grandTotal.toLocaleString()} & Book`}
                       </Button>
                     ) : (
                       <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>

@@ -218,7 +218,7 @@ const Cart = () => {
       toast({ title: isInstant ? "Booking Confirmed!" : "Enquiry Sent!", description: isInstant ? "Your booking is confirmed. Vendor will be notified." : "Our team will respond within 24 hours." });
       clearCart();
       setShowEnquiry(false);
-      setEventDetails({ event_start_date: "", event_end_date: "", venue_address_line1: "", venue_address_line2: "", venue_pincode: "", notes: "" });
+      setEventDetails({ event_start_date: "", event_end_date: "", venue_address_line1: "", venue_address_line2: "", venue_pincode: "", venue_lat: 0, venue_lng: 0, notes: "" });
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to send enquiry", variant: "destructive" });
     } finally {

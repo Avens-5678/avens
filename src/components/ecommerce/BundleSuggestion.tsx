@@ -38,7 +38,7 @@ const BundleSuggestion = ({ serviceType, categories }: { serviceType: string; ca
         .order("display_order", { ascending: true })
         .limit(3);
       if (error) throw error;
-      return (data || []) as Bundle[];
+      return (data || []) as unknown as Bundle[];
     },
   });
 

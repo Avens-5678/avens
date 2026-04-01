@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AudioProvider } from "@/contexts/AudioContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "@/components/ScrollToTop";
 import { lazy, Suspense } from "react";
@@ -37,10 +38,11 @@ const queryClient = new QueryClient();
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
   <QueryClientProvider client={queryClient}>
+    <AuthProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ScrollToTop />
         <AudioProvider>
           <Suspense fallback={<div className="min-h-screen" />}>
@@ -73,7 +75,16 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPassword />} />
               
               {/* Protected Routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route
+                path="/admin"
+                element={
+                  <Suspense fallback={<div className="min-h-screen" />}>
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
               <Route 
                 path="/client/dashboard" 
                 element={
@@ -94,9 +105,15 @@ const App = () => (
                   </Suspense>
                 } 
               />
-              <Route 
-                path="/employee/dashboard" 
-                element={<EmployeeDashboard />} 
+              <Route
+                path="/employee/dashboard"
+                element={
+                  <Suspense fallback={<div className="min-h-screen" />}>
+                    <ProtectedRoute allowedRoles={["employee"]}>
+                      <EmployeeDashboard />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
               />
               
               <Route path="/vendor/action" element={<VendorAction />} />
@@ -106,6 +123,7 @@ const App = () => (
         </AudioProvider>
       </BrowserRouter>
     </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
   </ThemeProvider>
 );

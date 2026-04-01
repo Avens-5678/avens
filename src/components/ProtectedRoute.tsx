@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole, AppRole } from "@/hooks/useUserRole";
 import { Loader2 } from "lucide-react";
@@ -13,15 +13,17 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const isLoading = authLoading || roleLoading;
 
   useEffect(() => {
     if (isLoading) return;
 
-    // Not authenticated
+    // Not authenticated — send to /auth and remember where they were trying to go
     if (!user) {
-      navigate("/auth");
+      const redirect = encodeURIComponent(location.pathname + location.search);
+      navigate(`/auth?redirect=${redirect}`);
       return;
     }
 

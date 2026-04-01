@@ -25,6 +25,12 @@ import {
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 const Cart = () => {
   const { items, removeItem, updateQuantity, updateDimensions, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
@@ -310,6 +316,160 @@ const Cart = () => {
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to send enquiry", variant: "destructive" });
     } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleRazorpayCheckout = async () => {
+    if (!user) {
+      toast({ title: "Please log in", description: "You need to sign in to book.", variant: "destructive" });
+      navigate("/auth");
+      return;
+    }
+    if (!profileData?.full_name || !profileData?.phone) {
+      toast({ title: "Complete your profile", description: "Please fill in your name and phone number first.", variant: "destructive" });
+      navigate("/client");
+      return;
+    }
+    if (!derivedStartDate) {
+      toast({ title: "Missing dates", description: "Please add items with booking dates.", variant: "destructive" });
+      return;
+    }
+    if (showVenueAddressFields && !eventDetails.venue_address_line1 && !primaryVenueAddress) {
+      toast({ title: "Missing information", description: "Please fill in the venue address.", variant: "destructive" });
+      return;
+    }
+    if (!milestoneBreakdown) {
+      toast({ title: "Error", description: "Payment plan not calculated. Please try again.", variant: "destructive" });
+      return;
+    }
+    if (!window.Razorpay) {
+      toast({ title: "Payment unavailable", description: "Please disable your ad blocker and refresh the page.", variant: "destructive" });
+      return;
+    }
+
+    setSubmitting(true);
+    const orderId = crypto.randomUUID();
+
+    try {
+      const cartPayload = items.map(item => ({
+        rental_id: item.id,
+        title: item.title,
+        variant_id: item.variant_id || null,
+        variant_label: item.variant_label || null,
+        quantity: item.quantity,
+        length: item.length || null,
+        breadth: item.breadth || null,
+        price_value: item.price_value,
+        pricing_unit: item.pricing_unit,
+      }));
+      const normalizedPhone = profileData.phone ? normalizePhoneNumber(profileData.phone) : null;
+      const venueLocation = [eventDetails.venue_address_line1 || primaryVenueAddress, eventDetails.venue_address_line2, eventDetails.venue_pincode].filter(Boolean).join(", ");
+      const vendorItem = items.find(i => i.vendor_id);
+      const assignedVendorId = vendorItem?.vendor_id || null;
+      const vendorInventoryItemId = vendorItem ? vendorItem.id : null;
+
+      // Insert order with status payment_pending — confirmed only after Razorpay verification
+      const { error: orderError } = await supabase.from("rental_orders").insert({
+        id: orderId,
+        title: `Instant Booking - ${items.length} item(s)`,
+        equipment_category: "Cart Order",
+        equipment_details: JSON.stringify({
+          cart_items: cartPayload,
+          event_details: { ...eventDetails, customer_name: profileData.full_name, email: profileData.email, contact_number: profileData.phone },
+        }),
+        client_name: profileData.full_name,
+        client_email: profileData.email,
+        client_phone: normalizedPhone,
+        event_date: derivedStartDate || null,
+        location: venueLocation || primaryVenueAddress || null,
+        notes: eventDetails.notes || null,
+        status: "payment_pending",
+        client_id: user.id,
+        assigned_vendor_id: assignedVendorId,
+        vendor_inventory_item_id: vendorInventoryItemId,
+        payment_plan: selectedPlan,
+        manpower_fee: manpowerFee,
+        transport_fee: transportFee,
+        platform_fee: platformFee,
+        vendor_payout: vendorPayout,
+      } as any);
+      if (orderError) throw orderError;
+
+      // Insert milestones all as pending — verify-razorpay-payment marks milestone 1 paid
+      const milestoneRows = milestoneBreakdown.milestones.map(m => ({
+        order_id: orderId,
+        milestone_name: m.name,
+        amount_due: m.amount,
+        due_date: m.due_date,
+        status: "pending",
+        paid_at: null,
+        payment_plan: milestoneBreakdown.plan,
+        milestone_order: m.milestone_order,
+      }));
+      const { error: msError } = await supabase.from("payment_milestones").insert(milestoneRows as any);
+      if (msError) throw msError;
+
+      // Create the Razorpay order on the backend
+      const amountToPay = milestoneBreakdown.milestones[0].amount;
+      const { data: rzpData, error: rzpFnError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { amount: amountToPay, currency: "INR", order_id: orderId },
+      });
+      if (rzpFnError || !rzpData?.razorpay_order_id) {
+        throw new Error(rzpFnError?.message || "Failed to create payment order");
+      }
+
+      // Open Razorpay checkout popup
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: amountToPay * 100, // paise
+        currency: "INR",
+        name: "Evnting.com",
+        description: `Booking - ${items.length} item(s)`,
+        order_id: rzpData.razorpay_order_id,
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+            body: {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: orderId,
+              phone: normalizedPhone,
+              name: profileData.full_name,
+            },
+          });
+          if (verifyError || !verifyData?.success) {
+            toast({
+              title: "Payment verification failed",
+              description: `Please contact support with payment ID: ${response.razorpay_payment_id}`,
+              variant: "destructive",
+            });
+            return;
+          }
+          toast({ title: "Booking Confirmed!", description: "Payment successful. You'll receive a WhatsApp confirmation shortly." });
+          clearCart();
+          navigate("/ecommerce/orders");
+        },
+        prefill: {
+          name: profileData.full_name,
+          email: profileData.email,
+          contact: normalizedPhone || profileData.phone,
+        },
+        theme: { color: "#7c3aed" },
+        modal: {
+          ondismiss: () => {
+            toast({ title: "Payment cancelled", description: "Your booking was not confirmed. You can try again.", variant: "destructive" });
+            setSubmitting(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+      // setSubmitting is intentionally NOT reset here —
+      // ondismiss handles the cancel case; the success handler navigates away.
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to initiate payment", variant: "destructive" });
       setSubmitting(false);
     }
   };
@@ -603,8 +763,8 @@ const Cart = () => {
                     </div>
 
                     {canInstantBook ? (
-                      <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>
-                        <Zap className="h-4 w-4" /> {submitting ? "Confirming..." : `Pay ₹${milestoneBreakdown?.milestones[0]?.amount?.toLocaleString("en-IN") || grandTotal.toLocaleString()} & Book`}
+                      <Button onClick={handleRazorpayCheckout} className="w-full gap-2" size="lg" disabled={submitting}>
+                        <Zap className="h-4 w-4" /> {submitting ? "Opening Payment..." : `Pay ₹${milestoneBreakdown?.milestones[0]?.amount?.toLocaleString("en-IN") || grandTotal.toLocaleString()} & Book`}
                       </Button>
                     ) : (
                       <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>

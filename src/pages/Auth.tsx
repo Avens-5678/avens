@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogIn, ArrowLeft, UserPlus, ArrowRight, Shield, Mail, User, Building2, Briefcase } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -54,6 +54,8 @@ const Auth = () => {
   const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect");
 
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
@@ -80,6 +82,11 @@ const Auth = () => {
     }
   };
 
+  // After login, go to the page they originally tried to visit (if any),
+  // otherwise fall back to their role's dashboard.
+  const getPostLoginPath = (targetRole?: string | null) =>
+    redirectTo || getDashboardPath(targetRole);
+
   const hasMultipleRoles = (userTypeInfo?.roles?.length || 0) > 1;
 
   // Handle Google OAuth callback - check if user needs onboarding
@@ -94,7 +101,7 @@ const Auth = () => {
     }
 
     if (user && role) {
-      navigate(getDashboardPath(role), { replace: true });
+      navigate(getPostLoginPath(role), { replace: true });
     } else if (user && !role && !roleLoading) {
       // Check if this is a Google OAuth user with no role
       // If they signed up via Google but have no profile/role, show onboarding
@@ -185,7 +192,7 @@ const Auth = () => {
   };
 
   const handleRoleSelect = (selectedRole: string) => {
-    navigate(getDashboardPath(selectedRole), { replace: true });
+    navigate(getPostLoginPath(selectedRole), { replace: true });
   };
 
   const handleForgotPassword = async () => {
@@ -274,8 +281,7 @@ const Auth = () => {
 
       toast({ title: "Welcome!", description: "Your account is set up successfully." });
 
-      // Navigate to ecommerce after onboarding
-      navigate("/ecommerce");
+      navigate(getPostLoginPath(selectedOnboardingRole), { replace: true });
     } catch (error: any) {
       console.error("Onboarding error:", error);
       toast({ title: "Setup Failed", description: error.message || "Something went wrong.", variant: "destructive" });

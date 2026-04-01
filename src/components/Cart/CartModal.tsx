@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/useCart";
@@ -27,6 +27,7 @@ const CartModal = ({ open, onOpenChange }: CartModalProps) => {
             <ShoppingCart className="h-5 w-5" />
             Cart ({items.length} items)
           </DialogTitle>
+          <DialogDescription className="sr-only">Review your cart items before proceeding to checkout.</DialogDescription>
         </DialogHeader>
 
         {items.length === 0 ? (

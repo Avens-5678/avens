@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MapPin, Navigation, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 interface LocationPromptProps {
   open: boolean;
@@ -46,6 +46,7 @@ const LocationPrompt = ({ open, onClose, onDetectGPS, onPinCodeSubmit }: Locatio
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden rounded-2xl">
         <DialogTitle className="sr-only">Set your delivery location</DialogTitle>
+        <DialogDescription className="sr-only">Enter your pin code or use GPS to find items available near you.</DialogDescription>
         {/* Header */}
         <div className="bg-gradient-to-r from-primary to-primary/80 p-6 text-primary-foreground">
           <div className="flex items-center gap-3">

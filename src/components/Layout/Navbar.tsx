@@ -28,14 +28,10 @@ const Navbar = () => {
 
   const navLinks = [
     { href: "/ecommerce", label: "Marketplace" },
-    { href: "/about", label: "About" },
-    { href: "/faq", label: "FAQ" },
   ];
 
   const mobileNavLinks = [
     { href: "/ecommerce", label: "Marketplace" },
-    { href: "/about", label: "About" },
-    { href: "/faq", label: "FAQ" },
   ];
 
   const isActive = (path: string) => location.pathname === path;

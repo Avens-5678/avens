@@ -24,6 +24,8 @@ const sidebarItems: SidebarItem[] = [
   { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: MapPin, label: "Site Visits", value: "site-visits" },
+  { icon: HandshakeIcon, label: "B2B Cross-Hire", value: "b2b" },
+  { icon: Users, label: "Labor & Payroll", value: "labor" },
   { icon: BookOpen, label: "Offline Booking", value: "offline" },
   { icon: FileText, label: "Quotation Maker", value: "quotes" },
   { icon: TrendingUp, label: "Earnings", value: "earnings" },

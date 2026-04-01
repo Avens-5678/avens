@@ -686,6 +686,14 @@ const ProductDetail = () => {
                 {isVenue && (
                   <SiteVisitForm rental={rental} />
                 )}
+
+                {/* Instant 24-Hour Hold for venues */}
+                {isVenue && id && (
+                  <VenueHoldButton venueId={id} venueName={rental.title || rental.name || "Venue"} />
+                )}
+
+                {/* Smart Bundle suggestion */}
+                <BundleSuggestion serviceType={rental.service_type} categories={rental.categories} />
               </div>
 
             </div>

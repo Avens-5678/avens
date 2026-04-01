@@ -19,13 +19,12 @@ Deno.serve(async (req) => {
       throw new Error("Razorpay credentials not configured");
     }
 
-    // amount is in INR (rupees). Razorpay requires paise.
-    // receipt: callers may pass either `receipt` or `order_id` (legacy)
     const body = await req.json();
-    console.log("Request body:", JSON.stringify(body));
+    console.log("1. Raw body received:", JSON.stringify(body));
 
+    // Callers send amount in rupees. Support both `receipt` and legacy `order_id`.
+    // currency defaults to INR if omitted.
     const { amount, currency = "INR", receipt, order_id, notes } = body;
-    const receiptValue = receipt || order_id; // support both callers
 
     if (!amount) {
       return new Response(
@@ -34,20 +33,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    const credentials = btoa(`${keyId}:${keySecret}`);
+    // Safety: if amount looks like it might already be in paise (>= 100000 for >=₹1000)
+    // we still treat it as rupees — all callers send rupees. Multiply unconditionally.
+    const amountInPaise = Math.round(amount * 100);
+    console.log("2. Amount in paise:", amountInPaise, "(rupees received:", amount, ")");
+
+    // receipt: prefer explicit receipt, fall back to order_id, then auto-generate
+    const receiptValue = (receipt || order_id || `order_${Date.now()}`).substring(0, 40);
 
     const razorpayPayload: Record<string, unknown> = {
-      amount: Math.round(amount * 100), // convert rupees → paise
+      amount: amountInPaise,
       currency,
+      receipt: receiptValue,
     };
-
-    if (receiptValue) {
-      razorpayPayload.receipt = String(receiptValue).substring(0, 40); // max 40 chars
-    }
 
     if (notes) {
       razorpayPayload.notes = notes;
     }
+
+    console.log("3. Razorpay payload:", JSON.stringify(razorpayPayload));
+
+    const credentials = btoa(`${keyId}:${keySecret}`);
 
     const razorpayResponse = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
@@ -58,9 +64,9 @@ Deno.serve(async (req) => {
       body: JSON.stringify(razorpayPayload),
     });
 
-    console.log("Razorpay status:", razorpayResponse.status);
+    console.log("4. Razorpay status:", razorpayResponse.status);
     const razorpayBody = await razorpayResponse.json();
-    console.log("Razorpay response:", JSON.stringify(razorpayBody));
+    console.log("5. Razorpay body:", JSON.stringify(razorpayBody));
 
     if (!razorpayResponse.ok) {
       return new Response(

@@ -28,14 +28,10 @@ const Navbar = () => {
 
   const navLinks = [
     { href: "/ecommerce", label: "Marketplace" },
-    { href: "/about", label: "About" },
-    { href: "/faq", label: "FAQ" },
   ];
 
   const mobileNavLinks = [
     { href: "/ecommerce", label: "Marketplace" },
-    { href: "/about", label: "About" },
-    { href: "/faq", label: "FAQ" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -160,18 +156,6 @@ const Navbar = () => {
                   <ChevronRight className="h-4 w-4 opacity-40" />
                 </Link>
               ))}
-              <div className="border-t border-white/8 pt-3 mt-2 space-y-1">
-                <button
-                  className="w-full flex items-center gap-3 text-sm text-white/55 hover:text-white px-4 py-3 rounded-xl hover:bg-white/5 transition-all"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    setIsMobileContactOpen(true);
-                  }}
-                >
-                  <Mail className="h-4 w-4" />
-                  Contact Us
-                </button>
-              </div>
             </div>
           </div>
         )}

@@ -307,6 +307,7 @@ const InventoryManager = () => {
         address: formData.address || null,
         vendor_base_price: vendorBasePrice,
         labor_weight: formData.labor_weight || 1,
+        volume_units: formData.volume_units || 1,
         price_per_day: hasVariants ? null : (formData.price_per_day ? parseFloat(formData.price_per_day) : null),
         price_value: calculatedRetail || manualPrice,
         pricing_unit: hasVariants ? null : (formData.pricing_unit || 'Per Day'),

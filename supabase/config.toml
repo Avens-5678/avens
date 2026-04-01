@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.notify-admin-order]
 verify_jwt = false
+
+[functions.milestone-reminder]
+verify_jwt = false

@@ -140,7 +140,7 @@ const InventoryManager = () => {
     setAttributeType("Size");
     setFormData({
       name: '', short_description: '', description: '', address: '',
-      vendor_base_price: '', labor_weight: 1,
+      vendor_base_price: '', labor_weight: 1, volume_units: 1,
       price_value: '', pricing_unit: 'Per Day', price_per_day: 0,
       categories: [], search_keywords: '', display_order: 0,
       quantity: 1, is_available: true,
@@ -158,6 +158,7 @@ const InventoryManager = () => {
       price_value: item.price_value ?? '',
       vendor_base_price: (item as any).vendor_base_price ?? '',
       labor_weight: (item as any).labor_weight ?? 1,
+      volume_units: (item as any).volume_units ?? 1,
       pricing_unit: item.pricing_unit || 'Per Day',
       service_type: item.service_type || 'rental',
       amenities: item.amenities || [],
@@ -306,6 +307,7 @@ const InventoryManager = () => {
         address: formData.address || null,
         vendor_base_price: vendorBasePrice,
         labor_weight: formData.labor_weight || 1,
+        volume_units: formData.volume_units || 1,
         price_per_day: hasVariants ? null : (formData.price_per_day ? parseFloat(formData.price_per_day) : null),
         price_value: calculatedRetail || manualPrice,
         pricing_unit: hasVariants ? null : (formData.pricing_unit || 'Per Day'),
@@ -626,9 +628,14 @@ const InventoryManager = () => {
                     </div>
                   )}
                   <div className="space-y-1">
-                    <Label>Volume Units (for manpower calc)</Label>
+                    <Label>Labor Weight (for manpower calc)</Label>
                     <Input type="number" min="1" value={formData.labor_weight || 1} onChange={(e) => setFormData(prev => ({ ...prev, labor_weight: parseInt(e.target.value) || 1 }))} placeholder="1" />
-                    <p className="text-xs text-muted-foreground">Weight/volume per unit: 1 chair = 1, 1 sofa = 10, 1 truss = 20</p>
+                    <p className="text-xs text-muted-foreground">Weight per unit for loader calculation: 1 chair = 1, 1 sofa = 10</p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Volume Units (for vehicle matching)</Label>
+                    <Input type="number" min="1" value={formData.volume_units || 1} onChange={(e) => setFormData(prev => ({ ...prev, volume_units: parseInt(e.target.value) || 1 }))} placeholder="1" />
+                    <p className="text-xs text-muted-foreground">Space in vehicle: 1 chair = 1, 1 sofa = 15, 1 DJ console = 30, 1 LED wall = 50</p>
                   </div>
                 </div>
               ) : (

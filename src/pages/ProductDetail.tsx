@@ -259,6 +259,7 @@ const ProductDetail = () => {
       booking_slot: isVenue ? bookingSlot : undefined,
       markup_tier: tierKey,
       vendor_base_price: isVendorItem ? vendorBasePrice : undefined,
+      volume_units: (rental as any).volume_units || 1,
     });
     navigate("/cart");
   };

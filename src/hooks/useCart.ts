@@ -32,6 +32,8 @@ export interface CartItem {
   markup_tier?: string;
   /** Vendor's base price before platform markup */
   vendor_base_price?: number;
+  /** Volume units for vehicle matching (1 chair = 1, 1 sofa = 15, etc.) */
+  volume_units?: number;
 }
 
 interface CartStore {

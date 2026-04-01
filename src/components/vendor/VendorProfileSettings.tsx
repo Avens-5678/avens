@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Save, User, Building2, MapPin, FileText, BadgeCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import MapPinPicker from "@/components/ecommerce/MapPinPicker";
 
 const VendorProfileSettings = () => {
   const { user } = useAuth();
@@ -27,6 +28,8 @@ const VendorProfileSettings = () => {
     gst_number: "",
     pan_number: "",
     warehouse_pincode: "",
+    warehouse_lat: 0,
+    warehouse_lng: 0,
   });
 
   useEffect(() => {
@@ -53,6 +56,8 @@ const VendorProfileSettings = () => {
           gst_number: (data as any).gst_number || "",
           pan_number: (data as any).pan_number || "",
           warehouse_pincode: (data as any).warehouse_pincode || "",
+          warehouse_lat: (data as any).warehouse_lat || 0,
+          warehouse_lng: (data as any).warehouse_lng || 0,
         });
       }
 
@@ -79,6 +84,8 @@ const VendorProfileSettings = () => {
         gst_number: profile.gst_number,
         pan_number: profile.pan_number,
         warehouse_pincode: profile.warehouse_pincode,
+        warehouse_lat: profile.warehouse_lat || null,
+        warehouse_lng: profile.warehouse_lng || null,
       } as any)
       .eq("user_id", user.id);
 
@@ -274,10 +281,20 @@ const VendorProfileSettings = () => {
                 placeholder="e.g. 500081"
                 maxLength={6}
               />
-              <p className="text-xs text-muted-foreground">
-                Used for transport cost calculation to client delivery address.
-              </p>
             </div>
+          </div>
+
+          {/* Map Pin Picker for exact warehouse location */}
+          <div className="pt-2">
+            <MapPinPicker
+              label="📍 Pin your exact warehouse location"
+              description="Drop a pin on the map so we can calculate precise delivery distances. Search, use GPS, or click on the map."
+              initialLat={profile.warehouse_lat || undefined}
+              initialLng={profile.warehouse_lng || undefined}
+              onLocationSelect={(lat, lng, addr) => {
+                setProfile(p => ({ ...p, warehouse_lat: lat, warehouse_lng: lng }));
+              }}
+            />
           </div>
         </CardContent>
       </Card>

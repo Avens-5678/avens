@@ -14,11 +14,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit, calculateCartTotal, calculateManpowerFee, isInstantBookable } from "@/utils/pricingUtils";
-import { useLogisticsConfig, useTransportTiers } from "@/hooks/useLogisticsConfig";
-import { useTransportFee } from "@/hooks/useTransportFee";
+import { useLogisticsConfig } from "@/hooks/useLogisticsConfig";
+import { useDynamicTransport } from "@/hooks/useDynamicTransport";
+import MapPinPicker from "@/components/ecommerce/MapPinPicker";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
-  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2,
+  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 
@@ -29,8 +30,7 @@ const Cart = () => {
   const navigate = useNavigate();
 
   const { data: logisticsConfig } = useLogisticsConfig();
-  const { data: transportTiers } = useTransportTiers();
-  const { calculate: calcTransport, result: transportResult, loading: transportLoading } = useTransportFee();
+  const { calculate: calcDynamicTransport, result: dynamicTransportResult, loading: transportLoading } = useDynamicTransport();
 
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -42,6 +42,8 @@ const Cart = () => {
     venue_address_line1: "",
     venue_address_line2: "",
     venue_pincode: "",
+    venue_lat: 0,
+    venue_lng: 0,
     notes: "",
   });
 
@@ -62,18 +64,41 @@ const Cart = () => {
     ? calculateManpowerFee(items, logisticsConfig.labor_units_per_loader, logisticsConfig.loader_daily_rate)
     : 0;
 
-  // Auto-calc transport when pincode changes
+  // Calculate total volume units from cart
+  const totalVolumeUnits = items.reduce((sum, i) => sum + ((i as any).volume_units || 1) * i.quantity, 0);
+
+  // Auto-calc dynamic transport when venue location is set and we have a vendor with lat/lng
   useEffect(() => {
-    if (eventDetails.venue_pincode && eventDetails.venue_pincode.length >= 5) {
-      // Find vendor pincode from first vendor item
-      const vendorItem = items.find(i => i.vendor_pincode);
-      if (vendorItem?.vendor_pincode) {
-        calcTransport(vendorItem.vendor_pincode, eventDetails.venue_pincode);
+    if (eventDetails.venue_lat && eventDetails.venue_lng) {
+      // Find vendor with lat/lng (from profile)
+      const vendorItem = items.find(i => i.vendor_id);
+      if (vendorItem?.vendor_id) {
+        // Fetch vendor's warehouse lat/lng
+        supabase.from("profiles").select("warehouse_lat, warehouse_lng").eq("user_id", vendorItem.vendor_id).single().then(({ data }) => {
+          if (data && (data as any).warehouse_lat && (data as any).warehouse_lng) {
+            calcDynamicTransport({
+              warehouse_lat: (data as any).warehouse_lat,
+              warehouse_lng: (data as any).warehouse_lng,
+              venue_lat: eventDetails.venue_lat,
+              venue_lng: eventDetails.venue_lng,
+              total_volume_units: totalVolumeUnits,
+            });
+          }
+        });
+      } else if (eventDetails.venue_pincode && eventDetails.venue_pincode.length >= 5) {
+        // Fallback: use pincode-based with volume
+        const vendorPincodeItem = items.find(i => i.vendor_pincode);
+        if (vendorPincodeItem?.vendor_pincode) {
+          // Use old edge function as fallback
+          supabase.functions.invoke("calculate-transport", {
+            body: { vendor_pincode: vendorPincodeItem.vendor_pincode, client_pincode: eventDetails.venue_pincode },
+          });
+        }
       }
     }
-  }, [eventDetails.venue_pincode]);
+  }, [eventDetails.venue_lat, eventDetails.venue_lng, totalVolumeUnits]);
 
-  const transportFee = transportResult?.fee || 0;
+  const transportFee = dynamicTransportResult?.fee || 0;
 
   const formatItemPrice = (item: any) => {
     if (item.price_value != null) {
@@ -193,7 +218,7 @@ const Cart = () => {
       toast({ title: isInstant ? "Booking Confirmed!" : "Enquiry Sent!", description: isInstant ? "Your booking is confirmed. Vendor will be notified." : "Our team will respond within 24 hours." });
       clearCart();
       setShowEnquiry(false);
-      setEventDetails({ event_start_date: "", event_end_date: "", venue_address_line1: "", venue_address_line2: "", venue_pincode: "", notes: "" });
+      setEventDetails({ event_start_date: "", event_end_date: "", venue_address_line1: "", venue_address_line2: "", venue_pincode: "", venue_lat: 0, venue_lng: 0, notes: "" });
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to send enquiry", variant: "destructive" });
     } finally {
@@ -400,9 +425,23 @@ const Cart = () => {
                             <Input value={eventDetails.venue_address_line2} onChange={e => setEventDetails(p => ({ ...p, venue_address_line2: e.target.value }))} placeholder="Area, landmark" />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs">Pin Code *</Label>
+                            <Label className="text-xs">Pin Code</Label>
                             <Input value={eventDetails.venue_pincode} onChange={e => setEventDetails(p => ({ ...p, venue_pincode: e.target.value }))} placeholder="500001" maxLength={6} />
                           </div>
+                          {/* Map Pin Picker for venue delivery */}
+                          <MapPinPicker
+                            label="📍 Pin your venue location"
+                            description="Drop a pin for precise delivery distance & cost calculation."
+                            onLocationSelect={(lat, lng, addr) => {
+                              setEventDetails(p => ({
+                                ...p,
+                                venue_lat: lat,
+                                venue_lng: lng,
+                                venue_address_line1: addr || p.venue_address_line1,
+                              }));
+                            }}
+                            compact
+                          />
                         </>
                       )}
                       <div className="space-y-1">
@@ -430,13 +469,22 @@ const Cart = () => {
                                 {transportLoading && <Loader2 className="h-3 w-3 animate-spin" />}
                               </span>
                               <span className="font-medium">
-                                {transportResult ? `₹${transportFee.toLocaleString()}` : eventDetails.venue_pincode ? "Calculating..." : "Enter PIN"}
+                                {dynamicTransportResult ? `₹${transportFee.toLocaleString()}` : eventDetails.venue_lat ? "Calculating..." : "Pin venue on map"}
                               </span>
                             </div>
-                            {transportResult && (
-                              <p className="text-[10px] text-muted-foreground">
-                                {transportResult.distance_km} km · {transportResult.vehicle_type}
-                              </p>
+                            {dynamicTransportResult && (
+                              <div className="bg-muted/50 rounded-md p-2 space-y-0.5">
+                                <p className="text-[10px] text-muted-foreground">
+                                  🚛 {dynamicTransportResult.vehicle_type} · {dynamicTransportResult.distance_km} km driving distance
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  Base ₹{dynamicTransportResult.base_fare} + {dynamicTransportResult.extra_km} km × ₹{dynamicTransportResult.per_km_rate}/km
+                                  {dynamicTransportResult.surge_applied && " × 1.5x night surge"}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  📦 {dynamicTransportResult.total_volume_units} volume units
+                                </p>
+                              </div>
                             )}
                           </div>
                           <Separator />

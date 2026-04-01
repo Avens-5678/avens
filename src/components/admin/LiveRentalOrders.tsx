@@ -875,6 +875,7 @@ const LiveRentalOrders = () => {
               {viewOrder.notes && (
                 <div><Label className="text-muted-foreground">Notes</Label><p>{viewOrder.notes}</p></div>
               )}
+              <MilestoneTracker orderId={viewOrder.id} />
             </div>
           )}
         </DialogContent>

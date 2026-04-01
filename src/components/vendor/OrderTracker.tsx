@@ -141,7 +141,7 @@ const OrderTracker = () => {
         )}
 
         <OrderQuoteCard orderId={order.id} />
-
+        <MilestoneTracker orderId={order.id} />
         {showStatusUpdate && ["new", "accepted", "confirmed", "in_progress", "out_for_delivery", "delivered"].includes(order.status) && (
           <div className="flex items-center gap-3 pt-2 border-t">
             <span className="text-sm font-medium">Update Status:</span>

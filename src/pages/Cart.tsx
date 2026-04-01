@@ -425,9 +425,23 @@ const Cart = () => {
                             <Input value={eventDetails.venue_address_line2} onChange={e => setEventDetails(p => ({ ...p, venue_address_line2: e.target.value }))} placeholder="Area, landmark" />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs">Pin Code *</Label>
+                            <Label className="text-xs">Pin Code</Label>
                             <Input value={eventDetails.venue_pincode} onChange={e => setEventDetails(p => ({ ...p, venue_pincode: e.target.value }))} placeholder="500001" maxLength={6} />
                           </div>
+                          {/* Map Pin Picker for venue delivery */}
+                          <MapPinPicker
+                            label="📍 Pin your venue location"
+                            description="Drop a pin for precise delivery distance & cost calculation."
+                            onLocationSelect={(lat, lng, addr) => {
+                              setEventDetails(p => ({
+                                ...p,
+                                venue_lat: lat,
+                                venue_lng: lng,
+                                venue_address_line1: addr || p.venue_address_line1,
+                              }));
+                            }}
+                            compact
+                          />
                         </>
                       )}
                       <div className="space-y-1">
@@ -455,13 +469,22 @@ const Cart = () => {
                                 {transportLoading && <Loader2 className="h-3 w-3 animate-spin" />}
                               </span>
                               <span className="font-medium">
-                                {transportResult ? `₹${transportFee.toLocaleString()}` : eventDetails.venue_pincode ? "Calculating..." : "Enter PIN"}
+                                {dynamicTransportResult ? `₹${transportFee.toLocaleString()}` : eventDetails.venue_lat ? "Calculating..." : "Pin venue on map"}
                               </span>
                             </div>
-                            {transportResult && (
-                              <p className="text-[10px] text-muted-foreground">
-                                {transportResult.distance_km} km · {transportResult.vehicle_type}
-                              </p>
+                            {dynamicTransportResult && (
+                              <div className="bg-muted/50 rounded-md p-2 space-y-0.5">
+                                <p className="text-[10px] text-muted-foreground">
+                                  🚛 {dynamicTransportResult.vehicle_type} · {dynamicTransportResult.distance_km} km driving distance
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  Base ₹{dynamicTransportResult.base_fare} + {dynamicTransportResult.extra_km} km × ₹{dynamicTransportResult.per_km_rate}/km
+                                  {dynamicTransportResult.surge_applied && " × 1.5x night surge"}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  📦 {dynamicTransportResult.total_volume_units} volume units
+                                </p>
+                              </div>
                             )}
                           </div>
                           <Separator />

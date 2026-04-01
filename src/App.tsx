@@ -11,13 +11,8 @@ import { Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 
 // Lazy-loaded routes to reduce initial JS bundle
-const Services = lazy(() => import("./pages/Services"));
-const Portfolio = lazy(() => import("./pages/Portfolio"));
-const Gallery = lazy(() => import("./pages/Gallery"));
 const About = lazy(() => import("./pages/About"));
-const Blog = lazy(() => import("./pages/Blog"));
 const FAQ = lazy(() => import("./pages/FAQ"));
-const EventDetail = lazy(() => import("./pages/EventDetail"));
 const Ecommerce = lazy(() => import("./pages/Ecommerce"));
 const EcommerceOrders = lazy(() => import("./pages/EcommerceOrders"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
@@ -32,12 +27,6 @@ const EmployeeDashboard = lazy(() => import("./pages/employee/EmployeeDashboard"
 const VendorAction = lazy(() => import("./pages/vendor/VendorAction"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
-const CorporateEvents = lazy(() => import("./pages/events/CorporateEvents"));
-const EquipmentRental = lazy(() => import("./pages/events/EquipmentRental"));
-const GovernmentEvents = lazy(() => import("./pages/events/GovernmentEvents"));
-const DynamicEventPage = lazy(() => import("./pages/events/DynamicEventPage"));
-const Team = lazy(() => import("./pages/Team"));
-const BlogPost = lazy(() => import("./pages/BlogPost"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));

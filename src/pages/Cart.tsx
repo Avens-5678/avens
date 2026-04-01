@@ -64,18 +64,41 @@ const Cart = () => {
     ? calculateManpowerFee(items, logisticsConfig.labor_units_per_loader, logisticsConfig.loader_daily_rate)
     : 0;
 
-  // Auto-calc transport when pincode changes
+  // Calculate total volume units from cart
+  const totalVolumeUnits = items.reduce((sum, i) => sum + ((i as any).volume_units || 1) * i.quantity, 0);
+
+  // Auto-calc dynamic transport when venue location is set and we have a vendor with lat/lng
   useEffect(() => {
-    if (eventDetails.venue_pincode && eventDetails.venue_pincode.length >= 5) {
-      // Find vendor pincode from first vendor item
-      const vendorItem = items.find(i => i.vendor_pincode);
-      if (vendorItem?.vendor_pincode) {
-        calcTransport(vendorItem.vendor_pincode, eventDetails.venue_pincode);
+    if (eventDetails.venue_lat && eventDetails.venue_lng) {
+      // Find vendor with lat/lng (from profile)
+      const vendorItem = items.find(i => i.vendor_id);
+      if (vendorItem?.vendor_id) {
+        // Fetch vendor's warehouse lat/lng
+        supabase.from("profiles").select("warehouse_lat, warehouse_lng").eq("user_id", vendorItem.vendor_id).single().then(({ data }) => {
+          if (data && (data as any).warehouse_lat && (data as any).warehouse_lng) {
+            calcDynamicTransport({
+              warehouse_lat: (data as any).warehouse_lat,
+              warehouse_lng: (data as any).warehouse_lng,
+              venue_lat: eventDetails.venue_lat,
+              venue_lng: eventDetails.venue_lng,
+              total_volume_units: totalVolumeUnits,
+            });
+          }
+        });
+      } else if (eventDetails.venue_pincode && eventDetails.venue_pincode.length >= 5) {
+        // Fallback: use pincode-based with volume
+        const vendorPincodeItem = items.find(i => i.vendor_pincode);
+        if (vendorPincodeItem?.vendor_pincode) {
+          // Use old edge function as fallback
+          supabase.functions.invoke("calculate-transport", {
+            body: { vendor_pincode: vendorPincodeItem.vendor_pincode, client_pincode: eventDetails.venue_pincode },
+          });
+        }
       }
     }
-  }, [eventDetails.venue_pincode]);
+  }, [eventDetails.venue_lat, eventDetails.venue_lng, totalVolumeUnits]);
 
-  const transportFee = transportResult?.fee || 0;
+  const transportFee = dynamicTransportResult?.fee || 0;
 
   const formatItemPrice = (item: any) => {
     if (item.price_value != null) {

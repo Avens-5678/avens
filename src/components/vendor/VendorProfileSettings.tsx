@@ -56,6 +56,8 @@ const VendorProfileSettings = () => {
           gst_number: (data as any).gst_number || "",
           pan_number: (data as any).pan_number || "",
           warehouse_pincode: (data as any).warehouse_pincode || "",
+          warehouse_lat: (data as any).warehouse_lat || 0,
+          warehouse_lng: (data as any).warehouse_lng || 0,
         });
       }
 

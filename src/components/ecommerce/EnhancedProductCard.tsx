@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { usePricingRules, applyTieredMarkup } from "@/hooks/usePricingRules";
 
 interface EnhancedProductCardProps {
   rental: any;

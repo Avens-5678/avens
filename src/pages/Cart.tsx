@@ -38,6 +38,9 @@ const Cart = () => {
   const [submitting, setSubmitting] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [profileData, setProfileData] = useState<{ full_name: string; email: string; phone: string } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PaymentPlan>("advance");
+  const [milestoneBreakdown, setMilestoneBreakdown] = useState<MilestoneBreakdown | null>(null);
+  const { mutateAsync: createMilestones } = useCreateMilestones();
   const [eventDetails, setEventDetails] = useState({
     event_start_date: "",
     event_end_date: "",

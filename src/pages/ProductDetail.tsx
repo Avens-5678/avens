@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
+import { usePricingRules, applyTieredMarkup } from "@/hooks/usePricingRules";
 import { cn } from "@/lib/utils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
@@ -61,6 +62,7 @@ const ProductDetail = () => {
   const { data: variants } = useRentalVariants(id);
   const { addItem, removeItem, isInCart, getItemCount } = useCart();
   const { toast } = useToast();
+  const { data: pricingRules } = usePricingRules();
 
   const [selectedVariant, setSelectedVariant] = useState<RentalVariant | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -115,6 +117,7 @@ const ProductDetail = () => {
       amenities_matrix: v.amenities_matrix || {},
       venue_pricing_model: v.venue_pricing_model || "dry_rental",
       packages: v.packages || [],
+      markup_tier: v.markup_tier || "mid",
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];
@@ -169,18 +172,28 @@ const ProductDetail = () => {
 
   useEffect(() => { setCurrentImageIndex(0); }, [selectedVariant]);
 
+  const tierKey = rental?.markup_tier || "mid";
+  const isVendorItem = rental?._source === "vendor";
+
   const displayPrice = useMemo(() => {
-    if (selectedVariant?.price_value != null) return { value: selectedVariant.price_value, unit: selectedVariant.pricing_unit || "Per Day" };
-    if (rental?.price_value != null) return { value: rental.price_value, unit: (rental as any).pricing_unit || "Per Day" };
+    const rawPrice = selectedVariant?.price_value ?? rental?.price_value ?? null;
+    const unit = selectedVariant?.pricing_unit ?? (rental as any)?.pricing_unit ?? "Per Day";
+
+    if (rawPrice != null && isVendorItem && pricingRules?.length) {
+      const { clientPrice } = applyTieredMarkup(rawPrice, tierKey, pricingRules);
+      return { value: clientPrice, unit, vendorBase: rawPrice };
+    }
+    if (rawPrice != null) return { value: rawPrice, unit };
     if (rental?.price_range) return { text: `₹${rental.price_range}` };
     return null;
-  }, [rental, selectedVariant]);
+  }, [rental, selectedVariant, pricingRules, tierKey, isVendorItem]);
 
   const currentUnit = displayPrice && "unit" in displayPrice ? displayPrice.unit : undefined;
   const isMeasurable = isMeasurableUnit(currentUnit);
 
   const numDays = bookingFrom && bookingTill ? Math.max(differenceInDays(bookingTill, bookingFrom), 1) : 1;
-  const pricePerUnit = selectedVariant?.price_value ?? rental?.price_value ?? 0;
+  const pricePerUnit = displayPrice && "value" in displayPrice ? displayPrice.value : 0;
+  const vendorBasePrice = displayPrice && "vendorBase" in displayPrice ? (displayPrice as any).vendorBase : pricePerUnit;
   const totalPrice = pricePerUnit * numDays;
 
   const variantGroups = useMemo(() => {
@@ -229,7 +242,7 @@ const ProductDetail = () => {
     addItem({
       id: rental.id,
       title: rental.title + (selectedVariant ? ` - ${selectedVariant.attribute_value}` : ""),
-      price_value: selectedVariant?.price_value ?? rental.price_value ?? null,
+      price_value: pricePerUnit || null,
       pricing_unit: selectedVariant?.pricing_unit ?? (rental as any).pricing_unit ?? "Per Day",
       price_range: rental.price_range,
       image_url: displayImages[0] || rental.image_url,
@@ -244,6 +257,8 @@ const ProductDetail = () => {
       booking_from: format(bookingFrom, "yyyy-MM-dd"),
       booking_till: format(bookingTill, "yyyy-MM-dd"),
       booking_slot: isVenue ? bookingSlot : undefined,
+      markup_tier: tierKey,
+      vendor_base_price: isVendorItem ? vendorBasePrice : undefined,
     });
     navigate("/cart");
   };

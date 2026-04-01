@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { usePricingRules, applyTieredMarkup } from "@/hooks/usePricingRules";
 
 interface EnhancedProductCardProps {
   rental: any;
@@ -25,10 +26,19 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { addViewed } = useRecentlyViewed();
+  const { data: pricingRules } = usePricingRules();
+
+  const isVendor = rental._source === "vendor";
+  const tierKey = rental.markup_tier || "mid";
 
   const formatPrice = () => {
     if (rental.price_value != null) {
-      return { price: `₹${rental.price_value.toLocaleString()}`, unit: `/ ${rental.pricing_unit || "Per Day"}` };
+      let price = rental.price_value;
+      if (isVendor && pricingRules?.length) {
+        const { clientPrice } = applyTieredMarkup(price, tierKey, pricingRules);
+        price = clientPrice;
+      }
+      return { price: `₹${price.toLocaleString()}`, unit: `/ ${rental.pricing_unit || "Per Day"}` };
     }
     if (rental.price_range) return { price: `₹${rental.price_range}`, unit: "" };
     return null;
@@ -36,7 +46,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
   const priceInfo = formatPrice();
   const isAssured = rental.rating && rental.rating >= 4;
-  const isVendor = rental._source === "vendor";
+  // isVendor already defined above
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
   const hasVirtualTour = !!rental.virtual_tour_url;

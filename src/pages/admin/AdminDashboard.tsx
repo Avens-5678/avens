@@ -50,6 +50,7 @@ import LiveServiceOrders from "@/components/admin/LiveServiceOrders";
 import QuoteMaker from "@/components/admin/QuoteMaker";
 import PromoBannerManager from "@/components/admin/PromoBannerManager";
 import LogisticsConfigManager from "@/components/admin/LogisticsConfigManager";
+import PricingRulesManager from "@/components/admin/PricingRulesManager";
 import TrustStripManager from "@/components/admin/TrustStripManager";
 import WhatsAppLiveChat from "@/components/admin/WhatsAppLiveChat";
 import WhatsAppCampaigns from "@/components/admin/WhatsAppCampaigns";
@@ -103,6 +104,7 @@ const menuGroups: MenuGroup[] = [
       { label: "Promo Banners", value: "promo-banners" },
       { label: "Trust Strip", value: "trust-strip" },
       { label: "Logistics Config", value: "logistics-config" },
+      { label: "Pricing Rules", value: "pricing-rules" },
     ],
   },
   {
@@ -396,6 +398,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <TrustStripManager />;
       case "logistics-config":
         return <LogisticsConfigManager />;
+      case "pricing-rules":
+        return <PricingRulesManager />;
       case "portfolio":
         return <NewEnhancedPortfolioManager portfolio={portfolio || []} events={events || []} />;
       case "clients":

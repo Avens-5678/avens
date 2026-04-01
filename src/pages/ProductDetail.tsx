@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
+import { usePricingRules, applyTieredMarkup } from "@/hooks/usePricingRules";
 import { cn } from "@/lib/utils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,

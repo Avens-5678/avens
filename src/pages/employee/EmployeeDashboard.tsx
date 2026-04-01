@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
 import { useEmployeePermissions, PermissionCategory } from "@/hooks/useEmployeePermissions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,7 +74,6 @@ const allMenuGroups: MenuGroup[] = [
 
 const EmployeeDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -89,7 +87,7 @@ const EmployeeDashboard = () => {
   const { data: portfolio } = usePortfolio();
   const { data: formSubmissions } = useFormSubmissions();
 
-  const isLoading = authLoading || roleLoading || permLoading;
+  const isLoading = authLoading || permLoading;
 
   // Filter menu groups based on permissions
   const availableGroups = allMenuGroups.filter((g) => hasPermission(g.category, "view"));
@@ -104,12 +102,9 @@ const EmployeeDashboard = () => {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      navigate("/auth");
+      navigate("/auth", { replace: true });
     }
-    if (!isLoading && role && role !== "employee") {
-      navigate("/");
-    }
-  }, [isLoading, user, role]);
+  }, [isLoading, user, navigate]);
 
   if (isLoading) {
     return (

@@ -159,23 +159,35 @@ const EcommerceHeader = ({
     navigate(`/ecommerce/${item.id}`);
   }, [onSearchChange, saveRecentSearch, navigate]);
 
+  const buildMarketplaceUrl = useCallback((term: string, category: string) => {
+    const params = new URLSearchParams();
+    if (term.trim()) params.set("search", term.trim());
+    if (category) params.set("category", category);
+    const query = params.toString();
+    return query ? `/ecommerce?${query}` : "/ecommerce";
+  }, []);
+
   const handleRecentClick = useCallback((term: string) => {
     onSearchChange(term);
+    saveRecentSearch(term);
     setShowDropdown(false);
-  }, [onSearchChange]);
+    navigate(buildMarketplaceUrl(term, selectedSearchCategory));
+  }, [onSearchChange, saveRecentSearch, navigate, buildMarketplaceUrl, selectedSearchCategory]);
 
   const handleTrendingClick = useCallback((term: string) => {
     onSearchChange(term);
     saveRecentSearch(term);
     setShowDropdown(false);
-  }, [onSearchChange, saveRecentSearch]);
+    navigate(buildMarketplaceUrl(term, selectedSearchCategory));
+  }, [onSearchChange, saveRecentSearch, navigate, buildMarketplaceUrl, selectedSearchCategory]);
 
   const handleSubmit = useCallback(() => {
     if (searchTerm.trim()) {
       saveRecentSearch(searchTerm.trim());
     }
     setShowDropdown(false);
-  }, [searchTerm, saveRecentSearch]);
+    navigate(buildMarketplaceUrl(searchTerm, selectedSearchCategory));
+  }, [searchTerm, saveRecentSearch, navigate, buildMarketplaceUrl, selectedSearchCategory]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     const total = flatSuggestions.length;
@@ -203,6 +215,7 @@ const EcommerceHeader = ({
       case "admin": return "/admin";
       case "client": return "/client/dashboard";
       case "vendor": return "/vendor/dashboard";
+      case "employee": return "/employee/dashboard";
       default: return "/auth";
     }
   };

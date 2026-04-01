@@ -65,15 +65,36 @@ const Auth = () => {
     defaultValues: { password: "" },
   });
 
+  const getDashboardPath = (targetRole?: string | null) => {
+    switch (targetRole) {
+      case "admin":
+        return "/admin";
+      case "employee":
+        return "/employee/dashboard";
+      case "vendor":
+        return "/vendor/dashboard";
+      case "client":
+        return "/client/dashboard";
+      default:
+        return "/ecommerce";
+    }
+  };
+
+  const hasMultipleRoles = (userTypeInfo?.roles?.length || 0) > 1;
+
   // Handle Google OAuth callback - check if user needs onboarding
   useEffect(() => {
     if (authLoading || roleLoading) return;
-    if (user && role) {
-      if (role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/ecommerce");
+
+    if (user && hasMultipleRoles) {
+      if (step !== "role-select") {
+        setStep("role-select");
       }
+      return;
+    }
+
+    if (user && role) {
+      navigate(getDashboardPath(role), { replace: true });
     } else if (user && !role && !roleLoading) {
       // Check if this is a Google OAuth user with no role
       // If they signed up via Google but have no profile/role, show onboarding
@@ -99,7 +120,7 @@ const Auth = () => {
         navigate("/auth/register");
       }
     }
-  }, [user, role, authLoading, roleLoading, navigate]);
+  }, [user, role, authLoading, roleLoading, navigate, hasMultipleRoles, step]);
 
   const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
@@ -164,11 +185,7 @@ const Auth = () => {
   };
 
   const handleRoleSelect = (selectedRole: string) => {
-    if (selectedRole === "admin") {
-      navigate("/admin");
-    } else {
-      navigate("/ecommerce");
-    }
+    navigate(getDashboardPath(selectedRole), { replace: true });
   };
 
   const handleForgotPassword = async () => {

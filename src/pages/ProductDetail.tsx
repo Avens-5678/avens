@@ -246,6 +246,7 @@ const ProductDetail = () => {
       pricing_unit: selectedVariant?.pricing_unit ?? (rental as any).pricing_unit ?? "Per Day",
       price_range: rental.price_range,
       image_url: displayImages[0] || rental.image_url,
+      address: rental.address || undefined,
       quantity: finalQuantity,
       variant_id: selectedVariant?.id,
       variant_label: selectedVariant?.attribute_value,

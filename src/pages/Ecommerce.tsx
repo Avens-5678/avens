@@ -177,12 +177,12 @@ const Ecommerce = () => {
   }, [rentals, vendorItems]);
   const { items } = useCart();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get("search") || "");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<number[]>([]);
   const [showInStock, setShowInStock] = useState(false);
-  const [searchCategory, setSearchCategory] = useState("");
+  const [searchCategory, setSearchCategory] = useState(() => searchParams.get("category") || "");
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     categories: true,
@@ -248,6 +248,14 @@ const Ecommerce = () => {
     return Array.from(citySet).sort();
   }, [allItems, activeServiceType]);
 
+  useEffect(() => {
+    const nextSearch = searchParams.get("search") || "";
+    const nextCategory = searchParams.get("category") || "";
+
+    setSearchTerm((prev) => (prev === nextSearch ? prev : nextSearch));
+    setSearchCategory((prev) => (prev === nextCategory ? prev : nextCategory));
+  }, [searchParams]);
+
   // Reset service-specific filters when service changes
   useEffect(() => {
     setSelectedAmenities([]);
@@ -282,9 +290,22 @@ const Ecommerce = () => {
     }
 
     let results = allItems.filter((rental: any) => {
-      const matchesSearch =
-        !searchTerm ||
-        rental.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const normalizedSearch = searchTerm.trim().toLowerCase();
+      const searchableText = [
+        rental.title,
+        rental.short_description,
+        rental.description,
+        rental.service_type,
+        rental.address,
+        rental.search_keywords,
+        rental.venue_type,
+        rental.crew_type,
+        ...(rental.categories || []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
       const allCats = [...selectedCategories];
       if (activeQuickCat && !allCats.includes(activeQuickCat)) allCats.push(activeQuickCat);
       if (searchCategory && !allCats.includes(searchCategory)) allCats.push(searchCategory);
@@ -333,7 +354,32 @@ const Ecommerce = () => {
           venueSearchFilters.guestCount <= rental.max_capacity) ||
         (!rental.min_capacity && !rental.max_capacity);
 
-      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience && matchesCrewType && matchesVenueGuestCount;
+      const venueFilterText = [
+        rental.title,
+        rental.short_description,
+        rental.description,
+        rental.venue_type,
+        ...(rental.categories || []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const matchesVenueEventType =
+        !venueSearchFilters.eventType ||
+        activeServiceType !== "venue" ||
+        venueSearchFilters.eventType === "all" ||
+        venueFilterText.includes(venueSearchFilters.eventType.toLowerCase());
+
+      const matchesVenueSlot =
+        !venueSearchFilters.slot ||
+        activeServiceType !== "venue" ||
+        !Array.isArray(rental.slot_types) ||
+        rental.slot_types.length === 0 ||
+        rental.slot_types.includes(venueSearchFilters.slot) ||
+        rental.slot_types.includes("full_day");
+
+      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience && matchesCrewType && matchesVenueGuestCount && matchesVenueEventType && matchesVenueSlot;
     });
 
     switch (sortBy) {

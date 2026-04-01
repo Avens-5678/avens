@@ -44,7 +44,8 @@ export const calculateCartTotal = (items: Array<{ price_value?: number | null; q
 // ─── Instant Booking Engine ─────────────────────────────────────
 
 /**
- * Apply platform markup to vendor base price.
+ * @deprecated Use applyTieredMarkup from usePricingRules instead.
+ * Legacy flat markup kept for backward compatibility.
  */
 export const applyMarkup = (vendorBasePrice: number, markupPercent: number): number => {
   return Math.round(vendorBasePrice * (1 + markupPercent / 100));

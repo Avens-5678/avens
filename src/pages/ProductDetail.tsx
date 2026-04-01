@@ -62,6 +62,7 @@ const ProductDetail = () => {
   const { data: variants } = useRentalVariants(id);
   const { addItem, removeItem, isInCart, getItemCount } = useCart();
   const { toast } = useToast();
+  const { data: pricingRules } = usePricingRules();
 
   const [selectedVariant, setSelectedVariant] = useState<RentalVariant | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);

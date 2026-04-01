@@ -242,7 +242,7 @@ const ProductDetail = () => {
     addItem({
       id: rental.id,
       title: rental.title + (selectedVariant ? ` - ${selectedVariant.attribute_value}` : ""),
-      price_value: selectedVariant?.price_value ?? rental.price_value ?? null,
+      price_value: pricePerUnit || null,
       pricing_unit: selectedVariant?.pricing_unit ?? (rental as any).pricing_unit ?? "Per Day",
       price_range: rental.price_range,
       image_url: displayImages[0] || rental.image_url,
@@ -257,6 +257,8 @@ const ProductDetail = () => {
       booking_from: format(bookingFrom, "yyyy-MM-dd"),
       booking_till: format(bookingTill, "yyyy-MM-dd"),
       booking_slot: isVenue ? bookingSlot : undefined,
+      markup_tier: tierKey,
+      vendor_base_price: isVendorItem ? vendorBasePrice : undefined,
     });
     navigate("/cart");
   };

@@ -42,6 +42,8 @@ const Cart = () => {
     venue_address_line1: "",
     venue_address_line2: "",
     venue_pincode: "",
+    venue_lat: 0,
+    venue_lng: 0,
     notes: "",
   });
 

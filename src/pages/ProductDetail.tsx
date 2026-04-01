@@ -191,6 +191,7 @@ const ProductDetail = () => {
   const currentUnit = displayPrice && "unit" in displayPrice ? displayPrice.unit : undefined;
   const isMeasurable = isMeasurableUnit(currentUnit);
 
+  const numDays = bookingFrom && bookingTill ? Math.max(differenceInDays(bookingTill, bookingFrom), 1) : 1;
   const pricePerUnit = displayPrice && "value" in displayPrice ? displayPrice.value : 0;
   const vendorBasePrice = displayPrice && "vendorBase" in displayPrice ? (displayPrice as any).vendorBase : pricePerUnit;
   const totalPrice = pricePerUnit * numDays;

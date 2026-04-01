@@ -9,6 +9,7 @@ import { Loader2, Calendar, MapPin, Package, Clock, CheckCircle2, IndianRupee } 
 import { format } from "date-fns";
 import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
 import MilestoneTracker from "@/components/vendor/MilestoneTracker";
+import OrderLocationMap from "@/components/vendor/OrderLocationMap";
 
 const statusColors: Record<string, string> = {
   new: "bg-blue-500/10 text-blue-600 border-blue-500/20",

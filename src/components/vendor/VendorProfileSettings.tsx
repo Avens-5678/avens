@@ -84,6 +84,8 @@ const VendorProfileSettings = () => {
         gst_number: profile.gst_number,
         pan_number: profile.pan_number,
         warehouse_pincode: profile.warehouse_pincode,
+        warehouse_lat: profile.warehouse_lat || null,
+        warehouse_lng: profile.warehouse_lng || null,
       } as any)
       .eq("user_id", user.id);
 

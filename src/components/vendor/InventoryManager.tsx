@@ -158,6 +158,7 @@ const InventoryManager = () => {
       price_value: item.price_value ?? '',
       vendor_base_price: (item as any).vendor_base_price ?? '',
       labor_weight: (item as any).labor_weight ?? 1,
+      volume_units: (item as any).volume_units ?? 1,
       pricing_unit: item.pricing_unit || 'Per Day',
       service_type: item.service_type || 'rental',
       amenities: item.amenities || [],

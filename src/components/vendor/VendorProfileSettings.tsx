@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Save, User, Building2, MapPin, FileText, BadgeCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import MapPinPicker from "@/components/ecommerce/MapPinPicker";
 
 const VendorProfileSettings = () => {
   const { user } = useAuth();

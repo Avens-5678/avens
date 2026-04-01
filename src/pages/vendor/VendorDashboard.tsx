@@ -97,6 +97,10 @@ const VendorDashboard = () => {
         return <InventoryManager />;
       case "site-visits":
         return <SiteVisitManager />;
+      case "b2b":
+        return <B2BCrossHire />;
+      case "labor":
+        return <LaborTracker />;
       case "offline":
         return <VendorOfflineBooking />;
       case "quotes":

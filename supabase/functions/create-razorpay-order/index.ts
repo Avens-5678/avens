@@ -20,40 +20,60 @@ Deno.serve(async (req) => {
     }
 
     // amount is in INR (rupees). Razorpay requires paise.
-    const { amount, currency = "INR", order_id } = await req.json();
+    // receipt: callers may pass either `receipt` or `order_id` (legacy)
+    const body = await req.json();
+    console.log("Request body:", JSON.stringify(body));
 
-    if (!amount || !order_id) {
+    const { amount, currency = "INR", receipt, order_id, notes } = body;
+    const receiptValue = receipt || order_id; // support both callers
+
+    if (!amount) {
       return new Response(
-        JSON.stringify({ error: "amount and order_id are required" }),
+        JSON.stringify({ error: "amount is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const credentials = btoa(`${keyId}:${keySecret}`);
 
-    const response = await fetch("https://api.razorpay.com/v1/orders", {
+    const razorpayPayload: Record<string, unknown> = {
+      amount: Math.round(amount * 100), // convert rupees → paise
+      currency,
+    };
+
+    if (receiptValue) {
+      razorpayPayload.receipt = String(receiptValue).substring(0, 40); // max 40 chars
+    }
+
+    if (notes) {
+      razorpayPayload.notes = notes;
+    }
+
+    const razorpayResponse = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
       headers: {
         "Authorization": `Basic ${credentials}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        amount: Math.round(amount * 100), // convert rupees → paise
-        currency,
-        receipt: order_id.substring(0, 40), // Razorpay receipt max 40 chars
-        notes: { order_id },
-      }),
+      body: JSON.stringify(razorpayPayload),
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Razorpay API error ${response.status}: ${errText}`);
+    console.log("Razorpay status:", razorpayResponse.status);
+    const razorpayBody = await razorpayResponse.json();
+    console.log("Razorpay response:", JSON.stringify(razorpayBody));
+
+    if (!razorpayResponse.ok) {
+      return new Response(
+        JSON.stringify({
+          error: razorpayBody.error?.description || "Razorpay error",
+          razorpay_error: razorpayBody,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    const razorpayOrder = await response.json();
-
     return new Response(
-      JSON.stringify({ razorpay_order_id: razorpayOrder.id }),
+      JSON.stringify({ razorpay_order_id: razorpayBody.id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

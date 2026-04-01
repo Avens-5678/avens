@@ -85,6 +85,8 @@ const ClientDashboard = () => {
     switch (activeTab) {
       case "ai":
         return null; // Rendered persistently below
+      case "workspace":
+        return <EventWorkspace />;
       case "tracker":
         return <EventTracker />;
       case "request":

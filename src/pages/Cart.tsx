@@ -52,17 +52,23 @@ const Cart = () => {
     notes: "",
   });
 
+  const primaryVenueItem = items.find((item: any) => item.service_type === "venue");
+  const primaryVenueAddress = primaryVenueItem?.address || "";
+  const bookingFromDates = items.map((item) => item.booking_from).filter(Boolean) as string[];
+  const derivedStartDate = bookingFromDates.length > 0 ? [...bookingFromDates].sort()[0] : "";
+
   // Detect if cart has venue items — venue bookings skip venue address fields
   const hasVenueItem = items.some((item: any) => item.service_type === "venue");
   const isVenueOnlyCart = items.length > 0 && items.every((item: any) => item.service_type === "venue");
-  const showVenueAddressFields = !isVenueOnlyCart && !hasVenueItem;
+  const showVenueAddressFields = !isVenueOnlyCart;
 
   // Instant booking logic
   const allItemsPriced = items.length > 0 && items.every(i => i.price_value != null);
   const minBookingHours = logisticsConfig?.min_booking_hours || 48;
-  const dateIsSet = !!eventDetails.event_start_date;
-  const canInstantBook = allItemsPriced && dateIsSet && isInstantBookable(eventDetails.event_start_date, minBookingHours);
+  const dateIsSet = !!derivedStartDate;
+  const canInstantBook = allItemsPriced && dateIsSet && isInstantBookable(derivedStartDate, minBookingHours);
   const showInstantBookFlow = allItemsPriced; // Show the flow if all items are priced, but enable button only if date qualifies
+  const hasRequiredLocation = !showVenueAddressFields || !!eventDetails.venue_address_line1 || !!primaryVenueAddress;
 
   // Calculate manpower fee
   const manpowerFee = logisticsConfig
@@ -105,6 +111,52 @@ const Cart = () => {
 
   const transportFee = dynamicTransportResult?.fee || 0;
 
+  useEffect(() => {
+    if (!primaryVenueAddress || isVenueOnlyCart) return;
+
+    setEventDetails((prev) => (
+      prev.venue_address_line1
+        ? prev
+        : { ...prev, venue_address_line1: primaryVenueAddress }
+    ));
+  }, [primaryVenueAddress, isVenueOnlyCart]);
+
+  useEffect(() => {
+    if (!showVenueAddressFields || eventDetails.venue_lat || eventDetails.venue_lng) return;
+
+    const pinCode = eventDetails.venue_pincode.trim();
+    if (pinCode.length < 5) return;
+
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(pinCode)}&country=India&format=json&limit=1`
+        );
+        const data = await res.json();
+
+        if (!cancelled && Array.isArray(data) && data.length > 0) {
+          setEventDetails((prev) => (
+            prev.venue_lat || prev.venue_lng
+              ? prev
+              : {
+                  ...prev,
+                  venue_lat: parseFloat(data[0].lat),
+                  venue_lng: parseFloat(data[0].lon),
+                }
+          ));
+        }
+      } catch {
+        // Ignore geocode fallback failures and allow manual pin drop instead
+      }
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [showVenueAddressFields, eventDetails.venue_pincode, eventDetails.venue_lat, eventDetails.venue_lng]);
+
   const formatItemPrice = (item: any) => {
     if (item.price_value != null) {
       return `₹${item.price_value.toLocaleString()}`;
@@ -134,6 +186,32 @@ const Cart = () => {
     setProfileLoaded(true);
   };
 
+  const { calculatedTotal, hasQuoteItems } = calculateCartTotal(items);
+  const vendorSubtotal = items.reduce(
+    (sum, item) => sum + (((item as any).vendor_base_price ?? item.price_value ?? 0) * item.quantity),
+    0
+  );
+  const platformFee = calculatedTotal - vendorSubtotal;
+  const vendorPayout = vendorSubtotal + transportFee + manpowerFee;
+  const grandTotal = calculatedTotal + manpowerFee + transportFee;
+
+  useEffect(() => {
+    if (!showInstantBookFlow || grandTotal <= 0) {
+      setMilestoneBreakdown(null);
+      return;
+    }
+
+    setMilestoneBreakdown(
+      calculateMilestoneBreakdown(
+        grandTotal,
+        platformFee,
+        vendorPayout,
+        derivedStartDate || null,
+        selectedPlan
+      )
+    );
+  }, [showInstantBookFlow, grandTotal, platformFee, vendorPayout, derivedStartDate, selectedPlan]);
+
   const handleSendEnquiry = async () => {
     if (!user) {
       toast({ title: "Please log in", description: "You need to sign in to send an enquiry.", variant: "destructive" });
@@ -145,16 +223,11 @@ const Cart = () => {
       navigate("/client");
       return;
     }
-    // Derive dates from cart items
-    const bookingFromDates = items.map(i => i.booking_from).filter(Boolean) as string[];
-    const bookingTillDates = items.map(i => i.booking_till).filter(Boolean) as string[];
-    const derivedStartDate = bookingFromDates.length > 0 ? bookingFromDates.sort()[0] : "";
-    const derivedEndDate = bookingTillDates.length > 0 ? bookingTillDates.sort().reverse()[0] : "";
     if (!derivedStartDate) {
       toast({ title: "Missing dates", description: "Please add items with booking dates.", variant: "destructive" });
       return;
     }
-    if (showVenueAddressFields && !eventDetails.venue_address_line1) {
+    if (showVenueAddressFields && !eventDetails.venue_address_line1 && !primaryVenueAddress) {
       toast({ title: "Missing information", description: "Please fill in the venue address.", variant: "destructive" });
       return;
     }
@@ -172,11 +245,11 @@ const Cart = () => {
         pricing_unit: item.pricing_unit,
       }));
       const normalizedPhone = profileData.phone ? normalizePhoneNumber(profileData.phone) : null;
-      const venueLocation = [eventDetails.venue_address_line1, eventDetails.venue_address_line2, eventDetails.venue_pincode].filter(Boolean).join(", ");
+      const venueLocation = [eventDetails.venue_address_line1 || primaryVenueAddress, eventDetails.venue_address_line2, eventDetails.venue_pincode].filter(Boolean).join(", ");
       const orderId = crypto.randomUUID();
 
       // Determine if instant book
-      const isInstant = canInstantBook && showVenueAddressFields;
+      const isInstant = canInstantBook && hasRequiredLocation;
 
       // Determine the vendor from cart items (first vendor item found)
       const vendorItem = items.find(i => i.vendor_id);
@@ -192,7 +265,7 @@ const Cart = () => {
         client_email: profileData.email,
         client_phone: normalizedPhone,
         event_date: derivedStartDate || null,
-        location: venueLocation,
+        location: venueLocation || primaryVenueAddress || null,
         notes: eventDetails.notes || null,
         status: isInstant ? "confirmed" : "new",
         client_id: user.id,
@@ -202,12 +275,10 @@ const Cart = () => {
       };
 
       if (isInstant) {
-        const pFee = calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0);
-        const vPayout = items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee;
         orderData.manpower_fee = manpowerFee;
         orderData.transport_fee = transportFee;
-        orderData.platform_fee = pFee;
-        orderData.vendor_payout = vPayout;
+        orderData.platform_fee = platformFee;
+        orderData.vendor_payout = vendorPayout;
       }
 
       const { error } = await supabase.from("rental_orders").insert(orderData as any);
@@ -242,9 +313,6 @@ const Cart = () => {
       setSubmitting(false);
     }
   };
-
-  const { calculatedTotal, hasQuoteItems } = calculateCartTotal(items);
-  const grandTotal = calculatedTotal + manpowerFee + transportFee;
 
   return (
     <Layout hideNavbar>
@@ -519,12 +587,12 @@ const Cart = () => {
                       )}
 
                       {/* Payment Plan Selector — only for instant book eligible orders */}
-                      {canInstantBook && showVenueAddressFields && grandTotal > 0 && (
+                      {canInstantBook && grandTotal > 0 && (
                         <PaymentPlanSelector
                           grandTotal={grandTotal}
-                          platformFee={calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0)}
-                          vendorPayout={items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee}
-                          eventDate={items.map(i => i.booking_from).filter(Boolean).sort()[0] || null}
+                          platformFee={platformFee}
+                          vendorPayout={vendorPayout}
+                          eventDate={derivedStartDate || null}
                           selectedPlan={selectedPlan}
                           onPlanSelect={(plan, breakdown) => {
                             setSelectedPlan(plan);
@@ -534,7 +602,7 @@ const Cart = () => {
                       )}
                     </div>
 
-                    {canInstantBook && showVenueAddressFields ? (
+                    {canInstantBook ? (
                       <Button onClick={handleSendEnquiry} className="w-full gap-2" size="lg" disabled={submitting}>
                         <Zap className="h-4 w-4" /> {submitting ? "Confirming..." : `Pay ₹${milestoneBreakdown?.milestones[0]?.amount?.toLocaleString("en-IN") || grandTotal.toLocaleString()} & Book`}
                       </Button>
@@ -597,7 +665,7 @@ const Cart = () => {
                         <p className="text-[11px] text-muted-foreground">* Some items require a custom quote. Final price confirmed by our team.</p>
                       )}
 
-                      {showInstantBookFlow && (
+                      {canInstantBook && (
                         <Badge variant="secondary" className="gap-1">
                           <Zap className="h-3 w-3" /> Instant Book eligible
                         </Badge>
@@ -629,14 +697,14 @@ const Cart = () => {
                         className="w-full gap-2"
                         size="lg"
                       >
-                        {showInstantBookFlow ? (
+                        {canInstantBook ? (
                           <><Zap className="h-4 w-4" /> Proceed to Book</>
                         ) : (
                           <><Send className="h-4 w-4" /> Proceed to Enquiry</>
                         )}
                       </Button>
                       <p className="text-[11px] text-muted-foreground text-center">
-                        {showInstantBookFlow ? "Instant booking with real-time pricing." : "Our team will respond within 24 hours."}
+                        {canInstantBook ? "Secure this booking with your first payment." : "Our team will respond within 24 hours."}
                       </p>
                     </div>
                   </>

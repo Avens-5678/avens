@@ -8,6 +8,7 @@ export interface CartItem {
   pricing_unit?: string;
   price_range?: string;
   image_url?: string;
+  address?: string;
   quantity: number;
   variant_id?: string;
   variant_label?: string;

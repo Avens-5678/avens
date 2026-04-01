@@ -63,6 +63,7 @@ const MapPinPicker = ({
       const data = await res.json();
       const addr = data.display_name || "";
       setAddress(addr);
+      setSearchQuery(addr);
       return addr;
     } catch {
       return "";
@@ -153,6 +154,7 @@ const MapPinPicker = ({
         setLat(newLat);
         setLng(newLng);
         setAddress(data[0].display_name || "");
+        setSearchQuery(data[0].display_name || searchQuery);
 
         if (mapInstanceRef.current && markerRef.current) {
           mapInstanceRef.current.setView([newLat, newLng], 15);

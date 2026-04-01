@@ -369,7 +369,7 @@ const Cart = () => {
       const assignedVendorId = vendorItem?.vendor_id || null;
       const vendorInventoryItemId = vendorItem ? vendorItem.id : null;
 
-      // Insert order with status payment_pending — confirmed only after Razorpay verification
+      // Insert order with status 'accepted' — confirmed only after Razorpay signature verification
       const { error: orderError } = await supabase.from("rental_orders").insert({
         id: orderId,
         title: `Instant Booking - ${items.length} item(s)`,
@@ -384,7 +384,7 @@ const Cart = () => {
         event_date: derivedStartDate || null,
         location: venueLocation || primaryVenueAddress || null,
         notes: eventDetails.notes || null,
-        status: "payment_pending",
+        status: "accepted",
         client_id: user.id,
         assigned_vendor_id: assignedVendorId,
         vendor_inventory_item_id: vendorInventoryItemId,

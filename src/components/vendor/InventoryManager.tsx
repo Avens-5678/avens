@@ -140,7 +140,7 @@ const InventoryManager = () => {
     setAttributeType("Size");
     setFormData({
       name: '', short_description: '', description: '', address: '',
-      vendor_base_price: '', labor_weight: 1,
+      vendor_base_price: '', labor_weight: 1, volume_units: 1,
       price_value: '', pricing_unit: 'Per Day', price_per_day: 0,
       categories: [], search_keywords: '', display_order: 0,
       quantity: 1, is_available: true,

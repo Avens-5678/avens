@@ -117,6 +117,7 @@ const ProductDetail = () => {
       amenities_matrix: v.amenities_matrix || {},
       venue_pricing_model: v.venue_pricing_model || "dry_rental",
       packages: v.packages || [],
+      markup_tier: v.markup_tier || "mid",
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];

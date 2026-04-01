@@ -56,6 +56,8 @@ export interface RentalOrder {
   manpower_fee: number | null;
   transport_fee: number | null;
   platform_fee: number | null;
+  venue_lat: number | null;
+  venue_lng: number | null;
 }
 
 export interface RentalOrderInsert {

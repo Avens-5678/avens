@@ -116,6 +116,9 @@ const ProductDetail = () => {
       house_rules: v.house_rules || [],
       amenities_matrix: v.amenities_matrix || {},
       venue_pricing_model: v.venue_pricing_model || "dry_rental",
+      venue_category: v.venue_category || null,
+      site_visit_price: v.site_visit_price ?? 499,
+      hold_24hr_price: v.hold_24hr_price ?? 2000,
       packages: v.packages || [],
       markup_tier: v.markup_tier || "mid",
       _source: "vendor",
@@ -706,7 +709,7 @@ const ProductDetail = () => {
 
                 {/* Instant 24-Hour Hold for venues */}
                 {isVenue && id && (
-                  <VenueHoldButton venueId={id} venueName={rental.title || rental.name || "Venue"} />
+                  <VenueHoldButton venueId={id} venueName={rental.title || rental.name || "Venue"} holdPrice={rental.hold_24hr_price ?? 2000} />
                 )}
 
                 {/* Smart Bundle suggestion */}

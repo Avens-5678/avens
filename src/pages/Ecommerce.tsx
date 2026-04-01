@@ -22,6 +22,7 @@ import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
+import VenueCard from "@/components/ecommerce/VenueCard";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
@@ -159,6 +160,9 @@ const Ecommerce = () => {
       is_verified: v.is_verified || false,
       markup_tier: v.markup_tier || "mid",
       venue_type: v.venue_type || null,
+      venue_category: v.venue_category || null,
+      site_visit_price: v.site_visit_price ?? 499,
+      hold_24hr_price: v.hold_24hr_price ?? 2000,
       min_capacity: v.min_capacity,
       max_capacity: v.max_capacity,
       catering_type: v.catering_type,
@@ -890,7 +894,11 @@ const Ecommerce = () => {
                     >
                       {filteredRentals.map((rental) => (
                         <div key={rental.id} className="relative">
-                          <EnhancedProductCard rental={rental} viewMode={mobileView} />
+                          {activeServiceType === "venue" ? (
+                            <VenueCard venue={rental} viewMode={mobileView} />
+                          ) : (
+                            <EnhancedProductCard rental={rental} viewMode={mobileView} />
+                          )}
                           {activeServiceType === "venue" && (
                             <label className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-background/90 backdrop-blur-sm rounded-md px-1.5 py-1 cursor-pointer border border-border shadow-sm">
                               <Checkbox

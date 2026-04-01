@@ -11,7 +11,19 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
-const VenueHoldButton = ({ venueId, venueName }: { venueId: string; venueName: string }) => {
+declare global {
+  interface Window { Razorpay: any }
+}
+
+const VenueHoldButton = ({
+  venueId,
+  venueName,
+  holdPrice = 2000,
+}: {
+  venueId: string;
+  venueName: string;
+  holdPrice?: number;
+}) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -20,7 +32,7 @@ const VenueHoldButton = ({ venueId, venueName }: { venueId: string; venueName: s
   const [calOpen, setCalOpen] = useState(false);
 
   // Check existing holds for this venue
-  const { data: existingHolds = [] } = useQuery({
+  const { data: existingHolds = [], refetch } = useQuery({
     queryKey: ["venue-holds", venueId],
     enabled: !!user,
     queryFn: async () => {
@@ -52,26 +64,74 @@ const VenueHoldButton = ({ venueId, venueName }: { venueId: string; venueName: s
       return;
     }
 
+    if (!window.Razorpay) {
+      toast({ title: "Payment unavailable", description: "Please refresh and try again", variant: "destructive" });
+      return;
+    }
+
     setLoading(true);
+    setCalOpen(false);
+
     try {
-      const { error } = await supabase.from("venue_holds").insert({
-        venue_id: venueId,
-        user_id: user.id,
-        hold_date: dateStr,
-        amount_paid: 2000,
-        status: "active",
+      // Create Razorpay order
+      const { data: orderData, error: orderError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: {
+          amount: holdPrice,
+          currency: "INR",
+          receipt: `hold_${venueId}_${dateStr}`,
+          notes: { venue_id: venueId, hold_date: dateStr },
+        },
       });
-      if (error) throw error;
-      toast({
-        title: "Date Held! 🎉",
-        description: `${venueName} locked for ${format(holdDate, "dd MMM yyyy")} for 24 hours. ₹2,000 hold applied.`,
-      });
-      setHoldDate(undefined);
-      setCalOpen(false);
+
+      if (orderError || !orderData?.razorpay_order_id) {
+        throw new Error(orderError?.message || "Could not create payment order");
+      }
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        order_id: orderData.razorpay_order_id,
+        name: "Evnting",
+        description: `24-Hour Hold – ${venueName} (${format(holdDate, "dd MMM yyyy")})`,
+        image: "/favicon.ico",
+        prefill: {
+          name: user.user_metadata?.full_name || "",
+          email: user.email || "",
+        },
+        theme: { color: "#7c3aed" },
+        modal: {
+          ondismiss: () => setLoading(false),
+        },
+        handler: async (response: any) => {
+          try {
+            const { error } = await supabase.from("venue_holds").insert({
+              venue_id: venueId,
+              user_id: user.id,
+              hold_date: dateStr,
+              amount_paid: holdPrice,
+              status: "active",
+              razorpay_payment_id: response.razorpay_payment_id,
+            });
+
+            if (error) throw error;
+
+            toast({
+              title: "Date Held! 🎉",
+              description: `${venueName} is locked for ${format(holdDate, "dd MMM yyyy")} for 24 hours. ₹${holdPrice.toLocaleString()} hold applied.`,
+            });
+            setHoldDate(undefined);
+            refetch();
+          } catch (err: any) {
+            const msg = err.message?.includes("unique") ? "This date is already held" : err.message;
+            toast({ title: "Hold Failed", description: msg, variant: "destructive" });
+          } finally {
+            setLoading(false);
+          }
+        },
+      };
+
+      new window.Razorpay(options).open();
     } catch (err: any) {
-      const msg = err.message?.includes("unique") ? "This date is already held" : err.message;
-      toast({ title: "Hold Failed", description: msg, variant: "destructive" });
-    } finally {
+      toast({ title: "Payment Error", description: err.message, variant: "destructive" });
       setLoading(false);
     }
   };
@@ -81,7 +141,9 @@ const VenueHoldButton = ({ venueId, venueName }: { venueId: string; venueName: s
       <div className="flex items-center gap-2">
         <Lock className="h-4 w-4 text-amber-600" />
         <span className="text-sm font-semibold text-foreground">Instant 24-Hour Hold</span>
-        <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-700 dark:text-amber-400">₹2,000</Badge>
+        <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-700 dark:text-amber-400">
+          ₹{holdPrice.toLocaleString()}
+        </Badge>
       </div>
       <p className="text-xs text-muted-foreground">
         Lock your preferred date so no one else can book it while you visit the venue. Fully adjustable against your final booking.
@@ -89,7 +151,7 @@ const VenueHoldButton = ({ venueId, venueName }: { venueId: string; venueName: s
       <div className="flex items-center gap-2">
         <Popover open={calOpen} onOpenChange={setCalOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="text-xs h-9 flex-1">
+            <Button variant="outline" size="sm" className="text-xs h-9 flex-1" disabled={loading}>
               <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
               {holdDate ? format(holdDate, "dd MMM yyyy") : "Pick a date"}
             </Button>
@@ -109,8 +171,11 @@ const VenueHoldButton = ({ venueId, venueName }: { venueId: string; venueName: s
           onClick={handleHold}
           disabled={loading || !holdDate}
         >
-          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1" />}
-          Hold Now
+          {loading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Hold Now</>
+          )}
         </Button>
       </div>
     </div>

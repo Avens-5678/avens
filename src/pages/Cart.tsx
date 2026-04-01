@@ -198,17 +198,29 @@ const Cart = () => {
         client_id: user.id,
         assigned_vendor_id: assignedVendorId,
         vendor_inventory_item_id: vendorInventoryItemId,
+        payment_plan: selectedPlan,
       };
 
       if (isInstant) {
+        const pFee = calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0);
+        const vPayout = items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee;
         orderData.manpower_fee = manpowerFee;
         orderData.transport_fee = transportFee;
-        orderData.platform_fee = calculatedTotal - items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0);
-        orderData.vendor_payout = items.reduce((s, i) => s + ((i as any).vendor_base_price || i.price_value || 0) * i.quantity, 0) + transportFee + manpowerFee;
+        orderData.platform_fee = pFee;
+        orderData.vendor_payout = vPayout;
       }
 
       const { error } = await supabase.from("rental_orders").insert(orderData as any);
       if (error) throw error;
+
+      // Create payment milestones
+      if (isInstant && milestoneBreakdown) {
+        try {
+          await createMilestones({ orderId, breakdown: milestoneBreakdown });
+        } catch (mErr) {
+          console.error("Failed to create milestones:", mErr);
+        }
+      }
 
       if (normalizedPhone) {
         try {

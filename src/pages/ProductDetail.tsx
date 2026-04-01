@@ -172,19 +172,26 @@ const ProductDetail = () => {
 
   useEffect(() => { setCurrentImageIndex(0); }, [selectedVariant]);
 
+  const tierKey = rental?.markup_tier || "mid";
+  const isVendorItem = rental?._source === "vendor";
+
   const displayPrice = useMemo(() => {
-    if (selectedVariant?.price_value != null) return { value: selectedVariant.price_value, unit: selectedVariant.pricing_unit || "Per Day" };
-    if (rental?.price_value != null) return { value: rental.price_value, unit: (rental as any).pricing_unit || "Per Day" };
+    const rawPrice = selectedVariant?.price_value ?? rental?.price_value ?? null;
+    const unit = selectedVariant?.pricing_unit ?? (rental as any)?.pricing_unit ?? "Per Day";
+
+    if (rawPrice != null && isVendorItem && pricingRules?.length) {
+      const { clientPrice } = applyTieredMarkup(rawPrice, tierKey, pricingRules);
+      return { value: clientPrice, unit, vendorBase: rawPrice };
+    }
+    if (rawPrice != null) return { value: rawPrice, unit };
     if (rental?.price_range) return { text: `₹${rental.price_range}` };
     return null;
-  }, [rental, selectedVariant]);
+  }, [rental, selectedVariant, pricingRules, tierKey, isVendorItem]);
 
   const currentUnit = displayPrice && "unit" in displayPrice ? displayPrice.unit : undefined;
   const isMeasurable = isMeasurableUnit(currentUnit);
 
   const numDays = bookingFrom && bookingTill ? Math.max(differenceInDays(bookingTill, bookingFrom), 1) : 1;
-  const pricePerUnit = selectedVariant?.price_value ?? rental?.price_value ?? 0;
-  const totalPrice = pricePerUnit * numDays;
 
   const variantGroups = useMemo(() => {
     if (!variants?.length) return {};

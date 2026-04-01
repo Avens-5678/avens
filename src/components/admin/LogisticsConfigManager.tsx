@@ -112,14 +112,12 @@ const LogisticsConfigManager = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label>Platform Markup (%)</Label>
-              <Input type="number" value={form.markup_percent} onChange={e => setForm(p => ({ ...p, markup_percent: parseFloat(e.target.value) || 0 }))} />
-              <p className="text-xs text-muted-foreground">Vendor base price × (1 + markup%) = client price</p>
-            </div>
-            <div className="space-y-1">
               <Label>Min Booking Hours</Label>
               <Input type="number" value={form.min_booking_hours} onChange={e => setForm(p => ({ ...p, min_booking_hours: parseInt(e.target.value) || 0 }))} />
               <p className="text-xs text-muted-foreground">Events less than this many hours away fall back to enquiry</p>
+            </div>
+            <div className="space-y-1 flex flex-col justify-center">
+              <p className="text-xs text-muted-foreground">Markup is now managed via <strong>Pricing Rules</strong> (tiered per item category).</p>
             </div>
           </div>
         </CardContent>

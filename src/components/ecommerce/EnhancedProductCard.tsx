@@ -46,7 +46,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
   const priceInfo = formatPrice();
   const isAssured = rental.rating && rental.rating >= 4;
-  const isVendor = rental._source === "vendor";
+  // isVendor already defined above
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
   const hasVirtualTour = !!rental.virtual_tour_url;

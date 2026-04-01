@@ -69,19 +69,35 @@ const Auth = () => {
   useEffect(() => {
     if (authLoading || roleLoading) return;
     if (user && role) {
-      // User has a role, redirect to ecommerce (or admin for admins)
       if (role === "admin") {
         navigate("/admin");
       } else {
         navigate("/ecommerce");
       }
     } else if (user && !role && !roleLoading) {
-      // User is authenticated but has no role - needs onboarding (Google OAuth new user)
-      setStep("google-onboarding");
-      setOnboardingData(prev => ({
-        ...prev,
-        fullName: user.user_metadata?.full_name || user.user_metadata?.name || "",
-      }));
+      // Check if this is a Google OAuth user with no role
+      // If they signed up via Google but have no profile/role, show onboarding
+      // But first check if this user was intentionally signing up or just clicking "Sign in with Google"
+      const isGoogleUser = user.app_metadata?.provider === "google" || user.app_metadata?.providers?.includes("google");
+      if (isGoogleUser) {
+        // Check if user has a profile already (returning user whose role got deleted vs new user)
+        supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+          if (data) {
+            // Has profile but no role - something is wrong, just redirect
+            navigate("/ecommerce");
+          } else {
+            // Truly new Google user - show onboarding
+            setStep("google-onboarding");
+            setOnboardingData(prev => ({
+              ...prev,
+              fullName: user.user_metadata?.full_name || user.user_metadata?.name || "",
+            }));
+          }
+        });
+      } else {
+        // Non-Google user with no role - shouldn't happen, redirect to register
+        navigate("/auth/register");
+      }
     }
   }, [user, role, authLoading, roleLoading, navigate]);
 

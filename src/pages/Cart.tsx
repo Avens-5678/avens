@@ -30,8 +30,7 @@ const Cart = () => {
   const navigate = useNavigate();
 
   const { data: logisticsConfig } = useLogisticsConfig();
-  const { data: transportTiers } = useTransportTiers();
-  const { calculate: calcTransport, result: transportResult, loading: transportLoading } = useTransportFee();
+  const { calculate: calcDynamicTransport, result: dynamicTransportResult, loading: transportLoading } = useDynamicTransport();
 
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [submitting, setSubmitting] = useState(false);

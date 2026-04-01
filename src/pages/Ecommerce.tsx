@@ -711,6 +711,9 @@ const Ecommerce = () => {
       {isDiscoveryView && (
         <>
           <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} />
+          <div className="container mx-auto px-4 sm:px-6">
+            <LookbookSection />
+          </div>
           <HowItWorks />
         </>
       )}

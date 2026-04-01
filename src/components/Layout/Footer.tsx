@@ -42,11 +42,8 @@ const Footer = () => {
             <h4 className="font-semibold text-white text-sm uppercase tracking-wider">Quick Links</h4>
             <div className="space-y-3">
               {[
-                { to: "/", label: "Home" },
-                { to: "/services", label: "Services" },
-                { to: "/portfolio", label: "Portfolio" },
+                { to: "/ecommerce", label: "Marketplace" },
                 { to: "/about", label: "About" },
-                { to: "/blog", label: "Blog" },
                 { to: "/faq", label: "FAQ" },
               ].map(({ to, label }) => (
                 <Link
@@ -61,27 +58,25 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Services */}
+          {/* Marketplace */}
           <div className="space-y-5">
-            <h4 className="font-semibold text-white text-sm uppercase tracking-wider">Services</h4>
+            <h4 className="font-semibold text-white text-sm uppercase tracking-wider">Marketplace</h4>
             <div className="space-y-3">
-              {events?.map((event) => (
+              {[
+                { to: "/ecommerce?service=venue", label: "Venues" },
+                { to: "/ecommerce?service=crew", label: "Crew Hub" },
+                { to: "/ecommerce?service=rental", label: "Equipment Rental" },
+                { to: "/ecommerce/track", label: "Track Order" },
+              ].map(({ to, label }) => (
                 <Link
-                  key={event.id}
-                  to={`/events/${event.event_type}`}
+                  key={to}
+                  to={to}
                   className="group flex items-center text-sm text-white/40 hover:text-white transition-colors duration-300"
                 >
-                  {event.title}
+                  {label}
                   <ArrowUpRight className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
               ))}
-              <Link
-                to="/ecommerce"
-                className="group flex items-center text-sm text-white/40 hover:text-white transition-colors duration-300"
-              >
-                Equipment Rental
-                <ArrowUpRight className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </Link>
             </div>
           </div>
 

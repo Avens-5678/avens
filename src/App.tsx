@@ -48,17 +48,16 @@ const App = () => (
               {/* Public Routes */}
               <Route path="/" element={<Navigate to="/ecommerce" replace />} />
               <Route path="/home" element={<Index />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/portfolio" element={<Portfolio />} />
-              <Route path="/gallery/:portfolioId" element={<Gallery />} />
+              {/* Redirects for removed pages */}
+              <Route path="/services" element={<Navigate to="/ecommerce" replace />} />
+              <Route path="/portfolio" element={<Navigate to="/ecommerce" replace />} />
+              <Route path="/gallery/*" element={<Navigate to="/ecommerce" replace />} />
+              <Route path="/blog" element={<Navigate to="/ecommerce" replace />} />
+              <Route path="/blog/*" element={<Navigate to="/ecommerce" replace />} />
+              <Route path="/team" element={<Navigate to="/ecommerce" replace />} />
+              <Route path="/events/*" element={<Navigate to="/ecommerce" replace />} />
               <Route path="/about" element={<About />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:id" element={<BlogPost />} />
               <Route path="/faq" element={<FAQ />} />
-              <Route path="/team" element={<Team />} />
-              <Route path="/events/corporate" element={<CorporateEvents />} />
-              <Route path="/events/equipment-rental" element={<EquipmentRental />} />
-              <Route path="/events/:eventType" element={<DynamicEventPage />} />
               <Route path="/ecommerce" element={<Ecommerce />} />
               <Route path="/ecommerce/orders" element={<EcommerceOrders />} />
               <Route path="/ecommerce/track" element={<TrackOrder />} />

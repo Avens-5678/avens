@@ -25,7 +25,7 @@ import HowItWorks from "@/components/ecommerce/HowItWorks";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
-
+import LookbookSection from "@/components/ecommerce/LookbookSection";
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
 // ── Rental-specific filters ──

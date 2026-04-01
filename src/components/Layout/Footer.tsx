@@ -1,10 +1,7 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, ArrowUpRight } from "lucide-react";
-import { useEvents } from "@/hooks/useData";
 
 const Footer = () => {
-  const { data: events } = useEvents();
-  
   return (
     <footer className="bg-[hsl(222,20%,12%)] dark:bg-[hsl(222,25%,5%)] text-white/70">
       <div className="container mx-auto px-5 sm:px-6 py-16 lg:py-20">

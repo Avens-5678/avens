@@ -16,6 +16,7 @@ import EventWorkspace from "@/components/client/EventWorkspace";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
+  { icon: FolderOpen, label: "Event Hub", value: "workspace" },
   { icon: FileText, label: "My Requests", value: "tracker" },
   { icon: Plus, label: "New Request", value: "request" },
   { icon: Calendar, label: "Past Orders", value: "past-orders" },

@@ -907,6 +907,54 @@ export type Database = {
           },
         ]
       }
+      pricing_rules: {
+        Row: {
+          applies_to: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          markup_default: number
+          markup_max: number
+          markup_min: number
+          markup_type: string
+          tier_key: string
+          tier_label: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          markup_default?: number
+          markup_max?: number
+          markup_min?: number
+          markup_type?: string
+          tier_key: string
+          tier_label: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          markup_default?: number
+          markup_max?: number
+          markup_min?: number
+          markup_type?: string
+          tier_key?: string
+          tier_label?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_bundles: {
         Row: {
           bundle_items: Json
@@ -1440,6 +1488,7 @@ export type Database = {
           image_url: string | null
           image_urls: string[] | null
           is_active: boolean | null
+          markup_tier: string | null
           max_capacity: number | null
           min_capacity: number | null
           num_halls: number | null
@@ -1485,6 +1534,7 @@ export type Database = {
           image_url?: string | null
           image_urls?: string[] | null
           is_active?: boolean | null
+          markup_tier?: string | null
           max_capacity?: number | null
           min_capacity?: number | null
           num_halls?: number | null
@@ -1530,6 +1580,7 @@ export type Database = {
           image_url?: string | null
           image_urls?: string[] | null
           is_active?: boolean | null
+          markup_tier?: string | null
           max_capacity?: number | null
           min_capacity?: number | null
           num_halls?: number | null
@@ -2098,6 +2149,7 @@ export type Database = {
           is_available: boolean
           is_verified: boolean | null
           labor_weight: number
+          markup_tier: string | null
           max_capacity: number | null
           min_capacity: number | null
           name: string
@@ -2154,6 +2206,7 @@ export type Database = {
           is_available?: boolean
           is_verified?: boolean | null
           labor_weight?: number
+          markup_tier?: string | null
           max_capacity?: number | null
           min_capacity?: number | null
           name: string
@@ -2210,6 +2263,7 @@ export type Database = {
           is_available?: boolean
           is_verified?: boolean | null
           labor_weight?: number
+          markup_tier?: string | null
           max_capacity?: number | null
           min_capacity?: number | null
           name?: string

@@ -281,10 +281,20 @@ const VendorProfileSettings = () => {
                 placeholder="e.g. 500081"
                 maxLength={6}
               />
-              <p className="text-xs text-muted-foreground">
-                Used for transport cost calculation to client delivery address.
-              </p>
             </div>
+          </div>
+
+          {/* Map Pin Picker for exact warehouse location */}
+          <div className="pt-2">
+            <MapPinPicker
+              label="📍 Pin your exact warehouse location"
+              description="Drop a pin on the map so we can calculate precise delivery distances. Search, use GPS, or click on the map."
+              initialLat={profile.warehouse_lat || undefined}
+              initialLng={profile.warehouse_lng || undefined}
+              onLocationSelect={(lat, lng, addr) => {
+                setProfile(p => ({ ...p, warehouse_lat: lat, warehouse_lng: lng }));
+              }}
+            />
           </div>
         </CardContent>
       </Card>

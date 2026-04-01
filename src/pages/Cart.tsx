@@ -17,6 +17,8 @@ import { isMeasurableUnit, calculateCartTotal, calculateManpowerFee, isInstantBo
 import { useLogisticsConfig } from "@/hooks/useLogisticsConfig";
 import { useDynamicTransport } from "@/hooks/useDynamicTransport";
 import MapPinPicker from "@/components/ecommerce/MapPinPicker";
+import PaymentPlanSelector from "@/components/ecommerce/PaymentPlanSelector";
+import { PaymentPlan, MilestoneBreakdown, calculateMilestoneBreakdown, useCreateMilestones } from "@/hooks/usePaymentMilestones";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
   CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin,

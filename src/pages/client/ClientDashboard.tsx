@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot } from "lucide-react";
+import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,7 +26,9 @@ import ChatManager from "@/components/vendor/ChatManager";
 import SpendingTracker from "@/components/vendor/SpendingTracker";
 import VendorBundleEvents from "@/components/vendor/VendorBundleEvents";
 import DeliveryManager from "@/components/vendor/DeliveryManager";
+import VendorOnboardingWizard from "@/components/vendor/VendorOnboardingWizard";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
+import { supabase } from "@/integrations/supabase/client";
 
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
@@ -56,6 +58,13 @@ const VendorDashboard = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const unreadChats = useUnreadChats("vendor");
+  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("vendor_onboarding_progress").select("is_completed").eq("vendor_id", user.id).maybeSingle()
+      .then(({ data }) => setOnboardingDone(data?.is_completed ?? null));
+  }, [user]);
 
   const sidebarItems: SidebarItem[] = useMemo(() =>
     baseSidebarItems.map((item) => ({
@@ -154,6 +163,18 @@ const VendorDashboard = () => {
         return null;
     }
   };
+
+  // Show onboarding wizard if not completed (and not loading)
+  if (onboardingDone === false) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        {headerContent}
+        <div className="p-4 sm:p-6">
+          <VendorOnboardingWizard onComplete={() => setOnboardingDone(true)} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DashboardShell

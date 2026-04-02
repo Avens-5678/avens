@@ -239,7 +239,7 @@ const Cart = () => {
   );
   const platformFee = calculatedTotal - vendorSubtotal;
   const vendorPayout = vendorSubtotal + transportFee + manpowerFee;
-  const grandTotal = calculatedTotal + manpowerFee + transportFee;
+  const grandTotal = calculatedTotal + manpowerFee + transportFee - couponDiscount;
 
   useEffect(() => {
     if (!showInstantBookFlow || grandTotal <= 0) {
@@ -339,6 +339,24 @@ const Cart = () => {
         }
       }
 
+      // Record coupon usage
+      if (couponApplied && user) {
+        try {
+          await supabase.from("coupon_usage").insert({
+            coupon_id: couponApplied.id,
+            user_id: user.id,
+            order_id: orderId,
+            order_type: "rental",
+            discount_applied: couponApplied.discount,
+          } as any);
+          await supabase.from("discount_coupons")
+            .update({ used_count: (await supabase.from("discount_coupons").select("used_count").eq("id", couponApplied.id).single()).data?.used_count + 1 } as any)
+            .eq("id", couponApplied.id);
+        } catch (couponErr) {
+          console.error("Coupon usage tracking failed:", couponErr);
+        }
+      }
+
       if (normalizedPhone) {
         try {
           await supabase.functions.invoke("wati-rental-confirmation", {
@@ -351,6 +369,9 @@ const Cart = () => {
 
       toast({ title: isInstant ? "Booking Confirmed!" : "Enquiry Sent!", description: isInstant ? "Your booking is confirmed. Vendor will be notified." : "Our team will respond within 24 hours." });
       clearCart();
+      setCouponApplied(null);
+      setCouponDiscount(0);
+      setCouponCode("");
       setShowEnquiry(false);
       setEventDetails({ event_start_date: "", event_end_date: "", venue_address_line1: "", venue_address_line2: "", venue_pincode: "", venue_lat: 0, venue_lng: 0, notes: "" });
     } catch (err: any) {
@@ -485,6 +506,18 @@ const Cart = () => {
               variant: "destructive",
             });
             return;
+          }
+          // Record coupon usage on successful payment
+          if (couponApplied) {
+            supabase.from("coupon_usage").insert({
+              coupon_id: couponApplied.id, user_id: user.id, order_id: orderId,
+              order_type: "rental", discount_applied: couponApplied.discount,
+            } as any).then(() => {
+              supabase.from("discount_coupons").select("used_count").eq("id", couponApplied.id).single()
+                .then(({ data }) => {
+                  if (data) supabase.from("discount_coupons").update({ used_count: (data.used_count || 0) + 1 } as any).eq("id", couponApplied.id).then(() => {});
+                });
+            });
           }
           toast({ title: "Booking Confirmed!", description: "Payment successful. You'll receive a WhatsApp confirmation shortly." });
           clearCart();

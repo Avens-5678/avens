@@ -12,8 +12,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const keyId = Deno.env.get("RAZORPAY_KEY_ID");
-    const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
+    // .trim() removes accidental whitespace/newlines from the Supabase secrets UI
+    const keyId = Deno.env.get("RAZORPAY_KEY_ID")?.trim();
+    const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET")?.trim();
+
+    // Secret presence diagnostics — safe to log (no actual values exposed)
+    console.log("Key ID present:", !!keyId);
+    console.log("Key ID prefix:", keyId?.substring(0, 8));
+    console.log("Secret present:", !!keySecret);
+    console.log("Secret length:", keySecret?.length);
 
     if (!keyId || !keySecret) {
       throw new Error("Razorpay credentials not configured");
@@ -21,6 +28,21 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     console.log("1. Raw body received:", JSON.stringify(body));
+
+    // Debug endpoint — returns credential presence without calling Razorpay
+    if (body.debug === true) {
+      return new Response(
+        JSON.stringify({
+          key_id_present: !!keyId,
+          key_id_prefix: keyId.substring(0, 8),
+          key_id_length: keyId.length,
+          secret_present: !!keySecret,
+          secret_length: keySecret.length,
+          secret_last4: keySecret.slice(-4),
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Callers send amount in rupees. Support both `receipt` and legacy `order_id`.
     // currency defaults to INR if omitted.
@@ -33,12 +55,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Safety: if amount looks like it might already be in paise (>= 100000 for >=₹1000)
-    // we still treat it as rupees — all callers send rupees. Multiply unconditionally.
-    const amountInPaise = Math.round(amount * 100);
+    const amountInPaise = Math.round(amount * 100); // callers send rupees
     console.log("2. Amount in paise:", amountInPaise, "(rupees received:", amount, ")");
 
-    // receipt: prefer explicit receipt, fall back to order_id, then auto-generate
+    // receipt: prefer explicit, fall back to order_id, then auto-generate
     const receiptValue = (receipt || order_id || `order_${Date.now()}`).substring(0, 40);
 
     const razorpayPayload: Record<string, unknown> = {

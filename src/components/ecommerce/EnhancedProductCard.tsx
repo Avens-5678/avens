@@ -7,6 +7,8 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/h
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { usePricingRules, applyTieredMarkup } from "@/hooks/usePricingRules";
+import { MapPin as MapPinIcon } from "lucide-react";
+import { distanceColor } from "@/utils/geoDistance";
 
 interface EnhancedProductCardProps {
   rental: any;
@@ -146,6 +148,13 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
               {rental.rating} <Star className="h-2.5 w-2.5 fill-current" />
             </span>
           </div>
+        )}
+
+        {/* Distance badge */}
+        {rental._distance_km != null && (
+          <Badge variant="secondary" className={`text-[9px] gap-0.5 w-fit ${distanceColor(rental._distance_km)}`}>
+            <MapPinIcon className="h-2.5 w-2.5" />{rental._distance_km} km
+          </Badge>
         )}
 
         {/* Price */}

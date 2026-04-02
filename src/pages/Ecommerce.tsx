@@ -4,6 +4,7 @@ import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { haversineKm } from "@/utils/geoDistance";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows } from "lucide-react";
@@ -21,6 +22,7 @@ import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
 import ServiceSelector from "@/components/ecommerce/ServiceSelector";
 import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
+import LocationRadiusBar from "@/components/ecommerce/LocationRadiusBar";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
@@ -209,10 +211,41 @@ const Ecommerce = () => {
       packages: v.packages || [],
       portfolio_urls: v.portfolio_urls || [],
       instagram_url: v.instagram_url || null,
+      pickup_lat: v.pickup_lat || null,
+      pickup_lng: v.pickup_lng || null,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];
   }, [rentals, vendorItems]);
+  // Fetch vendor warehouse locations for distance calc
+  const vendorIdsForGeo = useMemo(() => [...new Set(allItems.filter((r: any) => r._source === "vendor" && r.vendor_id).map((r: any) => r.vendor_id))], [allItems]);
+  const { data: vendorGeoProfiles = [] } = useQuery({
+    queryKey: ["vendor-geo-profiles", vendorIdsForGeo.join(",")],
+    enabled: vendorIdsForGeo.length > 0,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("user_id, warehouse_lat, warehouse_lng").in("user_id", vendorIdsForGeo);
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+  const vendorGeoMap = useMemo(() => {
+    const m: Record<string, { lat: number; lng: number }> = {};
+    vendorGeoProfiles.forEach((p: any) => { if (p.warehouse_lat && p.warehouse_lng) m[p.user_id] = { lat: p.warehouse_lat, lng: p.warehouse_lng }; });
+    return m;
+  }, [vendorGeoProfiles]);
+
+  // Enrich items with distance
+  const itemsWithDistance = useMemo(() => {
+    if (!userLocation) return allItems.map((r: any) => ({ ...r, _distance_km: null }));
+    return allItems.map((r: any) => {
+      const vGeo = r.vendor_id ? vendorGeoMap[r.vendor_id] : null;
+      const lat = r.pickup_lat || vGeo?.lat;
+      const lng = r.pickup_lng || vGeo?.lng;
+      const dist = lat && lng ? haversineKm(userLocation.lat, userLocation.lng, lat, lng) : null;
+      return { ...r, _distance_km: dist };
+    });
+  }, [allItems, userLocation, vendorGeoMap]);
+
   const { items } = useCart();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState(() => searchParams.get("search") || "");
@@ -247,7 +280,10 @@ const Ecommerce = () => {
   }>({});
   
   const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
-
+  const [deliveryRadius, setDeliveryRadius] = useState(() => {
+    try { return parseInt(localStorage.getItem("evnting_delivery_radius") || "15") || 15; } catch { return 15; }
+  });
+  const handleRadiusChange = (r: number) => { setDeliveryRadius(r); localStorage.setItem("evnting_delivery_radius", String(r)); };
 
   // Map activeService card IDs to service_type DB values
   const serviceTypeMap: Record<string, string> = {
@@ -327,7 +363,7 @@ const Ecommerce = () => {
       return results;
     }
 
-    let results = allItems.filter((rental: any) => {
+    let results = itemsWithDistance.filter((rental: any) => {
       const normalizedSearch = searchTerm.trim().toLowerCase();
       const searchableText = [
         rental.title,
@@ -417,7 +453,10 @@ const Ecommerce = () => {
         rental.slot_types.includes(venueSearchFilters.slot) ||
         rental.slot_types.includes("full_day");
 
-      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience && matchesCrewType && matchesVenueGuestCount && matchesVenueEventType && matchesVenueSlot;
+      // Radius filter: include if within radius OR no distance data (don't exclude unknowns)
+      const matchesRadius = !userLocation || rental._distance_km === null || rental._distance_km <= deliveryRadius;
+
+      return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience && matchesCrewType && matchesVenueGuestCount && matchesVenueEventType && matchesVenueSlot && matchesRadius;
     });
 
     switch (sortBy) {
@@ -436,7 +475,7 @@ const Ecommerce = () => {
     }
 
     return results;
-  }, [allItems, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience, vendorFilterId, crewSubTab, venueSearchFilters]);
+  }, [allItems, itemsWithDistance, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience, vendorFilterId, crewSubTab, venueSearchFilters, deliveryRadius, userLocation]);
 
   // Discovery rows for default landing view
   const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0 && !vendorFilterId;
@@ -741,6 +780,17 @@ const Ecommerce = () => {
           </button>
         </div>
       </div>
+
+      {/* Radius bar */}
+      {userLocation && (
+        <LocationRadiusBar
+          location={userLocation}
+          radius={deliveryRadius}
+          onRadiusChange={handleRadiusChange}
+          onDetectGPS={detectGPS}
+          onPinCode={(pin) => setFromPinCode(pin).catch(() => {})}
+        />
+      )}
 
       {/* Service Selection Strip */}
       <ServiceSelector activeService={activeService} onServiceChange={(service) => {

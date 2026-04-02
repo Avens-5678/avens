@@ -31,6 +31,7 @@ const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const EventCommandCenter = lazy(() => import("./pages/client/EventCommandCenter"));
 const QuoteAcceptance = lazy(() => import("./pages/QuoteAcceptance"));
 
 const queryClient = new QueryClient();
@@ -95,7 +96,17 @@ const App = () => (
                   </Suspense>
                 } 
               />
-              <Route 
+              <Route
+                path="/my-event/:bundleOrderId"
+                element={
+                  <Suspense fallback={<div className="min-h-screen" />}>
+                    <ProtectedRoute allowedRoles={["client"]}>
+                      <EventCommandCenter />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
                 path="/vendor/dashboard" 
                 element={
                   <Suspense fallback={<div className="min-h-screen" />}>

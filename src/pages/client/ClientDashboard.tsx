@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare } from "lucide-react";
+import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare, Gift } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
@@ -14,11 +14,13 @@ import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import EventWorkspace from "@/components/client/EventWorkspace";
 import ClientMessages from "@/components/client/ClientMessages";
+import ClientBundleEvents from "@/components/client/ClientBundleEvents";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: FolderOpen, label: "Event Hub", value: "workspace" },
+  { icon: Gift, label: "My Events", value: "events" },
   { icon: MessageSquare, label: "Messages", value: "messages" },
   { icon: FileText, label: "My Requests", value: "tracker" },
   { icon: Plus, label: "New Request", value: "request" },
@@ -98,6 +100,8 @@ const ClientDashboard = () => {
         return null; // Rendered persistently below
       case "workspace":
         return <EventWorkspace />;
+      case "events":
+        return <ClientBundleEvents />;
       case "messages":
         return <ClientMessages />;
       case "tracker":
@@ -134,7 +138,7 @@ const ClientDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
-      mobilePrimaryItems={["ai", "workspace", "messages", "tracker"]}
+      mobilePrimaryItems={["ai", "events", "messages", "tracker"]}
     >
       <div className={activeTab === "ai" ? "h-full" : "hidden"}>
         <DashboardChatbot role="client" userName={userName} />

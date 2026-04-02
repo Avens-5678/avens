@@ -131,12 +131,26 @@ const VendorBundleEvents = () => {
         completion: `${vendorName} completed delivery of "${itemName}"`,
       };
 
+      const updateContent = messages[updateType] || `${vendorName} updated "${itemName}" to ${newStatus}`;
       await supabase.from("bundle_event_updates").insert({
         bundle_order_id: bundleOrderId,
         vendor_id: user!.id,
         update_type: updateType,
-        content: messages[updateType] || `${vendorName} updated "${itemName}" to ${newStatus}`,
+        content: updateContent,
       } as any);
+      // Push notification to customer
+      const order = orderMap[bundleOrderId];
+      if (order?.customer_id) {
+        supabase.functions.invoke("send-push-notification", {
+          body: {
+            user_id: order.customer_id,
+            title: "Event Update",
+            body: updateContent,
+            type: "bundle_update",
+            data: { link: `/my-event/${bundleOrderId}` },
+          },
+        }).catch(() => {});
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendor-bundle-items"] });

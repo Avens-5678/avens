@@ -454,6 +454,21 @@ const Cart = () => {
         }
       }
 
+      // Push notification to vendor about new order
+      if (assignedVendorId) {
+        try {
+          await supabase.functions.invoke("send-push-notification", {
+            body: {
+              user_id: assignedVendorId,
+              title: "New Order Received",
+              body: `New ${isInstant ? "booking" : "enquiry"} for ${items.length} item(s) — ₹${Math.round(grandTotal).toLocaleString("en-IN")}`,
+              type: "order_update",
+              data: { link: "/vendor/dashboard?tab=orders", order_id: orderId },
+            },
+          });
+        } catch {}
+      }
+
       toast({ title: isInstant ? "Booking Confirmed!" : "Enquiry Sent!", description: isInstant ? "Your booking is confirmed. Vendor will be notified." : "Our team will respond within 24 hours." });
       clearCart();
       setCouponApplied(null);

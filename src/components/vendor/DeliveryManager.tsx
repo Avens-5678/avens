@@ -78,13 +78,30 @@ const DeliveryManager = () => {
     },
   });
 
-  // Update delivery status
+  // Update delivery status + notify customer
   const updateStatus = useMutation({
     mutationFn: async ({ id, status, extras }: { id: string; status: string; extras?: Record<string, any> }) => {
       const updates: any = { status, updated_at: new Date().toISOString(), ...extras };
       if (status === "delivered") updates.delivered_at = new Date().toISOString();
       const { error } = await supabase.from("delivery_orders").update(updates).eq("id", id);
       if (error) throw error;
+      // Push notification to customer
+      const delivery = deliveries.find((d) => d.id === id);
+      if (delivery?.customer_id) {
+        const statusLabels: Record<string, string> = { picked_up: "picked up from vendor", in_transit: "on the way", delivered: "delivered" };
+        const label = statusLabels[status];
+        if (label) {
+          supabase.functions.invoke("send-push-notification", {
+            body: {
+              user_id: delivery.customer_id,
+              title: "Delivery Update",
+              body: `Your delivery is ${label}!${status === "in_transit" ? " Track it live." : ""}`,
+              type: "delivery",
+              data: { link: `/track-delivery/${id}` },
+            },
+          }).catch(() => {});
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendor-deliveries"] });

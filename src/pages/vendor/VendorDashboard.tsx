@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users, Star, UserCheck, ListTodo, IndianRupee, MessageSquare } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, TrendingDown, BookOpen, MapPin, HandshakeIcon, Users, Star, UserCheck, ListTodo, IndianRupee, MessageSquare } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import InventoryManager from "@/components/vendor/InventoryManager";
@@ -23,6 +23,7 @@ import EmployeeManager from "@/components/vendor/EmployeeManager";
 import TaskManager from "@/components/vendor/TaskManager";
 import PayrollManager from "@/components/vendor/PayrollManager";
 import ChatManager from "@/components/vendor/ChatManager";
+import SpendingTracker from "@/components/vendor/SpendingTracker";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
@@ -38,6 +39,7 @@ const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: Users, label: "Labor & Payroll", value: "labor" },
   { icon: BookOpen, label: "Offline Booking", value: "offline" },
   { icon: FileText, label: "Quotation Maker", value: "quotes" },
+  { icon: TrendingDown, label: "Spending", value: "spending" },
   { icon: TrendingUp, label: "Earnings", value: "earnings" },
   { icon: Star, label: "Reviews", value: "reviews" },
   { icon: User, label: "Profile", value: "profile" },
@@ -132,6 +134,8 @@ const VendorDashboard = () => {
         return <VendorOfflineBooking />;
       case "quotes":
         return <VendorQuoteMaker />;
+      case "spending":
+        return <SpendingTracker />;
       case "earnings":
         return <VendorEarnings />;
       case "reviews":

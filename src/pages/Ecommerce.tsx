@@ -131,6 +131,12 @@ const Ecommerce = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const vendorFilterId = searchParams.get("vendor") || "";
 
+  // Capture referral code from URL
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) { localStorage.setItem("evnting_referral_code", ref); searchParams.delete("ref"); setSearchParams(searchParams, { replace: true }); }
+  }, []);
+
   // Fetch vendor profile for vendor store header
   const { data: vendorStoreProfile } = useVendorProfile(vendorFilterId || undefined);
 

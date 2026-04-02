@@ -21,7 +21,7 @@ import PaymentPlanSelector from "@/components/ecommerce/PaymentPlanSelector";
 import { PaymentPlan, MilestoneBreakdown, calculateMilestoneBreakdown, useCreateMilestones } from "@/hooks/usePaymentMilestones";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
-  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin, Building2, Gift,
+  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin, Building2, Gift, Star,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { detectBundle, groupItemsByCategory, CATEGORY_LABELS } from "@/utils/bundleDetection";
@@ -52,6 +52,8 @@ const Cart = () => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponApplied, setCouponApplied] = useState<{ id: string; code: string; discount: number } | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+  const [loyaltyBalance, setLoyaltyBalance] = useState(0);
   const [eventDetails, setEventDetails] = useState({
     event_start_date: "",
     event_end_date: "",
@@ -80,6 +82,15 @@ const Cart = () => {
   const canInstantBook = allItemsPriced && dateIsSet && isInstantBookable(derivedStartDate, minBookingHours);
   const showInstantBookFlow = allItemsPriced; // Show the flow if all items are priced, but enable button only if date qualifies
   const hasRequiredLocation = !showVenueAddressFields || !!eventDetails.venue_address_line1 || !!primaryVenueAddress;
+
+  // Fetch loyalty balance
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("loyalty_accounts").select("current_balance").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data) setLoyaltyBalance(data.current_balance || 0); });
+  }, [user]);
+
+  const pointsDiscount = Math.floor(pointsToRedeem / 100) * 50; // 100 pts = ₹50
 
   // Calculate manpower fee
   const manpowerFee = logisticsConfig
@@ -241,7 +252,7 @@ const Cart = () => {
   const platformFee = calculatedTotal - vendorSubtotal;
   const vendorPayout = vendorSubtotal + transportFee + manpowerFee;
   const bundle = useMemo(() => detectBundle(items, calculatedTotal), [items, calculatedTotal]);
-  const grandTotal = calculatedTotal + manpowerFee + transportFee - couponDiscount - bundle.customerDiscount;
+  const grandTotal = calculatedTotal + manpowerFee + transportFee - couponDiscount - bundle.customerDiscount - pointsDiscount;
 
   useEffect(() => {
     if (!showInstantBookFlow || grandTotal <= 0) {
@@ -469,11 +480,38 @@ const Cart = () => {
         } catch {}
       }
 
+      // Award loyalty points (10 pts per ₹100 spent)
+      if (isInstant && user && calculatedTotal > 0) {
+        try {
+          const basePoints = Math.floor(calculatedTotal / 100) * 10;
+          const bonusPoints = bundle.isBundle ? 100 : 0;
+          const totalPts = basePoints + bonusPoints;
+          if (totalPts > 0) {
+            await supabase.rpc("award_loyalty_points", {
+              p_user_id: user.id, p_points: totalPts, p_type: "order_earned",
+              p_description: `Earned from order #${orderId.slice(0, 8).toUpperCase()}${bonusPoints ? " + bundle bonus" : ""}`,
+              p_reference_id: orderId, p_reference_type: "order",
+            });
+          }
+        } catch {}
+      }
+      // Deduct redeemed points
+      if (pointsToRedeem > 0 && user) {
+        try {
+          await supabase.rpc("award_loyalty_points", {
+            p_user_id: user.id, p_points: -pointsToRedeem, p_type: "redeemed",
+            p_description: `Redeemed at checkout for order #${orderId.slice(0, 8).toUpperCase()}`,
+            p_reference_id: orderId, p_reference_type: "order",
+          });
+        } catch {}
+      }
+
       toast({ title: isInstant ? "Booking Confirmed!" : "Enquiry Sent!", description: isInstant ? "Your booking is confirmed. Vendor will be notified." : "Our team will respond within 24 hours." });
       clearCart();
       setCouponApplied(null);
       setCouponDiscount(0);
       setCouponCode("");
+      setPointsToRedeem(0);
       setShowEnquiry(false);
       setEventDetails({ event_start_date: "", event_end_date: "", venue_address_line1: "", venue_address_line2: "", venue_pincode: "", venue_lat: 0, venue_lng: 0, notes: "" });
     } catch (err: any) {
@@ -1111,6 +1149,41 @@ const Cart = () => {
                             <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{bundle.label} Discount</span>
                           </div>
                           <span className="text-sm font-bold text-emerald-600">-₹{Math.round(bundle.customerDiscount).toLocaleString("en-IN")}</span>
+                        </div>
+                      )}
+
+                      {/* Loyalty Points Redemption */}
+                      {user && loyaltyBalance > 0 && (
+                        <div className="space-y-1.5 bg-purple-50 dark:bg-purple-900/20 rounded-lg px-3 py-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-purple-700 dark:text-purple-400 flex items-center gap-1"><Star className="h-3 w-3" />Loyalty Points</span>
+                            <span className="text-[10px] text-muted-foreground">{loyaltyBalance} pts available</span>
+                          </div>
+                          {pointsToRedeem > 0 ? (
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-purple-600">Using {pointsToRedeem} pts</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-purple-600">-₹{pointsDiscount.toLocaleString("en-IN")}</span>
+                                <button onClick={() => setPointsToRedeem(0)} className="text-[10px] text-muted-foreground hover:text-destructive">Remove</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <Input
+                                type="number"
+                                min={0}
+                                max={Math.min(loyaltyBalance, Math.floor(calculatedTotal / 50) * 100)}
+                                step={100}
+                                placeholder="Points to use"
+                                className="h-7 text-xs flex-1"
+                                onChange={(e) => {
+                                  const v = Math.min(parseInt(e.target.value) || 0, loyaltyBalance, Math.floor(calculatedTotal / 50) * 100);
+                                  setPointsToRedeem(Math.max(0, Math.floor(v / 100) * 100));
+                                }}
+                              />
+                              <span className="text-[10px] text-muted-foreground self-center whitespace-nowrap">100 pts = ₹50</span>
+                            </div>
+                          )}
                         </div>
                       )}
                       <Separator />

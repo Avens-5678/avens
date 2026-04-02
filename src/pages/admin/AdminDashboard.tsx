@@ -65,6 +65,7 @@ import AdminFeaturedManager from "@/components/admin/AdminFeaturedManager";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminChatModeration from "@/components/admin/AdminChatModeration";
 import WhatsAppMessageLogs from "@/components/admin/WhatsAppMessageLogs";
+import AdminLoyaltyManager from "@/components/admin/AdminLoyaltyManager";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -97,6 +98,7 @@ const menuGroups: MenuGroup[] = [
       { label: "Quote Maker", value: "quote-maker" },
       { label: "Reviews", value: "reviews" },
       { label: "Chat Moderation", value: "chat-moderation" },
+      { label: "Loyalty Program", value: "loyalty" },
     ],
   },
   {
@@ -362,6 +364,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <AdminReviewsManager />;
       case "chat-moderation":
         return <AdminChatModeration />;
+      case "loyalty":
+        return <AdminLoyaltyManager />;
       case "banners":
         return (
           <CrudInterface

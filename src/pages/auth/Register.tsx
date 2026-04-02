@@ -128,6 +128,36 @@ const Register = () => {
         if (roleError) {
           console.error("Role assignment error:", roleError);
         }
+
+        // Handle referral code from URL
+        const refCode = localStorage.getItem("evnting_referral_code");
+        if (refCode && authData.user) {
+          try {
+            const { data: refData } = await supabase.from("referral_codes").select("id, user_id").eq("code", refCode).eq("is_active", true).maybeSingle();
+            if (refData && refData.user_id !== authData.user.id) {
+              await supabase.from("referral_redemptions").insert({
+                referral_code_id: refData.id, referrer_id: refData.user_id,
+                referred_id: authData.user.id, status: "signed_up",
+              } as any);
+              // Award 100 points to new user
+              await supabase.rpc("award_loyalty_points", {
+                p_user_id: authData.user.id, p_points: 100, p_type: "referral_bonus",
+                p_description: "Welcome bonus from referral",
+              });
+              localStorage.removeItem("evnting_referral_code");
+            }
+          } catch (refErr) { console.error("Referral processing error:", refErr); }
+        }
+
+        // Create loyalty account + referral code
+        try {
+          const { data: silverTier } = await supabase.from("loyalty_tiers").select("id").eq("name", "Silver").single();
+          if (silverTier && authData.user) {
+            await supabase.from("loyalty_accounts").insert({ user_id: authData.user.id, current_tier_id: silverTier.id } as any);
+            const code = "EVNT-" + authData.user.id.slice(0, 6).toUpperCase();
+            await supabase.from("referral_codes").insert({ user_id: authData.user.id, code } as any);
+          }
+        } catch {}
       }
 
       toast({

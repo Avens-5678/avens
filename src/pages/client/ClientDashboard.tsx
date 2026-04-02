@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare, Gift } from "lucide-react";
+import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare, Gift, Award } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
@@ -15,6 +15,7 @@ import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import EventWorkspace from "@/components/client/EventWorkspace";
 import ClientMessages from "@/components/client/ClientMessages";
 import ClientBundleEvents from "@/components/client/ClientBundleEvents";
+import LoyaltyDashboard from "@/components/client/LoyaltyDashboard";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
@@ -25,6 +26,7 @@ const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: FileText, label: "My Requests", value: "tracker" },
   { icon: Plus, label: "New Request", value: "request" },
   { icon: Calendar, label: "Past Orders", value: "past-orders" },
+  { icon: Award, label: "Loyalty", value: "loyalty" },
   { icon: User, label: "Profile", value: "profile" },
 ];
 
@@ -125,6 +127,8 @@ const ClientDashboard = () => {
         );
       case "past-orders":
         return <PastOrders />;
+      case "loyalty":
+        return <LoyaltyDashboard />;
       case "profile":
         return <ClientProfileSettings />;
       default:

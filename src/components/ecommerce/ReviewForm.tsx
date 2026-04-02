@@ -112,6 +112,13 @@ const ReviewForm = ({ rentalId, rentalTitle }: ReviewFormProps) => {
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["rental-reviews", rentalId] });
       queryClient.invalidateQueries({ queryKey: ["review-existing", rentalId, user?.id] });
+      // Award 50 loyalty points for review
+      try {
+        await supabase.rpc("award_loyalty_points", {
+          p_user_id: user!.id, p_points: 50, p_type: "review_bonus",
+          p_description: `Review bonus for ${rentalTitle}`, p_reference_id: rentalId, p_reference_type: "review",
+        });
+      } catch {}
       setSubmitted(true);
     } catch (err: any) {
       toast({ title: "Submit failed", description: err.message, variant: "destructive" });

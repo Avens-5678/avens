@@ -21,10 +21,12 @@ import PaymentPlanSelector from "@/components/ecommerce/PaymentPlanSelector";
 import { PaymentPlan, MilestoneBreakdown, calculateMilestoneBreakdown, useCreateMilestones } from "@/hooks/usePaymentMilestones";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
-  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin, Building2, Gift, Star,
+  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin, Building2, Gift, Star, TrendingUp,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { detectBundle, groupItemsByCategory, CATEGORY_LABELS } from "@/utils/bundleDetection";
+import { calculateSurge, SurgeRule } from "@/utils/surgeCalculator";
+import { useSurgeRules } from "@/hooks/useSurgeRules";
 
 declare global {
   interface Window {
@@ -40,6 +42,7 @@ const Cart = () => {
 
   const { data: logisticsConfig } = useLogisticsConfig();
   const { calculate: calcDynamicTransport, result: dynamicTransportResult, loading: transportLoading } = useDynamicTransport();
+  const { data: surgeRules = [] } = useSurgeRules();
 
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -252,7 +255,16 @@ const Cart = () => {
   const platformFee = calculatedTotal - vendorSubtotal;
   const vendorPayout = vendorSubtotal + transportFee + manpowerFee;
   const bundle = useMemo(() => detectBundle(items, calculatedTotal), [items, calculatedTotal]);
-  const grandTotal = calculatedTotal + manpowerFee + transportFee - couponDiscount - bundle.customerDiscount - pointsDiscount;
+
+  // Surge pricing based on event date
+  const eventDateForSurge = derivedStartDate ? new Date(derivedStartDate) : null;
+  const primaryCity = items.find((i: any) => i.address)?.address?.split(",").pop()?.trim() || null;
+  const primaryServiceType = items[0]?.service_type || "rental";
+  const surge = useMemo(() =>
+    calculateSurge(calculatedTotal, primaryCity, primaryServiceType, eventDateForSurge, surgeRules),
+  [calculatedTotal, primaryCity, primaryServiceType, eventDateForSurge, surgeRules]);
+
+  const grandTotal = calculatedTotal + surge.surgeAmount + manpowerFee + transportFee - couponDiscount - bundle.customerDiscount - pointsDiscount;
 
   useEffect(() => {
     if (!showInstantBookFlow || grandTotal <= 0) {
@@ -1140,6 +1152,20 @@ const Cart = () => {
                           </div>
                         )}
                       </div>
+
+                      {/* Surge Pricing */}
+                      {surge.isActive && surge.surgeAmount > 0 && (
+                        <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
+                          <div className="flex items-center gap-1.5">
+                            <TrendingUp className="h-3.5 w-3.5 text-amber-600" />
+                            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">{surge.label}</span>
+                          </div>
+                          <span className="text-sm font-bold text-amber-600">+₹{surge.surgeAmount.toLocaleString("en-IN")}</span>
+                        </div>
+                      )}
+                      {surge.isEarlyBird && surge.earlyBirdSaving > 0 && (
+                        <p className="text-[10px] text-emerald-600 text-center">You're saving ₹{surge.earlyBirdSaving.toLocaleString("en-IN")} by booking early!</p>
+                      )}
 
                       {/* Bundle Discount */}
                       {bundle.isBundle && bundle.customerDiscount > 0 && (

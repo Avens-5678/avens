@@ -66,6 +66,7 @@ import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminChatModeration from "@/components/admin/AdminChatModeration";
 import WhatsAppMessageLogs from "@/components/admin/WhatsAppMessageLogs";
 import AdminLoyaltyManager from "@/components/admin/AdminLoyaltyManager";
+import AdminSurgeManager from "@/components/admin/AdminSurgeManager";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -117,6 +118,7 @@ const menuGroups: MenuGroup[] = [
       { label: "Trust Strip", value: "trust-strip" },
       { label: "Logistics Config", value: "logistics-config" },
       { label: "Pricing Rules", value: "pricing-rules" },
+      { label: "Surge Pricing", value: "surge-pricing" },
     ],
   },
   {
@@ -428,6 +430,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <LogisticsConfigManager />;
       case "pricing-rules":
         return <PricingRulesManager />;
+      case "surge-pricing":
+        return <AdminSurgeManager />;
       case "cms-banners":
         return <AdminBannerManager />;
       case "cms-coupons":

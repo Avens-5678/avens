@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useChatModeration } from "@/hooks/useChatModeration";
+import { useChatImageScan } from "@/hooks/useChatImageScan";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -238,6 +239,7 @@ const ClientChatPanel = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { processMessage, checkWithAI, canSend, warningMessage, warningLevel, isRestricted, isSuspended } = useChatModeration();
+  const { uploadAndScan, scanning: imageScanning } = useChatImageScan();
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -332,14 +334,19 @@ const ClientChatPanel = ({
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const ext = file.name.split(".").pop();
-    const path = `chat/${conversation.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("review-photos").upload(path, file);
-    if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); return; }
-    const { data: urlData } = supabase.storage.from("review-photos").getPublicUrl(path);
-    await sendMessage(file.name, file.type.startsWith("image/") ? "image" : "file", urlData.publicUrl, file.name);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [conversation.id, sendMessage, toast]);
+    const result = await uploadAndScan(file, conversation.id);
+    if (!result) return;
+    if (result.allowed) {
+      await sendMessage(result.fileName, file.type.startsWith("image/") ? "image" : "file", result.imageUrl, result.fileName);
+    } else {
+      await supabase.from("chat_messages").insert({
+        conversation_id: conversation.id, sender_id: user!.id, sender_type: "system",
+        message: "[Image blocked — contained contact information]", message_type: "system",
+      } as any);
+      queryClient.invalidateQueries({ queryKey: ["chat-messages"] });
+    }
+  }, [conversation.id, sendMessage, uploadAndScan, user, queryClient]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(inputText); }
@@ -403,13 +410,18 @@ const ClientChatPanel = ({
           {warningMessage}
         </div>
       )}
+      {imageScanning && (
+        <div className="px-4 py-2 text-xs text-center text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 flex items-center justify-center gap-1.5">
+          <Loader2 className="h-3 w-3 animate-spin" />Scanning image...
+        </div>
+      )}
       <div className="border-t border-border p-3 bg-background">
         {isRestricted || isSuspended ? (
           <p className="text-xs text-center text-muted-foreground py-2">{isSuspended ? "Chat suspended — contact support." : "Chat restricted — try again later."}</p>
         ) : (
         <div className="flex items-end gap-2">
           <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload} accept="image/*,.pdf,.doc,.docx,.xlsx" />
-          <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground flex-shrink-0"><Paperclip className="h-4 w-4" /></button>
+          <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground flex-shrink-0" disabled={imageScanning}><Paperclip className="h-4 w-4" /></button>
           <textarea
             value={inputText} onChange={(e) => setInputText(e.target.value)} onKeyDown={handleKeyDown}
             placeholder="Type a message..." rows={1}

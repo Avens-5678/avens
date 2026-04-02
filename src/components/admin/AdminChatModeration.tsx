@@ -67,6 +67,7 @@ const AdminChatModeration = () => {
   const queryClient = useQueryClient();
   const [detailUser, setDetailUser] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch moderation logs
@@ -132,6 +133,7 @@ const AdminChatModeration = () => {
   const filteredLogs = useMemo(() => {
     return logs.filter((l) => {
       if (severityFilter !== "all" && l.severity !== severityFilter) return false;
+      if (typeFilter !== "all" && l.detection_type !== typeFilter) return false;
       if (searchTerm) {
         const name = l.sender_id ? (profileMap[l.sender_id]?.full_name || "").toLowerCase() : "";
         if (!name.includes(searchTerm.toLowerCase()) && !l.original_content.toLowerCase().includes(searchTerm.toLowerCase())) return false;
@@ -237,11 +239,20 @@ const AdminChatModeration = () => {
         <Select value={severityFilter} onValueChange={setSeverityFilter}>
           <SelectTrigger className="w-[110px] h-8 text-xs"><SelectValue placeholder="Severity" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="all">All Severity</SelectItem>
             <SelectItem value="low">Low</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
             <SelectItem value="high">High</SelectItem>
             <SelectItem value="critical">Critical</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-[110px] h-8 text-xs"><SelectValue placeholder="Type" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="regex">Regex</SelectItem>
+            <SelectItem value="ai">AI</SelectItem>
+            <SelectItem value="image_ocr">Image OCR</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -278,8 +289,19 @@ const AdminChatModeration = () => {
                         <p className="text-[10px] text-muted-foreground">{p?.email || ""}</p>
                       </TableCell>
                       <TableCell>
-                        <p className="text-xs text-foreground line-clamp-2 max-w-[250px]">{log.original_content}</p>
-                        {log.ai_reasoning && <p className="text-[10px] text-blue-600 mt-0.5 italic">AI: {log.ai_reasoning}</p>}
+                        {log.detection_type === "image_ocr" && log.original_content.startsWith("[Image:") ? (
+                          <div className="space-y-1">
+                            <a href={log.original_content.match(/\[Image: (.+)\]/)?.[1] || "#"} target="_blank" rel="noopener noreferrer">
+                              <img src={log.original_content.match(/\[Image: (.+)\]/)?.[1] || ""} alt="Flagged" className="w-16 h-16 rounded object-cover border border-border hover:ring-2 hover:ring-primary" />
+                            </a>
+                            {log.ai_reasoning && <p className="text-[10px] text-blue-600 italic">{log.ai_reasoning}</p>}
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-xs text-foreground line-clamp-2 max-w-[250px]">{log.original_content}</p>
+                            {log.ai_reasoning && <p className="text-[10px] text-blue-600 mt-0.5 italic">AI: {log.ai_reasoning}</p>}
+                          </>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-0.5">

@@ -40,6 +40,11 @@ const SiteVisitForm = ({ rental }: SiteVisitFormProps) => {
   const depositAmount: number = rental?.site_visit_price ?? 499;
 
   const handleSiteVisit = async () => {
+    if (!user) {
+      toast({ title: "Sign in required", description: "Please sign in to book a site visit.", variant: "destructive" });
+      return;
+    }
+
     if (!clientName.trim() || !clientPhone.trim() || !preferredDate) {
       toast({ title: "Required", description: "Please fill name, phone, and select a date.", variant: "destructive" });
       return;

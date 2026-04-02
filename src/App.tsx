@@ -32,6 +32,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const EventCommandCenter = lazy(() => import("./pages/client/EventCommandCenter"));
+const TrackDelivery = lazy(() => import("./pages/TrackDelivery"));
 const QuoteAcceptance = lazy(() => import("./pages/QuoteAcceptance"));
 
 const queryClient = new QueryClient();
@@ -102,6 +103,16 @@ const App = () => (
                   <Suspense fallback={<div className="min-h-screen" />}>
                     <ProtectedRoute allowedRoles={["client"]}>
                       <EventCommandCenter />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/track-delivery/:deliveryOrderId"
+                element={
+                  <Suspense fallback={<div className="min-h-screen" />}>
+                    <ProtectedRoute allowedRoles={["client"]}>
+                      <TrackDelivery />
                     </ProtectedRoute>
                   </Suspense>
                 }

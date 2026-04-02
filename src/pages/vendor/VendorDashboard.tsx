@@ -1,61 +1,45 @@
 import { useState, useMemo, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, TrendingDown, BookOpen, MapPin, HandshakeIcon, Users, Star, UserCheck, ListTodo, IndianRupee, MessageSquare, Gift, Truck } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
-import Logo from "@/components/ui/logo";
-import InventoryManager from "@/components/vendor/InventoryManager";
-import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
+import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import VendorDashboardShell, { NavSection } from "@/components/vendor/VendorDashboardShell";
+import VendorOverview from "@/components/vendor/VendorOverview";
+import VendorOnboardingWizard from "@/components/vendor/VendorOnboardingWizard";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
-import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
-import OrderTracker from "@/components/vendor/OrderTracker";
+import { useUnreadChats } from "@/hooks/useUnreadChats";
 
-import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
-import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
-import VendorEarnings from "@/components/vendor/VendorEarnings";
-import VendorReviews from "@/components/vendor/VendorReviews";
-import SiteVisitManager from "@/components/vendor/SiteVisitManager";
-import B2BCrossHire from "@/components/vendor/B2BCrossHire";
-import LaborTracker from "@/components/vendor/LaborTracker";
+// Lazy-ish imports (still eagerly loaded but could be React.lazy later)
+import OrderTracker from "@/components/vendor/OrderTracker";
+import InventoryManager from "@/components/vendor/InventoryManager";
 import EmployeeManager from "@/components/vendor/EmployeeManager";
 import TaskManager from "@/components/vendor/TaskManager";
 import PayrollManager from "@/components/vendor/PayrollManager";
 import ChatManager from "@/components/vendor/ChatManager";
 import SpendingTracker from "@/components/vendor/SpendingTracker";
+import VendorEarnings from "@/components/vendor/VendorEarnings";
+import VendorReviews from "@/components/vendor/VendorReviews";
+import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
 import VendorBundleEvents from "@/components/vendor/VendorBundleEvents";
 import DeliveryManager from "@/components/vendor/DeliveryManager";
-import VendorOnboardingWizard from "@/components/vendor/VendorOnboardingWizard";
-import { useUnreadChats } from "@/hooks/useUnreadChats";
-import { supabase } from "@/integrations/supabase/client";
+import SiteVisitManager from "@/components/vendor/SiteVisitManager";
+import B2BCrossHire from "@/components/vendor/B2BCrossHire";
+import LaborTracker from "@/components/vendor/LaborTracker";
+import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
+import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 
-const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
-  { icon: Bot, label: "AI Assistant", value: "ai" },
-  { icon: ClipboardList, label: "My Orders", value: "orders" },
-  { icon: Gift, label: "Bundle Events", value: "bundle-events" },
-  { icon: Truck, label: "Deliveries", value: "deliveries" },
-  { icon: MessageSquare, label: "Chat", value: "chat" },
-  { icon: Package, label: "Inventory", value: "inventory" },
-  { icon: UserCheck, label: "Team", value: "team" },
-  { icon: ListTodo, label: "Tasks", value: "tasks" },
-  { icon: IndianRupee, label: "Payroll", value: "payroll" },
-  { icon: MapPin, label: "Site Visits", value: "site-visits" },
-  { icon: HandshakeIcon, label: "B2B Cross-Hire", value: "b2b" },
-  { icon: Users, label: "Labor & Payroll", value: "labor" },
-  { icon: BookOpen, label: "Offline Booking", value: "offline" },
-  { icon: FileText, label: "Quotation Maker", value: "quotes" },
-  { icon: TrendingDown, label: "Spending", value: "spending" },
-  { icon: TrendingUp, label: "Earnings", value: "earnings" },
-  { icon: Star, label: "Reviews", value: "reviews" },
-  { icon: User, label: "Profile", value: "profile" },
-];
+import {
+  LayoutDashboard, ClipboardList, Package, MessageSquare,
+  UserCheck, ListTodo, IndianRupee, TrendingUp, TrendingDown,
+  Star, User, Gift, Truck, MapPin, HandshakeIcon, Users,
+  BookOpen, FileText, Bot, Loader2,
+} from "lucide-react";
 
 const VendorDashboard = () => {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "ai";
+  const initialTab = searchParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState(initialTab);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const unreadChats = useUnreadChats("vendor");
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
@@ -66,65 +50,69 @@ const VendorDashboard = () => {
       .then(({ data }) => setOnboardingDone(data?.is_completed ?? null));
   }, [user]);
 
-  const sidebarItems: SidebarItem[] = useMemo(() =>
-    baseSidebarItems.map((item) => ({
-      ...item,
-      badge: item.value === "chat" ? unreadChats : undefined,
-    })),
-  [unreadChats]);
+  // Fetch vendor profile for name
+  const [vendorName, setVendorName] = useState("");
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("company_name, full_name").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => setVendorName(data?.company_name || data?.full_name || ""));
+  }, [user]);
 
-  const handleLogout = async () => {
-    await signOut();
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out successfully.",
-    });
-  };
+  const sections: NavSection[] = useMemo(() => [
+    {
+      title: "",
+      items: [
+        { icon: LayoutDashboard, label: "Overview", value: "overview" },
+        { icon: Bot, label: "AI Assistant", value: "ai" },
+      ],
+    },
+    {
+      title: "Operations",
+      items: [
+        { icon: ClipboardList, label: "Orders", value: "orders" },
+        { icon: Gift, label: "Bundle Events", value: "bundle-events" },
+        { icon: Truck, label: "Deliveries", value: "deliveries" },
+        { icon: MessageSquare, label: "Chat", value: "chat", badge: unreadChats || undefined },
+        { icon: Package, label: "Inventory", value: "inventory" },
+      ],
+    },
+    {
+      title: "Team",
+      items: [
+        { icon: UserCheck, label: "Employees", value: "team" },
+        { icon: ListTodo, label: "Tasks", value: "tasks" },
+        { icon: IndianRupee, label: "Payroll", value: "payroll" },
+        { icon: Users, label: "Labor", value: "labor" },
+      ],
+    },
+    {
+      title: "Finance",
+      items: [
+        { icon: TrendingUp, label: "Earnings", value: "earnings" },
+        { icon: TrendingDown, label: "Spending", value: "spending" },
+        { icon: FileText, label: "Quotes", value: "quotes" },
+        { icon: BookOpen, label: "Offline Booking", value: "offline" },
+      ],
+    },
+    {
+      title: "More",
+      items: [
+        { icon: Star, label: "Reviews", value: "reviews" },
+        { icon: MapPin, label: "Site Visits", value: "site-visits" },
+        { icon: HandshakeIcon, label: "B2B Cross-Hire", value: "b2b" },
+        { icon: User, label: "Profile", value: "profile" },
+      ],
+    },
+  ], [unreadChats]);
 
-  const headerContent = (
-    <header className="bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 text-background px-4 sm:px-6 py-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 sm:space-x-4">
-          <Logo className="scale-75 brightness-0 invert" />
-          <div className="hidden sm:block">
-            <h1 className="text-lg font-bold tracking-tight">Vendor Portal</h1>
-            <p className="text-xs text-background/60">Manage your business</p>
-          </div>
-          <span className="sm:hidden text-lg font-bold">Vendor</span>
-        </div>
-        
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <Link
-            to="/"
-            className="flex items-center text-background/60 hover:text-background transition-colors text-sm"
-          >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            <span className="hidden sm:inline">Website</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-3 pl-3 border-l border-background/20">
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
-              {user?.email?.charAt(0)?.toUpperCase() || "V"}
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-medium">{user?.email}</p>
-              <p className="text-xs text-background/50">Vendor</p>
-            </div>
-          </div>
-          <Button variant="ghost" onClick={handleLogout} size="sm" className="text-background/70 hover:text-background hover:bg-background/10">
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline ml-1">Logout</span>
-          </Button>
-        </div>
-      </div>
-    </header>
-  );
-
-  const userName = useMemo(() => user?.user_metadata?.full_name || user?.email || "", [user?.user_metadata?.full_name, user?.email]);
+  const userName = useMemo(() => user?.user_metadata?.full_name || user?.email || "", [user]);
 
   const renderContent = () => {
     switch (activeTab) {
+      case "overview":
+        return <VendorOverview onNavigate={setActiveTab} />;
       case "ai":
-        return null;
+        return <DashboardChatbot role="vendor" userName={userName} />;
       case "orders":
         return <OrderTracker />;
       case "bundle-events":
@@ -141,54 +129,55 @@ const VendorDashboard = () => {
         return <TaskManager />;
       case "payroll":
         return <PayrollManager />;
+      case "labor":
+        return <LaborTracker />;
+      case "earnings":
+        return <VendorEarnings />;
+      case "spending":
+        return <SpendingTracker />;
+      case "quotes":
+        return <VendorQuoteMaker />;
+      case "offline":
+        return <VendorOfflineBooking />;
+      case "reviews":
+        return <VendorReviews />;
       case "site-visits":
         return <SiteVisitManager />;
       case "b2b":
         return <B2BCrossHire />;
-      case "labor":
-        return <LaborTracker />;
-      case "offline":
-        return <VendorOfflineBooking />;
-      case "quotes":
-        return <VendorQuoteMaker />;
-      case "spending":
-        return <SpendingTracker />;
-      case "earnings":
-        return <VendorEarnings />;
-      case "reviews":
-        return <VendorReviews />;
       case "profile":
         return <VendorProfileSettings />;
       default:
-        return null;
+        return <VendorOverview onNavigate={setActiveTab} />;
     }
   };
 
-  // Show onboarding wizard if not completed (and not loading)
+  // Show onboarding wizard if not completed
   if (onboardingDone === false) {
     return (
-      <div className="min-h-screen bg-muted/30">
-        {headerContent}
-        <div className="p-4 sm:p-6">
+      <div className="min-h-screen bg-background">
+        <div className="max-w-2xl mx-auto p-4 sm:p-6 pt-8">
           <VendorOnboardingWizard onComplete={() => setOnboardingDone(true)} />
         </div>
       </div>
     );
   }
 
+  // Loading state
+  if (onboardingDone === null) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
+
   return (
-    <DashboardShell
-      sidebarItems={sidebarItems}
+    <VendorDashboardShell
+      sections={sections}
       activeTab={activeTab}
       onTabChange={setActiveTab}
-      headerContent={headerContent}
-      mobilePrimaryItems={["ai", "orders", "chat", "team", "tasks"]}
+      vendorName={vendorName}
+      mobilePrimaryItems={["overview", "orders", "chat", "inventory", "tasks"]}
     >
-      <div className={activeTab === "ai" ? "h-full" : "hidden"}>
-        <DashboardChatbot role="vendor" userName={userName} />
-      </div>
-      {activeTab !== "ai" && renderContent()}
-    </DashboardShell>
+      {renderContent()}
+    </VendorDashboardShell>
   );
 };
 

@@ -10,7 +10,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
-import Index from "./pages/Index";
+const Index = lazy(() => import("./pages/Index"));
 
 // Lazy-loaded routes to reduce initial JS bundle
 const About = lazy(() => import("./pages/About"));

@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const metaToken = Deno.env.get("META_WHATSAPP_TOKEN");
   const phoneNumberId = Deno.env.get("META_PHONE_NUMBER_ID");
-  const verifyToken = Deno.env.get("META_WEBHOOK_VERIFY_TOKEN");
+  const verifyToken = Deno.env.get("META_WHATSAPP_VERIFY_TOKEN") || Deno.env.get("META_WEBHOOK_VERIFY_TOKEN");
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -41,11 +41,12 @@ Deno.serve(async (req) => {
       const changes = entry?.changes?.[0];
       const value = changes?.value;
 
-      // Handle message status updates (for campaigns)
+      // Handle message status updates (delivery receipts)
       if (value?.statuses) {
         for (const status of value.statuses) {
           const phone = status.recipient_id;
           const messageStatus = status.status; // sent, delivered, read, failed
+          const metaMsgId = status.id;
 
           // Update campaign recipient status
           if (messageStatus === "delivered") {
@@ -66,6 +67,18 @@ Deno.serve(async (req) => {
               .update({ status: "failed", error_message: status.errors?.[0]?.title || "Unknown error" })
               .eq("phone_number", phone)
               .eq("status", "pending");
+          }
+
+          // Also update whatsapp_message_logs for delivery tracking
+          if (metaMsgId) {
+            const logUpdate: Record<string, any> = { status: messageStatus };
+            if (messageStatus === "delivered") logUpdate.delivered_at = new Date().toISOString();
+            if (messageStatus === "read") logUpdate.read_at = new Date().toISOString();
+            if (messageStatus === "failed") logUpdate.error_message = status.errors?.[0]?.title || "Unknown error";
+            await supabase
+              .from("whatsapp_message_logs")
+              .update(logUpdate)
+              .eq("meta_message_id", metaMsgId);
           }
         }
         return new Response("OK", { status: 200, headers: corsHeaders });

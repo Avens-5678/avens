@@ -98,15 +98,27 @@ Deno.serve(async (req) => {
       throw milestoneError;
     }
 
-    // --- Fire WhatsApp confirmation ---
+    // --- Fire WhatsApp confirmation via Meta API ---
     if (phone) {
       try {
-        await supabase.functions.invoke("wati-rental-confirmation", {
-          body: { phone, name: name || "Customer", order_id },
+        const cleanPhone = phone.replace(/\D/g, "");
+        const wa_phone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+        await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-whatsapp`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({
+            to: wa_phone,
+            template_name: "payment_received",
+            template_params: [name || "Customer", String(amount_due), order_id.slice(0, 8).toUpperCase()],
+            recipient_name: name,
+            recipient_type: "customer",
+          }),
         });
-      } catch (watiErr) {
-        // Non-fatal — log but don't fail the payment verification
-        console.error("WhatsApp notification failed:", watiErr);
+      } catch (waErr) {
+        console.error("WhatsApp notification failed:", waErr);
       }
     }
 

@@ -440,8 +440,14 @@ const Cart = () => {
 
       if (normalizedPhone) {
         try {
-          await supabase.functions.invoke("wati-rental-confirmation", {
-            body: { phone: normalizedPhone, name: profileData.full_name || "Customer", order_id: orderId },
+          await supabase.functions.invoke("send-whatsapp", {
+            body: {
+              to: normalizedPhone,
+              template_name: "rental_confirmation",
+              template_params: [profileData.full_name || "Customer", orderId.slice(0, 8).toUpperCase(), `${items.length} item(s)`, `${Math.round(grandTotal)}`],
+              recipient_name: profileData.full_name,
+              recipient_type: "customer",
+            },
           });
         } catch (whatsappErr) {
           console.error("WhatsApp rental confirmation failed:", whatsappErr);

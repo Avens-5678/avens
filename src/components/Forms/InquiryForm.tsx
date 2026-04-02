@@ -136,11 +136,13 @@ const InquiryForm = ({
           // Send WhatsApp rental confirmation
           if (normalizedPhone) {
             try {
-              await supabase.functions.invoke("wati-rental-confirmation", {
+              await supabase.functions.invoke("send-whatsapp", {
                 body: {
-                  phone: normalizedPhone,
-                  name: values.name || "Customer",
-                  order_id: "INQUIRY",
+                  to: normalizedPhone,
+                  template_name: "rental_confirmation",
+                  template_params: [values.name || "Customer", "INQUIRY", values.equipment || "Equipment", "TBD"],
+                  recipient_name: values.name,
+                  recipient_type: "customer",
                 },
               });
             } catch (whatsappErr) {

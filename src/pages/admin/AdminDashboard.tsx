@@ -64,6 +64,7 @@ import AdminCouponManager from "@/components/admin/AdminCouponManager";
 import AdminFeaturedManager from "@/components/admin/AdminFeaturedManager";
 import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import AdminChatModeration from "@/components/admin/AdminChatModeration";
+import WhatsAppMessageLogs from "@/components/admin/WhatsAppMessageLogs";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -151,6 +152,7 @@ const menuGroups: MenuGroup[] = [
     subTabs: [
       { label: "Live Chat", value: "wa-live-chat" },
       { label: "Campaigns", value: "wa-campaigns" },
+      { label: "Message Logs", value: "wa-logs" },
       { label: "Contacts", value: "wa-contacts" },
       { label: "Templates", value: "wa-templates" },
       { label: "Settings", value: "wa-settings" },
@@ -500,6 +502,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <WhatsAppLiveChat />;
       case "wa-campaigns":
         return <WhatsAppCampaigns />;
+      case "wa-logs":
+        return <WhatsAppMessageLogs />;
       case "wa-contacts":
         return <WhatsAppContacts />;
       case "wa-templates":

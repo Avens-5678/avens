@@ -3,9 +3,6 @@ project_id = "zbcnepczdenymvfeuoaj"
 [functions.check-user-type]
 verify_jwt = false
 
-[functions.wati-whatsapp]
-verify_jwt = false
-
 [functions.vendor-action]
 verify_jwt = false
 
@@ -21,19 +18,7 @@ verify_jwt = false
 [functions.zoho-crm-requests]
 verify_jwt = false
 
-[functions.wati-vendor-reminder]
-verify_jwt = false
-
-[functions.wati-service-confirmation]
-verify_jwt = false
-
-[functions.wati-rental-confirmation]
-verify_jwt = false
-
 [functions.sync-quote-to-order]
-verify_jwt = false
-
-[functions.wati-quote-notification]
 verify_jwt = false
 
 [functions.send-quote-email]
@@ -43,4 +28,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.milestone-reminder]
+verify_jwt = false
+
+[functions.send-whatsapp]
+verify_jwt = false
+
+[functions.scan-chat-image]
 verify_jwt = false

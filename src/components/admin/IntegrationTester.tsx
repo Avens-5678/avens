@@ -108,54 +108,34 @@ const IntegrationTester = () => {
   const testWatiIntegration = async () => {
     setIsTestingWati(true);
     try {
-      const { data, error } = await supabase.functions.invoke('wati-whatsapp', {
+      const { data, error } = await supabase.functions.invoke('send-whatsapp', {
         body: {
-          action: 'send_to_vendor',
-          orderId: '00000000-0000-0000-0000-000000000000',
-          vendorPhone: '919999999999',
-          vendorName: 'Test Vendor',
+          to: '919999999999',
+          template_name: 'rental_confirmation',
+          template_params: ['Test User', 'TEST0001', 'Test Items', '1000'],
+          recipient_name: 'Test',
+          recipient_type: 'admin',
         },
       });
 
-      // supabase.functions.invoke returns error for non-2xx responses
-      if (error) {
-        // Try to read the error context - for FunctionsHttpError the message includes status info
-        const errorMsg = error?.message || String(error);
-        const errorContext = typeof error === 'object' && 'context' in error 
-          ? JSON.stringify((error as any).context) 
-          : errorMsg;
-        
-        // "Order not found" with dummy ID means the edge function is reachable & auth works
-        if (errorMsg.includes('404') || errorMsg.includes('Order not found') || 
-            errorContext.includes('Order not found') || errorMsg.includes('Edge Function returned a non-2xx status code')) {
-          setWatiStatus('success');
-          toast({ title: "WATI WhatsApp Test", description: "Edge function is reachable and working! (Dummy order ID returned expected 404.)" });
-          return;
-        }
-        throw new Error(errorMsg);
-      }
+      if (error) throw new Error(error.message || String(error));
 
-      if (data?.whatsapp_sent) {
+      if (data?.success) {
         setWatiStatus('success');
-        toast({ title: "WATI WhatsApp Test", description: "Message sent successfully via WATI API!" });
+        toast({ title: "WhatsApp Test", description: "Message sent successfully via Meta API!" });
       } else {
         setWatiStatus('success');
-        toast({ title: "WATI WhatsApp Test", description: data?.message || "Edge function responded. Check WATI secrets are configured." });
+        toast({ title: "WhatsApp Test", description: data?.error || "Edge function responded. Check Meta secrets are configured." });
       }
     } catch (error) {
-      // Also catch here - if it's an "Order not found" type error, treat as success
       const msg = error instanceof Error ? error.message : String(error);
-      if (msg.includes('404') || msg.includes('Order not found') || msg.includes('non-2xx')) {
+      if (msg.includes('not configured')) {
         setWatiStatus('success');
-        toast({ title: "WATI WhatsApp Test", description: "Edge function is reachable and working!" });
+        toast({ title: "WhatsApp Test", description: "Edge function reachable — set META_PHONE_NUMBER_ID and META_WHATSAPP_TOKEN." });
         return;
       }
       setWatiStatus('error');
-      toast({
-        title: "WATI WhatsApp Error",
-        description: msg || "Failed to reach WATI edge function",
-        variant: "destructive",
-      });
+      toast({ title: "WhatsApp Error", description: msg, variant: "destructive" });
     } finally {
       setIsTestingWati(false);
     }

@@ -46,23 +46,31 @@ Deno.serve(async (req) => {
           .eq("id", milestone.id);
       }
 
-      // Send WhatsApp reminder if client has a phone number
+      // Send WhatsApp reminder via Meta API
       if (order?.client_phone) {
         try {
           const daysLabel = isOverdue ? "overdue" : "due in 3 days";
-          await supabase.functions.invoke("wati-whatsapp", {
-            body: {
-              action: "send_template",
-              phone: order.client_phone,
-              template: "payment_reminder",
-              params: [
+          const cleanPhone = order.client_phone.replace(/\D/g, "");
+          const waPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+          await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-whatsapp`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            },
+            body: JSON.stringify({
+              to: waPhone,
+              template_name: "payment_reminder",
+              template_params: [
                 order.client_name || "Customer",
                 milestone.milestone_name,
                 `₹${milestone.amount_due.toLocaleString("en-IN")}`,
                 order.title || "your booking",
                 daysLabel,
               ],
-            },
+              recipient_name: order.client_name,
+              recipient_type: "customer",
+            }),
           });
           results.push({ milestone_id: milestone.id, action: "whatsapp_sent", success: true });
         } catch (err) {

@@ -8,7 +8,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { usePricingRules, applyTieredMarkup } from "@/hooks/usePricingRules";
 import { MapPin as MapPinIcon } from "lucide-react";
-import { distanceColor } from "@/utils/geoDistance";
+
+// Inline to avoid importing external module into Ecommerce chunk
+const distanceColor = (km: number) =>
+  km <= 10 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+  : km <= 25 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
 
 interface EnhancedProductCardProps {
   rental: any;

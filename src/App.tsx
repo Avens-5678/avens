@@ -7,6 +7,7 @@ import { AudioProvider } from "@/contexts/AudioContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "@/components/ScrollToTop";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import Index from "./pages/Index";
@@ -48,6 +49,7 @@ const App = () => (
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ScrollToTop />
         <AudioProvider>
+          <ErrorBoundary>
           <Suspense fallback={<div className="min-h-screen" />}>
             <Routes>
               {/* Public Routes */}
@@ -144,6 +146,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
         </AudioProvider>
       </BrowserRouter>
     </TooltipProvider>

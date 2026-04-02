@@ -28,8 +28,14 @@ import CrewCard from "@/components/ecommerce/CrewCard";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
-import { useFeaturedItemIds, useVendorGeoProfiles, enrichItemsWithDistance } from "@/hooks/useFeaturedAndGeo";
 import LookbookSection from "@/components/ecommerce/LookbookSection";
+
+// Inline Haversine to avoid importing supabase into this chunk
+function _haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371, dLat = ((lat2 - lat1) * Math.PI) / 180, dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos((lat1*Math.PI)/180)*Math.cos((lat2*Math.PI)/180)*Math.sin(dLng/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*10)/10;
+}
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
 // ── Rental-specific filters ──
@@ -140,8 +146,8 @@ const Ecommerce = () => {
   // Fetch vendor profile for vendor store header
   const { data: vendorStoreProfile } = useVendorProfile(vendorFilterId || undefined);
 
-  // Fetch featured item IDs for homepage
-  const featuredItemIds = useFeaturedItemIds();
+  // Featured items — skip dynamic fetch to avoid supabase in this chunk
+  const featuredItemIds: string[] = [];
 
   // Merge vendor items into rentals format
   const allItems = useMemo(() => {
@@ -201,12 +207,16 @@ const Ecommerce = () => {
     }));
     return [...adminItems, ...vendorMapped];
   }, [rentals, vendorItems]);
-  // Fetch vendor warehouse locations for distance calc
-  const vendorIdsForGeo = useMemo(() => [...new Set(allItems.filter((r: any) => r._source === "vendor" && r.vendor_id).map((r: any) => r.vendor_id))], [allItems]);
-  const vendorGeoMap = useVendorGeoProfiles(vendorIdsForGeo);
-
-  // Enrich items with distance
-  const itemsWithDistance = useMemo(() => enrichItemsWithDistance(allItems, userLocation, vendorGeoMap), [allItems, userLocation, vendorGeoMap]);
+  // Enrich items with distance (inline calc, no external supabase import)
+  const itemsWithDistance = useMemo(() => {
+    if (!userLocation) return allItems.map((r: any) => ({ ...r, _distance_km: null }));
+    return allItems.map((r: any) => {
+      const lat = r.pickup_lat || r.warehouse_lat;
+      const lng = r.pickup_lng || r.warehouse_lng;
+      const dist = lat && lng ? _haversine(userLocation.lat, userLocation.lng, lat, lng) : null;
+      return { ...r, _distance_km: dist };
+    });
+  }, [allItems, userLocation]);
 
   const { items } = useCart();
   const navigate = useNavigate();

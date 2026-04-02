@@ -29,7 +29,8 @@ import {
   Truck,
   Briefcase,
   ShoppingBag,
-  MessageCircle
+  MessageCircle,
+  Newspaper
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -58,6 +59,10 @@ import WhatsAppContacts from "@/components/admin/WhatsAppContacts";
 import WhatsAppTemplates from "@/components/admin/WhatsAppTemplates";
 import WhatsAppSettings from "@/components/admin/WhatsAppSettings";
 import AdminReviewsManager from "@/components/admin/AdminReviewsManager";
+import AdminBannerManager from "@/components/admin/AdminBannerManager";
+import AdminCouponManager from "@/components/admin/AdminCouponManager";
+import AdminFeaturedManager from "@/components/admin/AdminFeaturedManager";
+import AdminSiteSettings from "@/components/admin/AdminSiteSettings";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -107,6 +112,15 @@ const menuGroups: MenuGroup[] = [
       { label: "Trust Strip", value: "trust-strip" },
       { label: "Logistics Config", value: "logistics-config" },
       { label: "Pricing Rules", value: "pricing-rules" },
+    ],
+  },
+  {
+    icon: Newspaper, label: "CMS", value: "cms",
+    subTabs: [
+      { label: "Promo Banners", value: "cms-banners" },
+      { label: "Coupons", value: "cms-coupons" },
+      { label: "Featured Items", value: "cms-featured" },
+      { label: "Site Settings", value: "cms-settings" },
     ],
   },
   {
@@ -404,6 +418,14 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <LogisticsConfigManager />;
       case "pricing-rules":
         return <PricingRulesManager />;
+      case "cms-banners":
+        return <AdminBannerManager />;
+      case "cms-coupons":
+        return <AdminCouponManager />;
+      case "cms-featured":
+        return <AdminFeaturedManager />;
+      case "cms-settings":
+        return <AdminSiteSettings />;
       case "portfolio":
         return <NewEnhancedPortfolioManager portfolio={portfolio || []} events={events || []} />;
       case "clients":

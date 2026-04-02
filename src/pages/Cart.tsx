@@ -47,6 +47,10 @@ const Cart = () => {
   const [selectedPlan, setSelectedPlan] = useState<PaymentPlan>("advance");
   const [milestoneBreakdown, setMilestoneBreakdown] = useState<MilestoneBreakdown | null>(null);
   const { mutateAsync: createMilestones } = useCreateMilestones();
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState<{ id: string; code: string; discount: number } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
   const [eventDetails, setEventDetails] = useState({
     event_start_date: "",
     event_end_date: "",
@@ -192,6 +196,41 @@ const Cart = () => {
     }
     setProfileLoaded(true);
   };
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const { data: coupon, error } = await supabase
+        .from("discount_coupons")
+        .select("*")
+        .eq("code", couponCode.trim().toUpperCase())
+        .eq("is_active", true)
+        .maybeSingle();
+      if (error) throw error;
+      if (!coupon) { toast({ title: "Invalid coupon", description: "This coupon code does not exist.", variant: "destructive" }); return; }
+      const now = new Date();
+      if (coupon.starts_at && new Date(coupon.starts_at) > now) { toast({ title: "Coupon not active yet", variant: "destructive" }); return; }
+      if (coupon.expires_at && new Date(coupon.expires_at) < now) { toast({ title: "Coupon expired", variant: "destructive" }); return; }
+      if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit) { toast({ title: "Coupon usage limit reached", variant: "destructive" }); return; }
+      if (user && coupon.per_user_limit) {
+        const { count } = await supabase.from("coupon_usage").select("id", { count: "exact", head: true }).eq("coupon_id", coupon.id).eq("user_id", user.id);
+        if ((count || 0) >= coupon.per_user_limit) { toast({ title: "You've already used this coupon", variant: "destructive" }); return; }
+      }
+      const { calculatedTotal: ct } = calculateCartTotal(items);
+      if (coupon.min_order_amount && ct < coupon.min_order_amount) { toast({ title: `Minimum order ₹${Math.round(coupon.min_order_amount)} required`, variant: "destructive" }); return; }
+      let discount = coupon.discount_type === "percentage" ? (ct * coupon.discount_value) / 100 : coupon.discount_value;
+      if (coupon.max_discount_amount && discount > coupon.max_discount_amount) discount = coupon.max_discount_amount;
+      discount = Math.round(discount);
+      setCouponDiscount(discount);
+      setCouponApplied({ id: coupon.id, code: coupon.code, discount });
+      toast({ title: "Coupon applied!", description: `₹${discount} discount` });
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally { setCouponLoading(false); }
+  };
+
+  const removeCoupon = () => { setCouponDiscount(0); setCouponApplied(null); setCouponCode(""); };
 
   const { calculatedTotal, hasQuoteItems } = calculateCartTotal(items);
   const vendorSubtotal = items.reduce(
@@ -816,10 +855,43 @@ const Cart = () => {
                         </div>
                       )}
 
+                      {/* Coupon */}
+                      <div className="space-y-2">
+                        {couponApplied ? (
+                          <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 rounded-lg px-3 py-2">
+                            <div className="flex items-center gap-1.5">
+                              <Tag className="h-3.5 w-3.5 text-emerald-600" />
+                              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{couponApplied.code}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-emerald-600">-₹{couponApplied.discount.toLocaleString()}</span>
+                              <button onClick={removeCoupon} className="text-xs text-muted-foreground hover:text-destructive">Remove</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Input
+                              value={couponCode}
+                              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                              placeholder="Coupon code"
+                              className="h-8 text-xs font-mono flex-1"
+                              onKeyDown={(e) => { if (e.key === "Enter") applyCoupon(); }}
+                            />
+                            <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={applyCoupon} disabled={couponLoading || !couponCode.trim()}>
+                              {couponLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Tag className="h-3 w-3" />}Apply
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      <Separator />
+
                       {calculatedTotal > 0 && (
                         <div className="flex justify-between items-center">
                           <span className="text-base font-bold text-foreground">Estimated Total</span>
-                          <span className="text-lg font-bold text-primary">₹{calculatedTotal.toLocaleString()}</span>
+                          <div className="text-right">
+                            {couponDiscount > 0 && <span className="text-xs line-through text-muted-foreground mr-2">₹{calculatedTotal.toLocaleString()}</span>}
+                            <span className="text-lg font-bold text-primary">₹{(calculatedTotal - couponDiscount).toLocaleString()}</span>
+                          </div>
                         </div>
                       )}
                       {hasQuoteItems && (

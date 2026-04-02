@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows } from "lucide-react";
@@ -79,7 +81,7 @@ const CREW_EXPERIENCE_OPTIONS = [
 ];
 
 // ── Discovery section with Top Picks + Recently Viewed ──
-const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues }: any) => {
+const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues, featuredItems }: any) => {
   const { recentIds } = useRecentlyViewed();
 
   const recentlyViewedItems = useMemo(() => {
@@ -100,6 +102,9 @@ const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discov
 
   return (
     <div className="bg-background py-4 sm:py-6">
+      {featuredItems.length > 0 && (
+        <DiscoveryRow title="⭐ Featured Products" subtitle="Hand-picked by our team" items={featuredItems} />
+      )}
       <DiscoveryRow title="🔥 Discover Best Rentals" subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
       {discoveryBestInCity.length > 0 && (
         <DiscoveryRow title={`📍 Discover Best in ${userLocation?.cityName || "Your City"}`} subtitle="Popular items near you" items={discoveryBestInCity} />
@@ -128,6 +133,23 @@ const Ecommerce = () => {
 
   // Fetch vendor profile for vendor store header
   const { data: vendorStoreProfile } = useVendorProfile(vendorFilterId || undefined);
+
+  // Fetch featured item IDs for homepage
+  const { data: featuredItemIds = [] } = useQuery({
+    queryKey: ["featured-homepage-ids"],
+    queryFn: async () => {
+      const now = new Date().toISOString();
+      const { data, error } = await supabase
+        .from("featured_items")
+        .select("item_id")
+        .eq("item_type", "product")
+        .eq("placement", "homepage")
+        .eq("is_active", true)
+        .order("display_order");
+      if (error) throw error;
+      return (data || []).map((d: any) => d.item_id as string);
+    },
+  });
 
   // Merge vendor items into rentals format
   const allItems = useMemo(() => {
@@ -441,6 +463,13 @@ const Ecommerce = () => {
       .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
       .slice(0, 12);
   }, [allItems]);
+
+  const featuredProducts = useMemo(() => {
+    if (featuredItemIds.length === 0) return [];
+    return featuredItemIds
+      .map((fid: string) => allItems.find((r: any) => r.id === fid))
+      .filter(Boolean);
+  }, [allItems, featuredItemIds]);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -767,7 +796,7 @@ const Ecommerce = () => {
       {/* Discovery Rows — shown on default landing */}
       {isDiscoveryView && (
         <>
-          <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} />
+          <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} featuredItems={featuredProducts} />
           <div className="container mx-auto px-4 sm:px-6">
             <LookbookSection />
           </div>

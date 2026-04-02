@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,9 @@ interface PromoBanner {
   display_order: number | null;
   linked_rental_ids: string[] | null;
   service_type: string | null;
+  link_url: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
 }
 
 interface PromoBannerCarouselProps {
@@ -24,6 +28,7 @@ interface PromoBannerCarouselProps {
 
 const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselProps) => {
   const [current, setCurrent] = useState(0);
+  const navigate = useNavigate();
 
   const { data: allBanners = [] } = useQuery({
     queryKey: ["promo-banners"],
@@ -38,13 +43,18 @@ const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselPro
     },
   });
 
-  // Filter by service type or shuffle all
+  // Filter by service type, date range
   const banners = useMemo(() => {
+    const now = new Date();
+    const dateFiltered = allBanners.filter((b) => {
+      if (b.starts_at && new Date(b.starts_at) > now) return false;
+      if (b.ends_at && new Date(b.ends_at) < now) return false;
+      return true;
+    });
     if (serviceType) {
-      return allBanners.filter((b) => (b.service_type || "rental") === serviceType);
+      return dateFiltered.filter((b) => (b.service_type || "rental") === serviceType);
     }
-    // No service selected — show all banners in random order
-    return [...allBanners].sort(() => Math.random() - 0.5);
+    return [...dateFiltered].sort(() => Math.random() - 0.5);
   }, [allBanners, serviceType]);
 
   useEffect(() => {
@@ -63,7 +73,13 @@ const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselPro
   const next = () => setCurrent((c) => (c + 1) % banners.length);
 
   const handleCtaClick = (banner: PromoBanner) => {
-    if (onCtaClick && banner.linked_rental_ids && banner.linked_rental_ids.length > 0) {
+    if (banner.link_url) {
+      if (banner.link_url.startsWith("http")) {
+        window.open(banner.link_url, "_blank");
+      } else {
+        navigate(banner.link_url);
+      }
+    } else if (onCtaClick && banner.linked_rental_ids && banner.linked_rental_ids.length > 0) {
       onCtaClick(banner.linked_rental_ids);
     }
   };

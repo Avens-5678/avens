@@ -2,9 +2,6 @@ import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { haversineKm } from "@/utils/geoDistance";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows } from "lucide-react";
@@ -31,6 +28,7 @@ import CrewCard from "@/components/ecommerce/CrewCard";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { useFeaturedItemIds, useVendorGeoProfiles, enrichItemsWithDistance } from "@/hooks/useFeaturedAndGeo";
 import LookbookSection from "@/components/ecommerce/LookbookSection";
 type SortOption = "relevance" | "price_low" | "price_high" | "newest" | "rating";
 
@@ -143,21 +141,7 @@ const Ecommerce = () => {
   const { data: vendorStoreProfile } = useVendorProfile(vendorFilterId || undefined);
 
   // Fetch featured item IDs for homepage
-  const { data: featuredItemIds = [] } = useQuery({
-    queryKey: ["featured-homepage-ids"],
-    queryFn: async () => {
-      const now = new Date().toISOString();
-      const { data, error } = await supabase
-        .from("featured_items")
-        .select("item_id")
-        .eq("item_type", "product")
-        .eq("placement", "homepage")
-        .eq("is_active", true)
-        .order("display_order");
-      if (error) throw error;
-      return (data || []).map((d: any) => d.item_id as string);
-    },
-  });
+  const featuredItemIds = useFeaturedItemIds();
 
   // Merge vendor items into rentals format
   const allItems = useMemo(() => {
@@ -219,32 +203,10 @@ const Ecommerce = () => {
   }, [rentals, vendorItems]);
   // Fetch vendor warehouse locations for distance calc
   const vendorIdsForGeo = useMemo(() => [...new Set(allItems.filter((r: any) => r._source === "vendor" && r.vendor_id).map((r: any) => r.vendor_id))], [allItems]);
-  const { data: vendorGeoProfiles = [] } = useQuery({
-    queryKey: ["vendor-geo-profiles", vendorIdsForGeo.join(",")],
-    enabled: vendorIdsForGeo.length > 0,
-    queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("user_id, warehouse_lat, warehouse_lng").in("user_id", vendorIdsForGeo);
-      return data || [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-  const vendorGeoMap = useMemo(() => {
-    const m: Record<string, { lat: number; lng: number }> = {};
-    vendorGeoProfiles.forEach((p: any) => { if (p.warehouse_lat && p.warehouse_lng) m[p.user_id] = { lat: p.warehouse_lat, lng: p.warehouse_lng }; });
-    return m;
-  }, [vendorGeoProfiles]);
+  const vendorGeoMap = useVendorGeoProfiles(vendorIdsForGeo);
 
   // Enrich items with distance
-  const itemsWithDistance = useMemo(() => {
-    if (!userLocation) return allItems.map((r: any) => ({ ...r, _distance_km: null }));
-    return allItems.map((r: any) => {
-      const vGeo = r.vendor_id ? vendorGeoMap[r.vendor_id] : null;
-      const lat = r.pickup_lat || vGeo?.lat;
-      const lng = r.pickup_lng || vGeo?.lng;
-      const dist = lat && lng ? haversineKm(userLocation.lat, userLocation.lng, lat, lng) : null;
-      return { ...r, _distance_km: dist };
-    });
-  }, [allItems, userLocation, vendorGeoMap]);
+  const itemsWithDistance = useMemo(() => enrichItemsWithDistance(allItems, userLocation, vendorGeoMap), [allItems, userLocation, vendorGeoMap]);
 
   const { items } = useCart();
   const navigate = useNavigate();

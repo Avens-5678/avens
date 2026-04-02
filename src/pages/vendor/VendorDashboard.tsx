@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users, Star } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import InventoryManager from "@/components/vendor/InventoryManager";
@@ -15,6 +15,7 @@ import OrderTracker from "@/components/vendor/OrderTracker";
 import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
 import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 import VendorEarnings from "@/components/vendor/VendorEarnings";
+import VendorReviews from "@/components/vendor/VendorReviews";
 import SiteVisitManager from "@/components/vendor/SiteVisitManager";
 import B2BCrossHire from "@/components/vendor/B2BCrossHire";
 import LaborTracker from "@/components/vendor/LaborTracker";
@@ -29,6 +30,7 @@ const sidebarItems: SidebarItem[] = [
   { icon: BookOpen, label: "Offline Booking", value: "offline" },
   { icon: FileText, label: "Quotation Maker", value: "quotes" },
   { icon: TrendingUp, label: "Earnings", value: "earnings" },
+  { icon: Star, label: "Reviews", value: "reviews" },
   { icon: User, label: "Profile", value: "profile" },
 ];
 
@@ -107,6 +109,8 @@ const VendorDashboard = () => {
         return <VendorQuoteMaker />;
       case "earnings":
         return <VendorEarnings />;
+      case "reviews":
+        return <VendorReviews />;
       case "profile":
         return <VendorProfileSettings />;
       default:

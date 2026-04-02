@@ -1,0 +1,6 @@
+ALTER TABLE public.rental_reviews
+  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS rental_order_id UUID REFERENCES public.rental_orders(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS photo_urls TEXT[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS verified_booking BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS helpful_count INTEGER DEFAULT 0;

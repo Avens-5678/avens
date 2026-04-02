@@ -57,6 +57,7 @@ import WhatsAppCampaigns from "@/components/admin/WhatsAppCampaigns";
 import WhatsAppContacts from "@/components/admin/WhatsAppContacts";
 import WhatsAppTemplates from "@/components/admin/WhatsAppTemplates";
 import WhatsAppSettings from "@/components/admin/WhatsAppSettings";
+import AdminReviewsManager from "@/components/admin/AdminReviewsManager";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -87,6 +88,7 @@ const menuGroups: MenuGroup[] = [
       { label: "Rental Orders", value: "rental-orders" },
       { label: "Event Requests", value: "service-orders" },
       { label: "Quote Maker", value: "quote-maker" },
+      { label: "Reviews", value: "reviews" },
     ],
   },
   {
@@ -338,6 +340,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <LiveServiceOrders />;
       case "quote-maker":
         return <QuoteMaker />;
+      case "reviews":
+        return <AdminReviewsManager />;
       case "banners":
         return (
           <CrudInterface

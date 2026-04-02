@@ -1,11 +1,10 @@
 import { ReactNode, lazy, Suspense } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import AnnouncementBar from "./AnnouncementBar";
-import { useSEODefaults } from "@/hooks/useSEODefaults";
 
-// Lazy load non-critical UI elements
+// Lazy load non-critical UI elements to avoid circular init in main bundle
 const AudioControls = lazy(() => import("@/components/Audio/AudioControls"));
+const AnnouncementBar = lazy(() => import("./AnnouncementBar"));
 
 interface LayoutProps {
   children: ReactNode;
@@ -13,10 +12,13 @@ interface LayoutProps {
 }
 
 const Layout = ({ children, hideNavbar }: LayoutProps) => {
-  useSEODefaults();
   return (
     <div className="min-h-screen flex flex-col">
-      {!hideNavbar && <AnnouncementBar />}
+      {!hideNavbar && (
+        <Suspense fallback={null}>
+          <AnnouncementBar />
+        </Suspense>
+      )}
       {!hideNavbar && <Navbar />}
       <main className="flex-1">{children}</main>
       <Footer />

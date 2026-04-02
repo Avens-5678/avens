@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -8,7 +8,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import NotificationCenter from "./NotificationCenter";
+
+// Lazy-load to avoid supabase in main bundle init chain
+const NotificationCenter = lazy(() => import("./NotificationCenter"));
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -71,7 +73,7 @@ const Navbar = () => {
           {/* Right: Actions */}
           <div className="flex items-center gap-2 justify-end">
             <ThemeToggle />
-            {user && <NotificationCenter />}
+            {user && <Suspense fallback={null}><NotificationCenter /></Suspense>}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -139,7 +141,7 @@ const Navbar = () => {
           </Link>
 
           <div className="flex items-center gap-1">
-            {user && <NotificationCenter />}
+            {user && <Suspense fallback={null}><NotificationCenter /></Suspense>}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
@@ -21,9 +21,10 @@ import PaymentPlanSelector from "@/components/ecommerce/PaymentPlanSelector";
 import { PaymentPlan, MilestoneBreakdown, calculateMilestoneBreakdown, useCreateMilestones } from "@/hooks/usePaymentMilestones";
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
-  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin,
+  CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin, Building2, Gift,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
+import { detectBundle, groupItemsByCategory, CATEGORY_LABELS } from "@/utils/bundleDetection";
 
 declare global {
   interface Window {
@@ -239,7 +240,8 @@ const Cart = () => {
   );
   const platformFee = calculatedTotal - vendorSubtotal;
   const vendorPayout = vendorSubtotal + transportFee + manpowerFee;
-  const grandTotal = calculatedTotal + manpowerFee + transportFee - couponDiscount;
+  const bundle = useMemo(() => detectBundle(items, calculatedTotal), [items, calculatedTotal]);
+  const grandTotal = calculatedTotal + manpowerFee + transportFee - couponDiscount - bundle.customerDiscount;
 
   useEffect(() => {
     if (!showInstantBookFlow || grandTotal <= 0) {
@@ -297,6 +299,45 @@ const Cart = () => {
       // Determine if instant book
       const isInstant = canInstantBook && hasRequiredLocation;
 
+      // Create bundle order if multi-category
+      let bundleOrderId: string | null = null;
+      if (bundle.isBundle) {
+        bundleOrderId = crypto.randomUUID();
+        const { error: bundleError } = await supabase.from("bundle_orders").insert({
+          id: bundleOrderId,
+          customer_id: user.id,
+          event_name: eventDetails.notes ? `Event - ${items.length} items` : null,
+          event_date: derivedStartDate || null,
+          event_venue_address: eventDetails.venue_address_line1 || primaryVenueAddress || null,
+          bundle_type: bundle.bundleType,
+          categories_included: bundle.categoriesIncluded,
+          subtotal: calculatedTotal,
+          category_commission: platformFee,
+          bundle_premium_rate: bundle.premiumRate,
+          bundle_premium_amount: bundle.premiumAmount,
+          total_amount: grandTotal,
+          customer_savings: bundle.customerDiscount,
+          status: isInstant ? "confirmed" : "pending",
+          payment_status: "unpaid",
+        } as any);
+        if (bundleError) console.error("Bundle order creation failed:", bundleError);
+
+        // Create bundle order items
+        const bundleItems = items.map((item) => ({
+          bundle_order_id: bundleOrderId,
+          item_id: item.id,
+          item_type: item.service_type === "venue" ? "venue" : item.service_type === "crew" ? "crew" : "equipment",
+          vendor_id: item.vendor_id || user.id,
+          item_name: item.title,
+          quantity: item.quantity,
+          price_per_unit: item.price_value || 0,
+          total_price: (item.price_value || 0) * item.quantity,
+          rental_start: item.booking_from || null,
+          rental_end: item.booking_till || null,
+        }));
+        await supabase.from("bundle_order_items").insert(bundleItems as any);
+      }
+
       // Determine the vendor from cart items (first vendor item found)
       const vendorItem = items.find(i => i.vendor_id);
       const assignedVendorId = vendorItem?.vendor_id || null;
@@ -304,7 +345,7 @@ const Cart = () => {
 
       const orderData: Record<string, any> = {
         id: orderId,
-        title: `${isInstant ? "Instant Booking" : "Cart Enquiry"} - ${items.length} item(s)`,
+        title: `${isInstant ? "Instant Booking" : "Cart Enquiry"} - ${items.length} item(s)${bundle.isBundle ? ` [${bundle.label}]` : ""}`,
         equipment_category: "Cart Order",
         equipment_details: JSON.stringify({ cart_items: cartPayload, event_details: { ...eventDetails, customer_name: profileData.full_name, email: profileData.email, contact_number: profileData.phone } }),
         client_name: profileData.full_name,
@@ -318,6 +359,7 @@ const Cart = () => {
         assigned_vendor_id: assignedVendorId,
         vendor_inventory_item_id: vendorInventoryItemId,
         payment_plan: selectedPlan,
+        bundle_order_id: bundleOrderId,
       };
 
       if (isInstant) {
@@ -426,6 +468,41 @@ const Cart = () => {
       }));
       const normalizedPhone = profileData.phone ? normalizePhoneNumber(profileData.phone) : null;
       const venueLocation = [eventDetails.venue_address_line1 || primaryVenueAddress, eventDetails.venue_address_line2, eventDetails.venue_pincode].filter(Boolean).join(", ");
+      // Create bundle order if multi-category
+      let rzpBundleOrderId: string | null = null;
+      if (bundle.isBundle) {
+        rzpBundleOrderId = crypto.randomUUID();
+        await supabase.from("bundle_orders").insert({
+          id: rzpBundleOrderId,
+          customer_id: user.id,
+          event_date: derivedStartDate || null,
+          event_venue_address: eventDetails.venue_address_line1 || primaryVenueAddress || null,
+          bundle_type: bundle.bundleType,
+          categories_included: bundle.categoriesIncluded,
+          subtotal: calculatedTotal,
+          category_commission: platformFee,
+          bundle_premium_rate: bundle.premiumRate,
+          bundle_premium_amount: bundle.premiumAmount,
+          total_amount: grandTotal,
+          customer_savings: bundle.customerDiscount,
+          status: "pending",
+          payment_status: "unpaid",
+        } as any);
+        const bundleItems = items.map((item) => ({
+          bundle_order_id: rzpBundleOrderId,
+          item_id: item.id,
+          item_type: item.service_type === "venue" ? "venue" : item.service_type === "crew" ? "crew" : "equipment",
+          vendor_id: item.vendor_id || user.id,
+          item_name: item.title,
+          quantity: item.quantity,
+          price_per_unit: item.price_value || 0,
+          total_price: (item.price_value || 0) * item.quantity,
+          rental_start: item.booking_from || null,
+          rental_end: item.booking_till || null,
+        }));
+        await supabase.from("bundle_order_items").insert(bundleItems as any);
+      }
+
       const vendorItem = items.find(i => i.vendor_id);
       const assignedVendorId = vendorItem?.vendor_id || null;
       const vendorInventoryItemId = vendorItem ? vendorItem.id : null;
@@ -433,7 +510,7 @@ const Cart = () => {
       // Insert order with status 'accepted' — confirmed only after Razorpay signature verification
       const { error: orderError } = await supabase.from("rental_orders").insert({
         id: orderId,
-        title: `Instant Booking - ${items.length} item(s)`,
+        title: `Instant Booking - ${items.length} item(s)${bundle.isBundle ? ` [${bundle.label}]` : ""}`,
         equipment_category: "Cart Order",
         equipment_details: JSON.stringify({
           cart_items: cartPayload,
@@ -454,6 +531,7 @@ const Cart = () => {
         transport_fee: transportFee,
         platform_fee: platformFee,
         vendor_payout: vendorPayout,
+        bundle_order_id: rzpBundleOrderId,
       } as any);
       if (orderError) throw orderError;
 
@@ -506,6 +584,15 @@ const Cart = () => {
               variant: "destructive",
             });
             return;
+          }
+          // Mark bundle as paid
+          if (rzpBundleOrderId) {
+            supabase.from("bundle_orders").update({
+              status: "confirmed", payment_status: "paid",
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              updated_at: new Date().toISOString(),
+            } as any).eq("id", rzpBundleOrderId).then(() => {});
           }
           // Record coupon usage on successful payment
           if (couponApplied) {
@@ -593,6 +680,23 @@ const Cart = () => {
                     Remove all
                   </button>
                 </div>
+
+                {/* Bundle Deal Banner */}
+                {bundle.isBundle && (
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800">
+                    <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center flex-shrink-0">
+                      <Gift className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+                        {bundle.label} — {bundle.categoriesIncluded.length} categories
+                      </p>
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                        Save ₹{Math.round(bundle.customerDiscount).toLocaleString("en-IN")} by booking {bundle.categoriesIncluded.map(c => CATEGORY_LABELS[c] || c).join(" + ")} together!
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-3">
                   {items.map((item) => {
@@ -916,14 +1020,27 @@ const Cart = () => {
                           </div>
                         )}
                       </div>
+
+                      {/* Bundle Discount */}
+                      {bundle.isBundle && bundle.customerDiscount > 0 && (
+                        <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 rounded-lg px-3 py-2">
+                          <div className="flex items-center gap-1.5">
+                            <Gift className="h-3.5 w-3.5 text-emerald-600" />
+                            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{bundle.label} Discount</span>
+                          </div>
+                          <span className="text-sm font-bold text-emerald-600">-₹{Math.round(bundle.customerDiscount).toLocaleString("en-IN")}</span>
+                        </div>
+                      )}
                       <Separator />
 
                       {calculatedTotal > 0 && (
                         <div className="flex justify-between items-center">
                           <span className="text-base font-bold text-foreground">Estimated Total</span>
                           <div className="text-right">
-                            {couponDiscount > 0 && <span className="text-xs line-through text-muted-foreground mr-2">₹{calculatedTotal.toLocaleString()}</span>}
-                            <span className="text-lg font-bold text-primary">₹{(calculatedTotal - couponDiscount).toLocaleString()}</span>
+                            {(couponDiscount > 0 || bundle.customerDiscount > 0) && (
+                              <span className="text-xs line-through text-muted-foreground mr-2">₹{calculatedTotal.toLocaleString()}</span>
+                            )}
+                            <span className="text-lg font-bold text-primary">₹{Math.round(calculatedTotal - couponDiscount - bundle.customerDiscount).toLocaleString("en-IN")}</span>
                           </div>
                         </div>
                       )}

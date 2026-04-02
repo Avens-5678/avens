@@ -399,6 +399,45 @@ const Cart = () => {
         }
       }
 
+      // Create delivery order if transport was calculated
+      if (dynamicTransportResult && transportFee > 0 && eventDetails.venue_lat) {
+        try {
+          const vendorForDelivery = items.find(i => i.vendor_id);
+          if (vendorForDelivery?.vendor_id) {
+            const { data: vendorProf } = await supabase.from("profiles").select("warehouse_lat, warehouse_lng, address").eq("user_id", vendorForDelivery.vendor_id).single();
+            if (vendorProf) {
+              await supabase.from("delivery_orders").insert({
+                order_id: orderId,
+                order_type: bundleOrderId ? "bundle" : "rental",
+                customer_id: user.id,
+                vendor_id: vendorForDelivery.vendor_id,
+                pickup_lat: (vendorProf as any).warehouse_lat || 0,
+                pickup_lng: (vendorProf as any).warehouse_lng || 0,
+                pickup_address: (vendorProf as any).address || "Vendor warehouse",
+                dropoff_lat: eventDetails.venue_lat,
+                dropoff_lng: eventDetails.venue_lng,
+                dropoff_address: eventDetails.venue_address_line1 || "Event venue",
+                distance_km: dynamicTransportResult.distance_km,
+                duration_minutes: dynamicTransportResult.duration_min,
+                delivery_fee: transportFee,
+                fee_breakdown: {
+                  vehicle_type: dynamicTransportResult.vehicle_type,
+                  base_fare: dynamicTransportResult.base_fare,
+                  extra_km: dynamicTransportResult.extra_km,
+                  per_km_rate: dynamicTransportResult.per_km_rate,
+                  surge_applied: dynamicTransportResult.surge_applied,
+                  volume_units: dynamicTransportResult.total_volume_units,
+                },
+                scheduled_date: derivedStartDate || null,
+                status: "pending",
+              } as any);
+            }
+          }
+        } catch (delErr) {
+          console.error("Delivery order creation failed:", delErr);
+        }
+      }
+
       if (normalizedPhone) {
         try {
           await supabase.functions.invoke("wati-rental-confirmation", {
@@ -548,6 +587,28 @@ const Cart = () => {
       }));
       const { error: msError } = await supabase.from("payment_milestones").insert(milestoneRows as any);
       if (msError) throw msError;
+
+      // Create delivery order for Razorpay checkout
+      if (dynamicTransportResult && transportFee > 0 && eventDetails.venue_lat) {
+        const vendorForDel = items.find(i => i.vendor_id);
+        if (vendorForDel?.vendor_id) {
+          const { data: vp } = await supabase.from("profiles").select("warehouse_lat, warehouse_lng, address").eq("user_id", vendorForDel.vendor_id).single();
+          if (vp) {
+            await supabase.from("delivery_orders").insert({
+              order_id: orderId, order_type: rzpBundleOrderId ? "bundle" : "rental",
+              customer_id: user.id, vendor_id: vendorForDel.vendor_id,
+              pickup_lat: (vp as any).warehouse_lat || 0, pickup_lng: (vp as any).warehouse_lng || 0,
+              pickup_address: (vp as any).address || "Vendor warehouse",
+              dropoff_lat: eventDetails.venue_lat, dropoff_lng: eventDetails.venue_lng,
+              dropoff_address: eventDetails.venue_address_line1 || "Event venue",
+              distance_km: dynamicTransportResult.distance_km, duration_minutes: dynamicTransportResult.duration_min,
+              delivery_fee: transportFee,
+              fee_breakdown: { vehicle_type: dynamicTransportResult.vehicle_type, base_fare: dynamicTransportResult.base_fare, extra_km: dynamicTransportResult.extra_km, per_km_rate: dynamicTransportResult.per_km_rate, surge_applied: dynamicTransportResult.surge_applied, volume_units: dynamicTransportResult.total_volume_units },
+              scheduled_date: derivedStartDate || null, status: "pending",
+            } as any);
+          }
+        }
+      }
 
       // Create the Razorpay order on the backend
       const amountToPay = milestoneBreakdown.milestones[0].amount;

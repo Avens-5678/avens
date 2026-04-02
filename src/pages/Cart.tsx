@@ -86,6 +86,7 @@ const Cart = () => {
 
   // Auto-calc dynamic transport when venue location is set and we have a vendor with lat/lng
   useEffect(() => {
+    if (!user) return;
     if (eventDetails.venue_lat && eventDetails.venue_lng) {
       // Find vendor with lat/lng (from profile)
       const vendorItem = items.find(i => i.vendor_id);
@@ -714,7 +715,7 @@ const Cart = () => {
                                 {transportLoading && <Loader2 className="h-3 w-3 animate-spin" />}
                               </span>
                               <span className="font-medium">
-                                {dynamicTransportResult ? `₹${transportFee.toLocaleString()}` : eventDetails.venue_lat ? "Calculating..." : "Pin venue on map"}
+                                {!user ? "Login to see delivery fee" : dynamicTransportResult ? `₹${transportFee.toLocaleString()}` : eventDetails.venue_lat ? "Calculating..." : "Pin venue on map"}
                               </span>
                             </div>
                             {dynamicTransportResult && (

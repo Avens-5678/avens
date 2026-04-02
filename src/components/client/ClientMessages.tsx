@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useChatModeration } from "@/hooks/useChatModeration";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -236,6 +237,7 @@ const ClientChatPanel = ({
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { processMessage, checkWithAI, canSend, warningMessage, warningLevel, isRestricted, isSuspended } = useChatModeration();
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -292,20 +294,31 @@ const ClientChatPanel = ({
 
   const sendMessage = useCallback(async (text: string, type = "text", fileUrl?: string, fileName?: string) => {
     if (!text.trim() && !fileUrl) return;
+    if (!canSend) { toast({ title: "Chat restricted", variant: "destructive" }); return; }
     setSending(true);
     try {
-      const { error } = await supabase.from("chat_messages").insert({
+      let messageText = text.trim();
+      let isSuspicious = false;
+      if (type === "text" && messageText) {
+        const result = processMessage(messageText, conversation.id);
+        messageText = result.text;
+        isSuspicious = result.isSuspicious;
+      }
+      const { data: inserted, error } = await supabase.from("chat_messages").insert({
         conversation_id: conversation.id,
         sender_id: user!.id,
         sender_type: "client",
-        message: text.trim() || null,
+        message: messageText || null,
         message_type: type,
         file_url: fileUrl || null,
         file_name: fileName || null,
-      } as any);
+      } as any).select("id").single();
       if (error) throw error;
+      if (isSuspicious && inserted?.id) {
+        checkWithAI(conversation.id, inserted.id, text.trim());
+      }
       await supabase.from("chat_conversations").update({
-        last_message: text.trim() || `[${type}]`,
+        last_message: messageText || `[${type}]`,
         last_message_at: new Date().toISOString(),
         unread_count_vendor: (conversation.unread_count_vendor || 0) + 1,
       } as any).eq("id", conversation.id);
@@ -314,7 +327,7 @@ const ClientChatPanel = ({
     } catch (e: any) {
       toast({ title: "Failed to send", description: e.message, variant: "destructive" });
     } finally { setSending(false); }
-  }, [conversation, user, queryClient, toast]);
+  }, [conversation, user, queryClient, toast, canSend, processMessage, checkWithAI]);
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -385,7 +398,15 @@ const ClientChatPanel = ({
         <div ref={messagesEndRef} />
       </div>
 
+      {warningMessage && (
+        <div className={`px-4 py-2 text-xs text-center font-medium ${warningLevel === "first_warning" ? "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
+          {warningMessage}
+        </div>
+      )}
       <div className="border-t border-border p-3 bg-background">
+        {isRestricted || isSuspended ? (
+          <p className="text-xs text-center text-muted-foreground py-2">{isSuspended ? "Chat suspended — contact support." : "Chat restricted — try again later."}</p>
+        ) : (
         <div className="flex items-end gap-2">
           <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload} accept="image/*,.pdf,.doc,.docx,.xlsx" />
           <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground flex-shrink-0"><Paperclip className="h-4 w-4" /></button>
@@ -400,6 +421,7 @@ const ClientChatPanel = ({
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>
+        )}
       </div>
     </>
   );

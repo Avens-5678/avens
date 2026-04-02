@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, User, Phone, Mail, CalendarIcon, Loader2, Pencil, UserX, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import AttendanceTracker from "./AttendanceTracker";
+import SalaryStructureDialog from "./SalaryStructureDialog";
 
 // ── Types ──
 interface Employee {
@@ -538,6 +539,11 @@ const EmployeeDetailSheet = ({
                 {employee.employment_type.replace("_", " ")} &middot; ₹{employee.base_salary.toLocaleString()}/{employee.salary_type}
               </p>
               {employee.notes && <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2">{employee.notes}</p>}
+              <SalaryStructureDialog
+                employeeId={employee.id}
+                employeeName={employee.full_name}
+                currentBaseSalary={employee.base_salary}
+              />
             </div>
           )}
 

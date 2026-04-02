@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users, Star, UserCheck, ListTodo } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users, Star, UserCheck, ListTodo, IndianRupee } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import InventoryManager from "@/components/vendor/InventoryManager";
@@ -21,6 +21,7 @@ import B2BCrossHire from "@/components/vendor/B2BCrossHire";
 import LaborTracker from "@/components/vendor/LaborTracker";
 import EmployeeManager from "@/components/vendor/EmployeeManager";
 import TaskManager from "@/components/vendor/TaskManager";
+import PayrollManager from "@/components/vendor/PayrollManager";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
@@ -28,6 +29,7 @@ const sidebarItems: SidebarItem[] = [
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: UserCheck, label: "Team", value: "team" },
   { icon: ListTodo, label: "Tasks", value: "tasks" },
+  { icon: IndianRupee, label: "Payroll", value: "payroll" },
   { icon: MapPin, label: "Site Visits", value: "site-visits" },
   { icon: HandshakeIcon, label: "B2B Cross-Hire", value: "b2b" },
   { icon: Users, label: "Labor & Payroll", value: "labor" },
@@ -105,6 +107,8 @@ const VendorDashboard = () => {
         return <EmployeeManager />;
       case "tasks":
         return <TaskManager />;
+      case "payroll":
+        return <PayrollManager />;
       case "site-visits":
         return <SiteVisitManager />;
       case "b2b":

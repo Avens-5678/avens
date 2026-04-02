@@ -134,7 +134,34 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <div className="flex-1" />
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/8 rounded-xl">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-xl">
+                  <DropdownMenuItem onClick={() => { navigate(getDashboardPath()); setIsMenuOpen(false); }} className="rounded-lg">
+                    <User className="h-4 w-4 mr-2" />
+                    My Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()} className="rounded-lg">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/8 rounded-xl">
+                  <LogIn className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -156,6 +183,40 @@ const Navbar = () => {
                   <ChevronRight className="h-4 w-4 opacity-40" />
                 </Link>
               ))}
+              <div className="border-t border-white/8 pt-2 mt-1 space-y-1">
+                {user ? (
+                  <>
+                    <button
+                      onClick={() => { navigate(getDashboardPath()); setIsMenuOpen(false); }}
+                      className="flex items-center justify-between w-full text-sm font-medium text-white/55 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all"
+                    >
+                      <span className="flex items-center gap-2"><User className="h-4 w-4" />My Dashboard</span>
+                      <ChevronRight className="h-4 w-4 opacity-40" />
+                    </button>
+                    <button
+                      onClick={() => { signOut(); setIsMenuOpen(false); }}
+                      className="flex items-center gap-2 w-full text-sm font-medium text-white/55 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all"
+                    >
+                      <LogOut className="h-4 w-4" />Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    to="/auth"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-between text-sm font-medium text-white/55 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all"
+                  >
+                    <span className="flex items-center gap-2"><LogIn className="h-4 w-4" />Sign In</span>
+                    <ChevronRight className="h-4 w-4 opacity-40" />
+                  </Link>
+                )}
+                <button
+                  onClick={() => { setIsMobileContactOpen(true); setIsMenuOpen(false); }}
+                  className="flex items-center gap-2 w-full text-sm font-medium text-secondary hover:text-secondary/80 hover:bg-white/5 px-4 py-3 rounded-xl transition-all"
+                >
+                  <Mail className="h-4 w-4" />Contact Us
+                </button>
+              </div>
             </div>
           </div>
         )}

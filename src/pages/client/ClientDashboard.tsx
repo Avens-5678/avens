@@ -121,6 +121,7 @@ const ClientDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
+      mobilePrimaryItems={["ai", "workspace", "tracker", "profile"]}
     >
       <div className={activeTab === "ai" ? "h-full" : "hidden"}>
         <DashboardChatbot role="client" userName={userName} />

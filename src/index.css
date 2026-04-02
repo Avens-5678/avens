@@ -537,6 +537,20 @@
     display: none;
   }
 
+  /* ═══════ Mobile / Touch ═══════ */
+  /* Prevent double-tap zoom on all interactive elements */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Safe area padding for notched devices (iPhone X+) */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   /* ═══════ Desktop responsive ═══════ */
   .container {
     @apply px-5 sm:px-6 lg:px-8 xl:px-12 max-w-screen-2xl;

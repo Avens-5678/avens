@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users, Star } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users, Star, UserCheck, ListTodo } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import InventoryManager from "@/components/vendor/InventoryManager";
@@ -19,11 +19,15 @@ import VendorReviews from "@/components/vendor/VendorReviews";
 import SiteVisitManager from "@/components/vendor/SiteVisitManager";
 import B2BCrossHire from "@/components/vendor/B2BCrossHire";
 import LaborTracker from "@/components/vendor/LaborTracker";
+import EmployeeManager from "@/components/vendor/EmployeeManager";
+import TaskManager from "@/components/vendor/TaskManager";
 
 const sidebarItems: SidebarItem[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
   { icon: Package, label: "Inventory", value: "inventory" },
+  { icon: UserCheck, label: "Team", value: "team" },
+  { icon: ListTodo, label: "Tasks", value: "tasks" },
   { icon: MapPin, label: "Site Visits", value: "site-visits" },
   { icon: HandshakeIcon, label: "B2B Cross-Hire", value: "b2b" },
   { icon: Users, label: "Labor & Payroll", value: "labor" },
@@ -97,6 +101,10 @@ const VendorDashboard = () => {
         return <OrderTracker />;
       case "inventory":
         return <InventoryManager />;
+      case "team":
+        return <EmployeeManager />;
+      case "tasks":
+        return <TaskManager />;
       case "site-visits":
         return <SiteVisitManager />;
       case "b2b":
@@ -124,6 +132,7 @@ const VendorDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
+      mobilePrimaryItems={["ai", "orders", "inventory", "team", "tasks"]}
     >
       <div className={activeTab === "ai" ? "h-full" : "hidden"}>
         <DashboardChatbot role="vendor" userName={userName} />

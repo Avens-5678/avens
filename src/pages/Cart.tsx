@@ -498,7 +498,7 @@ const Cart = () => {
         </div>
       </div>
 
-      <section className="py-6 sm:py-8">
+      <section className="py-6 sm:py-8 pb-24 lg:pb-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
           {items.length === 0 ? (
             <div className="text-center py-20 max-w-md mx-auto">
@@ -875,6 +875,50 @@ const Cart = () => {
           )}
         </div>
       </section>
+
+      {/* Mobile sticky bottom CTA */}
+      {items.length > 0 && !showEnquiry && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg px-4 py-3 flex items-center gap-3 lg:hidden">
+          <div className="flex-1 min-w-0">
+            {calculatedTotal > 0 && (
+              <p className="text-base font-bold text-foreground leading-tight">
+                ₹{calculatedTotal.toLocaleString()}
+                <span className="text-xs font-normal text-muted-foreground ml-1">est. total</span>
+              </p>
+            )}
+            <p className="text-[10px] text-muted-foreground">{items.length} item{items.length !== 1 ? "s" : ""}</p>
+          </div>
+          <Button
+            size="sm"
+            className="gap-1.5 h-10 px-5"
+            onClick={async () => {
+              if (!user && !authLoading) {
+                toast({ title: "Please log in", description: "Sign in to send your enquiry.", variant: "destructive" });
+                navigate("/auth");
+                return;
+              }
+              if (user) {
+                const { data } = await supabase
+                  .from("profiles")
+                  .select("full_name, email, phone")
+                  .eq("user_id", user.id)
+                  .single();
+                if (data && data.full_name && data.phone) {
+                  setProfileData({ full_name: data.full_name, email: data.email || user.email || "", phone: data.phone });
+                  setProfileLoaded(true);
+                  setShowEnquiry(true);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                } else {
+                  toast({ title: "Complete your profile", description: "Please add your name and phone number to proceed.", variant: "destructive" });
+                  navigate("/client");
+                }
+              }
+            }}
+          >
+            {canInstantBook ? <><Zap className="h-3.5 w-3.5" />Proceed to Book</> : <><Send className="h-3.5 w-3.5" />Proceed to Enquiry</>}
+          </Button>
+        </div>
+      )}
     </Layout>
   );
 };

@@ -228,7 +228,7 @@ const EcommerceHeader = ({
       <div className="container mx-auto px-4 sm:px-6">
         {/* Mobile: two rows */}
         <div className="sm:hidden">
-          {/* Row 1: Hamburger + Logo */}
+          {/* Row 1: Hamburger + Logo + Cart/Account */}
           <div className="flex items-center justify-between h-12">
             <div className="flex items-center gap-2">
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -258,6 +258,17 @@ const EcommerceHeader = ({
                 <span className="text-lg font-brand font-bold italic tracking-tight uppercase text-primary-foreground">
                   Evnting<span className="text-secondary">.com</span>
                 </span>
+              </button>
+            </div>
+            <div className="flex items-center gap-1">
+              <button onClick={() => navigate(getDashboardPath())} className="p-2 hover:bg-white/10 rounded transition-colors" aria-label="Account">
+                <User className="h-5 w-5" />
+              </button>
+              <button onClick={() => navigate("/cart")} className="p-2 hover:bg-white/10 rounded transition-colors relative" aria-label="Cart">
+                <ShoppingCart className="h-5 w-5" />
+                {items.length > 0 && (
+                  <span className="absolute top-0.5 right-0.5 bg-secondary text-secondary-foreground text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">{items.length}</span>
+                )}
               </button>
             </div>
           </div>

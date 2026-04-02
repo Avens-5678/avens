@@ -34,6 +34,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const EventCommandCenter = lazy(() => import("./pages/client/EventCommandCenter"));
 const TrackDelivery = lazy(() => import("./pages/TrackDelivery"));
 const QuoteAcceptance = lazy(() => import("./pages/QuoteAcceptance"));
+const EventPlanner = lazy(() => import("./pages/EventPlanner"));
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/ecommerce/track" element={<TrackOrder />} />
               <Route path="/ecommerce/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/event-planner" element={<EventPlanner />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/quote/:token" element={<QuoteAcceptance />} />

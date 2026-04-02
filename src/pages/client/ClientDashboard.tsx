@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen } from "lucide-react";
+import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
@@ -13,10 +13,13 @@ import ClientProfileSettings from "@/components/client/ClientProfileSettings";
 import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import EventWorkspace from "@/components/client/EventWorkspace";
+import ClientMessages from "@/components/client/ClientMessages";
+import { useUnreadChats } from "@/hooks/useUnreadChats";
 
-const sidebarItems: SidebarItem[] = [
+const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: FolderOpen, label: "Event Hub", value: "workspace" },
+  { icon: MessageSquare, label: "Messages", value: "messages" },
   { icon: FileText, label: "My Requests", value: "tracker" },
   { icon: Plus, label: "New Request", value: "request" },
   { icon: Calendar, label: "Past Orders", value: "past-orders" },
@@ -29,6 +32,14 @@ const ClientDashboard = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const unreadChats = useUnreadChats("client");
+
+  const sidebarItems: SidebarItem[] = useMemo(() =>
+    baseSidebarItems.map((item) => ({
+      ...item,
+      badge: item.value === "messages" ? unreadChats : undefined,
+    })),
+  [unreadChats]);
 
   // Read eventType from URL params for pre-filling
   const prefilledEventType = searchParams.get("type") || "";
@@ -87,6 +98,8 @@ const ClientDashboard = () => {
         return null; // Rendered persistently below
       case "workspace":
         return <EventWorkspace />;
+      case "messages":
+        return <ClientMessages />;
       case "tracker":
         return <EventTracker />;
       case "request":
@@ -121,7 +134,7 @@ const ClientDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
-      mobilePrimaryItems={["ai", "workspace", "tracker", "profile"]}
+      mobilePrimaryItems={["ai", "workspace", "messages", "tracker"]}
     >
       <div className={activeTab === "ai" ? "h-full" : "hidden"}>
         <DashboardChatbot role="client" userName={userName} />

@@ -11,6 +11,7 @@ export interface SidebarItem {
   icon: LucideIcon;
   label: string;
   value: string;
+  badge?: number;
 }
 
 interface DashboardShellProps {
@@ -59,13 +60,18 @@ const DashboardShell = ({
                     <button
                       onClick={() => onTabChange(item.value)}
                       className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
+                        "relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
                         isActive
                           ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       )}
                     >
                       <Icon className="h-5 w-5" />
+                      {item.badge && item.badge > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] flex items-center justify-center px-0.5">
+                          {item.badge > 99 ? "99+" : item.badge}
+                        </span>
+                      )}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="right" className="font-medium">
@@ -94,13 +100,18 @@ const DashboardShell = ({
                 key={item.value}
                 onClick={() => onTabChange(item.value)}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[48px] transition-colors",
+                  "relative flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[48px] transition-colors",
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground"
                 )}
               >
                 <Icon className="h-5 w-5" />
+                {item.badge && item.badge > 0 && (
+                  <span className="absolute top-0 right-0.5 bg-red-500 text-white text-[8px] font-bold rounded-full h-3.5 min-w-[14px] flex items-center justify-center px-0.5">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
                 <span className="text-[10px] font-medium leading-tight truncate max-w-[56px]">
                   {item.label}
                 </span>

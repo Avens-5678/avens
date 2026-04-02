@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users, Star, UserCheck, ListTodo, IndianRupee } from "lucide-react";
+import { LogOut, Package, User, ArrowLeft, Bot, ClipboardList, FileText, TrendingUp, BookOpen, MapPin, HandshakeIcon, Users, Star, UserCheck, ListTodo, IndianRupee, MessageSquare } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import InventoryManager from "@/components/vendor/InventoryManager";
@@ -22,10 +22,13 @@ import LaborTracker from "@/components/vendor/LaborTracker";
 import EmployeeManager from "@/components/vendor/EmployeeManager";
 import TaskManager from "@/components/vendor/TaskManager";
 import PayrollManager from "@/components/vendor/PayrollManager";
+import ChatManager from "@/components/vendor/ChatManager";
+import { useUnreadChats } from "@/hooks/useUnreadChats";
 
-const sidebarItems: SidebarItem[] = [
+const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: ClipboardList, label: "My Orders", value: "orders" },
+  { icon: MessageSquare, label: "Chat", value: "chat" },
   { icon: Package, label: "Inventory", value: "inventory" },
   { icon: UserCheck, label: "Team", value: "team" },
   { icon: ListTodo, label: "Tasks", value: "tasks" },
@@ -46,6 +49,14 @@ const VendorDashboard = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const unreadChats = useUnreadChats("vendor");
+
+  const sidebarItems: SidebarItem[] = useMemo(() =>
+    baseSidebarItems.map((item) => ({
+      ...item,
+      badge: item.value === "chat" ? unreadChats : undefined,
+    })),
+  [unreadChats]);
 
   const handleLogout = async () => {
     await signOut();
@@ -101,6 +112,8 @@ const VendorDashboard = () => {
         return null;
       case "orders":
         return <OrderTracker />;
+      case "chat":
+        return <ChatManager />;
       case "inventory":
         return <InventoryManager />;
       case "team":
@@ -136,7 +149,7 @@ const VendorDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
-      mobilePrimaryItems={["ai", "orders", "inventory", "team", "tasks"]}
+      mobilePrimaryItems={["ai", "orders", "chat", "team", "tasks"]}
     >
       <div className={activeTab === "ai" ? "h-full" : "hidden"}>
         <DashboardChatbot role="vendor" userName={userName} />

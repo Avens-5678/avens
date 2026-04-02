@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserRole, AppRole } from "@/hooks/useUserRole";
 import { Loader2 } from "lucide-react";
+
+type AppRole = "admin" | "client" | "vendor" | "employee";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,48 +11,33 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { user, loading: authLoading } = useAuth();
-  const { role, loading: roleLoading } = useUserRole();
+  const { user, role, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isLoading = authLoading || roleLoading;
-
   useEffect(() => {
-    if (isLoading) return;
+    if (loading) return;
 
-    // Not authenticated — send to /auth and remember where they were trying to go
     if (!user) {
       const redirect = encodeURIComponent(location.pathname + location.search);
       navigate(`/auth?redirect=${redirect}`);
       return;
     }
 
-    // Role-based access check
     if (allowedRoles && allowedRoles.length > 0 && role) {
-      if (!allowedRoles.includes(role)) {
-        // Redirect to appropriate dashboard based on role
+      if (!allowedRoles.includes(role as AppRole)) {
         switch (role) {
-          case "admin":
-            navigate("/admin");
-            break;
-          case "client":
-            navigate("/client/dashboard");
-            break;
-          case "vendor":
-            navigate("/vendor/dashboard");
-            break;
-          case "employee":
-            navigate("/employee/dashboard");
-            break;
-          default:
-            navigate("/");
+          case "admin":     navigate("/admin"); break;
+          case "client":    navigate("/client/dashboard"); break;
+          case "vendor":    navigate("/vendor/dashboard"); break;
+          case "employee":  navigate("/employee/dashboard"); break;
+          default:          navigate("/");
         }
       }
     }
-  }, [user, role, isLoading, allowedRoles, navigate]);
+  }, [user, role, loading, allowedRoles, navigate]);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -62,12 +48,9 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
-  // If roles are specified and user doesn't have the right role, don't render
-  if (allowedRoles && allowedRoles.length > 0 && role && !allowedRoles.includes(role)) {
+  if (allowedRoles && allowedRoles.length > 0 && role && !allowedRoles.includes(role as AppRole)) {
     return null;
   }
 

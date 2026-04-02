@@ -37,7 +37,7 @@ interface WhatsAppLiveChatProps {
 }
 
 const WhatsAppLiveChat = ({ employeeMode = false }: WhatsAppLiveChatProps) => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
@@ -130,7 +130,6 @@ const WhatsAppLiveChat = ({ employeeMode = false }: WhatsAppLiveChatProps) => {
     if (!session) return;
 
     try {
-      const { data: { session: authSession } } = await supabase.auth.getSession();
       const response = await supabase.functions.invoke("whatsapp-send", {
         body: {
           action: "send_text",

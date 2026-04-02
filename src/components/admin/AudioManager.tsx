@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, Play, Pause, Trash2, Volume2, Download } from 'lucide-react';
 
@@ -15,28 +16,13 @@ interface SiteSettings {
 }
 
 const AudioManager = () => {
+  const { loading: authLoading } = useAuth();
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthReady, setIsAuthReady] = useState(false); // State to track auth readiness
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const { toast } = useToast();
-
-  // FIX: Wait for Supabase to confirm auth state before fetching data
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        // This listener fires once on initial load, confirming the session is checked.
-        setIsAuthReady(true);
-      }
-    );
-
-    return () => {
-      // Cleanup the listener when the component unmounts
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
 
   const fetchSettings = async () => {
     setIsLoading(true);
@@ -60,16 +46,14 @@ const AudioManager = () => {
     }
   };
 
-  // FIX: This effect now depends on isAuthReady
   useEffect(() => {
-    // Only fetch settings after the auth state has been confirmed
-    if (isAuthReady) {
+    if (!authLoading) {
       fetchSettings();
     }
     return () => {
       audio?.pause();
     };
-  }, [isAuthReady]);
+  }, [authLoading]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!settings) {
@@ -222,8 +206,7 @@ const AudioManager = () => {
     audioInstance.play();
   };
 
-  // FIX: The loading state now waits for both auth and data fetching
-  if (isLoading || !isAuthReady) {
+  if (authLoading || isLoading) {
     return (
       <Card>
         <CardHeader><CardTitle>Background Audio Management</CardTitle></CardHeader>

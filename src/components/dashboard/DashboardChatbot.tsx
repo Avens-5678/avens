@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Sparkles, ArrowLeft, Plus, Calendar, Package, Briefcase, TrendingUp, Search, Star, LayoutGrid } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import FloatingRobot from "./FloatingRobot";
 
@@ -40,6 +41,7 @@ const VENDOR_FEATURES = [
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dashboard-chat`;
 
 export default function DashboardChatbot({ role, userName }: DashboardChatbotProps) {
+  const { session } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -76,7 +78,6 @@ export default function DashboardChatbot({ role, userName }: DashboardChatbotPro
     let assistantSoFar = "";
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {

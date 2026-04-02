@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Send, Plus, BarChart3, Users, CheckCircle, XCircle, Eye } from "lucide-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const WhatsAppCampaigns = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
@@ -45,7 +47,7 @@ const WhatsAppCampaigns = () => {
           template_name: templateName,
           total_recipients: phones.length,
           status: "ready",
-          created_by: (await supabase.auth.getUser()).data.user?.id,
+          created_by: user?.id,
         })
         .select()
         .single();

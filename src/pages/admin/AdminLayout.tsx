@@ -1,90 +1,67 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { useAuth } from "@/hooks/useAuth";
 import AdminDashboard from "./AdminDashboard";
 import AdminLogin from "./AdminLogin";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminLayout = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, loading: authLoading, signOut } = useAuth();
   const [adminUser, setAdminUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isChecking, setIsChecking] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        await checkAdminUser(session.user.email!);
-      }
-      setIsLoading(false);
-    };
+    if (authLoading) return;
 
-    checkSession();
+    if (!user) {
+      setAdminUser(null);
+      return;
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user);
-          // Defer the admin check to avoid deadlock
-          setTimeout(() => {
-            checkAdminUser(session.user.email!);
-          }, 0);
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setAdminUser(null);
+    // Server-side admin verification — extra security layer beyond ProtectedRoute
+    const verifyAdmin = async () => {
+      setIsChecking(true);
+      try {
+        const { data: isAdmin, error } = await supabase.rpc("is_admin_secure");
+        if (error) throw error;
+
+        if (!isAdmin) {
+          await signOut();
+          toast({
+            title: "Access Denied",
+            description: "You do not have admin privileges.",
+            variant: "destructive",
+          });
+          return;
         }
-      }
-    );
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkAdminUser = async (email: string) => {
-    try {
-      // Use secure RPC function to validate admin status
-      const { data: isAdmin, error: rpcError } = await supabase
-        .rpc('is_admin_secure');
-
-      if (rpcError) throw rpcError;
-
-      if (!isAdmin) {
-        await supabase.auth.signOut();
+        setAdminUser({
+          email: user.email,
+          full_name: "Super Admin",
+          role: "super_admin",
+          is_active: true,
+        });
+      } catch (error: any) {
+        console.error("Error verifying admin:", error);
+        await signOut();
         toast({
-          title: "Access Denied",
-          description: "You do not have admin privileges.",
+          title: "Authentication Error",
+          description: "Could not verify admin status.",
           variant: "destructive",
         });
-        return;
+      } finally {
+        setIsChecking(false);
       }
+    };
 
-      // Set admin user info from the authenticated user's email
-      setAdminUser({
-        email: email,
-        full_name: 'Super Admin',
-        role: 'super_admin',
-        is_active: true
-      });
-    } catch (error: any) {
-      console.error("Error checking admin user:", error);
-      await supabase.auth.signOut();
-      toast({
-        title: "Authentication Error",
-        description: "Could not verify admin status.",
-        variant: "destructive",
-      });
-    }
-  };
+    verifyAdmin();
+  }, [user?.id, authLoading]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
-  if (isLoading) {
+  if (authLoading || isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     );
   }
@@ -93,7 +70,7 @@ const AdminLayout = () => {
     return <AdminLogin onLoginSuccess={() => {}} />;
   }
 
-  return <AdminDashboard adminUser={adminUser} onLogout={handleLogout} />;
+  return <AdminDashboard adminUser={adminUser} onLogout={signOut} />;
 };
 
 export default AdminLayout;

@@ -4,18 +4,43 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Save, User, Building2, MapPin, FileText, BadgeCheck } from "lucide-react";
+import { Loader2, Save, User, Building2, MapPin, FileText, BadgeCheck, Camera, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import MapPinPicker from "@/components/ecommerce/MapPinPicker";
+
+const CREW_CATEGORIES = [
+  { value: "photographer", label: "Photographer" },
+  { value: "dj", label: "DJ" },
+  { value: "decorator", label: "Decorator" },
+  { value: "event_manager", label: "Event Manager" },
+  { value: "caterer", label: "Caterer" },
+  { value: "florist", label: "Florist" },
+  { value: "mc", label: "MC / Anchor" },
+  { value: "makeup_artist", label: "Makeup Artist" },
+  { value: "security", label: "Security" },
+  { value: "waitstaff", label: "Wait Staff" },
+  { value: "loader", label: "Loader" },
+];
 
 const VendorProfileSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [crewItemId, setCrewItemId] = useState<string | null>(null);
+  const [isSavingCrew, setIsSavingCrew] = useState(false);
+  const [crewProfile, setCrewProfile] = useState({
+    crew_category: "",
+    specializations: [] as string[],
+    travel_radius_km: 50,
+    outstation_fee: 0,
+    past_events_count: 0,
+    specializationInput: "",
+  });
   const [profile, setProfile] = useState({
     full_name: "",
     email: "",
@@ -61,6 +86,27 @@ const VendorProfileSettings = () => {
         });
       }
 
+      // Fetch crew inventory item if vendor has one
+      const { data: crewItem } = await supabase
+        .from("vendor_inventory")
+        .select("id, crew_category, specializations, travel_radius_km, outstation_fee, past_events_count")
+        .eq("vendor_id", user.id)
+        .eq("service_type", "crew")
+        .limit(1)
+        .maybeSingle();
+
+      if (crewItem) {
+        setCrewItemId(crewItem.id);
+        setCrewProfile({
+          crew_category: (crewItem as any).crew_category || "",
+          specializations: (crewItem as any).specializations || [],
+          travel_radius_km: (crewItem as any).travel_radius_km ?? 50,
+          outstation_fee: (crewItem as any).outstation_fee ?? 0,
+          past_events_count: (crewItem as any).past_events_count ?? 0,
+          specializationInput: "",
+        });
+      }
+
       setIsLoading(false);
     };
 
@@ -103,6 +149,38 @@ const VendorProfileSettings = () => {
     }
 
     setIsSaving(false);
+  };
+
+  const handleSaveCrew = async () => {
+    if (!user || !crewItemId) return;
+    setIsSavingCrew(true);
+    const { error } = await supabase
+      .from("vendor_inventory")
+      .update({
+        crew_category: crewProfile.crew_category || null,
+        specializations: crewProfile.specializations,
+        travel_radius_km: crewProfile.travel_radius_km,
+        outstation_fee: crewProfile.outstation_fee,
+        past_events_count: crewProfile.past_events_count,
+      } as any)
+      .eq("id", crewItemId);
+    if (error) {
+      toast({ title: "Error", description: "Failed to save crew profile", variant: "destructive" });
+    } else {
+      toast({ title: "Crew Profile Saved", description: "Your crew details have been updated." });
+    }
+    setIsSavingCrew(false);
+  };
+
+  const addSpecialization = () => {
+    const val = crewProfile.specializationInput.trim();
+    if (val && !crewProfile.specializations.includes(val)) {
+      setCrewProfile((p) => ({ ...p, specializations: [...p.specializations, val], specializationInput: "" }));
+    }
+  };
+
+  const removeSpecialization = (s: string) => {
+    setCrewProfile((p) => ({ ...p, specializations: p.specializations.filter((x) => x !== s) }));
   };
 
   if (isLoading) {
@@ -320,6 +398,111 @@ const VendorProfileSettings = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Crew Profile — shown when vendor has a crew inventory item */}
+      {crewItemId && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              Crew Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Crew category */}
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <div className="flex flex-wrap gap-2">
+                {CREW_CATEGORIES.map((cat) => (
+                  <Badge
+                    key={cat.value}
+                    variant={crewProfile.crew_category === cat.value ? "default" : "outline"}
+                    className="cursor-pointer text-xs py-1 px-2.5"
+                    onClick={() => setCrewProfile((p) => ({ ...p, crew_category: cat.value }))}
+                  >
+                    {cat.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Specializations */}
+            <div className="space-y-2">
+              <Label>Specializations</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="e.g. Wedding, Corporate, Birthday"
+                  value={crewProfile.specializationInput}
+                  onChange={(e) => setCrewProfile((p) => ({ ...p, specializationInput: e.target.value }))}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSpecialization(); } }}
+                />
+                <Button type="button" variant="outline" onClick={addSpecialization} className="shrink-0">
+                  Add
+                </Button>
+              </div>
+              {crewProfile.specializations.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {crewProfile.specializations.map((s) => (
+                    <Badge key={s} variant="secondary" className="gap-1 text-xs">
+                      {s}
+                      <button onClick={() => removeSpecialization(s)} className="ml-0.5 hover:text-destructive">
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Travel radius + outstation fee */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="travel_radius">Travel Radius (km)</Label>
+                <Input
+                  id="travel_radius"
+                  type="number"
+                  min={0}
+                  value={crewProfile.travel_radius_km}
+                  onChange={(e) => setCrewProfile((p) => ({ ...p, travel_radius_km: Number(e.target.value) }))}
+                  placeholder="50"
+                />
+                <p className="text-[11px] text-muted-foreground">Free travel within this range.</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="outstation_fee">Outstation Fee (₹)</Label>
+                <Input
+                  id="outstation_fee"
+                  type="number"
+                  min={0}
+                  value={crewProfile.outstation_fee}
+                  onChange={(e) => setCrewProfile((p) => ({ ...p, outstation_fee: Number(e.target.value) }))}
+                  placeholder="0"
+                />
+                <p className="text-[11px] text-muted-foreground">Extra charge beyond radius.</p>
+              </div>
+            </div>
+
+            {/* Past events count */}
+            <div className="space-y-2">
+              <Label htmlFor="past_events_count">Past Events Count</Label>
+              <Input
+                id="past_events_count"
+                type="number"
+                min={0}
+                value={crewProfile.past_events_count}
+                onChange={(e) => setCrewProfile((p) => ({ ...p, past_events_count: Number(e.target.value) }))}
+                placeholder="0"
+              />
+            </div>
+
+            <Button onClick={handleSaveCrew} disabled={isSavingCrew} variant="outline" className="w-full md:w-auto">
+              {isSavingCrew && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Save className="mr-2 h-4 w-4" />
+              Save Crew Profile
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <Button onClick={handleSave} disabled={isSaving} className="w-full md:w-auto">
         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

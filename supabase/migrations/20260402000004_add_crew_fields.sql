@@ -1,0 +1,6 @@
+ALTER TABLE public.vendor_inventory
+  ADD COLUMN IF NOT EXISTS crew_category TEXT,
+  ADD COLUMN IF NOT EXISTS outstation_fee NUMERIC DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS travel_radius_km INTEGER DEFAULT 50,
+  ADD COLUMN IF NOT EXISTS specializations TEXT[],
+  ADD COLUMN IF NOT EXISTS past_events_count INTEGER DEFAULT 0;

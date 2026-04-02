@@ -4,6 +4,7 @@ import { format, differenceInDays } from "date-fns";
 import Layout from "@/components/Layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import SiteVisitForm from "@/components/ecommerce/BookingWidget";
+import CrewBookingWidget from "@/components/ecommerce/CrewBookingWidget";
 import SmartRecommendations from "@/components/ecommerce/SmartRecommendations";
 import VenueHoldButton from "@/components/ecommerce/VenueHoldButton";
 import BundleSuggestion from "@/components/ecommerce/BundleSuggestion";
@@ -121,6 +122,13 @@ const ProductDetail = () => {
       hold_24hr_price: v.hold_24hr_price ?? 2000,
       packages: v.packages || [],
       markup_tier: v.markup_tier || "mid",
+      portfolio_urls: v.portfolio_urls || [],
+      video_url: v.video_url || null,
+      crew_category: v.crew_category || null,
+      outstation_fee: v.outstation_fee ?? 0,
+      travel_radius_km: v.travel_radius_km ?? 50,
+      specializations: v.specializations || [],
+      past_events_count: v.past_events_count ?? 0,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];
@@ -130,6 +138,7 @@ const ProductDetail = () => {
   const vendorId = rental?._source === "vendor" ? rental.vendor_id : undefined;
   const { data: vendorProfile } = useVendorProfile(vendorId);
   const isVenue = (rental?.service_type || "rental") === "venue";
+  const isCrew = (rental?.service_type || "rental") === "crew";
 
   // Availability check
   const checkInStr = bookingFrom ? format(bookingFrom, "yyyy-MM-dd") : undefined;
@@ -712,6 +721,16 @@ const ProductDetail = () => {
                   <VenueHoldButton venueId={id} venueName={rental.title || rental.name || "Venue"} holdPrice={rental.hold_24hr_price ?? 2000} />
                 )}
 
+                {/* Crew booking CTA */}
+                {isCrew && id && (
+                  <CrewBookingWidget
+                    crewId={id}
+                    crewName={rental.title || rental.name || "Crew Member"}
+                    packages={rental.packages || []}
+                    basePrice={rental.price_value ?? 0}
+                  />
+                )}
+
                 {/* Smart Bundle suggestion */}
                 <BundleSuggestion serviceType={rental.service_type} categories={rental.categories} />
               </div>
@@ -772,6 +791,124 @@ const ProductDetail = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── CREW SECTIONS ── */}
+      {isCrew && (
+        <section className="border-t border-border">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-6 space-y-6">
+
+            {/* Specializations */}
+            {(rental as any).specializations?.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold text-foreground">Specializations</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(rental as any).specializations.map((s: string, i: number) => (
+                    <Badge key={i} variant="secondary" className="text-xs">
+                      {s}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Travel & Outstation */}
+            {((rental as any).travel_radius_km > 0 || (rental as any).outstation_fee > 0) && (
+              <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+                <h3 className="text-sm font-bold text-foreground">Travel Coverage</h3>
+                {(rental as any).travel_radius_km > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    ✅ Covers within <span className="font-semibold text-foreground">{(rental as any).travel_radius_km} km</span> at no extra charge.
+                  </p>
+                )}
+                {(rental as any).outstation_fee > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    ✈️ Outstation fee: <span className="font-semibold text-foreground">₹{(rental as any).outstation_fee.toLocaleString()}</span>
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Packages */}
+            {rental.packages && rental.packages.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-foreground">Packages</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {rental.packages.map((pkg: any, i: number) => (
+                    <div key={i} className="border border-border rounded-xl p-4 space-y-2 hover:border-primary/40 transition-colors">
+                      <p className="text-sm font-semibold text-foreground">{pkg.name}</p>
+                      <p className="text-lg font-bold text-primary">
+                        ₹{(pkg.base_price || pkg.price || 0).toLocaleString()}
+                        {pkg.unit && <span className="text-xs font-normal text-muted-foreground"> / {pkg.unit}</span>}
+                      </p>
+                      {(pkg.inclusions || pkg.deliverables) && (
+                        <ul className="text-xs text-muted-foreground space-y-1 pt-1">
+                          {(pkg.inclusions || pkg.deliverables || []).map((d: string, j: number) => (
+                            <li key={j} className="flex items-start gap-1.5">
+                              <span className="text-green-500 mt-0.5">✓</span> {d}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Portfolio gallery */}
+            {(rental as any).portfolio_urls?.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-foreground">Portfolio</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {(rental as any).portfolio_urls.map((url: string, i: number) => (
+                    <div key={i} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                      <img
+                        src={url}
+                        alt={`Portfolio ${i + 1}`}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Showreel */}
+            {(rental as any).video_url && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-foreground">Showreel</h3>
+                <div className="rounded-xl overflow-hidden border border-border bg-muted aspect-video">
+                  <iframe
+                    src={(() => {
+                      const url = (rental as any).video_url;
+                      if (url.includes("youtube.com/watch")) {
+                        const vid = new URL(url).searchParams.get("v");
+                        return `https://www.youtube.com/embed/${vid}`;
+                      }
+                      if (url.includes("youtu.be/")) {
+                        const vid = url.split("youtu.be/")[1]?.split("?")[0];
+                        return `https://www.youtube.com/embed/${vid}`;
+                      }
+                      return url;
+                    })()}
+                    className="w-full h-full"
+                    allowFullScreen
+                    title="Showreel"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Past events count */}
+            {(rental as any).past_events_count > 0 && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="text-2xl font-bold text-foreground">{(rental as any).past_events_count}</span>
+                events completed
               </div>
             )}
           </div>

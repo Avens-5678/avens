@@ -23,6 +23,7 @@ import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
 import VenueCard from "@/components/ecommerce/VenueCard";
+import CrewCard from "@/components/ecommerce/CrewCard";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
@@ -169,6 +170,11 @@ const Ecommerce = () => {
       parking_available: v.parking_available,
       av_equipment: v.av_equipment,
       crew_type: v.crew_type || null,
+      crew_category: v.crew_category || null,
+      outstation_fee: v.outstation_fee ?? 0,
+      travel_radius_km: v.travel_radius_km ?? 50,
+      specializations: v.specializations || [],
+      past_events_count: v.past_events_count ?? 0,
       venue_pricing_model: v.venue_pricing_model || "dry_rental",
       house_rules: v.house_rules || [],
       amenities_matrix: v.amenities_matrix || {},
@@ -896,6 +902,8 @@ const Ecommerce = () => {
                         <div key={rental.id} className="relative">
                           {activeServiceType === "venue" ? (
                             <VenueCard venue={rental} viewMode={mobileView} />
+                          ) : activeServiceType === "crew" ? (
+                            <CrewCard crew={rental} viewMode={mobileView} />
                           ) : (
                             <EnhancedProductCard rental={rental} viewMode={mobileView} />
                           )}

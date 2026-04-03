@@ -26,8 +26,13 @@ import { BackgroundPattern } from "@/components/ui/background-pattern";
 import { SectionDivider } from "@/components/ui/section-divider";
 import ScrollReveal from "@/components/ui/scroll-reveal";
 
-// Lazy load heavy/below-fold components
-const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));
+// DO NOT use React.lazy() at module level — Vite TDZ bug
+// Created at first render via getTestimonialsSection()
+let _cachedTestimonials: ReturnType<typeof lazy> | null = null;
+const getTestimonialsSection = () => {
+  if (!_cachedTestimonials) _cachedTestimonials = lazy(() => import("@/components/TestimonialsSection"));
+  return _cachedTestimonials;
+};
 
 // Skeleton loaders for faster perceived loading
 const HeroSkeleton = () =>
@@ -54,6 +59,7 @@ const CardSkeleton = () =>
 
 
 const Index = () => {
+  const TestimonialsSection = getTestimonialsSection();
   const isMobile = useIsMobile();
   const { getServiceRequestPath } = useDashboardPath();
   // Core data - only essential for above-the-fold

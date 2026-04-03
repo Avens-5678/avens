@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
@@ -27,11 +27,24 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
-// Lazy-load components that import supabase directly to prevent
-// bundler initialization order issues in the Ecommerce chunk
-const PromoBannerCarousel = lazy(() => import("@/components/ecommerce/PromoBannerCarousel"));
-const LookbookSection = lazy(() => import("@/components/ecommerce/LookbookSection"));
-const VenueCompare = lazy(() => import("@/components/ecommerce/VenueCompare"));
+// IMPORTANT: Do NOT put React.lazy() at module level — Vite's __vite_preload
+// is a const defined later in the chunk, causing TDZ "Cannot access '_' before init"
+// These are created inside the component via useLazyComponents() below.
+function useLazyComponents() {
+  const ref = useRef<{
+    PromoBannerCarousel: React.LazyExoticComponent<any>;
+    LookbookSection: React.LazyExoticComponent<any>;
+    VenueCompare: React.LazyExoticComponent<any>;
+  } | null>(null);
+  if (!ref.current) {
+    ref.current = {
+      PromoBannerCarousel: lazy(() => import("@/components/ecommerce/PromoBannerCarousel")),
+      LookbookSection: lazy(() => import("@/components/ecommerce/LookbookSection")),
+      VenueCompare: lazy(() => import("@/components/ecommerce/VenueCompare")),
+    };
+  }
+  return ref.current;
+}
 
 // Inline Haversine to avoid importing supabase into this chunk
 function _haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -135,6 +148,7 @@ const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discov
 };
 
 const Ecommerce = () => {
+  const { PromoBannerCarousel, LookbookSection, VenueCompare } = useLazyComponents();
   const { data: rentals, isLoading } = useAllRentals();
   const { data: vendorItems } = useVerifiedVendorInventory();
   const [searchParams, setSearchParams] = useSearchParams();

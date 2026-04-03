@@ -76,8 +76,16 @@ const EcommerceHeader = ({
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Compact header on scroll
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Rotating placeholder text
   useEffect(() => {
@@ -224,12 +232,12 @@ const EcommerceHeader = ({
   const showSuggestionsView = showDropdown && searchTerm.trim().length > 0 && flatSuggestions.length > 0;
 
   return (
-    <div className="bg-foreground text-primary-foreground sticky top-0 z-50">
+    <div className={`bg-foreground text-primary-foreground sticky top-0 z-50 transition-all duration-200 ${scrolled ? "shadow-lg shadow-black/20" : ""}`}>
       <div className="container mx-auto px-4 sm:px-6">
         {/* Mobile: two rows */}
         <div className="sm:hidden">
           {/* Row 1: Hamburger + Logo + Cart/Account */}
-          <div className="flex items-center justify-between h-12">
+          <div className={`flex items-center justify-between transition-all duration-200 ${scrolled ? "h-10" : "h-12"}`}>
             <div className="flex items-center gap-2">
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                 <SheetTrigger asChild>
@@ -279,6 +287,7 @@ const EcommerceHeader = ({
                 <input
                   ref={inputRef}
                   type="text"
+                  data-search-input
                   placeholder={PLACEHOLDER_TEXTS[placeholderIndex]}
                   value={searchTerm}
                   onChange={(e) => { onSearchChange(e.target.value); setShowDropdown(true); setSelectedIndex(-1); }}
@@ -350,7 +359,7 @@ const EcommerceHeader = ({
         </div>
 
         {/* Desktop: single row */}
-        <div className="hidden sm:flex items-center gap-4 h-16">
+        <div className={`hidden sm:flex items-center gap-4 transition-all duration-200 ${scrolled ? "h-14" : "h-16"}`}>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>

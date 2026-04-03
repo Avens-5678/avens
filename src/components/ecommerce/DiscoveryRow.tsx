@@ -7,9 +7,10 @@ interface DiscoveryRowProps {
   subtitle?: string;
   items: any[];
   accentColor?: string;
+  onClear?: () => void;
 }
 
-const DiscoveryRow = ({ title, subtitle, items, accentColor }: DiscoveryRowProps) => {
+const DiscoveryRow = ({ title, subtitle, items, accentColor, onClear }: DiscoveryRowProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -74,6 +75,11 @@ const DiscoveryRow = ({ title, subtitle, items, accentColor }: DiscoveryRowProps
             >
               <ChevronRight className="h-4 w-4" />
             </button>
+            {onClear && (
+              <button onClick={onClear} className="text-xs text-muted-foreground hover:text-destructive font-medium transition-colors">
+                Clear history
+              </button>
+            )}
             <button className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline">
               View All <ArrowRight className="h-3.5 w-3.5" />
             </button>

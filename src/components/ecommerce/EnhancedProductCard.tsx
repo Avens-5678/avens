@@ -81,9 +81,9 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
   };
 
   const priceInfo = formatPrice();
-  const isAssured = rental.rating > 0 && rental.rating >= 4;
+  const isAssured = rental.is_verified || rental.is_featured || (rental.rating > 0 && rental.rating >= 4);
   // isVendorItem already defined above
-  const isFeatured = rental.show_on_home;
+  const isFeatured = rental.show_on_home || rental.is_featured;
   const isList = viewMode === "list";
   const hasVirtualTour = !!rental.virtual_tour_url;
   const isVerified = rental.is_verified;

@@ -2,19 +2,19 @@ import { Search, CalendarCheck, PartyPopper } from "lucide-react";
 
 const steps = [
   {
-    num: 1,
+    num: "01",
     Icon: Search,
     title: "Browse",
     description: "Explore equipment, venues & crew for your event",
   },
   {
-    num: 2,
+    num: "02",
     Icon: CalendarCheck,
     title: "Book Instantly",
     description: "Add to cart, share event details & get a quote",
   },
   {
-    num: 3,
+    num: "03",
     Icon: PartyPopper,
     title: "Celebrate",
     description: "We deliver, set up & handle everything for you",
@@ -23,35 +23,40 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section className="py-5 sm:py-10 bg-muted/40 border-y border-border">
+    <section className="py-6 sm:py-12">
       <div className="container mx-auto px-4 sm:px-6">
-        <h3 className="text-center text-[10px] sm:text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-4 sm:mb-8">
-          How It Works
-        </h3>
+        <div className="bg-indigo-50 dark:bg-indigo-950/30 rounded-2xl p-6 sm:p-10 max-w-3xl mx-auto">
+          <h3 className="text-center text-2xl font-bold text-foreground mb-6 sm:mb-10">
+            How It Works
+          </h3>
 
-        <div className="flex items-start justify-center gap-2 sm:gap-0 max-w-3xl mx-auto">
-          {steps.map((step, i) => (
-            <div key={step.num} className="flex items-center flex-1 sm:flex-1">
-              {/* Step */}
-              <div className="flex flex-col items-center text-center px-1 sm:px-4 flex-1">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center mb-2 sm:mb-3 relative">
-                  <step.Icon className="h-4 w-4 sm:h-6 sm:w-6 text-primary" strokeWidth={1.8} />
-                  <span className="absolute -top-1 -right-1 sm:-top-1.5 sm:-right-1.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary text-primary-foreground text-[8px] sm:text-[10px] font-bold flex items-center justify-center">
-                    {step.num}
-                  </span>
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-6 sm:gap-0">
+            {steps.map((step, i) => (
+              <div key={step.num} className="flex flex-col sm:flex-row items-center flex-1">
+                {/* Step */}
+                <div className="flex flex-col items-center text-center px-2 sm:px-4 flex-1">
+                  <span className="text-xs font-bold text-indigo-500 mb-1.5 tracking-wider">{step.num}</span>
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center mb-2.5 sm:mb-3">
+                    <step.Icon className="h-6 w-6 sm:h-7 sm:w-7 text-primary" strokeWidth={1.8} />
+                  </div>
+                  <h4 className="text-sm sm:text-base font-bold text-foreground mb-1">{step.title}</h4>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-[200px]">
+                    {step.description}
+                  </p>
                 </div>
-                <h4 className="text-[11px] sm:text-sm font-bold text-foreground mb-0.5">{step.title}</h4>
-                <p className="text-[9px] sm:text-xs text-muted-foreground leading-snug max-w-[100px] sm:max-w-[180px]">
-                  {step.description}
-                </p>
-              </div>
 
-              {/* Connector */}
-              {i < steps.length - 1 && (
-                <div className="w-4 sm:w-12 lg:w-20 border-t-2 border-dashed border-primary/30 flex-shrink-0 mt-5 sm:mt-7" />
-              )}
-            </div>
-          ))}
+                {/* Connector */}
+                {i < steps.length - 1 && (
+                  <>
+                    {/* Vertical connector (mobile) */}
+                    <div className="sm:hidden h-6 border-l-2 border-dashed border-primary/30 flex-shrink-0" />
+                    {/* Horizontal connector (desktop) */}
+                    <div className="hidden sm:block w-12 lg:w-20 border-t-2 border-dashed border-primary/30 flex-shrink-0 mt-12" />
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

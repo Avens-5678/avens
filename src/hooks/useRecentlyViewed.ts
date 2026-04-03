@@ -26,5 +26,10 @@ export const useRecentlyViewed = () => {
     });
   }, []);
 
-  return { recentIds, addViewed };
+  const clearViewed = useCallback(() => {
+    setRecentIds([]);
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  }, []);
+
+  return { recentIds, addViewed, clearViewed };
 };

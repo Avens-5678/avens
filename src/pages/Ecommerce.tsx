@@ -1,10 +1,11 @@
-import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, useRef, lazy, Suspense, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows } from "lucide-react";
+import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows, Search, Calendar, MessageCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
 import VenueSearchBar from "@/components/ecommerce/VenueSearchBar";
 import CrewSubTabs from "@/components/ecommerce/CrewSubTabs";
@@ -240,6 +241,9 @@ const Ecommerce = () => {
   const { items } = useCart();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState(() => searchParams.get("search") || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+  const [availabilityDate, setAvailabilityDate] = useState<Date | null>(null);
+  const [unavailableIds, setUnavailableIds] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<number[]>([]);
@@ -331,30 +335,51 @@ const Ecommerce = () => {
     setShowInStock(false);
   }, [activeService]);
 
+  // Debounce search term — 300ms delay for grid filtering
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch unavailable item IDs when availability date changes
+  useEffect(() => {
+    if (!availabilityDate) { setUnavailableIds([]); return; }
+    const dateStr = availabilityDate.toISOString().split("T")[0];
+    (async () => {
+      const { data } = await supabase
+        .from("rental_orders")
+        .select("vendor_inventory_item_id")
+        .lte("check_in", dateStr)
+        .gte("check_out", dateStr)
+        .in("status", ["confirmed", "active", "pending"]);
+      setUnavailableIds((data || []).map((d: any) => d.vendor_inventory_item_id).filter(Boolean));
+    })();
+  }, [availabilityDate]);
+
   const filteredRentals = useMemo(() => {
     if (!allItems.length) return [];
 
     // Vendor store filter
     if (vendorFilterId) {
       let results = allItems.filter((r: any) => r._source === "vendor" && r.vendor_id === vendorFilterId);
-      if (searchTerm) {
-        results = results.filter((r: any) => r.title.toLowerCase().includes(searchTerm.toLowerCase()));
+      if (debouncedSearch) {
+        results = results.filter((r: any) => r.title.toLowerCase().includes(debouncedSearch.toLowerCase()));
       }
       return results;
     }
 
     if (promoFilterIds.length > 0) {
       let results = allItems.filter((r: any) => promoFilterIds.includes(r.id));
-      if (searchTerm) {
+      if (debouncedSearch) {
         results = results.filter((r: any) =>
-          r.title.toLowerCase().includes(searchTerm.toLowerCase())
+          r.title.toLowerCase().includes(debouncedSearch.toLowerCase())
         );
       }
       return results;
     }
 
     let results = itemsWithDistance.filter((rental: any) => {
-      const normalizedSearch = searchTerm.trim().toLowerCase();
+      const normalizedSearch = debouncedSearch.trim().toLowerCase();
       const searchableText = [
         rental.title,
         rental.short_description,
@@ -464,11 +489,21 @@ const Ecommerce = () => {
         break;
     }
 
+    // Mark unavailable items and sort available-first when date filter is active
+    if (unavailableIds.length > 0) {
+      results = results.map((r: any) => ({ ...r, _isUnavailable: unavailableIds.includes(r.id) }));
+      results.sort((a: any, b: any) => {
+        if (a._isUnavailable && !b._isUnavailable) return 1;
+        if (!a._isUnavailable && b._isUnavailable) return -1;
+        return 0;
+      });
+    }
+
     return results;
-  }, [allItems, itemsWithDistance, searchTerm, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience, vendorFilterId, crewSubTab, venueSearchFilters, deliveryRadius, userLocation]);
+  }, [allItems, itemsWithDistance, debouncedSearch, selectedCategories, selectedCities, activeQuickCat, searchCategory, sortBy, promoFilterIds, activeServiceType, selectedPriceRanges, showInStock, activePriceRanges, selectedAmenities, selectedCapacity, selectedExperience, vendorFilterId, crewSubTab, venueSearchFilters, deliveryRadius, userLocation, unavailableIds]);
 
   // Discovery rows for default landing view
-  const isDiscoveryView = !activeService && !searchTerm && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0 && !vendorFilterId;
+  const isDiscoveryView = !activeService && !debouncedSearch && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0 && !vendorFilterId;
 
   const discoveryBestRentals = useMemo(() => {
     return allItems
@@ -558,15 +593,41 @@ const Ecommerce = () => {
     return compareIds.map((cid) => allItems.find((r: any) => r.id === cid)).filter(Boolean);
   }, [compareIds, allItems]);
 
-  const activeFilterCount = selectedCategories.length + selectedCities.length + selectedPriceRanges.length + (showInStock ? 1 : 0) + selectedAmenities.length + selectedCapacity.length + selectedExperience.length;
+  const activeFilterCount = selectedCategories.length + selectedCities.length + selectedPriceRanges.length + (showInStock ? 1 : 0) + selectedAmenities.length + selectedCapacity.length + selectedExperience.length + (availabilityDate ? 1 : 0);
   const activeDisplayCategory = activeQuickCat || searchCategory || (selectedCategories.length === 1 ? selectedCategories[0] : "");
+
+  const SkeletonCard = () => (
+    <div className="rounded-xl border border-border/60 bg-card overflow-hidden animate-pulse">
+      <div className="aspect-square bg-muted" />
+      <div className="p-4 space-y-2.5">
+        <div className="h-3 bg-muted rounded w-3/4" />
+        <div className="h-2.5 bg-muted rounded w-full" />
+        <div className="h-2.5 bg-muted rounded w-1/2" />
+        <div className="h-5 bg-muted rounded w-1/3 mt-2" />
+      </div>
+    </div>
+  );
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
+      <Layout hideNavbar>
+        <EcommerceHeader searchTerm="" onSearchChange={() => {}} categories={[]} selectedSearchCategory="" onSearchCategoryChange={() => {}} />
+        <section className="py-6 bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-4">
+            <div className="max-w-7xl mx-auto flex gap-5">
+              <aside className="hidden lg:block w-56 flex-shrink-0">
+                <div className="bg-card rounded-xl border border-border/60 p-4 space-y-4 animate-pulse">
+                  {[...Array(6)].map((_, i) => <div key={i} className="h-4 bg-muted rounded w-full" />)}
+                </div>
+              </aside>
+              <div className="flex-1">
+                <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </Layout>
     );
   }
@@ -579,6 +640,7 @@ const Ecommerce = () => {
     setSelectedAmenities([]);
     setSelectedCapacity([]);
     setSelectedExperience([]);
+    setAvailabilityDate(null);
   };
 
   // ── Filter section helper ──
@@ -714,12 +776,35 @@ const Ecommerce = () => {
           </FilterSection>
         )}
 
-        {/* ── Rental-specific: Availability ── */}
-        {activeServiceType === "rental" && (
-          <FilterSection title="Availability" sectionKey="availability">
-            <CheckboxItem label="In Stock Only" checked={showInStock} onChange={() => setShowInStock(!showInStock)} />
-          </FilterSection>
-        )}
+        {/* ── Availability: date picker + in-stock ── */}
+        <FilterSection title="Availability" sectionKey="availability">
+          <div className="space-y-2.5">
+            <label className="block">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Check date</span>
+              <div className="relative mt-1">
+                <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                <input
+                  type="date"
+                  value={availabilityDate ? availabilityDate.toISOString().split("T")[0] : ""}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setAvailabilityDate(e.target.value ? new Date(e.target.value + "T00:00:00") : null)}
+                  className="w-full pl-7 pr-2 py-1.5 text-xs bg-background border border-border rounded-md outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </label>
+            {availabilityDate && (
+              <button
+                onClick={() => setAvailabilityDate(null)}
+                className="text-[10px] text-primary hover:text-primary/80 font-medium"
+              >
+                Clear date filter
+              </button>
+            )}
+            {activeServiceType === "rental" && (
+              <CheckboxItem label="In Stock Only" checked={showInStock} onChange={() => setShowInStock(!showInStock)} />
+            )}
+          </div>
+        </FilterSection>
       </div>
     );
   };
@@ -876,9 +961,23 @@ const Ecommerce = () => {
                       )}
                     </button>
                     <span className="text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground">{filteredRentals.length}</span> result{filteredRentals.length !== 1 ? "s" : ""}
-                      {searchTerm && <span> for "<span className="text-primary">{searchTerm}</span>"</span>}
+                      {debouncedSearch !== searchTerm ? (
+                        <span className="text-muted-foreground">Searching...</span>
+                      ) : (
+                        <>
+                          <span className="font-semibold text-foreground">{filteredRentals.length}</span> result{filteredRentals.length !== 1 ? "s" : ""}
+                          {debouncedSearch && <span> for &ldquo;<span className="text-primary">{debouncedSearch}</span>&rdquo;</span>}
+                          {availabilityDate && <span> &middot; available {availabilityDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>}
+                        </>
+                      )}
                     </span>
+                    {availabilityDate && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium">
+                        <Calendar className="h-3 w-3" />
+                        {availabilityDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                        <button onClick={() => setAvailabilityDate(null)} className="ml-0.5 hover:text-primary/70">&times;</button>
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -891,7 +990,7 @@ const Ecommerce = () => {
                       <option value="price_low">Price: Low to High</option>
                       <option value="price_high">Price: High to Low</option>
                       <option value="newest">Newest First</option>
-                      <option value="rating">Rating</option>
+                      <option value="rating">Highest Rated</option>
                     </select>
 
                     <div className="lg:hidden flex items-center border border-border rounded-md overflow-hidden">
@@ -943,12 +1042,35 @@ const Ecommerce = () => {
 
                 <div id="product-grid">
                   {filteredRentals.length === 0 ? (
-                    <div className="text-center py-20">
-                      <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">No Items Found</h3>
-                      <p className="text-muted-foreground text-sm">
-                        {searchTerm ? "Try adjusting your search terms" : "No items available at the moment"}
+                    <div className="text-center py-16 px-4">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                        <Search className="h-7 w-7 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        No results found{debouncedSearch && <> for &ldquo;{debouncedSearch}&rdquo;</>}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1.5 mb-5">
+                        Try adjusting your search or filters, or browse popular categories below
                       </p>
+                      <div className="flex flex-wrap justify-center gap-2 mb-4">
+                        {["Tents & Structures", "Stages", "Lighting", "Furniture", "Sound Systems"].map((cat) => (
+                          <button
+                            key={cat}
+                            onClick={() => { setSearchTerm(cat); setDebouncedSearch(cat); }}
+                            className="px-4 py-2 border border-border rounded-full text-sm text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors"
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                      {(debouncedSearch || availabilityDate || activeFilterCount > 0) && (
+                        <button
+                          onClick={() => { setSearchTerm(""); setDebouncedSearch(""); setAvailabilityDate(null); clearAllFilters(); }}
+                          className="text-sm text-primary hover:text-primary/80 font-medium"
+                        >
+                          Clear all filters
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div
@@ -957,7 +1079,7 @@ const Ecommerce = () => {
                       } sm:grid-cols-2 lg:grid-cols-3`}
                     >
                       {filteredRentals.map((rental) => (
-                        <div key={rental.id} className="relative">
+                        <div key={rental.id} className="relative group/card">
                           {activeServiceType === "venue" ? (
                             <VenueCard venue={rental} viewMode={mobileView} />
                           ) : activeServiceType === "crew" ? (
@@ -965,8 +1087,33 @@ const Ecommerce = () => {
                           ) : (
                             <EnhancedProductCard rental={rental} viewMode={mobileView} />
                           )}
+
+                          {/* Unavailable overlay */}
+                          {rental._isUnavailable && availabilityDate && (
+                            <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] rounded-xl z-10 flex items-end justify-center pb-6 pointer-events-none">
+                              <span className="bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 text-xs font-medium px-3 py-1.5 rounded-full">
+                                Unavailable on {availabilityDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* WhatsApp share button */}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const url = `${window.location.origin}/ecommerce/${rental.id}`;
+                              const text = `Check out ${rental.title} on Evnting — ₹${(rental.price_value || 0).toLocaleString("en-IN")}/day\n${url}`;
+                              window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+                            }}
+                            className="absolute top-2 right-2 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-opacity z-20"
+                            title="Share on WhatsApp"
+                          >
+                            <MessageCircle className="h-4 w-4 text-green-600" />
+                          </button>
+
                           {activeServiceType === "venue" && (
-                            <label className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-background/90 backdrop-blur-sm rounded-md px-1.5 py-1 cursor-pointer border border-border shadow-sm">
+                            <label className="absolute top-2 right-12 z-20 flex items-center gap-1 bg-background/90 backdrop-blur-sm rounded-md px-1.5 py-1 cursor-pointer border border-border shadow-sm">
                               <Checkbox
                                 checked={compareIds.includes(rental.id)}
                                 onCheckedChange={() => toggleCompare(rental.id)}

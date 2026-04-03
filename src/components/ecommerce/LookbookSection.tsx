@@ -89,7 +89,7 @@ const LookbookSection = () => {
     <section className="py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-foreground">✨ Lookbook</h2>
+          <h2 className="text-xl font-bold text-foreground inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-purple-500"><path d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zm7-10a1 1 0 01.967.744L14.146 7.2 17.5 7.512a1 1 0 01.541 1.751l-2.547 2.169.783 3.294a1 1 0 01-1.494 1.083L12 14.028l-2.783 1.781a1 1 0 01-1.494-1.083l.783-3.294-2.547-2.169a1 1 0 01.541-1.751L9.854 7.2l1.179-4.456A1 1 0 0112 2z"/></svg>Lookbook</h2>
           <p className="text-sm text-muted-foreground">Real event setups you can rent instantly</p>
         </div>
       </div>

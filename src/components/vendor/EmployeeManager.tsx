@@ -95,7 +95,7 @@ const EmployeeManager = () => {
 
   const [addOpen, setAddOpen] = useState(false);
   const [detailEmployee, setDetailEmployee] = useState<Employee | null>(null);
-  const [activeView, setActiveView] = useState<"employees" | "attendance">("employees");
+  // Attendance removed - keeping AttendanceTracker import in case needed later
 
   // ── Fetch employees ──
   const { data: employees = [], isLoading } = useQuery({
@@ -148,27 +148,12 @@ const EmployeeManager = () => {
           <p className="text-sm text-muted-foreground">{activeCount} active employee{activeCount !== 1 ? "s" : ""}</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-border overflow-hidden">
-            <button
-              onClick={() => setActiveView("employees")}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${activeView === "employees" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
-            >
-              Employees
-            </button>
-            <button
-              onClick={() => setActiveView("attendance")}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${activeView === "attendance" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
-            >
-              Attendance
-            </button>
-          </div>
           <AddEmployeeDialog open={addOpen} onOpenChange={setAddOpen} />
         </div>
       </div>
 
-      {activeView === "attendance" ? (
-        <AttendanceTracker employees={employees.filter((e) => e.is_active)} />
-      ) : (
+      {/* Attendance removed - keeping data fetch in case needed later */}
+      {(
         <>
           {employees.length === 0 ? (
             <div className="text-center py-16 space-y-3">

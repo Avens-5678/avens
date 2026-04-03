@@ -10,9 +10,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import {
   IndianRupee, Loader2, RefreshCw, CheckCircle2, Banknote,
-  FileText, Users, TrendingDown, Download,
+  FileText, Users, TrendingDown, Download, Wallet,
 } from "lucide-react";
 import { format } from "date-fns";
 import PayslipGenerator from "./PayslipGenerator";
@@ -98,6 +102,11 @@ const PayrollManager = () => {
   const [selYear, setSelYear] = useState(now.getFullYear());
   const [activeView, setActiveView] = useState<"payroll" | "advances">("payroll");
   const [payslipRecord, setPayslipRecord] = useState<PayrollRecord | null>(null);
+  const [paySalaryRecord, setPaySalaryRecord] = useState<PayrollRecord | null>(null);
+  const [paySalaryAmount, setPaySalaryAmount] = useState(0);
+  const [paySalaryMonth, setPaySalaryMonth] = useState(now.getMonth() + 1);
+  const [paySalaryYear, setPaySalaryYear] = useState(now.getFullYear());
+  const [paySalaryNotes, setPaySalaryNotes] = useState("");
 
   // ── Fetch employees ──
   const { data: employees = [] } = useQuery({
@@ -555,6 +564,18 @@ const PayrollManager = () => {
                                 </Button>
                               )}
                               <Button
+                                variant="ghost" size="sm" className="h-7 text-[10px] text-purple-600"
+                                onClick={() => {
+                                  setPaySalaryRecord(record);
+                                  setPaySalaryAmount(record.net_salary);
+                                  setPaySalaryMonth(record.month);
+                                  setPaySalaryYear(record.year);
+                                  setPaySalaryNotes("");
+                                }}
+                              >
+                                <Wallet className="h-3.5 w-3.5 mr-0.5" />Pay
+                              </Button>
+                              <Button
                                 variant="ghost" size="sm" className="h-7 px-1.5"
                                 onClick={() => setPayslipRecord(record)}
                               >
@@ -582,6 +603,99 @@ const PayrollManager = () => {
           onOpenChange={(open) => { if (!open) setPayslipRecord(null); }}
         />
       )}
+
+      {/* Pay Salary Modal */}
+      <Dialog open={!!paySalaryRecord} onOpenChange={(open) => { if (!open) setPaySalaryRecord(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-purple-600" />
+              Pay Salary
+            </DialogTitle>
+          </DialogHeader>
+          {paySalaryRecord && (
+            <div className="space-y-4 pt-2">
+              {/* Employee name */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Employee</Label>
+                <Input
+                  value={employeeMap[paySalaryRecord.employee_id]?.full_name || "Unknown"}
+                  disabled
+                  className="bg-muted/50"
+                />
+              </div>
+
+              {/* Month/Year */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Month</Label>
+                  <Select value={String(paySalaryMonth)} onValueChange={(v) => setPaySalaryMonth(Number(v))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {MONTHS.map((m, i) => <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Year</Label>
+                  <Select value={String(paySalaryYear)} onValueChange={(v) => setPaySalaryYear(Number(v))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {years.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Amount */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Amount (₹)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={paySalaryAmount}
+                  onChange={(e) => setPaySalaryAmount(parseFloat(e.target.value) || 0)}
+                />
+                <p className="text-[10px] text-muted-foreground">Net salary: ₹{paySalaryRecord.net_salary.toLocaleString("en-IN")}</p>
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Payment Notes (optional)</Label>
+                <Textarea
+                  value={paySalaryNotes}
+                  onChange={(e) => setPaySalaryNotes(e.target.value)}
+                  placeholder="e.g. Bonus included, partial payment..."
+                  rows={2}
+                  className="resize-none"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" size="sm" onClick={() => setPaySalaryRecord(null)}>
+                  Cancel
+                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button size="sm" disabled className="opacity-50 gap-1.5">
+                          <Banknote className="h-4 w-4" />
+                          Pay via Razorpay
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">Coming soon — payment wiring in progress</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

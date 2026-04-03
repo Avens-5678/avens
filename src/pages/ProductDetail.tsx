@@ -30,6 +30,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit } from "@/utils/pricingUtils";
 import { usePricingRules, applyTieredMarkup } from "@/hooks/usePricingRules";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import {
   ShoppingCart, ArrowLeft, Trash2, ChevronLeft, ChevronRight,
@@ -66,6 +67,8 @@ const ProductDetail = () => {
   const { addItem, removeItem, isInCart, getItemCount } = useCart();
   const { toast } = useToast();
   const { data: pricingRules } = usePricingRules();
+  const { role } = useAuth();
+  const isVendorUser = role === "vendor";
 
   const [selectedVariant, setSelectedVariant] = useState<RentalVariant | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -194,13 +197,16 @@ const ProductDetail = () => {
     const unit = selectedVariant?.pricing_unit ?? (rental as any)?.pricing_unit ?? "Per Day";
 
     if (rawPrice != null && isVendorItem && pricingRules?.length) {
+      if (isVendorUser) {
+        return { value: rawPrice, unit, vendorBase: rawPrice };
+      }
       const { clientPrice } = applyTieredMarkup(rawPrice, tierKey, pricingRules);
       return { value: clientPrice, unit, vendorBase: rawPrice };
     }
     if (rawPrice != null) return { value: rawPrice, unit };
     if (rental?.price_range) return { text: `₹${rental.price_range}` };
     return null;
-  }, [rental, selectedVariant, pricingRules, tierKey, isVendorItem]);
+  }, [rental, selectedVariant, pricingRules, tierKey, isVendorItem, isVendorUser]);
 
   const currentUnit = displayPrice && "unit" in displayPrice ? displayPrice.unit : undefined;
   const isMeasurable = isMeasurableUnit(currentUnit);
@@ -452,6 +458,9 @@ const ProductDetail = () => {
               {/* Price block */}
               {displayPrice && (
                 <div className="space-y-1">
+                  {isVendorUser && (
+                    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">Vendor rate</span>
+                  )}
                   <div className="flex items-baseline gap-2">
                     {"value" in displayPrice ? (
                       <>

@@ -7,6 +7,7 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/h
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { usePricingRules, applyTieredMarkup } from "@/hooks/usePricingRules";
+import { useAuth } from "@/hooks/useAuth";
 import { MapPin as MapPinIcon } from "lucide-react";
 
 // Inline to avoid importing external module into Ecommerce chunk
@@ -14,6 +15,32 @@ const distanceColor = (km: number) =>
   km <= 10 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
   : km <= 25 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
   : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+
+const categoryFallbacks: Record<string, string> = {
+  "Structures & Venues": "/fallbacks/structures.svg",
+  "Stages & Platforms": "/fallbacks/stages.svg",
+  "Lighting & Sound": "/fallbacks/lighting.svg",
+  "Furniture": "/fallbacks/furniture.svg",
+  "default": "/fallbacks/equipment.svg",
+};
+
+const getFallbackImage = (categories?: string[]) => {
+  if (categories?.length) {
+    for (const cat of categories) {
+      if (categoryFallbacks[cat]) return categoryFallbacks[cat];
+    }
+  }
+  return categoryFallbacks["default"];
+};
+
+const PlaceholderSVG = () => (
+  <svg viewBox="0 0 80 80" fill="none" className="w-12 h-12 text-muted-foreground/40">
+    <rect x="10" y="20" width="60" height="45" rx="4" stroke="currentColor" strokeWidth="2" />
+    <path d="M10 52l15-12 10 8 20-16 15 12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    <circle cx="30" cy="35" r="5" stroke="currentColor" strokeWidth="2" />
+    <path d="M25 10h30M40 4v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
 
 interface EnhancedProductCardProps {
   rental: any;
@@ -34,16 +61,18 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
   const isMobile = useIsMobile();
   const { addViewed } = useRecentlyViewed();
   const { data: pricingRules } = usePricingRules();
+  const { role } = useAuth();
 
-  const isVendor = rental._source === "vendor";
+  const isVendorItem = rental._source === "vendor";
+  const isVendorUser = role === "vendor";
   const tierKey = rental.markup_tier || "mid";
 
   const formatPrice = () => {
     if (rental.price_value != null) {
       let price = rental.price_value;
-      if (isVendor && pricingRules?.length) {
+      if (isVendorItem && pricingRules?.length) {
         const { clientPrice } = applyTieredMarkup(price, tierKey, pricingRules);
-        price = clientPrice;
+        price = isVendorUser ? rental.price_value : clientPrice;
       }
       return { price: `₹${price.toLocaleString()}`, unit: `/ ${rental.pricing_unit || "Per Day"}` };
     }
@@ -52,8 +81,8 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
   };
 
   const priceInfo = formatPrice();
-  const isAssured = rental.rating && rental.rating >= 4;
-  // isVendor already defined above
+  const isAssured = rental.rating > 0 && rental.rating >= 4;
+  // isVendorItem already defined above
   const isFeatured = rental.show_on_home;
   const isList = viewMode === "list";
   const hasVirtualTour = !!rental.virtual_tour_url;
@@ -91,9 +120,19 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-muted-foreground text-sm">No Image</span>
-          </div>
+          <img
+            src={getFallbackImage(rental.categories)}
+            alt={rental.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+              (e.target as HTMLImageElement).parentElement!.classList.add("flex", "items-center", "justify-center");
+              const svg = document.createElement("div");
+              svg.innerHTML = `<svg viewBox="0 0 80 80" fill="none" class="w-12 h-12 text-muted-foreground/40"><rect x="10" y="20" width="60" height="45" rx="4" stroke="currentColor" stroke-width="2"/><path d="M10 52l15-12 10 8 20-16 15 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="30" cy="35" r="5" stroke="currentColor" stroke-width="2"/><path d="M25 10h30M40 4v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+              (e.target as HTMLImageElement).parentElement!.appendChild(svg.firstChild!);
+            }}
+          />
         )}
 
         {/* Badges overlay */}
@@ -109,7 +148,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
                 <Eye className="h-3 w-3" /> 360° Tour
               </Badge>
             )}
-            {isVendor && !isVerified && (
+            {isVendorItem && !isVerified && (
               <Badge className="bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
                 <Store className="h-3 w-3" /> Vendor
               </Badge>
@@ -147,13 +186,17 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         </p>
 
         {/* Rating */}
-        {rental.rating && (
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5">
+          {rental.rating && rental.rating > 0 ? (
             <span className="inline-flex items-center gap-0.5 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
               {rental.rating} <Star className="h-2.5 w-2.5 fill-current" />
             </span>
-          </div>
-        )}
+          ) : (
+            <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+              New
+            </span>
+          )}
+        </div>
 
         {/* Distance badge */}
         {rental._distance_km != null && (
@@ -164,9 +207,14 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
         {/* Price */}
         {priceInfo && (
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-sm sm:text-base font-bold text-foreground">{priceInfo.price}</span>
-            <span className="text-[10px] text-muted-foreground">{priceInfo.unit}</span>
+          <div>
+            {isVendorUser && (
+              <span className="text-[9px] font-semibold text-purple-600 dark:text-purple-400">Vendor rate</span>
+            )}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm sm:text-base font-bold text-foreground">{priceInfo.price}</span>
+              <span className="text-[10px] text-muted-foreground">{priceInfo.unit}</span>
+            </div>
           </div>
         )}
 

@@ -125,23 +125,23 @@ const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discov
   return (
     <div className="bg-background py-4 sm:py-6">
       {featuredItems.length > 0 && (
-        <DiscoveryRow title="⭐ Featured Products" subtitle="Hand-picked by our team" items={featuredItems} />
+        <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-amber-500"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>Featured Products</span>} subtitle="Hand-picked by our team" items={featuredItems} />
       )}
-      <DiscoveryRow title="🔥 Discover Best Rentals" subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
+      <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-orange-500"><path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd"/></svg>Discover Best Rentals</span>} subtitle="Top-rated equipment for your events" items={discoveryBestRentals} />
       {discoveryBestInCity.length > 0 && (
-        <DiscoveryRow title={`📍 Discover Best in ${userLocation?.cityName || "Your City"}`} subtitle="Popular items near you" items={discoveryBestInCity} />
+        <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-rose-500"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>{`Discover Best in ${userLocation?.cityName || "Your City"}`}</span>} subtitle="Popular items near you" items={discoveryBestInCity} />
       )}
       {topPicksForYou.length > 0 && (
-        <DiscoveryRow title="✨ Top Picks for You" subtitle="Based on your browsing history" items={topPicksForYou} />
+        <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-purple-500"><path d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zm7-10a1 1 0 01.967.744L14.146 7.2 17.5 7.512a1 1 0 01.541 1.751l-2.547 2.169.783 3.294a1 1 0 01-1.494 1.083L12 14.028l-2.783 1.781a1 1 0 01-1.494-1.083l.783-3.294-2.547-2.169a1 1 0 01.541-1.751L9.854 7.2l1.179-4.456A1 1 0 0112 2z"/></svg>Top Picks for You</span>} subtitle="Based on your browsing history" items={topPicksForYou} />
       )}
       {discoveryBestCrew.length > 0 && (
-        <DiscoveryRow title="👥 Best Crew for Your Event" subtitle="Skilled professionals ready to help" items={discoveryBestCrew} />
+        <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-sky-500"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>Best Crew for Your Event</span>} subtitle="Skilled professionals ready to help" items={discoveryBestCrew} />
       )}
       {discoveryTopVenues.length > 0 && (
-        <DiscoveryRow title="🏛️ Top Venues Near You" subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
+        <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-amber-600"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"/></svg>Top Venues Near You</span>} subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
       )}
       {recentlyViewedItems.length > 0 && (
-        <DiscoveryRow title="🕒 Recently Viewed" subtitle="Pick up where you left off" items={recentlyViewedItems} />
+        <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-slate-500"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/></svg>Recently Viewed</span>} subtitle="Pick up where you left off" items={recentlyViewedItems} />
       )}
     </div>
   );
@@ -752,26 +752,7 @@ const Ecommerce = () => {
         }))}
       />
 
-      {/* Location bar below header */}
-      <div className="bg-muted/50 border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6">
-          <button
-            onClick={() => clearLocation()}
-            className="flex items-center gap-1.5 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <MapPin className="h-3.5 w-3.5 text-primary" />
-            {userLocation ? (
-              <span>
-                Deliver to <span className="font-semibold text-foreground">{userLocation.cityName || userLocation.pinCode || "Your Location"}</span>
-              </span>
-            ) : (
-              <span>Select your location</span>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Radius bar */}
+      {/* Location + Radius bar */}
       {userLocation && (
         <LocationRadiusBar
           location={userLocation}

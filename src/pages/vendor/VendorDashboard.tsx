@@ -23,7 +23,6 @@ import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
 import VendorBundleEvents from "@/components/vendor/VendorBundleEvents";
 import DeliveryManager from "@/components/vendor/DeliveryManager";
 import SiteVisitManager from "@/components/vendor/SiteVisitManager";
-import B2BCrossHire from "@/components/vendor/B2BCrossHire";
 import LaborTracker from "@/components/vendor/LaborTracker";
 import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
 import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
@@ -31,7 +30,7 @@ import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 import {
   LayoutDashboard, ClipboardList, Package, MessageSquare,
   UserCheck, ListTodo, IndianRupee, TrendingUp, TrendingDown,
-  Star, User, Gift, Truck, MapPin, HandshakeIcon, Users,
+  Star, User, Gift, Truck, MapPin, Users,
   BookOpen, FileText, Bot, Loader2,
 } from "lucide-react";
 
@@ -102,7 +101,6 @@ const VendorDashboard = () => {
       items: [
         { icon: Star, label: "Reviews", value: "reviews" },
         { icon: MapPin, label: "Site Visits", value: "site-visits" },
-        { icon: HandshakeIcon, label: "B2B Cross-Hire", value: "b2b" },
         { icon: User, label: "Profile", value: "profile" },
       ],
     },
@@ -146,8 +144,6 @@ const VendorDashboard = () => {
         return <VendorReviews />;
       case "site-visits":
         return <SiteVisitManager />;
-      case "b2b":
-        return <B2BCrossHire />;
       case "profile":
         return <VendorProfileSettings />;
       default:

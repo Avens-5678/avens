@@ -1,9 +1,9 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, ReactNode } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
 
 interface DiscoveryRowProps {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   items: any[];
   accentColor?: string;

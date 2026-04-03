@@ -15,7 +15,12 @@ export const MultiImageCarousel = ({ images, title, className = "" }: MultiImage
   if (!images || images.length === 0) {
     return (
       <div className={`aspect-[4/3] bg-muted flex items-center justify-center rounded-lg ${className}`}>
-        <span className="text-muted-foreground">No Image</span>
+        <svg viewBox="0 0 80 80" fill="none" className="w-12 h-12 text-muted-foreground/40">
+          <rect x="10" y="20" width="60" height="45" rx="4" stroke="currentColor" strokeWidth="2" />
+          <path d="M10 52l15-12 10 8 20-16 15 12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+          <circle cx="30" cy="35" r="5" stroke="currentColor" strokeWidth="2" />
+          <path d="M25 10h30M40 4v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
       </div>
     );
   }

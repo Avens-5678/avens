@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare, Gift, Award } from "lucide-react";
+import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare, Gift, Award, Home } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
@@ -16,9 +16,11 @@ import EventWorkspace from "@/components/client/EventWorkspace";
 import ClientMessages from "@/components/client/ClientMessages";
 import ClientBundleEvents from "@/components/client/ClientBundleEvents";
 import LoyaltyDashboard from "@/components/client/LoyaltyDashboard";
+import ClientDashboardHome from "@/components/client/ClientDashboardHome";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
+  { icon: Home, label: "Home", value: "home" },
   { icon: Bot, label: "AI Assistant", value: "ai" },
   { icon: FolderOpen, label: "Event Hub", value: "workspace" },
   { icon: Gift, label: "My Events", value: "events" },
@@ -32,7 +34,7 @@ const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
 
 const ClientDashboard = () => {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "ai";
+  const initialTab = searchParams.get("tab") || "home";
   const [activeTab, setActiveTab] = useState(initialTab);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -98,6 +100,8 @@ const ClientDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "home":
+        return <ClientDashboardHome onTabChange={setActiveTab} />;
       case "ai":
         return null; // Rendered persistently below
       case "workspace":
@@ -142,7 +146,7 @@ const ClientDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
-      mobilePrimaryItems={["ai", "events", "messages", "tracker"]}
+      mobilePrimaryItems={["home", "events", "messages", "tracker"]}
     >
       <div className={activeTab === "ai" ? "h-full" : "hidden"}>
         <DashboardChatbot role="client" userName={userName} />

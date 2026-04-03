@@ -42,6 +42,7 @@ function createLazyRoutes() {
     QuoteAcceptance: lazy(() => import("./pages/QuoteAcceptance")),
     EventPlanner: lazy(() => import("./pages/EventPlanner")),
     VendorStorefront: lazy(() => import("./pages/VendorStorefront")),
+    MyEventPage: lazy(() => import("./pages/MyEventPage")),
   };
 }
 
@@ -81,6 +82,7 @@ const App = () => {
               <Route path="/ecommerce/track" element={<R.TrackOrder />} />
               <Route path="/ecommerce/:id" element={<R.ProductDetail />} />
               <Route path="/vendor/:vendorId" element={<R.VendorStorefront />} />
+              <Route path="/event/:eventId" element={<R.MyEventPage />} />
               <Route path="/cart" element={<R.Cart />} />
               <Route path="/event-planner" element={<R.EventPlanner />} />
               <Route path="/privacy-policy" element={<R.PrivacyPolicy />} />

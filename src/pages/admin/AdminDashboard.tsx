@@ -70,6 +70,7 @@ import AdminSurgeManager from "@/components/admin/AdminSurgeManager";
 import AdminCityManager from "@/components/admin/AdminCityManager";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
+import AdminDashboardHome from "@/components/admin/AdminDashboardHome";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface AdminDashboardProps {
@@ -267,90 +268,9 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
     switch (activeSubTab) {
       case "overview":
         return (
-          <div className="space-y-6">
-            <GoogleAnalyticsDashboard />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              <Card className="bg-gradient-to-br from-primary to-accent text-primary-foreground border-none rounded-2xl shadow-lg">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium opacity-90">Total Events</CardTitle>
-                  <Calendar className="h-4 w-4 opacity-80" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">3</div>
-                  <p className="text-xs opacity-80">Event types active</p>
-                </CardContent>
-              </Card>
-              <Card className="rounded-2xl">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Form Submissions</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-secondary/10 flex items-center justify-center">
-                    <MessageSquare className="h-4 w-4 text-secondary" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formSubmissions?.length || 0}</div>
-                  <p className="text-xs text-muted-foreground">Pending inquiries</p>
-                </CardContent>
-              </Card>
-              <Card className="rounded-2xl">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Services</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <Award className="h-4 w-4 text-accent" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{services?.length || 0}</div>
-                  <p className="text-xs text-muted-foreground">Active services</p>
-                </CardContent>
-              </Card>
-              <Card className="rounded-2xl">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Portfolio Items</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Image className="h-4 w-4 text-primary" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{portfolio?.length || 0}</div>
-                  <p className="text-xs text-muted-foreground">Gallery images</p>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-              <Card className="rounded-2xl">
-                <CardHeader><CardTitle>Quick Actions</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <Button className="w-full justify-start" variant="outline" onClick={() => { setActiveGroup("operations"); setActiveSubTab("events-center"); }}>
-                    <ClipboardList className="mr-2 h-4 w-4" />Event Center
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => { setActiveGroup("website"); setActiveSubTab("forms"); }}>
-                    <MessageSquare className="mr-2 h-4 w-4" />View Form Submissions
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => { setActiveGroup("website"); setActiveSubTab("portfolio"); }}>
-                    <Image className="mr-2 h-4 w-4" />Update Portfolio
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card className="rounded-2xl">
-                <CardHeader><CardTitle>System Status</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Website Status</span>
-                    <Badge variant="default">Online</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Database</span>
-                    <Badge variant="default">Connected</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Last Update</span>
-                    <span className="text-sm text-muted-foreground">Just now</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <AdminDashboardHome
+            onNavigate={(group, subTab) => { setActiveGroup(group); setActiveSubTab(subTab); }}
+          />
         );
       case "events-center":
         return <EventCenter />;

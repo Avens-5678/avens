@@ -343,6 +343,45 @@ const Cart = () => {
     );
   }, [showInstantBookFlow, grandTotal, platformFee, vendorPayout, derivedStartDate, selectedPlan]);
 
+  // Create a master event_order + per-vendor sub_orders
+  const createEventOrder = async (paymentId?: string, rzpOrderId?: string) => {
+    if (!user) return null;
+    const evName = eventName || "My Event";
+    const byVendor: Record<string, typeof items> = {};
+    for (const item of items) {
+      const vid = item.vendor_id || "_platform";
+      if (!byVendor[vid]) byVendor[vid] = [];
+      byVendor[vid].push(item);
+    }
+    try {
+      const { data: eo, error } = await supabase.from("event_orders").insert({
+        customer_id: user.id,
+        event_name: evName,
+        event_date: derivedStartDate || null,
+        event_address: eventDetails.venue_address_line1 || primaryVenueAddress || null,
+        venue_lat: eventDetails.venue_lat || null,
+        venue_lng: eventDetails.venue_lng || null,
+        total_amount: grandTotal,
+        platform_fee: platformFee,
+        status: paymentId ? "confirmed" : "pending",
+        razorpay_order_id: rzpOrderId || null,
+        razorpay_payment_id: paymentId || null,
+      } as any).select().single();
+      if (error || !eo) return null;
+      const subs = Object.entries(byVendor).map(([vid, vItems]) => ({
+        parent_order_id: eo.id,
+        vendor_id: vid === "_platform" ? null : vid,
+        items: vItems.map((i) => ({ id: i.id, title: i.title, quantity: i.quantity, price: i.price_value, image_url: i.image_url, booking_from: i.booking_from, booking_till: i.booking_till })),
+        sub_total: vItems.reduce((s, i) => s + ((i.price_value ?? 0) * i.quantity), 0),
+        check_in: vItems[0]?.booking_from || null,
+        check_out: vItems[0]?.booking_till || null,
+        status: "pending",
+      }));
+      await supabase.from("vendor_sub_orders").insert(subs as any);
+      return eo.id as string;
+    } catch { return null; }
+  };
+
   const handleSendEnquiry = async () => {
     if (!user) {
       toast({ title: "Please log in", description: "You need to sign in to send an enquiry.", variant: "destructive" });
@@ -579,7 +618,9 @@ const Cart = () => {
       }
 
       toast({ title: isInstant ? "Booking Confirmed!" : "Enquiry Sent!", description: isInstant ? "Your booking is confirmed. Vendor will be notified." : "Our team will respond within 24 hours." });
+      await createEventOrder();
       clearCart();
+      localStorage.removeItem("evnting_event_name");
       setCouponApplied(null);
       setCouponDiscount(0);
       setCouponCode("");
@@ -799,8 +840,10 @@ const Cart = () => {
             });
           }
           toast({ title: "Booking Confirmed!", description: "Payment successful. You'll receive a WhatsApp confirmation shortly." });
+          const eventOrderId = await createEventOrder(response.razorpay_payment_id, response.razorpay_order_id);
           clearCart();
-          navigate("/ecommerce/orders");
+          localStorage.removeItem("evnting_event_name");
+          navigate(eventOrderId ? `/event/${eventOrderId}` : "/ecommerce/orders");
         },
         prefill: {
           name: profileData.full_name,

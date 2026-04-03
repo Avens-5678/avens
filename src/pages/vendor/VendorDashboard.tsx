@@ -21,6 +21,7 @@ import VendorEarnings from "@/components/vendor/VendorEarnings";
 import VendorReviews from "@/components/vendor/VendorReviews";
 import VendorProfileSettings from "@/components/vendor/VendorProfileSettings";
 import VendorBundleEvents from "@/components/vendor/VendorBundleEvents";
+import VendorBundleManager from "@/components/vendor/VendorBundleManager";
 import DeliveryManager from "@/components/vendor/DeliveryManager";
 import SiteVisitManager from "@/components/vendor/SiteVisitManager";
 import LaborTracker from "@/components/vendor/LaborTracker";
@@ -31,7 +32,7 @@ import {
   LayoutDashboard, ClipboardList, Package, MessageSquare,
   UserCheck, ListTodo, IndianRupee, TrendingUp, TrendingDown,
   Star, User, Gift, Truck, MapPin, Users,
-  BookOpen, FileText, Bot, Loader2,
+  BookOpen, FileText, Bot, Loader2, Boxes,
 } from "lucide-react";
 
 const VendorDashboard = () => {
@@ -72,6 +73,7 @@ const VendorDashboard = () => {
       title: "Operations",
       items: [
         { icon: ClipboardList, label: "Orders", value: "orders" },
+        { icon: Boxes, label: "My Packages", value: "packages" },
         { icon: Gift, label: "Bundle Events", value: "bundle-events" },
         { icon: Truck, label: "Deliveries", value: "deliveries" },
         { icon: MessageSquare, label: "Chat", value: "chat", badge: unreadChats || undefined },
@@ -116,6 +118,8 @@ const VendorDashboard = () => {
         return <DashboardChatbot role="vendor" userName={userName} />;
       case "orders":
         return <OrderTracker />;
+      case "packages":
+        return <VendorBundleManager />;
       case "bundle-events":
         return <VendorBundleEvents />;
       case "deliveries":

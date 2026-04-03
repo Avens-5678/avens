@@ -22,6 +22,7 @@ import LocationRadiusBar from "@/components/ecommerce/LocationRadiusBar";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
 import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
+import EventPackages from "@/components/ecommerce/EventPackages";
 import VenueCard from "@/components/ecommerce/VenueCard";
 import CrewCard from "@/components/ecommerce/CrewCard";
 import { useUserLocation } from "@/hooks/useUserLocation";
@@ -911,6 +912,7 @@ const Ecommerce = () => {
       {isDiscoveryView && (
         <>
           <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} featuredItems={featuredProducts} />
+          <EventPackages />
           <div className="container mx-auto px-4 sm:px-6">
             <Suspense fallback={null}><LookbookSection /></Suspense>
           </div>

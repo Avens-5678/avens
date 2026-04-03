@@ -47,7 +47,10 @@ const VendorDashboard = () => {
   useEffect(() => {
     if (!user) return;
     supabase.from("vendor_onboarding_progress").select("is_completed").eq("vendor_id", user.id).maybeSingle()
-      .then(({ data }) => setOnboardingDone(data?.is_completed ?? null));
+      .then(({ data, error }) => {
+        if (error) { console.error("Onboarding check failed:", error); setOnboardingDone(true); return; }
+        setOnboardingDone(data?.is_completed ?? false);
+      });
   }, [user]);
 
   // Fetch vendor profile for name

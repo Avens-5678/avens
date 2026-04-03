@@ -31,11 +31,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        const r = await fetchRole(session.user.id);
-        setRole(r);
+        try {
+          const r = await fetchRole(session.user.id);
+          setRole(r);
+        } catch (e) {
+          console.error("Failed to fetch role:", e);
+        }
       }
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
 
     // Single listener for subsequent auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -45,8 +49,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session?.user) {
           // Defer the RPC call to avoid Supabase client deadlock
           setTimeout(async () => {
-            const r = await fetchRole(session.user.id);
-            setRole(r);
+            try {
+              const r = await fetchRole(session.user.id);
+              setRole(r);
+            } catch (e) {
+              console.error("Failed to fetch role:", e);
+            }
             setLoading(false);
           }, 0);
         } else {

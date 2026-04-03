@@ -87,6 +87,8 @@ const ProductDetail = () => {
   const [bookingSlot, setBookingSlot] = useState("full_day");
   const [fromOpen, setFromOpen] = useState(false);
   const [tillOpen, setTillOpen] = useState(false);
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const ctaRef = useRef<HTMLDivElement>(null);
   const today = new Date();
 
@@ -156,6 +158,29 @@ const ProductDetail = () => {
   );
   const isAvailable = availability ? availability.available > 0 : true;
   const isLimited = availability ? availability.available === 1 : false;
+
+  // Fetch unavailable dates from existing orders
+  useEffect(() => {
+    if (!id) return;
+    const fetchUnavailable = async () => {
+      const { data: orders } = await supabase
+        .from("rental_orders")
+        .select("check_in, check_out")
+        .eq("vendor_inventory_item_id", id)
+        .in("status", ["confirmed", "active", "pending"]);
+      if (!orders) return;
+      const blocked: Date[] = [];
+      orders.forEach((o) => {
+        if (!o.check_in || !o.check_out) return;
+        const s = new Date(o.check_in);
+        const e = new Date(o.check_out);
+        const c = new Date(s);
+        while (c <= e) { blocked.push(new Date(c)); c.setDate(c.getDate() + 1); }
+      });
+      setUnavailableDates(blocked);
+    };
+    fetchUnavailable();
+  }, [id]);
 
   // Track recently viewed
   useEffect(() => { if (id) addToRecentlyViewed(id); }, [id]);
@@ -277,6 +302,8 @@ const ProductDetail = () => {
       vendor_pincode: vendorProfile?.warehouse_pincode || undefined,
       booking_from: format(bookingFrom, "yyyy-MM-dd"),
       booking_till: format(bookingTill, "yyyy-MM-dd"),
+      check_in: format(bookingFrom, "yyyy-MM-dd"),
+      check_out: format(bookingTill, "yyyy-MM-dd"),
       booking_slot: isVenue ? bookingSlot : undefined,
       markup_tier: tierKey,
       vendor_base_price: isVendorItem ? vendorBasePrice : undefined,
@@ -344,7 +371,7 @@ const ProductDetail = () => {
       </div>
 
       {/* Main Product Section */}
-      <section className="py-4 sm:py-8">
+      <section className="py-4 sm:py-8 pb-20 md:pb-0">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_460px] gap-6 lg:gap-8">
 
@@ -409,6 +436,12 @@ const ProductDetail = () => {
                   <span className="absolute bottom-3 right-3 sm:hidden bg-foreground/70 text-primary-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
                     {currentImageIndex + 1}/{displayImages.length}
                   </span>
+                )}
+
+                {displayImages.length > 3 && (
+                  <button onClick={() => setGalleryOpen(true)} className="absolute bottom-3 right-3 px-3 py-1.5 bg-black/60 hover:bg-black/80 text-white text-xs font-medium rounded-lg backdrop-blur-sm transition-colors z-10">
+                    View all {displayImages.length} photos
+                  </button>
                 )}
               </div>
             </div>
@@ -589,7 +622,7 @@ const ProductDetail = () => {
                             // Auto-open "till" picker after selecting "from"
                             setTimeout(() => setTillOpen(true), 150);
                           }}
-                          disabled={(date) => date < today}
+                          disabled={(date) => date < today || unavailableDates.some(ud => ud.toDateString() === date.toDateString())}
                           initialFocus
                           className="p-3 pointer-events-auto"
                         />
@@ -624,7 +657,7 @@ const ProductDetail = () => {
                           mode="single"
                           selected={bookingTill}
                           onSelect={(d) => { setBookingTill(d); setTillOpen(false); }}
-                          disabled={(date) => date < (bookingFrom || today)}
+                          disabled={(date) => date < (bookingFrom || today) || unavailableDates.some(ud => ud.toDateString() === date.toDateString())}
                           initialFocus
                           className="p-3 pointer-events-auto"
                         />
@@ -1096,6 +1129,45 @@ const ProductDetail = () => {
               <ShoppingCart className="h-4 w-4 mr-1.5" /> Add to Cart
             </Button>
           )}
+        </div>
+      )}
+
+      {/* Gallery modal */}
+      {galleryOpen && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col" onClick={() => setGalleryOpen(false)}>
+          <div className="flex justify-end p-4">
+            <button onClick={() => setGalleryOpen(false)} className="text-white/80 hover:text-white text-sm font-medium">Close ✕</button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 pb-8" onClick={(e) => e.stopPropagation()}>
+            <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {displayImages.map((img, i) => (
+                <img key={i} src={img} alt={`${rental?.title} ${i+1}`} className="w-full aspect-square object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity" onClick={() => { setCurrentImageIndex(i); setGalleryOpen(false); }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile sticky bottom bar */}
+      {rental && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border p-3 flex items-center gap-3 md:hidden">
+          <div className="flex-1">
+            <p className="text-xs text-muted-foreground">
+              {bookingFrom && bookingTill ? `${Math.max(differenceInDays(bookingTill, bookingFrom), 1)} day${Math.max(differenceInDays(bookingTill, bookingFrom), 1) > 1 ? "s" : ""}` : "Per day"}
+            </p>
+            <p className="text-lg font-bold text-foreground">
+              ₹{(bookingFrom && bookingTill ? pricePerUnit * Math.max(differenceInDays(bookingTill, bookingFrom), 1) : pricePerUnit).toLocaleString("en-IN")}
+            </p>
+          </div>
+          <Button
+            onClick={handleAddToCart}
+            disabled={!bookingFrom || !bookingTill}
+            className="gap-2 px-6"
+            style={{ backgroundColor: "#4F46E5" }}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {!bookingFrom || !bookingTill ? "Select dates" : "Add to Cart"}
+          </Button>
         </div>
       )}
 

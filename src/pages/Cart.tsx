@@ -22,6 +22,7 @@ import { PaymentPlan, MilestoneBreakdown, calculateMilestoneBreakdown, useCreate
 import {
   ShoppingCart, Trash2, ArrowLeft, Send, Package, Plus, Minus,
   CalendarDays, Tag, ChevronRight, Zap, Truck, Users, Loader2, MapPin, Building2, Gift, Star, TrendingUp,
+  Sparkles, AlertTriangle, X, Store, Info,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { detectBundle, groupItemsByCategory, CATEGORY_LABELS } from "@/utils/bundleDetection";
@@ -51,6 +52,7 @@ const Cart = () => {
   const [selectedPlan, setSelectedPlan] = useState<PaymentPlan>("advance");
   const [milestoneBreakdown, setMilestoneBreakdown] = useState<MilestoneBreakdown | null>(null);
   const { mutateAsync: createMilestones } = useCreateMilestones();
+  const [eventName, setEventName] = useState(() => localStorage.getItem("evnting_event_name") || "");
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponApplied, setCouponApplied] = useState<{ id: string; code: string; discount: number } | null>(null);
@@ -85,6 +87,28 @@ const Cart = () => {
   const canInstantBook = allItemsPriced && dateIsSet && isInstantBookable(derivedStartDate, minBookingHours);
   const showInstantBookFlow = allItemsPriced; // Show the flow if all items are priced, but enable button only if date qualifies
   const hasRequiredLocation = !showVenueAddressFields || !!eventDetails.venue_address_line1 || !!primaryVenueAddress;
+
+  // Persist event name
+  useEffect(() => {
+    localStorage.setItem("evnting_event_name", eventName);
+  }, [eventName]);
+
+  // Fetch vendor display names for grouping
+  const [vendorNames, setVendorNames] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const vendorIds = [...new Set(items.map((i) => i.vendor_id).filter(Boolean))] as string[];
+    if (vendorIds.length === 0) return;
+    supabase
+      .from("profiles")
+      .select("user_id, company_name, full_name")
+      .in("user_id", vendorIds)
+      .then(({ data }) => {
+        if (!data) return;
+        const names: Record<string, string> = {};
+        for (const v of data) names[v.user_id] = v.company_name || v.full_name || "Vendor";
+        setVendorNames(names);
+      });
+  }, [items.map((i) => i.vendor_id).join(",")]);
 
   // Fetch loyalty balance
   useEffect(() => {
@@ -255,6 +279,42 @@ const Cart = () => {
   const platformFee = calculatedTotal - vendorSubtotal;
   const vendorPayout = vendorSubtotal + transportFee + manpowerFee;
   const bundle = useMemo(() => detectBundle(items, calculatedTotal), [items, calculatedTotal]);
+
+  // Group items by vendor
+  const vendorGroups = useMemo(() => {
+    const groups: Record<string, { vendorId: string; vendorName: string; items: typeof items }> = {};
+    for (const item of items) {
+      const vid = item.vendor_id || "_platform";
+      if (!groups[vid]) groups[vid] = { vendorId: vid, vendorName: "_platform", items: [] };
+      groups[vid].items.push(item);
+    }
+    return Object.values(groups);
+  }, [items]);
+  const hasMultipleVendors = vendorGroups.length > 1;
+
+  // Date conflict detection
+  const dateConflicts = useMemo(() => {
+    const conflicts: { item1: string; item2: string; dates: string }[] = [];
+    items.forEach((item, i) => {
+      if (!item.booking_from || !item.booking_till) return;
+      items.slice(i + 1).forEach((other) => {
+        if (!other.booking_from || !other.booking_till) return;
+        const aStart = new Date(item.booking_from!);
+        const aEnd = new Date(item.booking_till!);
+        const bStart = new Date(other.booking_from!);
+        const bEnd = new Date(other.booking_till!);
+        if (aStart <= bEnd && bStart <= aEnd) {
+          conflicts.push({
+            item1: item.title,
+            item2: other.title,
+            dates: `${item.booking_from} \u2192 ${item.booking_till}`,
+          });
+        }
+      });
+    });
+    return conflicts;
+  }, [items]);
+  const hasConflicts = dateConflicts.length > 0;
 
   // Surge pricing based on event date
   const eventDateForSurge = derivedStartDate ? new Date(derivedStartDate) : null;
@@ -806,6 +866,33 @@ const Cart = () => {
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8">
               {/* Cart Items */}
               <div className="space-y-4">
+                {/* Event Name Input */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Name your event
+                  </label>
+                  <div className="relative">
+                    <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={eventName}
+                      onChange={(e) => setEventName(e.target.value)}
+                      placeholder="e.g. Priya's Wedding \u00b7 TechConf 2026 \u00b7 Rahul's Birthday"
+                      className="w-full pl-10 pr-10 py-3 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground placeholder:text-muted-foreground"
+                      maxLength={80}
+                    />
+                    {eventName && (
+                      <button
+                        onClick={() => setEventName("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Helps you track and manage multiple events separately</p>
+                </div>
+
                 <div className="flex items-center justify-between">
                   <h1 className="text-lg sm:text-xl font-bold text-foreground">Shopping Cart</h1>
                   <button onClick={clearCart} className="text-xs text-muted-foreground hover:text-destructive transition-colors">
@@ -830,103 +917,143 @@ const Cart = () => {
                   </div>
                 )}
 
+                {/* Date Conflict Banner */}
+                {hasConflicts && (
+                  <div className="flex gap-3 p-3.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                    <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-red-800 dark:text-red-300">Date conflict detected</p>
+                      {dateConflicts.map((c, i) => (
+                        <p key={i} className="text-xs text-red-600 dark:text-red-400 mt-0.5">
+                          &ldquo;{c.item1}&rdquo; and &ldquo;{c.item2}&rdquo; have overlapping booking dates
+                        </p>
+                      ))}
+                      <p className="text-[10px] text-red-500 dark:text-red-400/80 mt-1">
+                        Please adjust dates on one of the items before proceeding
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Cart items grouped by vendor */}
                 <div className="space-y-3">
-                  {items.map((item) => {
-                    const itemTotal = getItemTotal(item);
-                    return (
-                      <div key={`${item.id}-${item.variant_id || ''}`} className="bg-background border border-border rounded-xl p-4 sm:p-5">
-                        <div className="flex gap-4">
-                          <button onClick={() => navigate(`/ecommerce/${item.id}`)} className="flex-shrink-0">
-                            {item.image_url ? (
-                              <img src={item.image_url} alt={item.title} className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-border" />
-                            ) : (
-                              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted flex items-center justify-center">
-                                <Package className="h-8 w-8 text-muted-foreground/40" />
-                              </div>
-                            )}
-                          </button>
-
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <button onClick={() => navigate(`/ecommerce/${item.id}`)} className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors line-clamp-2 text-left">
-                                  {item.title}
-                                </button>
-                                {item.variant_label && (
-                                  <Badge variant="secondary" className="mt-1 text-[10px]">{item.variant_label}</Badge>
-                                )}
-                              </div>
-                              <button onClick={() => removeItem(item.id, item.variant_id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0">
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-foreground">{formatItemPrice(item)}</span>
-                              {item.pricing_unit && (
-                                <span className="text-xs text-muted-foreground">/ {item.pricing_unit}</span>
-                              )}
-                            </div>
-
-                            {/* Show booking dates per item */}
-                            {(item.booking_from || item.booking_till) && (
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <CalendarDays className="h-3.5 w-3.5" />
-                                <span>{item.booking_from} → {item.booking_till}</span>
-                                {item.booking_slot && item.booking_slot !== "full_day" && (
-                                  <Badge variant="outline" className="text-[10px] capitalize">{item.booking_slot.replace("_", " ")}</Badge>
-                                )}
-                              </div>
-                            )}
-
-                            <div className="flex items-center justify-between gap-3 flex-wrap">
-                              {isMeasurableUnit(item.pricing_unit) ? (
-                                <div className="space-y-1.5">
-                                  <div className="grid grid-cols-2 gap-2 max-w-[200px]">
-                                    <div className="space-y-0.5">
-                                      <span className="text-[10px] text-muted-foreground">Length</span>
-                                      <Input
-                                        type="number" min={0} step="any"
-                                        value={item.length || ""}
-                                        onChange={e => updateDimensions(item.id, parseFloat(e.target.value) || 0, item.breadth || 0, item.variant_id)}
-                                        className="h-8 text-sm"
-                                        placeholder="L"
-                                      />
-                                    </div>
-                                    <div className="space-y-0.5">
-                                      <span className="text-[10px] text-muted-foreground">Breadth</span>
-                                      <Input
-                                        type="number" min={0} step="any"
-                                        value={item.breadth || ""}
-                                        onChange={e => updateDimensions(item.id, item.length || 0, parseFloat(e.target.value) || 0, item.variant_id)}
-                                        className="h-8 text-sm"
-                                        placeholder="B"
-                                      />
-                                    </div>
-                                  </div>
-                                  {(item.length || 0) > 0 && (item.breadth || 0) > 0 && (
-                                    <p className="text-xs text-muted-foreground">
-                                      Area: <span className="font-medium text-foreground">{item.quantity.toLocaleString()} {item.pricing_unit?.replace("Per ", "")}</span>
-                                    </p>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="flex items-center border border-border rounded-lg overflow-hidden">
-                                  <button onClick={() => updateQuantity(item.id, item.quantity - 1, item.variant_id)} className="px-3 py-1.5 hover:bg-muted transition-colors text-sm font-medium">−</button>
-                                  <span className="px-3 py-1.5 text-sm font-semibold border-x border-border min-w-[40px] text-center">{item.quantity}</span>
-                                  <button onClick={() => updateQuantity(item.id, item.quantity + 1, item.variant_id)} className="px-3 py-1.5 hover:bg-muted transition-colors text-sm font-medium">+</button>
-                                </div>
-                              )}
-
-                              {itemTotal != null && (
-                                <span className="text-base font-bold text-foreground">₹{itemTotal.toLocaleString()}</span>
-                              )}
-                            </div>
+                  {vendorGroups.map((group) => (
+                    <div key={group.vendorId}>
+                      {/* Vendor group header */}
+                      {hasMultipleVendors && (
+                        <div className="flex items-center gap-2.5 mb-2 px-1">
+                          <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                            <Store className="h-3.5 w-3.5 text-muted-foreground" />
                           </div>
+                          <span className="text-sm font-semibold text-foreground">
+                            {group.vendorId === "_platform" ? "Evnting" : vendorNames[group.vendorId] || "Vendor"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground ml-auto">
+                            Subtotal: {"\u20B9"}{group.items.reduce((s, i) => s + ((i.price_value ?? 0) * i.quantity), 0).toLocaleString("en-IN")}
+                          </span>
                         </div>
+                      )}
+
+                      <div className="space-y-3">
+                        {group.items.map((item) => {
+                          const itemTotal = getItemTotal(item);
+                          return (
+                            <div key={`${item.id}-${item.variant_id || ''}`} className="bg-background border border-border rounded-xl p-4 sm:p-5">
+                              <div className="flex gap-4">
+                                <button onClick={() => navigate(`/ecommerce/${item.id}`)} className="flex-shrink-0">
+                                  {item.image_url ? (
+                                    <img src={item.image_url} alt={item.title} className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-border" />
+                                  ) : (
+                                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted flex items-center justify-center">
+                                      <Package className="h-8 w-8 text-muted-foreground/40" />
+                                    </div>
+                                  )}
+                                </button>
+
+                                <div className="flex-1 min-w-0 space-y-2">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                      <button onClick={() => navigate(`/ecommerce/${item.id}`)} className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors line-clamp-2 text-left">
+                                        {item.title}
+                                      </button>
+                                      {item.variant_label && (
+                                        <Badge variant="secondary" className="mt-1 text-[10px]">{item.variant_label}</Badge>
+                                      )}
+                                    </div>
+                                    <button onClick={() => removeItem(item.id, item.variant_id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0">
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-bold text-foreground">{formatItemPrice(item)}</span>
+                                    {item.pricing_unit && (
+                                      <span className="text-xs text-muted-foreground">/ {item.pricing_unit}</span>
+                                    )}
+                                  </div>
+
+                                  {/* Show booking dates per item */}
+                                  {(item.booking_from || item.booking_till) && (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                      <CalendarDays className="h-3.5 w-3.5" />
+                                      <span>{item.booking_from} → {item.booking_till}</span>
+                                      {item.booking_slot && item.booking_slot !== "full_day" && (
+                                        <Badge variant="outline" className="text-[10px] capitalize">{item.booking_slot.replace("_", " ")}</Badge>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                                    {isMeasurableUnit(item.pricing_unit) ? (
+                                      <div className="space-y-1.5">
+                                        <div className="grid grid-cols-2 gap-2 max-w-[200px]">
+                                          <div className="space-y-0.5">
+                                            <span className="text-[10px] text-muted-foreground">Length</span>
+                                            <Input
+                                              type="number" min={0} step="any"
+                                              value={item.length || ""}
+                                              onChange={e => updateDimensions(item.id, parseFloat(e.target.value) || 0, item.breadth || 0, item.variant_id)}
+                                              className="h-8 text-sm"
+                                              placeholder="L"
+                                            />
+                                          </div>
+                                          <div className="space-y-0.5">
+                                            <span className="text-[10px] text-muted-foreground">Breadth</span>
+                                            <Input
+                                              type="number" min={0} step="any"
+                                              value={item.breadth || ""}
+                                              onChange={e => updateDimensions(item.id, item.length || 0, parseFloat(e.target.value) || 0, item.variant_id)}
+                                              className="h-8 text-sm"
+                                              placeholder="B"
+                                            />
+                                          </div>
+                                        </div>
+                                        {(item.length || 0) > 0 && (item.breadth || 0) > 0 && (
+                                          <p className="text-xs text-muted-foreground">
+                                            Area: <span className="font-medium text-foreground">{item.quantity.toLocaleString()} {item.pricing_unit?.replace("Per ", "")}</span>
+                                          </p>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center border border-border rounded-lg overflow-hidden">
+                                        <button onClick={() => updateQuantity(item.id, item.quantity - 1, item.variant_id)} className="px-3 py-1.5 hover:bg-muted transition-colors text-sm font-medium">{"\u2212"}</button>
+                                        <span className="px-3 py-1.5 text-sm font-semibold border-x border-border min-w-[40px] text-center">{item.quantity}</span>
+                                        <button onClick={() => updateQuantity(item.id, item.quantity + 1, item.variant_id)} className="px-3 py-1.5 hover:bg-muted transition-colors text-sm font-medium">+</button>
+                                      </div>
+                                    )}
+
+                                    {itemTotal != null && (
+                                      <span className="text-base font-bold text-foreground">{"\u20B9"}{itemTotal.toLocaleString()}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
 
                 <Button variant="outline" onClick={() => navigate("/ecommerce")} size="sm" className="gap-2 text-sm">
@@ -1111,12 +1238,32 @@ const Cart = () => {
                       </div>
                       <Separator />
 
-                      {/* Show logistics preview if all priced */}
+                      {/* Platform fee + logistics */}
                       {showInstantBookFlow && (
                         <div className="space-y-1.5 text-sm">
+                          {platformFee > 0 && (
+                            <>
+                              <div className="flex justify-between text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  Platform fee
+                                  <span className="relative group/tip inline-flex">
+                                    <Info className="h-3 w-3 text-muted-foreground/50 cursor-help" />
+                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/tip:block bg-foreground text-background text-[10px] rounded-md px-2.5 py-1.5 whitespace-nowrap z-50 shadow-lg">
+                                      Covers platform, support & payment processing
+                                    </span>
+                                  </span>
+                                </span>
+                                <span>{"\u20B9"}{platformFee.toLocaleString("en-IN")}</span>
+                              </div>
+                              <div className="flex justify-between text-muted-foreground">
+                                <span>GST on platform fee (18%)</span>
+                                <span>{"\u20B9"}{Math.round(platformFee * 0.18).toLocaleString("en-IN")}</span>
+                              </div>
+                            </>
+                          )}
                           <div className="flex justify-between text-muted-foreground">
                             <span>+ Manpower (est.)</span>
-                            <span>₹{manpowerFee.toLocaleString()}</span>
+                            <span>{"\u20B9"}{manpowerFee.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between text-muted-foreground">
                             <span>+ Transport (est.)</span>
@@ -1260,8 +1407,10 @@ const Cart = () => {
                             }
                           }
                         }}
-                        className="w-full gap-2"
+                        className={`w-full gap-2 ${hasConflicts ? "opacity-50 cursor-not-allowed" : ""}`}
                         size="lg"
+                        disabled={hasConflicts}
+                        title={hasConflicts ? "Resolve date conflicts to proceed" : ""}
                       >
                         {canInstantBook ? (
                           <><Zap className="h-4 w-4" /> Proceed to Book</>
@@ -1295,7 +1444,9 @@ const Cart = () => {
           </div>
           <Button
             size="sm"
-            className="gap-1.5 h-10 px-5"
+            className={`gap-1.5 h-10 px-5 ${hasConflicts ? "opacity-50" : ""}`}
+            disabled={hasConflicts}
+            title={hasConflicts ? "Resolve date conflicts" : ""}
             onClick={async () => {
               if (!user && !authLoading) {
                 toast({ title: "Please log in", description: "Sign in to send your enquiry.", variant: "destructive" });

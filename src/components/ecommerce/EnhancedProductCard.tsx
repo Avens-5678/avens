@@ -47,10 +47,13 @@ interface EnhancedProductCardProps {
   viewMode: "list" | "two" | "one";
 }
 
-const VendorLabel = ({ name }: { name?: string }) => {
+const VendorLabel = ({ name, vendorId }: { name?: string; vendorId?: string }) => {
   if (!name) return null;
   return (
-    <p className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
+    <p
+      onClick={vendorId ? (e) => { e.stopPropagation(); window.location.href = `/vendor/${vendorId}`; } : undefined}
+      className={`text-[10px] text-muted-foreground truncate flex items-center gap-1 ${vendorId ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+    >
       <Store className="h-3 w-3" /> Sold by: <span className="font-medium text-foreground">{name}</span>
     </p>
   );
@@ -226,7 +229,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         )}
 
         {/* Vendor label */}
-        {rental._source === "vendor" && <VendorLabel name={rental.vendor_name || "Marketplace Seller"} />}
+        {rental._source === "vendor" && <VendorLabel name={rental.vendor_name || "Marketplace Seller"} vendorId={rental.vendor_id} />}
       </CardContent>
     </Card>
   );

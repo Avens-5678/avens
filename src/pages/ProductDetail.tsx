@@ -462,7 +462,7 @@ const ProductDetail = () => {
               {/* Vendor / Sold by */}
               {rental._source === "vendor" && vendorProfile && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); navigate(`/ecommerce?vendor=${rental.vendor_id}`); }}
+                  onClick={(e) => { e.stopPropagation(); navigate(`/vendor/${rental.vendor_id}`); }}
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors group"
                 >
                   <Store className="h-3.5 w-3.5" />

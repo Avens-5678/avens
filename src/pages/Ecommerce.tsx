@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
@@ -6,7 +6,6 @@ import { useCart } from "@/hooks/useCart";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows } from "lucide-react";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
-import VenueCompare from "@/components/ecommerce/VenueCompare";
 import VenueSearchBar from "@/components/ecommerce/VenueSearchBar";
 import CrewSubTabs from "@/components/ecommerce/CrewSubTabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +14,6 @@ import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
-import PromoBannerCarousel from "@/components/ecommerce/PromoBannerCarousel";
 import ServiceSelector from "@/components/ecommerce/ServiceSelector";
 import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
@@ -28,7 +26,12 @@ import CrewCard from "@/components/ecommerce/CrewCard";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { cn } from "@/lib/utils";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
-import LookbookSection from "@/components/ecommerce/LookbookSection";
+
+// Lazy-load components that import supabase directly to prevent
+// bundler initialization order issues in the Ecommerce chunk
+const PromoBannerCarousel = lazy(() => import("@/components/ecommerce/PromoBannerCarousel"));
+const LookbookSection = lazy(() => import("@/components/ecommerce/LookbookSection"));
+const VenueCompare = lazy(() => import("@/components/ecommerce/VenueCompare"));
 
 // Inline Haversine to avoid importing supabase into this chunk
 function _haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -806,19 +809,21 @@ const Ecommerce = () => {
 
       {/* Promotional Banner Carousel */}
       <div id="promo-banner">
-        <PromoBannerCarousel
-        serviceType={activeServiceType}
-        onCtaClick={(ids) => {
-          setPromoFilterIds(ids);
-          setSelectedCategories([]);
-          setActiveQuickCat("");
-          setSearchTerm("");
-          setActiveService("");
-          setTimeout(() => {
-            document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
-          }, 100);
-        }}
-      />
+        <Suspense fallback={null}>
+          <PromoBannerCarousel
+          serviceType={activeServiceType}
+          onCtaClick={(ids) => {
+            setPromoFilterIds(ids);
+            setSelectedCategories([]);
+            setActiveQuickCat("");
+            setSearchTerm("");
+            setActiveService("");
+            setTimeout(() => {
+              document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+          }}
+        />
+        </Suspense>
       </div>
 
       {/* Discovery Rows — shown on default landing */}
@@ -826,7 +831,7 @@ const Ecommerce = () => {
         <>
           <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} featuredItems={featuredProducts} />
           <div className="container mx-auto px-4 sm:px-6">
-            <LookbookSection />
+            <Suspense fallback={null}><LookbookSection /></Suspense>
           </div>
           <HowItWorks />
         </>
@@ -998,12 +1003,14 @@ const Ecommerce = () => {
         </div>
       )}
 
-      <VenueCompare
-        items={compareItems}
-        open={compareOpen}
-        onClose={() => setCompareOpen(false)}
-        onRemove={(id) => setCompareIds((prev) => prev.filter((x) => x !== id))}
-      />
+      <Suspense fallback={null}>
+        <VenueCompare
+          items={compareItems}
+          open={compareOpen}
+          onClose={() => setCompareOpen(false)}
+          onRemove={(id) => setCompareIds((prev) => prev.filter((x) => x !== id))}
+        />
+      </Suspense>
 
       {/* Floating Cart — hidden on mobile where bottom nav takes over */}
       {items.length > 0 && (

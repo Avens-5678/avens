@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   IndianRupee, Package, ClipboardList, Star, ArrowUpRight,
-  ArrowDownRight, MessageSquare, ListTodo, Plus, FileText, AlertTriangle,
+  ArrowDownRight, MessageSquare, ListTodo, Plus, FileText, AlertTriangle, X,
 } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import {
@@ -20,6 +20,18 @@ interface VendorOverviewProps {
 
 const VendorOverview = ({ onNavigate }: VendorOverviewProps) => {
   const { user } = useAuth();
+  const [bankBannerDismissed, setBankBannerDismissed] = useState(() => localStorage.getItem("bank_banner_dismissed") === "true");
+
+  // Check if bank account is missing
+  const { data: profileData } = useQuery({
+    queryKey: ["vendor-profile-bank", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("vendor_status, bank_details").eq("user_id", user!.id).single();
+      return data;
+    },
+  });
+  const showBankBanner = !bankBannerDismissed && profileData?.vendor_status === "approved" && !profileData?.bank_details;
 
   // Fetch orders
   const { data: orders = [] } = useQuery({
@@ -96,6 +108,31 @@ const VendorOverview = ({ onNavigate }: VendorOverviewProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Bank account banner */}
+      {showBankBanner && (
+        <div className="flex items-center gap-3 p-4 rounded-xl border" style={{ backgroundColor: "#FEF3C7", borderColor: "#F59E0B" }}>
+          <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-900">Add your bank account to receive payouts</p>
+            <p className="text-xs text-amber-700 mt-0.5">You won't receive payment for bookings until your bank account is verified</p>
+          </div>
+          <button
+            onClick={() => onNavigate("profile")}
+            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            Add now &rarr;
+          </button>
+          <button
+            onClick={() => { setBankBannerDismissed(true); localStorage.setItem("bank_banner_dismissed", "true"); }}
+            className="text-amber-400 hover:text-amber-600 flex-shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard

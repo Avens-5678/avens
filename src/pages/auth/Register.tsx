@@ -6,53 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UserPlus, ArrowLeft, Building2, User } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { normalizePhoneNumber } from "@/utils/phoneUtils";
 import { motion, AnimatePresence } from "framer-motion";
 
-const baseSchema = {
+const registerSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
   fullName: z.string().min(2, "Full name is required"),
-  phone: z.string().min(10, "Phone number is required (min 10 digits)"),
   role: z.enum(["client", "vendor"], {
     required_error: "Please select a role",
   }),
-  // Client fields
-  eventInterest: z.string().optional(),
-  // Vendor fields
-  companyName: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  gstNumber: z.string().optional(),
-  godownAddress: z.string().optional(),
-};
-
-const registerSchema = z.object(baseSchema).refine((data) => data.password === data.confirmPassword, {
+}).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-}).refine((data) => {
-  if (data.role === "vendor") {
-    return !!data.companyName && data.companyName.length >= 2;
-  }
-  return true;
-}, {
-  message: "Company name is required for vendors",
-  path: ["companyName"],
-}).refine((data) => {
-  if (data.role === "vendor") {
-    return !!data.address && data.address.length >= 5;
-  }
-  return true;
-}, {
-  message: "Address is required for vendors",
-  path: ["address"],
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -69,13 +40,6 @@ const Register = () => {
       password: "",
       confirmPassword: "",
       fullName: "",
-      phone: "",
-      companyName: "",
-      address: "",
-      city: "",
-      gstNumber: "",
-      godownAddress: "",
-      eventInterest: "",
       role: undefined as any,
     },
   });
@@ -106,12 +70,6 @@ const Register = () => {
             user_id: authData.user.id,
             email: values.email,
             full_name: values.fullName,
-            phone: values.phone ? normalizePhoneNumber(values.phone) : null,
-            company_name: values.companyName || null,
-            address: values.address || null,
-            city: values.city || null,
-            gst_number: values.gstNumber || null,
-            godown_address: values.godownAddress || null,
           });
 
         if (profileError) {
@@ -162,10 +120,16 @@ const Register = () => {
 
       toast({
         title: "Registration Successful!",
-        description: "Please check your email to verify your account.",
+        description: values.role === "vendor"
+          ? "Welcome! Let's set up your vendor profile."
+          : "Please check your email to verify your account.",
       });
 
-      navigate("/auth");
+      if (values.role === "vendor") {
+        navigate("/vendor/dashboard");
+      } else {
+        navigate("/ecommerce");
+      }
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({
@@ -284,114 +248,6 @@ const Register = () => {
                         </FormItem>
                       )}
                     />
-
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="+91 XXXXX XXXXX" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Client-specific fields */}
-                    {selectedRole === "client" && (
-                      <FormField
-                        control={form.control}
-                        name="eventInterest"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>What type of event are you planning? (Optional)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., Wedding, Corporate Event, Exhibition" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-
-                    {/* Vendor-specific fields */}
-                    {selectedRole === "vendor" && (
-                      <>
-                        <FormField
-                          control={form.control}
-                          name="companyName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Company / Business Name *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Your business name" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="address"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Business Address *</FormLabel>
-                              <FormControl>
-                                <Textarea placeholder="Full business address" className="min-h-[80px]" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="city"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>City</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="e.g., Hyderabad" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="gstNumber"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>GST Number</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="22AAAAA0000A1Z5" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <FormField
-                          control={form.control}
-                          name="godownAddress"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Godown / Warehouse Address (Optional)</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Warehouse or storage location" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-                    )}
 
                     {/* Password fields */}
                     <div className="grid grid-cols-2 gap-4">

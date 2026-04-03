@@ -80,6 +80,17 @@ const groupByDate = (messages: ChatMessage[]) => {
   return groups;
 };
 
+// ── Skeleton loader for messages ──
+const ChatSkeleton = () => (
+  <div className="space-y-4 py-4">
+    {[65, 45, 80, 35, 60, 50, 40].map((width, i) => (
+      <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
+        <div className="animate-pulse rounded-2xl bg-muted h-10" style={{ width: `${width}%` }} />
+      </div>
+    ))}
+  </div>
+);
+
 // ═══════════════════════════════════════════
 // Main Component
 // ═══════════════════════════════════════════
@@ -102,7 +113,8 @@ const ChatManager = () => {
         .from("chat_conversations")
         .select("*")
         .or(`vendor_id.eq.${user!.id},client_id.eq.${user!.id}`)
-        .order("last_message_at", { ascending: false, nullsFirst: false });
+        .order("last_message_at", { ascending: false, nullsFirst: false })
+        .limit(30);
       if (error) throw error;
       return data as Conversation[];
     },
@@ -297,66 +309,96 @@ const ChatPanel = ({
   const { uploadAndScan, scanning: imageScanning } = useChatImageScan();
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pageOffset, setPageOffset] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // ── Fetch messages ──
-  const { data: messages = [], isLoading } = useQuery({
-    queryKey: ["chat-messages", conversation.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
+  // ── Fetch messages + Realtime (single effect) ──
+  useEffect(() => {
+    if (!conversation.id) return;
+
+    // Clean up previous subscription
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    const fetchMessages = async () => {
+      setLoading(true);
+      const { data } = await supabase
         .from("chat_messages")
         .select("*")
         .eq("conversation_id", conversation.id)
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data as ChatMessage[];
-    },
-  });
+        .order("created_at", { ascending: false })
+        .limit(50);
 
-  // ── Realtime subscription ──
-  useEffect(() => {
+      if (data) {
+        setMessages(data.reverse());
+        setHasMore(data.length === 50);
+        setPageOffset(0);
+      }
+      setLoading(false);
+      setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: "auto" }); }, 100);
+    };
+
+    fetchMessages();
+
+    // Single subscription
     const channel = supabase
-      .channel(`chat-${conversation.id}`)
+      .channel(`chat_messages_${conversation.id}`)
       .on(
         "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "chat_messages",
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
+        { event: "INSERT", schema: "public", table: "chat_messages", filter: `conversation_id=eq.${conversation.id}` },
         (payload) => {
           const newMsg = payload.new as ChatMessage;
-          queryClient.setQueryData<ChatMessage[]>(
-            ["chat-messages", conversation.id],
-            (old) => (old ? [...old, newMsg] : [newMsg])
-          );
+          setMessages((prev) => {
+            if (prev.find((m) => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
+          });
           // Mark as read if from other party
           if (newMsg.sender_id !== user?.id) {
-            supabase
-              .from("chat_messages")
-              .update({ is_read: true } as any)
-              .eq("id", newMsg.id)
-              .then(() => {});
-            // Reset unread count
-            supabase
-              .from("chat_conversations")
-              .update({ unread_count_vendor: 0 } as any)
-              .eq("id", conversation.id)
+            supabase.from("chat_messages").update({ is_read: true } as any).eq("id", newMsg.id).then(() => {});
+            supabase.from("chat_conversations").update({ unread_count_vendor: 0 } as any).eq("id", conversation.id)
               .then(() => queryClient.invalidateQueries({ queryKey: ["chat-conversations"] }));
           }
+          setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, 50);
         }
       )
-      .subscribe();
+      .subscribe((status) => { console.log("Chat subscription status:", status); });
 
-    return () => { supabase.removeChannel(channel); };
-  }, [conversation.id, user?.id, queryClient]);
+    channelRef.current = channel;
 
-  // ── Auto-scroll ──
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [conversation.id]);
+
+  // ── Load earlier messages ──
+  const loadEarlierMessages = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const newOffset = pageOffset + 50;
+    const { data } = await supabase
+      .from("chat_messages")
+      .select("*")
+      .eq("conversation_id", conversation.id)
+      .order("created_at", { ascending: false })
+      .range(newOffset, newOffset + 49);
+    if (data) {
+      setMessages((prev) => [...data.reverse(), ...prev]);
+      setPageOffset(newOffset);
+      if (data.length < 50) setHasMore(false);
+    }
+    setLoadingMore(false);
+  }, [conversation.id, loadingMore, hasMore, pageOffset]);
 
   // ── Mark unread as read on open ──
   useEffect(() => {
@@ -489,12 +531,24 @@ const ChatPanel = ({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-1">
-        {isLoading ? (
-          <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+        {loading ? (
+          <ChatSkeleton />
         ) : messages.length === 0 ? (
-          <div className="text-center py-8 text-xs text-muted-foreground">No messages yet. Start the conversation!</div>
+          <div className="text-center py-12 space-y-2">
+            <MessageSquare className="h-8 w-8 mx-auto text-muted-foreground/30" />
+            <p className="text-sm font-medium text-foreground">No messages yet</p>
+            <p className="text-xs text-muted-foreground">Say hello to start the conversation</p>
+          </div>
         ) : (
-          grouped.map((group) => (
+          <>
+          {hasMore && (
+            <div className="text-center py-2">
+              <button onClick={loadEarlierMessages} disabled={loadingMore} className="text-xs text-primary hover:underline font-medium disabled:opacity-50">
+                {loadingMore ? <><Loader2 className="h-3 w-3 animate-spin inline mr-1" />Loading...</> : "\u2191 Load earlier messages"}
+              </button>
+            </div>
+          )}
+          {grouped.map((group) => (
             <div key={group.label}>
               <div className="flex items-center gap-3 my-3">
                 <div className="flex-1 h-px bg-border" />
@@ -540,7 +594,8 @@ const ChatPanel = ({
                 );
               })}
             </div>
-          ))
+          ))}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>

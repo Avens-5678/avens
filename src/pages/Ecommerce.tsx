@@ -166,6 +166,8 @@ const Ecommerce = () => {
   // Featured items — skip dynamic fetch to avoid supabase in this chunk
   const featuredItemIds: string[] = [];
 
+  const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
+
   // Merge vendor items into rentals format
   const allItems = useMemo(() => {
     const adminItems = (rentals || []).map((r: any) => ({ ...r, _source: "admin" }));
@@ -268,7 +270,6 @@ const Ecommerce = () => {
     date?: string; slot?: string; eventType?: string; guestCount?: number;
   }>({});
   
-  const { location: userLocation, showPrompt, detectGPS, setFromPinCode, clearLocation, dismissPrompt } = useUserLocation();
   const [deliveryRadius, setDeliveryRadius] = useState(() => {
     try { return parseInt(localStorage.getItem("evnting_delivery_radius") || "15") || 15; } catch { return 15; }
   });

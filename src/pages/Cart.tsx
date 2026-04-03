@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isMeasurableUnit, calculateCartTotal, calculateManpowerFee, isInstantBookable } from "@/utils/pricingUtils";
 import { useLogisticsConfig } from "@/hooks/useLogisticsConfig";
 import { useDynamicTransport } from "@/hooks/useDynamicTransport";
-import MapPinPicker from "@/components/ecommerce/MapPinPicker";
+import GoogleMapPicker from "@/components/shared/GoogleMapPicker";
 import PaymentPlanSelector from "@/components/ecommerce/PaymentPlanSelector";
 import { PaymentPlan, MilestoneBreakdown, calculateMilestoneBreakdown, useCreateMilestones } from "@/hooks/usePaymentMilestones";
 import {
@@ -982,19 +982,21 @@ const Cart = () => {
                             <Label className="text-xs">Pin Code</Label>
                             <Input value={eventDetails.venue_pincode} onChange={e => setEventDetails(p => ({ ...p, venue_pincode: e.target.value }))} placeholder="500001" maxLength={6} />
                           </div>
-                          {/* Map Pin Picker for venue delivery */}
-                          <MapPinPicker
-                            label="📍 Pin your venue location"
-                            description="Drop a pin for precise delivery distance & cost calculation."
-                            onLocationSelect={(lat, lng, addr) => {
+                          {/* Google Maps Pin Picker for venue delivery */}
+                          <GoogleMapPicker
+                            label="Pin your venue location"
+                            description="Drop a pin for precise delivery distance & cost calculation"
+                            onLocationSelect={(lat, lng, address, pincode) => {
                               setEventDetails(p => ({
                                 ...p,
                                 venue_lat: lat,
                                 venue_lng: lng,
-                                venue_address_line1: addr || p.venue_address_line1,
+                                venue_address_line1: address || p.venue_address_line1,
+                                venue_pincode: pincode || p.venue_pincode,
                               }));
                             }}
-                            compact
+                            height="260px"
+                            placeholder="Search your venue address or landmark"
                           />
                         </>
                       )}

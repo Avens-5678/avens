@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Save, User, Building2, MapPin, FileText, BadgeCheck, Camera, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import MapPinPicker from "@/components/ecommerce/MapPinPicker";
+import GoogleMapPicker from "@/components/shared/GoogleMapPicker";
 
 const CREW_CATEGORIES = [
   { value: "photographer", label: "Photographer" },
@@ -364,14 +364,15 @@ const VendorProfileSettings = () => {
 
           {/* Map Pin Picker for exact warehouse location */}
           <div className="pt-2">
-            <MapPinPicker
-              label="📍 Pin your exact warehouse location"
-              description="Drop a pin on the map so we can calculate precise delivery distances. Search, use GPS, or click on the map."
+            <GoogleMapPicker
+              label="Pin your exact warehouse location"
+              description="Drop a pin on the map so we can calculate precise delivery distances."
               initialLat={profile.warehouse_lat || undefined}
               initialLng={profile.warehouse_lng || undefined}
-              onLocationSelect={(lat, lng, addr) => {
+              onLocationSelect={(lat, lng) => {
                 setProfile(p => ({ ...p, warehouse_lat: lat, warehouse_lng: lng }));
               }}
+              placeholder="Search your warehouse address"
             />
           </div>
         </CardContent>

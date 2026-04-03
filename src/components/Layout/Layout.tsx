@@ -1,30 +1,24 @@
-import { ReactNode, lazy, Suspense } from "react";
+import { ReactNode } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-
-// Lazy load non-critical UI elements to avoid circular init in main bundle
-const AudioControls = lazy(() => import("@/components/Audio/AudioControls"));
-const AnnouncementBar = lazy(() => import("./AnnouncementBar"));
 
 interface LayoutProps {
   children: ReactNode;
   hideNavbar?: boolean;
 }
 
+// IMPORTANT: Do NOT use React.lazy() or dynamic import() here.
+// Layout is in its own Vite chunk and React.lazy causes __vite_preload
+// to be imported from the index chunk before it's initialized,
+// crashing with "Cannot access '_' before initialization".
+// These components are small — eager import is fine.
+
 const Layout = ({ children, hideNavbar }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col">
-      {!hideNavbar && (
-        <Suspense fallback={null}>
-          <AnnouncementBar />
-        </Suspense>
-      )}
       {!hideNavbar && <Navbar />}
       <main className="flex-1">{children}</main>
       <Footer />
-      <Suspense fallback={null}>
-        <AudioControls />
-      </Suspense>
     </div>
   );
 };

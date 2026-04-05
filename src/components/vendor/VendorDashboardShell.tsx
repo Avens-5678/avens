@@ -216,7 +216,7 @@ const VendorDashboardShell = ({
       </div>
 
       {/* ── Mobile Bottom Tab Bar ── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-card border-t border-border z-40 px-1 py-1 safe-area-bottom">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-card border-t border-border z-40 px-1 py-1" style={{ paddingBottom: "var(--safe-area-bottom)" }}>
         <div className="flex items-center justify-around">
           {primaryItems.map((item) => {
             const Icon = item.icon;

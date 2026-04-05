@@ -665,7 +665,7 @@ const PayrollManager = () => {
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
             <Banknote className="h-4 w-4 text-purple-600" /> Salary Payment History
           </h3>
-          <div className="border border-border rounded-xl overflow-hidden">
+          <div className="border border-border rounded-xl overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -712,7 +712,7 @@ const PayrollManager = () => {
 
       {/* Pay Salary Modal */}
       <Dialog open={!!paySalaryRecord} onOpenChange={(open) => { if (!open) setPaySalaryRecord(null); }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md w-[calc(100vw-2rem)] sm:w-full">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-purple-600" />

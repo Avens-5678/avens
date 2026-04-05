@@ -39,7 +39,7 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="glass-dark sticky top-0 z-50">
+    <nav className="glass-dark sticky top-0 z-50" style={{ paddingTop: "var(--safe-area-top)" }}>
       <div className="container mx-auto px-5 sm:px-6">
         {/* Desktop layout: 3-column grid */}
         <div className="hidden md:grid grid-cols-3 items-center h-16">

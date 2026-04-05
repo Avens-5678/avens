@@ -654,9 +654,11 @@ const Cart = () => {
       }
 
       toast({ title: isInstant ? "Booking Confirmed!" : "Enquiry Sent!", description: isInstant ? "Your booking is confirmed. Vendor will be notified." : "Our team will respond within 24 hours." });
-      await createEventOrder();
-      clearCart();
-      localStorage.removeItem("evnting_event_name");
+      const eoId = await createEventOrder();
+      if (eoId) {
+        clearCart();
+        localStorage.removeItem("evnting_event_name");
+      }
       setCouponApplied(null);
       setCouponDiscount(0);
       setCouponCode("");
@@ -877,8 +879,10 @@ const Cart = () => {
           }
           toast({ title: "Booking Confirmed!", description: "Payment successful. You'll receive a WhatsApp confirmation shortly." });
           const eventOrderId = await createEventOrder(response.razorpay_payment_id, response.razorpay_order_id);
-          clearCart();
-          localStorage.removeItem("evnting_event_name");
+          if (eventOrderId) {
+            clearCart();
+            localStorage.removeItem("evnting_event_name");
+          }
           navigate(eventOrderId ? `/event/${eventOrderId}` : "/ecommerce/orders");
         },
         prefill: {

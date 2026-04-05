@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
 import { MapPin, Navigation, Loader2, Search, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,14 +75,29 @@ const GoogleMapPicker = ({
       return;
     }
 
-    const loader = new Loader({
-      apiKey,
-      version: "weekly",
-      libraries: ["places"],
-    });
+    // Load Google Maps via script tag (Loader class removed in newer versions)
+    const loadScript = (): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        if (window.google?.maps) { resolve(); return; }
+        const existing = document.getElementById("google-maps-script");
+        if (existing) {
+          existing.addEventListener("load", () => resolve());
+          existing.addEventListener("error", reject);
+          return;
+        }
+        const script = document.createElement("script");
+        script.id = "google-maps-script";
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    };
 
-    loader.load().then(() => {
-      if (!mapRef.current) return;
+    loadScript().then(() => {
+      if (!mapRef.current || !window.google) return;
 
       const center = initialLat && initialLng
         ? { lat: initialLat, lng: initialLng }

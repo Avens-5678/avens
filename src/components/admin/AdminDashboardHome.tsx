@@ -193,13 +193,19 @@ const AdminDashboardHome = ({ onNavigate }: Props) => {
                 </div>
                 <div className="flex gap-1.5 flex-shrink-0">
                   <button
-                    onClick={() => handleVerify(item.id, true)}
+                    onClick={() => {
+                      if (!window.confirm(`Approve "${item.name}"? The vendor will be notified via WhatsApp.`)) return;
+                      handleVerify(item.id, true);
+                    }}
                     className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-colors"
                   >
                     Approve
                   </button>
                   <button
-                    onClick={() => handleVerify(item.id, false)}
+                    onClick={() => {
+                      if (!window.confirm(`Reject "${item.name}"? This cannot be undone.`)) return;
+                      handleVerify(item.id, false);
+                    }}
                     className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-semibold rounded-lg transition-colors dark:bg-red-900/30 dark:text-red-400"
                   >
                     Reject

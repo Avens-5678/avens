@@ -190,6 +190,9 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
   }, []);
 
   // OTP state
+  const [otpAttempts, setOtpAttempts] = useState(0);
+  const [otpLocked, setOtpLocked] = useState(false);
+  const [lockoutEnd, setLockoutEnd] = useState<number | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpCountdown, setOtpCountdown] = useState(0);
@@ -282,15 +285,32 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
   const verifyOtp = async () => {
     const token = otp.join("");
     if (token.length !== 6) return;
+    if (otpLocked) {
+      const remaining = lockoutEnd ? Math.ceil((lockoutEnd - Date.now()) / 1000) : 0;
+      setOtpError(`Too many attempts. Try again in ${remaining}s`);
+      return;
+    }
     setOtpVerifying(true);
     setOtpError("");
     try {
       const { error } = await supabase.auth.verifyOtp({ phone: "+91" + formData.phone, token, type: "sms" });
       if (error) {
-        if (error.message.includes("expired")) setOtpError("OTP expired. Please request a new one.");
-        else setOtpError("Incorrect OTP. Please try again.");
+        const newAttempts = otpAttempts + 1;
+        setOtpAttempts(newAttempts);
+        if (newAttempts >= 3) {
+          setOtpLocked(true);
+          const end = Date.now() + 5 * 60 * 1000;
+          setLockoutEnd(end);
+          setTimeout(() => { setOtpLocked(false); setOtpAttempts(0); setLockoutEnd(null); }, 5 * 60 * 1000);
+          setOtpError("Too many failed attempts. Please wait 5 minutes.");
+        } else if (error.message.includes("expired")) {
+          setOtpError("OTP expired. Please request a new one.");
+        } else {
+          setOtpError(`Incorrect OTP. ${3 - newAttempts} attempt${3 - newAttempts !== 1 ? "s" : ""} remaining.`);
+        }
         return;
       }
+      setOtpAttempts(0);
       update({ phone_verified: true });
       setPhoneVerified(true);
       setTimeout(() => {

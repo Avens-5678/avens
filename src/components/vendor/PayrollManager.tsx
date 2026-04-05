@@ -214,12 +214,13 @@ const PayrollManager = () => {
 
   // ── Pay salary via edge function ──
   const handlePaySalary = async () => {
-    if (!user || !paySalaryRecord) return;
+    if (payLoading || !user || !paySalaryRecord) return;
     const emp = employeeMap[paySalaryRecord.employee_id];
     if (!emp) return;
 
     setPayLoading(true);
     const monthStr = `${MONTHS[paySalaryMonth - 1]} ${paySalaryYear}`;
+    const idempotencyKey = `salary_${paySalaryRecord.employee_id}_${monthStr}_${Date.now()}`;
     try {
       const { data, error } = await supabase.functions.invoke("process-salary-payout", {
         body: {
@@ -229,6 +230,7 @@ const PayrollManager = () => {
           month: monthStr,
           notes: paySalaryNotes || null,
           vendor_id: user.id,
+          idempotency_key: idempotencyKey,
         },
       });
       if (error) throw error;

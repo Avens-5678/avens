@@ -75,22 +75,27 @@ const GoogleMapPicker = ({
       return;
     }
 
-    // Load Google Maps via script tag (Loader class removed in newer versions)
+    // Load Google Maps via script tag with callback (Loader class removed in newer versions)
+    const callbackName = "__googleMapsCallback";
     const loadScript = (): Promise<void> => {
       return new Promise((resolve, reject) => {
-        if (window.google?.maps) { resolve(); return; }
+        if (window.google?.maps?.Map) { resolve(); return; }
+        // Use Google's callback param to know exactly when the API is ready
+        (window as any)[callbackName] = () => { resolve(); delete (window as any)[callbackName]; };
         const existing = document.getElementById("google-maps-script");
         if (existing) {
-          existing.addEventListener("load", () => resolve());
-          existing.addEventListener("error", reject);
+          // Script exists — either loaded or loading. Poll for readiness.
+          const check = setInterval(() => {
+            if (window.google?.maps?.Map) { clearInterval(check); resolve(); }
+          }, 100);
+          setTimeout(() => { clearInterval(check); reject(new Error("Google Maps timeout")); }, 10000);
           return;
         }
         const script = document.createElement("script");
         script.id = "google-maps-script";
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=${callbackName}`;
         script.async = true;
         script.defer = true;
-        script.onload = () => resolve();
         script.onerror = reject;
         document.head.appendChild(script);
       });

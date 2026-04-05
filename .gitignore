@@ -26,3 +26,10 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Capacitor native builds
+android/app/build/
+android/.gradle/
+ios/App/Pods/
+ios/App/build/
+*.keystore

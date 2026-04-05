@@ -95,7 +95,7 @@ const AITestingAgent = () => {
         setResults((prev) => [...prev, {
           ...test,
           status: "warning",
-          summary: "AI check failed — verify manually",
+          summary: "AI check failed \u2014 verify manually",
           what_was_checked: test.description,
           potential_issues: [err.message || "Unknown error"],
           suggested_fix: null,

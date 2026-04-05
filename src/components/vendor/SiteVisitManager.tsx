@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { formatWhatsAppPhone } from "@/lib/validatePhone";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,19 +49,11 @@ const SiteVisitManager = () => {
       // WhatsApp: notify customer when site visit is confirmed
       if (result?.status === "confirmed") {
         const visit = visits.find((v: any) => v.id === result.id);
-        if (visit?.customer_phone || visit?.phone) {
-          const phone = (visit.customer_phone || visit.phone || "").replace(/\D/g, "");
-          if (phone) {
-            supabase.functions.invoke("send-whatsapp", {
-              body: {
-                to: `91${phone}`,
-                template_name: "event_reminder",
-                template_params: [visit.customer_name || "Customer", visit.venue_name || "Venue Site Visit", visit.visit_date || "Soon"],
-                recipient_name: visit.customer_name,
-                recipient_type: "customer",
-              },
-            }).catch(() => {});
-          }
+        const phone = formatWhatsAppPhone(visit?.customer_phone || visit?.phone);
+        if (phone) {
+          supabase.functions.invoke("send-whatsapp", {
+            body: { to: phone, template_name: "event_reminder", template_params: [visit.customer_name || "Customer", visit.venue_name || "Venue Site Visit", visit.visit_date || "Soon"], recipient_name: visit.customer_name, recipient_type: "customer" },
+          }).catch(() => {});
         }
       }
     },

@@ -16,11 +16,13 @@ const ClientDashboardHome = ({ onTabChange }: Props) => {
   const [metrics, setMetrics] = useState({ active: 0, spent: 0, upcoming: 0, reviews: 0 });
   const [upcomingBookings, setUpcomingBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
       setLoading(true);
+      setError(null);
       const today = new Date().toISOString().split("T")[0];
 
       const [profileRes, activeRes, spentRes, upcomingRes, reviewsRes, bookingsRes] = await Promise.all([
@@ -42,6 +44,10 @@ const ClientDashboardHome = ({ onTabChange }: Props) => {
       });
       setUpcomingBookings(bookingsRes.data || []);
       setLoading(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to load dashboard");
+      setLoading(false);
+    }
     };
     load();
   }, [user]);
@@ -77,6 +83,15 @@ const ClientDashboardHome = ({ onTabChange }: Props) => {
           {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-muted rounded-xl" />)}
         </div>
         <div className="h-48 bg-muted rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-sm text-destructive mb-2">Failed to load dashboard</p>
+        <button onClick={() => window.location.reload()} className="text-xs text-primary hover:text-primary/80">Retry</button>
       </div>
     );
   }

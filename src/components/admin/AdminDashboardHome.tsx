@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatWhatsAppPhone } from "@/lib/validatePhone";
 import { useAuth } from "@/hooks/useAuth";
 import { IndianRupee, Users, ShieldCheck, Package, CalendarDays, TrendingUp, ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -15,10 +16,12 @@ const AdminDashboardHome = ({ onNavigate }: Props) => {
   const [pendingItems, setPendingItems] = useState<any[]>([]);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [adminName, setAdminName] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      setError(null);
       const monthStart = new Date();
       monthStart.setDate(1);
       monthStart.setHours(0, 0, 0, 0);
@@ -62,6 +65,10 @@ const AdminDashboardHome = ({ onNavigate }: Props) => {
       setPendingItems(pendingRes.data || []);
       setRecentOrders(recentRes.data || []);
       setLoading(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to load dashboard");
+      setLoading(false);
+    }
     };
     load();
   }, [user]);
@@ -80,15 +87,10 @@ const AdminDashboardHome = ({ onNavigate }: Props) => {
     if (verified && item?.vendor_id) {
       supabase.from("profiles").select("phone, company_name, full_name").eq("user_id", item.vendor_id).maybeSingle()
         .then(({ data: vp }) => {
-          if (!vp?.phone) return;
+          const phone = formatWhatsAppPhone(vp?.phone);
+          if (!phone) return;
           supabase.functions.invoke("send-whatsapp", {
-            body: {
-              to: `91${vp.phone.replace(/\D/g, "")}`,
-              template_name: "vendor_approved",
-              template_params: [vp.company_name || vp.full_name || "Vendor", "evnting.com/vendor/dashboard"],
-              recipient_name: vp.company_name || vp.full_name,
-              recipient_type: "vendor",
-            },
+            body: { to: phone, template_name: "vendor_approved", template_params: [vp?.company_name || vp?.full_name || "Vendor", "evnting.com/vendor/dashboard"], recipient_name: vp?.company_name || vp?.full_name, recipient_type: "vendor" },
           }).catch(() => {});
         });
     }
@@ -108,6 +110,15 @@ const AdminDashboardHome = ({ onNavigate }: Props) => {
           {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-muted rounded-xl" />)}
         </div>
         <div className="h-64 bg-muted rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-sm text-destructive mb-2">Failed to load dashboard</p>
+        <button onClick={() => window.location.reload()} className="text-xs text-primary hover:text-primary/80">Retry</button>
       </div>
     );
   }

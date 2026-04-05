@@ -58,27 +58,27 @@ registerFeature({
   id: "cart_google_maps",
   group: "Cart & Checkout",
   name: "Cart — Google Maps address picker",
-  description: "Google Maps (not Leaflet). Places autocomplete. GPS button. Pin drop. Confirmation card. venue_lat/lng saved.",
+  description: "IMPLEMENTED: Script tag loading with callback= param (no deprecated Loader class). MAP_STYLE array for silver theme. google.maps.places.Autocomplete restricted to India (componentRestrictions: {country:'in'}). GPS via navigator.geolocation.getCurrentPosition with 10s timeout. Marker draggable:true with orange icon (#F97316). reverseGeocode via google.maps.Geocoder extracts formatted_address + postal_code. Confirmation card with confirmed state toggle.",
   route: "/cart",
-  implementation: "GoogleMapPicker.tsx with @googlemaps/js-api-loader, Places autocomplete",
+  implementation: "GoogleMapPicker.tsx: script tag + callback loading, MAP_STYLE, Places Autocomplete country:in, GPS handler, draggable Marker, Geocoder reverseGeocode, confirmed state card",
 });
 
 registerFeature({
   id: "checkout_flow",
   group: "Cart & Checkout",
   name: "Checkout — Razorpay payment flow",
-  description: "Razorpay modal -> createEventOrder -> event_orders + vendor_sub_orders -> WhatsApp -> cart cleared -> /event/:id",
+  description: "IMPLEMENTED: window.Razorpay modal opens after create-razorpay-order edge function. handler async verifies via verify-razorpay-payment. createEventOrder() inserts event_orders (customer_id, total_amount, platform_fee, razorpay_payment_id) then vendor_sub_orders per vendor. WhatsApp sent via formatWhatsAppPhone validation + send-whatsapp edge function (non-blocking). clearCart only called AFTER createEventOrder returns valid ID. Navigate to /event/:id. 75+ error handling lines in Cart.tsx.",
   route: "/cart",
-  implementation: "Cart.tsx createEventOrder after Razorpay, event_orders + vendor_sub_orders + send-whatsapp",
+  implementation: "Cart.tsx: createEventOrder inserts event_orders+vendor_sub_orders, Razorpay handler with verify edge function, formatWhatsAppPhone before all sends, clearCart guarded by createEventOrder success",
 });
 
 registerFeature({
   id: "my_event_page",
   group: "Cart & Checkout",
   name: "My Event page post-checkout",
-  description: "/event/:id shows event name, payment card, progress bar, vendor sub-orders with status, Message vendor buttons.",
+  description: "IMPLEMENTED: event_orders fetch by eventId .single(). vendor_sub_orders fetch by parent_order_id .order(created_at). Vendor profiles batch query .in('user_id', vIds) with dedup via new Set. Progress bar: confirmedCount/subOrders.length * 100%. Status badges: emerald(confirmed/completed), amber(pending/in_progress), red(cancelled). Message button opens wa.me with order ID. Skeleton loading state. 404 fallback for missing events.",
   route: "/event/[id]",
-  implementation: "MyEventPage.tsx fetching event_orders + vendor_sub_orders + profiles",
+  implementation: "MyEventPage.tsx: event_orders.eq(id,eventId).single(), vendor_sub_orders.eq(parent_order_id), profiles.in(user_id,vIds), progress bar %, statusColor map, wa.me link, skeleton + 404",
 });
 
 registerFeature({

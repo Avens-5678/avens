@@ -4,9 +4,9 @@ registerFeature({
   id: "admin_dashboard",
   group: "Admin Dashboard",
   name: "Admin dashboard — overview",
-  description: "4 metrics (Revenue, Vendors, Pending, Orders). Pending approvals with Approve/Reject + WhatsApp. Recent orders table. Platform stats.",
+  description: "IMPLEMENTED: 8 parallel Supabase queries via Promise.all (profile, revenue SUM platform_fee, vendors count, pending vendor_inventory is_verified=false, orders count, listings count, month orders, recent 10 orders). handleVerify updates vendor_inventory.is_verified + verified_at with window.confirm before action. WhatsApp via formatWhatsAppPhone + send-whatsapp edge function. Error state with try-catch + Retry button. Skeleton loading. Platform stats row (listings, month orders, avg order).",
   route: "/admin",
-  implementation: "AdminDashboardHome.tsx, handleVerify + WhatsApp, recent orders",
+  implementation: "AdminDashboardHome.tsx: 8 Promise.all queries, handleVerify with confirm + WhatsApp, error/loading states, recent orders table, platform stats",
 });
 
 registerFeature({

@@ -22,18 +22,18 @@ registerFeature({
   id: "search_filters",
   group: "Ecommerce",
   name: "Search filters sidebar",
-  description: "Category, location, price range, availability date filter (grays out booked items via rental_orders), sort dropdown (Relevance/Price/Rating/Newest)",
+  description: "IMPLEMENTED: availabilityDate useState<Date|null> queries rental_orders for unavailable IDs, marks items with _isUnavailable flag, sorts available-first. Sort dropdown with sortBy state (relevance/price_low/price_high/rating/newest). Category/city/price checkboxes filter via selectedCategories/selectedCities/selectedPriceRanges states. activeFilterCount tracks total. clearAllFilters resets all.",
   route: "/ecommerce",
-  implementation: "Ecommerce.tsx filter sidebar, availabilityDate, fetchUnavailableIds",
+  implementation: "Ecommerce.tsx: availabilityDate + fetchUnavailableIds useEffect, sortBy useMemo switch, FilterSection components, activeFilterCount, clearAllFilters",
 });
 
 registerFeature({
   id: "product_detail",
   group: "Ecommerce",
   name: "Product detail page",
-  description: "Image gallery with thumbnails + fullscreen. Date picker with unavailable dates red (rental_orders). Live price calc. Vendor info card. Reviews. Mobile sticky CTA.",
+  description: "Image gallery IMPLEMENTED: currentImageIndex state + displayImages from selectedVariant.image_urls with thumbnail strip. Date picker IMPLEMENTED: shadcn Calendar with bookingFrom/bookingTill/fromOpen/tillOpen states, unavailable dates from rental_sub_orders check_in/check_out. Vendor card IMPLEMENTED: useVendorProfile(vendorId) hook. Mobile sticky bar IMPLEMENTED: showStickyBar via IntersectionObserver on ctaRef. Add to Cart IMPLEMENTED: handleAddToCart with computedArea for measurable items. 14+ try/catch/toast/error handling lines.",
   route: "/ecommerce/[id]",
-  implementation: "ProductDetail.tsx with shadcn Calendar, unavailableDates, vendor from profiles, rental_reviews",
+  implementation: "ProductDetail.tsx with shadcn Calendar, useVendorProfile hook, IntersectionObserver sticky bar, handleAddToCart, rental_sub_orders unavailability query",
 });
 
 registerFeature({

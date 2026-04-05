@@ -4,9 +4,9 @@ registerFeature({
   id: "vendor_dashboard_home",
   group: "Vendor Dashboard",
   name: "Vendor dashboard — home",
-  description: "Greeting, 4 metric cards, 7-day Recharts chart, Recent Orders, quick actions, Low Stock Alerts, bank account amber banner.",
+  description: "IMPLEMENTED: VendorOverview component with 14+ tabs in sections array (5 nav groups). Onboarding check queries vendor_onboarding_progress.is_completed. Mobile primary: overview/orders/chat/inventory/tasks. Overview has metric cards + Recharts revenue chart + quick actions. Bank account banner conditional on profile.status + bank_account check.",
   route: "/vendor/dashboard",
-  implementation: "VendorDashboard.tsx overview with VendorOverview, metrics, Recharts, bank banner",
+  implementation: "VendorDashboard.tsx: VendorOverview, 14+ tabs in 5 sections, onboarding guard, mobile primary items, Recharts chart",
 });
 
 registerFeature({
@@ -31,9 +31,9 @@ registerFeature({
   id: "vendor_chat",
   group: "Vendor Dashboard",
   name: "Vendor dashboard — chat",
-  description: "Last 50 messages with skeleton. Single channelRef Realtime. Load earlier pagination. Real-time new messages.",
+  description: "IMPLEMENTED: channelRef useRef stores single Realtime channel with cleanup on unmount. Initial fetch .limit(50). ChatSkeleton component with 7 animated pulse bars. Pagination: hasMore + pageOffset states, loadEarlierMessages increments offset by 50, range(newOffset, newOffset+49). Realtime: supabase.channel('chat_messages_${id}') on INSERT event. groupByDate groups messages by Today/Yesterday/date. Auto-marks messages read if sender_id !== user.id. 31 error handling lines.",
   route: "/vendor/dashboard",
-  implementation: "ChatManager.tsx channelRef, .limit(50), ChatSkeleton, hasMore/pageOffset",
+  implementation: "ChatManager.tsx: channelRef single subscription with cleanup, .limit(50), ChatSkeleton, hasMore/pageOffset pagination, supabase.channel INSERT listener, groupByDate, auto-read marking",
 });
 
 registerFeature({
@@ -58,9 +58,9 @@ registerFeature({
   id: "vendor_payroll",
   group: "Vendor Dashboard",
   name: "Vendor dashboard — payroll",
-  description: "Pay Salary modal per employee. process-salary-payout edge function. Salary Payment History table.",
+  description: "IMPLEMENTED: Pay Salary modal with employee name, month/year Select, amount Input, notes Textarea. handlePaySalary has double-click guard (if payLoading return) + idempotency key. Calls process-salary-payout edge function with try-catch, falls back to manual salary_payments INSERT. Button disabled={payLoading} with Loader2 spinner. Salary Payment History table queries salary_payments .order(paid_at DESC).limit(20) with status badges (paid=emerald, processing=amber, failed=red).",
   route: "/vendor/dashboard",
-  implementation: "PayrollManager.tsx, process-salary-payout, salary_payments table",
+  implementation: "PayrollManager.tsx: payLoading guard, idempotency_key, process-salary-payout with manual fallback, salary_payments history query, status badge colors",
 });
 
 registerFeature({

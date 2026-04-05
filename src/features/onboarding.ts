@@ -4,9 +4,9 @@ registerFeature({
   id: "onboarding_wizard",
   group: "Vendor Onboarding",
   name: "Onboarding — 7-step wizard",
-  description: "Progress bar (Step X of 7), back button from step 2+. Progress saves to vendor_onboarding_progress. Resumable on refresh.",
+  description: "IMPLEMENTED: TOTAL_STEPS=7 constant, currentStep state 1-7. Progress persistence via vendor_onboarding_progress table upsert with current_step + onboarding_data fields. Resume on mount by querying saved step. Back button from step 2+. OTP has 3-attempt lockout with 5-min cooldown (otpAttempts/otpLocked/lockoutEnd states). File uploads have size validation (2MB passport, 5MB shop). Step 6 requires aadhaar_url && pan_url before Next.",
   route: "/vendor/onboarding",
-  implementation: "VendorOnboarding.tsx with vendor_onboarding_progress upsert, resume on mount",
+  implementation: "VendorOnboardingWizard.tsx: TOTAL_STEPS=7, vendor_onboarding_progress upsert/resume, OTP lockout (otpAttempts>=3), upload size checks, canProceed guards",
 });
 
 registerFeature({

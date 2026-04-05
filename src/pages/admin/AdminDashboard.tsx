@@ -71,6 +71,7 @@ import AdminCityManager from "@/components/admin/AdminCityManager";
 import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import AdminDashboardHome from "@/components/admin/AdminDashboardHome";
+import AITestingAgent from "@/components/admin/AITestingAgent";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface AdminDashboardProps {
@@ -168,6 +169,7 @@ const menuGroups: MenuGroup[] = [
   {
     icon: Settings, label: "Settings", value: "settings-group",
     subTabs: [
+      { label: "AI Testing", value: "ai-testing" },
       { label: "Integrations", value: "integrations" },
       { label: "Profile", value: "profile" },
     ],
@@ -422,6 +424,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         );
       case "faq":
         return <FAQManager />;
+      case "ai-testing":
+        return <AITestingAgent />;
       case "integrations":
         return <IntegrationTester />;
       case "audio":

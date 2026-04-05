@@ -67,12 +67,31 @@ const AdminDashboardHome = ({ onNavigate }: Props) => {
   }, [user]);
 
   const handleVerify = async (id: string, verified: boolean) => {
+    // Find the item before removing from list (need vendor_id for notification)
+    const item = pendingItems.find((i) => i.id === id);
     await supabase.from("vendor_inventory").update({
       is_verified: verified,
       verified_at: verified ? new Date().toISOString() : null,
     } as any).eq("id", id);
     setPendingItems((prev) => prev.filter((i) => i.id !== id));
     setMetrics((prev) => ({ ...prev, pendingItems: prev.pendingItems - 1 }));
+
+    // WhatsApp: notify vendor their listing was approved
+    if (verified && item?.vendor_id) {
+      supabase.from("profiles").select("phone, company_name, full_name").eq("user_id", item.vendor_id).maybeSingle()
+        .then(({ data: vp }) => {
+          if (!vp?.phone) return;
+          supabase.functions.invoke("send-whatsapp", {
+            body: {
+              to: `91${vp.phone.replace(/\D/g, "")}`,
+              template_name: "vendor_approved",
+              template_params: [vp.company_name || vp.full_name || "Vendor", "evnting.com/vendor/dashboard"],
+              recipient_name: vp.company_name || vp.full_name,
+              recipient_type: "vendor",
+            },
+          }).catch(() => {});
+        });
+    }
   };
 
   const statusColor = (s: string) => {

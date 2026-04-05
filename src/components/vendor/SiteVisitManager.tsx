@@ -39,10 +39,30 @@ const SiteVisitManager = () => {
         .update({ visit_status: status })
         .eq("id", id);
       if (error) throw error;
+      return { id, status };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["site_visits_vendor"] });
       toast({ title: "Visit Updated" });
+
+      // WhatsApp: notify customer when site visit is confirmed
+      if (result?.status === "confirmed") {
+        const visit = visits.find((v: any) => v.id === result.id);
+        if (visit?.customer_phone || visit?.phone) {
+          const phone = (visit.customer_phone || visit.phone || "").replace(/\D/g, "");
+          if (phone) {
+            supabase.functions.invoke("send-whatsapp", {
+              body: {
+                to: `91${phone}`,
+                template_name: "event_reminder",
+                template_params: [visit.customer_name || "Customer", visit.venue_name || "Venue Site Visit", visit.visit_date || "Soon"],
+                recipient_name: visit.customer_name,
+                recipient_type: "customer",
+              },
+            }).catch(() => {});
+          }
+        }
+      }
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });

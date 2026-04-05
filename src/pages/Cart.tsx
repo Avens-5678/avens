@@ -378,6 +378,42 @@ const Cart = () => {
         status: "pending",
       }));
       await supabase.from("vendor_sub_orders").insert(subs as any);
+
+      // WhatsApp: notify each vendor about their sub-order (fire-and-forget)
+      for (const sub of subs) {
+        if (!sub.vendor_id) continue;
+        supabase.from("profiles").select("phone, company_name, full_name").eq("user_id", sub.vendor_id).maybeSingle()
+          .then(({ data: vp }) => {
+            if (!vp?.phone) return;
+            const vPhone = vp.phone.replace(/\D/g, "");
+            const vName = vp.company_name || vp.full_name || "Vendor";
+            const itemsSummary = (sub.items as any[]).map((i: any) => i.title).slice(0, 3).join(", ");
+            supabase.functions.invoke("send-whatsapp", {
+              body: {
+                to: `91${vPhone}`,
+                template_name: "new_order_vendor",
+                template_params: [vName, profileData?.full_name || "Customer", derivedStartDate || "TBD", itemsSummary],
+                recipient_name: vName,
+                recipient_type: "vendor",
+              },
+            }).catch(() => {});
+          });
+      }
+
+      // WhatsApp: confirm booking to customer
+      if (paymentId && profileData?.phone) {
+        const custPhone = profileData.phone.replace(/\D/g, "");
+        supabase.functions.invoke("send-whatsapp", {
+          body: {
+            to: `91${custPhone}`,
+            template_name: "booking_confirmed",
+            template_params: [profileData.full_name || "Customer", evName, `\u20B9${Math.round(grandTotal).toLocaleString("en-IN")}`, eo.id.slice(0, 8).toUpperCase()],
+            recipient_name: profileData.full_name,
+            recipient_type: "customer",
+          },
+        }).catch(() => {});
+      }
+
       return eo.id as string;
     } catch { return null; }
   };

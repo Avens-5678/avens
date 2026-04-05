@@ -10,6 +10,11 @@ import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
+import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
+import { useStatusBar } from "@/hooks/useStatusBar";
+
+/** Runs native platform hooks inside BrowserRouter context */
+const NativeBootstrap = () => { useAndroidBackButton(); useStatusBar(); return null; };
 
 // IMPORTANT: All React.lazy() calls MUST be inside this function, NOT at module level.
 // Vite wraps dynamic import() with __vite_preload which is a const defined AFTER
@@ -59,6 +64,7 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <NativeBootstrap />
         <ScrollToTop />
         <AudioProvider>
           <ErrorBoundary>

@@ -17,8 +17,8 @@ const MobileTabBar = () => {
   const cartCount = items.length;
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-background border-t border-border md:hidden">
-      <div className="flex items-center justify-around h-[60px] pb-safe max-w-lg mx-auto">
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-background border-t border-border md:hidden" style={{ paddingBottom: "var(--safe-area-bottom)" }}>
+      <div className="flex items-center justify-around h-[60px] max-w-lg mx-auto">
         {tabs.map(({ label, icon: Icon, path, match }) => {
           const active = match(pathname);
           const isCart = label === "Cart";

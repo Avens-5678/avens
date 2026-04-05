@@ -232,7 +232,7 @@ const EcommerceHeader = ({
   const showSuggestionsView = showDropdown && searchTerm.trim().length > 0 && flatSuggestions.length > 0;
 
   return (
-    <div className={`bg-foreground text-primary-foreground sticky top-0 z-50 transition-all duration-200 ${scrolled ? "shadow-lg shadow-black/20" : ""}`}>
+    <div className={`bg-foreground text-primary-foreground sticky top-0 z-50 transition-all duration-200 ${scrolled ? "shadow-lg shadow-black/20" : ""}`} style={{ paddingTop: "var(--safe-area-top)" }}>
       <div className="container mx-auto px-4 sm:px-6">
         {/* Mobile: two rows */}
         <div className="sm:hidden">

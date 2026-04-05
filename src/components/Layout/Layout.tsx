@@ -18,7 +18,7 @@ const Layout = ({ children, hideNavbar }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col">
       {!hideNavbar && <Navbar />}
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
+      <main className="flex-1 md:pb-0" style={{ paddingBottom: "calc(60px + var(--safe-area-bottom))" }}>{children}</main>
       <Footer />
       <MobileTabBar />
     </div>

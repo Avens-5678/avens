@@ -838,15 +838,13 @@ const Ecommerce = () => {
       />
 
       {/* Location + Radius bar */}
-      {userLocation && (
-        <LocationRadiusBar
-          location={userLocation}
-          radius={deliveryRadius}
-          onRadiusChange={handleRadiusChange}
-          onDetectGPS={detectGPS}
-          onPinCode={(pin) => setFromPinCode(pin).catch(() => {})}
-        />
-      )}
+      <LocationRadiusBar
+        location={userLocation}
+        radius={deliveryRadius}
+        onRadiusChange={handleRadiusChange}
+        onDetectGPS={detectGPS}
+        onPinCode={(pin) => setFromPinCode(pin).catch(() => {})}
+      />
 
       {/* Service Selection Strip */}
       <ServiceSelector activeService={activeService} onServiceChange={(service) => {

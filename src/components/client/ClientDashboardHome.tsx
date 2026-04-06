@@ -23,6 +23,7 @@ const ClientDashboardHome = ({ onTabChange }: Props) => {
     const load = async () => {
       setLoading(true);
       setError(null);
+      try {
       const today = new Date().toISOString().split("T")[0];
 
       const [profileRes, activeRes, spentRes, upcomingRes, reviewsRes, bookingsRes] = await Promise.all([

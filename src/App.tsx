@@ -75,6 +75,11 @@ function createLazyRoutes() {
     EventPlanner: lazy(() => import("./pages/EventPlanner")),
     VendorStorefront: lazy(() => import("./pages/VendorStorefront")),
     MyEventPage: lazy(() => import("./pages/MyEventPage")),
+    EssentialsPage: lazy(() => import("./pages/EssentialsPage")),
+    EssentialsCart: lazy(() => import("./pages/EssentialsCart")),
+    EssentialProductDetail: lazy(() => import("./pages/EssentialProductDetail")),
+    EssentialOrders: lazy(() => import("./pages/EssentialOrders")),
+    EssentialOrderTracking: lazy(() => import("./pages/EssentialOrderTracking")),
   };
 }
 
@@ -118,6 +123,11 @@ const App = () => {
               <Route path="/ecommerce/:id" element={<R.ProductDetail />} />
               <Route path="/vendor/:vendorId" element={<R.VendorStorefront />} />
               <Route path="/event/:eventId" element={<R.MyEventPage />} />
+              <Route path="/essentials" element={<R.EssentialsPage />} />
+              <Route path="/essentials/cart" element={<R.EssentialsCart />} />
+              <Route path="/essentials/product/:id" element={<R.EssentialProductDetail />} />
+              <Route path="/essentials/orders" element={<R.EssentialOrders />} />
+              <Route path="/essentials/orders/:id" element={<R.EssentialOrderTracking />} />
               <Route path="/cart" element={<R.Cart />} />
               <Route path="/payment-callback" element={<R.PaymentCallback />} />
               <Route path="/event-planner" element={<R.EventPlanner />} />

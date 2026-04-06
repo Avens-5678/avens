@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Evnting</string>
+	<string>Evnting</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -18,10 +18,29 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>evnting</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Evnting needs camera access to take product photos</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID for quick login to Evnting</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Evnting uses your location to find nearby vendors and calculate delivery distances</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Evnting needs to save photos to your library</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Evnting needs photo library access to upload product images</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -45,24 +64,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Evnting needs camera access to take product photos</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Evnting needs photo library access to upload product images</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Evnting needs to save photos to your library</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Evnting uses your location to find nearby vendors and calculate delivery distances</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>Use Face ID for quick login to Evnting</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>evnting</string>
-			</array>
-		</dict>
-	</array>
 </dict>
 </plist>

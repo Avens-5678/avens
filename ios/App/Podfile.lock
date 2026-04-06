@@ -26,18 +26,18 @@ PODS:
   - IONGeolocationLib (2.1.0)
 
 DEPENDENCIES:
-  - "Capacitor (from `../../../../../node_modules/@capacitor/ios`)"
-  - "CapacitorApp (from `../../../../../node_modules/@capacitor/app`)"
-  - "CapacitorBrowser (from `../../../../../node_modules/@capacitor/browser`)"
-  - "CapacitorCamera (from `../../../../../node_modules/@capacitor/camera`)"
-  - "CapacitorCordova (from `../../../../../node_modules/@capacitor/ios`)"
-  - "CapacitorGeolocation (from `../../../../../node_modules/@capacitor/geolocation`)"
-  - CapacitorNativeBiometric (from `../../../../../node_modules/capacitor-native-biometric`)
-  - "CapacitorNetwork (from `../../../../../node_modules/@capacitor/network`)"
-  - "CapacitorPushNotifications (from `../../../../../node_modules/@capacitor/push-notifications`)"
-  - "CapacitorShare (from `../../../../../node_modules/@capacitor/share`)"
-  - "CapacitorSplashScreen (from `../../../../../node_modules/@capacitor/splash-screen`)"
-  - "CapacitorStatusBar (from `../../../../../node_modules/@capacitor/status-bar`)"
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
+  - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorGeolocation (from `../../node_modules/@capacitor/geolocation`)"
+  - CapacitorNativeBiometric (from `../../node_modules/capacitor-native-biometric`)
+  - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
+  - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
+  - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
+  - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
+  - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
 
 SPEC REPOS:
   trunk:
@@ -45,29 +45,29 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Capacitor:
-    :path: "../../../../../node_modules/@capacitor/ios"
+    :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
-    :path: "../../../../../node_modules/@capacitor/app"
+    :path: "../../node_modules/@capacitor/app"
   CapacitorBrowser:
-    :path: "../../../../../node_modules/@capacitor/browser"
+    :path: "../../node_modules/@capacitor/browser"
   CapacitorCamera:
-    :path: "../../../../../node_modules/@capacitor/camera"
+    :path: "../../node_modules/@capacitor/camera"
   CapacitorCordova:
-    :path: "../../../../../node_modules/@capacitor/ios"
+    :path: "../../node_modules/@capacitor/ios"
   CapacitorGeolocation:
-    :path: "../../../../../node_modules/@capacitor/geolocation"
+    :path: "../../node_modules/@capacitor/geolocation"
   CapacitorNativeBiometric:
-    :path: "../../../../../node_modules/capacitor-native-biometric"
+    :path: "../../node_modules/capacitor-native-biometric"
   CapacitorNetwork:
-    :path: "../../../../../node_modules/@capacitor/network"
+    :path: "../../node_modules/@capacitor/network"
   CapacitorPushNotifications:
-    :path: "../../../../../node_modules/@capacitor/push-notifications"
+    :path: "../../node_modules/@capacitor/push-notifications"
   CapacitorShare:
-    :path: "../../../../../node_modules/@capacitor/share"
+    :path: "../../node_modules/@capacitor/share"
   CapacitorSplashScreen:
-    :path: "../../../../../node_modules/@capacitor/splash-screen"
+    :path: "../../node_modules/@capacitor/splash-screen"
   CapacitorStatusBar:
-    :path: "../../../../../node_modules/@capacitor/status-bar"
+    :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
   Capacitor: 22e541237135648c9aa736232bb4d2eec35fddcb
@@ -84,6 +84,6 @@ SPEC CHECKSUMS:
   CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
   IONGeolocationLib: 6a7b6f76063fb1b01cfb14fae7d0f526e3c9b271
 
-PODFILE CHECKSUM: 41681cb916e7553d3679423f28fce1561afcb80b
+PODFILE CHECKSUM: 224716b230c86f79af08c37dd9a5dac1e898a39a
 
 COCOAPODS: 1.16.2

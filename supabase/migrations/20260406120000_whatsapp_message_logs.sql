@@ -43,6 +43,13 @@ CREATE POLICY "Service role access to whatsapp_message_logs"
 -- Enable realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE public.whatsapp_message_logs;
 
+-- Expand check constraints to allow incoming messages
+ALTER TABLE public.whatsapp_message_logs DROP CONSTRAINT IF EXISTS whatsapp_message_logs_message_type_check;
+ALTER TABLE public.whatsapp_message_logs ADD CONSTRAINT whatsapp_message_logs_message_type_check CHECK (message_type = ANY (ARRAY['template', 'broadcast', 'reply', 'incoming']));
+
+ALTER TABLE public.whatsapp_message_logs DROP CONSTRAINT IF EXISTS whatsapp_message_logs_status_check;
+ALTER TABLE public.whatsapp_message_logs ADD CONSTRAINT whatsapp_message_logs_status_check CHECK (status = ANY (ARRAY['queued', 'sent', 'delivered', 'read', 'failed', 'received']));
+
 -- Index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_wml_meta_message_id ON public.whatsapp_message_logs(meta_message_id);
 CREATE INDEX IF NOT EXISTS idx_wml_recipient_phone ON public.whatsapp_message_logs(recipient_phone);

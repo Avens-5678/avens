@@ -12,7 +12,6 @@ import CrewSubTabs from "@/components/ecommerce/CrewSubTabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
-import TrustStrip from "@/components/ecommerce/TrustStrip";
 import EcommerceBreadcrumbs from "@/components/ecommerce/EcommerceBreadcrumbs";
 import EnhancedProductCard from "@/components/ecommerce/EnhancedProductCard";
 import ServiceSelector from "@/components/ecommerce/ServiceSelector";
@@ -885,9 +884,6 @@ const Ecommerce = () => {
           activeService={activeServiceType}
         />
       )}
-
-      {/* Stats/Social Proof Bar - only on discovery view */}
-      {isDiscoveryView && <TrustStrip />}
 
       {/* Promotional Banner Carousel */}
       <div id="promo-banner">

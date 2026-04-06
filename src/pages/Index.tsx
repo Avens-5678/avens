@@ -15,7 +15,6 @@ import { Section } from "@/components/ui/section";
 import { SectionHeader } from "@/components/ui/section-header";
 import { HeroSection } from "@/components/ui/hero-section";
 import { GlassmorphismCard } from "@/components/ui/glassmorphism-card";
-import { StatsContainer, StatCard } from "@/components/ui/elegant-stats";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ServiceScrollContainer } from "@/components/ui/service-scroll-container";
@@ -233,29 +232,6 @@ const Index = () => {
 
 
       </HeroSection>
-
-      {/* Stats Section */}
-      <Section spacing="default" variant="muted" className="relative">
-        <BackgroundPattern variant="dots" />
-        <StatsContainer>
-          <ScrollReveal animation="fade-in-up">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
-                The only platform that creates extraordinary
-                <br />
-                <span className="text-primary">& memorable events</span> with precision
-              </h2>
-            </div>
-          </ScrollReveal>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            <StatCard number="500+" label="EVENTS MANAGED" />
-            <StatCard number="50+" label="CORPORATE CLIENTS" />
-            <StatCard number="5000+" label="SATISFIED GUESTS" />
-            <StatCard number="100%" label="SUCCESS RATE" />
-          </div>
-        </StatsContainer>
-      </Section>
 
       {/* Services Section */}
       <Section spacing="default" className="relative overflow-hidden">

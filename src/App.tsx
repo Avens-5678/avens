@@ -17,15 +17,17 @@ import { initDeepLinks } from "@/services/deepLinks";
 import OfflineBanner from "@/components/mobile/OfflineBanner";
 import AppLoadingScreen from "@/components/AppLoadingScreen";
 import { useAuth } from "@/hooks/useAuth";
+import { Capacitor } from "@capacitor/core";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-/** Shows branded loading screen until auth resolves */
+/** Shows branded loading screen on native apps until auth resolves */
 const AuthGate = ({ children }: { children: React.ReactNode }) => {
   const { loading } = useAuth();
+  const isNative = Capacitor.isNativePlatform();
   return (
     <>
-      <AppLoadingScreen visible={loading} />
+      {isNative && <AppLoadingScreen visible={loading} />}
       {children}
     </>
   );

@@ -20,13 +20,6 @@ export const useUserLocation = () => {
   });
   const [showPrompt, setShowPrompt] = useState(false);
 
-  useEffect(() => {
-    if (!location) {
-      const timer = setTimeout(() => setShowPrompt(true), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [location]);
-
   const saveLocation = useCallback((loc: UserLocation) => {
     setLocation(loc);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(loc));

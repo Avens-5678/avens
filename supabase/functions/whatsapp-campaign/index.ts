@@ -13,8 +13,8 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const metaToken = Deno.env.get("META_WHATSAPP_TOKEN");
-    const phoneNumberId = Deno.env.get("META_PHONE_NUMBER_ID");
+    const metaToken = Deno.env.get("META_WHATSAPP_TOKEN") || Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+    const phoneNumberId = Deno.env.get("META_PHONE_NUMBER_ID") || Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
 
     if (!metaToken || !phoneNumberId) {
       return new Response(

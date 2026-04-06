@@ -92,9 +92,29 @@ Deno.serve(async (req) => {
       const message = value.messages[0];
       const from = message.from; // sender phone number
       const msgBody = message.text?.body?.trim() || "";
+      const msgType = message.type || "text"; // text, image, document, audio, video, location, etc.
+      const metaMessageId = message.id || null;
+      const msgTimestamp = message.timestamp
+        ? new Date(parseInt(message.timestamp) * 1000).toISOString()
+        : new Date().toISOString();
       const msgLower = msgBody.toLowerCase();
 
+      // Extract sender name from contacts array if available
+      const senderContact = value.contacts?.[0];
+      const senderName = senderContact?.profile?.name || null;
+
       console.log(`Incoming message from ${from}: ${msgBody}`);
+
+      // Save incoming message to whatsapp_message_logs
+      await supabase.from("whatsapp_message_logs").insert({
+        recipient_phone: from,
+        recipient_name: senderName,
+        message_type: "incoming",
+        status: "received",
+        meta_message_id: metaMessageId,
+        parameters: { text: msgBody, type: msgType },
+        sent_at: msgTimestamp,
+      });
 
       // Get or create session
       let { data: session } = await supabase

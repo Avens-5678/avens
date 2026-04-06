@@ -61,6 +61,7 @@ function createLazyRoutes() {
     VendorDashboard: lazy(() => import("./pages/vendor/VendorDashboard")),
     EmployeeDashboard: lazy(() => import("./pages/employee/EmployeeDashboard")),
     VendorAction: lazy(() => import("./pages/vendor/VendorAction")),
+    PaymentCallback: lazy(() => import("./pages/PaymentCallback")),
     NotFound: lazy(() => import("./pages/NotFound")),
     ProtectedRoute: lazy(() => import("./components/ProtectedRoute")),
     ResetPassword: lazy(() => import("./pages/ResetPassword")),
@@ -116,6 +117,7 @@ const App = () => {
               <Route path="/vendor/:vendorId" element={<R.VendorStorefront />} />
               <Route path="/event/:eventId" element={<R.MyEventPage />} />
               <Route path="/cart" element={<R.Cart />} />
+              <Route path="/payment-callback" element={<R.PaymentCallback />} />
               <Route path="/event-planner" element={<R.EventPlanner />} />
               <Route path="/privacy-policy" element={<R.PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<R.TermsOfService />} />

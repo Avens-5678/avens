@@ -26,6 +26,8 @@ import {
   Sparkles, AlertTriangle, X, Store, Info,
 } from "lucide-react";
 import { normalizePhoneNumber } from "@/utils/phoneUtils";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 import { detectBundle, groupItemsByCategory, CATEGORY_LABELS } from "@/utils/bundleDetection";
 import { calculateSurge, SurgeRule } from "@/utils/surgeCalculator";
 import { useSurgeRules } from "@/hooks/useSurgeRules";
@@ -686,7 +688,8 @@ const Cart = () => {
       toast({ title: "Error", description: "Payment plan not calculated. Please try again.", variant: "destructive" });
       return;
     }
-    if (!window.Razorpay) {
+    const isNative = Capacitor.isNativePlatform();
+    if (!isNative && !window.Razorpay) {
       toast({ title: "Payment unavailable", description: "Please disable your ad blocker and refresh the page.", variant: "destructive" });
       return;
     }
@@ -813,87 +816,124 @@ const Cart = () => {
 
       // Create the Razorpay order on the backend
       const amountToPay = milestoneBreakdown.milestones[0].amount;
-      const { data: rzpData, error: rzpFnError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: amountToPay, currency: "INR", order_id: orderId },
-      });
-      if (rzpFnError || !rzpData?.razorpay_order_id) {
-        throw new Error(rzpFnError?.message || "Failed to create payment order");
-      }
 
-      // Open Razorpay checkout popup
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: amountToPay * 100, // paise
-        currency: "INR",
-        name: "Evnting.com",
-        description: `Booking - ${items.length} item(s)`,
-        order_id: rzpData.razorpay_order_id,
-        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
-          const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-            body: {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              order_id: orderId,
-              phone: normalizedPhone,
+      if (isNative) {
+        // --- Native app: use Razorpay Payment Link opened in in-app browser ---
+        const { data: rzpData, error: rzpFnError } = await supabase.functions.invoke("create-razorpay-order", {
+          body: {
+            amount: amountToPay,
+            currency: "INR",
+            order_id: orderId,
+            create_link: true,
+            description: `Evnting Booking - ${items.length} item(s)`,
+            callback_url: "https://evnting.com/payment-callback",
+            customer: {
               name: profileData.full_name,
+              email: profileData.email,
+              contact: (normalizedPhone || profileData.phone || "").replace(/\D/g, ""),
             },
-          });
-          if (verifyError || !verifyData?.success) {
-            toast({
-              title: "Payment verification failed",
-              description: `Please contact support with payment ID: ${response.razorpay_payment_id}`,
-              variant: "destructive",
-            });
-            return;
-          }
-          // Mark bundle as paid
-          if (rzpBundleOrderId) {
-            supabase.from("bundle_orders").update({
-              status: "confirmed", payment_status: "paid",
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              updated_at: new Date().toISOString(),
-            } as any).eq("id", rzpBundleOrderId).then(() => {});
-          }
-          // Record coupon usage on successful payment
-          if (couponApplied) {
-            supabase.from("coupon_usage").insert({
-              coupon_id: couponApplied.id, user_id: user.id, order_id: orderId,
-              order_type: "rental", discount_applied: couponApplied.discount,
-            } as any).then(() => {
-              supabase.from("discount_coupons").select("used_count").eq("id", couponApplied.id).single()
-                .then(({ data }) => {
-                  if (data) supabase.from("discount_coupons").update({ used_count: (data.used_count || 0) + 1 } as any).eq("id", couponApplied.id).then(() => {});
-                });
-            });
-          }
-          toast({ title: "Booking Confirmed!", description: "Payment successful. You'll receive a WhatsApp confirmation shortly." });
-          const eventOrderId = await createEventOrder(response.razorpay_payment_id, response.razorpay_order_id);
-          if (eventOrderId) {
-            clearCart();
-            localStorage.removeItem("evnting_event_name");
-          }
-          navigate(eventOrderId ? `/event/${eventOrderId}` : "/ecommerce/orders");
-        },
-        prefill: {
-          name: profileData.full_name,
-          email: profileData.email,
-          contact: normalizedPhone || profileData.phone,
-        },
-        theme: { color: "#7c3aed" },
-        modal: {
-          ondismiss: () => {
-            toast({ title: "Payment cancelled", description: "Your booking was not confirmed. You can try again.", variant: "destructive" });
-            setSubmitting(false);
+            notes: { order_id: orderId, bundle_order_id: rzpBundleOrderId || "" },
           },
-        },
-      };
+        });
+        if (rzpFnError || !rzpData?.payment_link_url) {
+          throw new Error(rzpFnError?.message || "Failed to create payment link");
+        }
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+        // Store order context for the callback page to use
+        localStorage.setItem("evnting_pending_payment", JSON.stringify({
+          orderId, rzpBundleOrderId, couponApplied: couponApplied ? { id: couponApplied.id, discount: couponApplied.discount } : null,
+        }));
+
+        // Open payment link in native browser
+        await Browser.open({ url: rzpData.payment_link_url, presentationStyle: "fullscreen" });
+
+        // Listen for browser close — user may have completed or cancelled
+        const listener = await Browser.addListener("browserFinished", () => {
+          listener.remove();
+          setSubmitting(false);
+          // Payment callback page handles verification + redirect
+        });
+      } else {
+        // --- Web: use Razorpay checkout modal ---
+        const { data: rzpData, error: rzpFnError } = await supabase.functions.invoke("create-razorpay-order", {
+          body: { amount: amountToPay, currency: "INR", order_id: orderId },
+        });
+        if (rzpFnError || !rzpData?.razorpay_order_id) {
+          throw new Error(rzpFnError?.message || "Failed to create payment order");
+        }
+
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: amountToPay * 100,
+          currency: "INR",
+          name: "Evnting.com",
+          description: `Booking - ${items.length} item(s)`,
+          order_id: rzpData.razorpay_order_id,
+          handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: orderId,
+                phone: normalizedPhone,
+                name: profileData.full_name,
+              },
+            });
+            if (verifyError || !verifyData?.success) {
+              toast({
+                title: "Payment verification failed",
+                description: `Please contact support with payment ID: ${response.razorpay_payment_id}`,
+                variant: "destructive",
+              });
+              return;
+            }
+            if (rzpBundleOrderId) {
+              supabase.from("bundle_orders").update({
+                status: "confirmed", payment_status: "paid",
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                updated_at: new Date().toISOString(),
+              } as any).eq("id", rzpBundleOrderId).then(() => {});
+            }
+            if (couponApplied) {
+              supabase.from("coupon_usage").insert({
+                coupon_id: couponApplied.id, user_id: user.id, order_id: orderId,
+                order_type: "rental", discount_applied: couponApplied.discount,
+              } as any).then(() => {
+                supabase.from("discount_coupons").select("used_count").eq("id", couponApplied.id).single()
+                  .then(({ data }) => {
+                    if (data) supabase.from("discount_coupons").update({ used_count: (data.used_count || 0) + 1 } as any).eq("id", couponApplied.id).then(() => {});
+                  });
+              });
+            }
+            toast({ title: "Booking Confirmed!", description: "Payment successful. You'll receive a WhatsApp confirmation shortly." });
+            const eventOrderId = await createEventOrder(response.razorpay_payment_id, response.razorpay_order_id);
+            if (eventOrderId) {
+              clearCart();
+              localStorage.removeItem("evnting_event_name");
+            }
+            navigate(eventOrderId ? `/event/${eventOrderId}` : "/ecommerce/orders");
+          },
+          prefill: {
+            name: profileData.full_name,
+            email: profileData.email,
+            contact: normalizedPhone || profileData.phone,
+          },
+          theme: { color: "#7c3aed" },
+          modal: {
+            ondismiss: () => {
+              toast({ title: "Payment cancelled", description: "Your booking was not confirmed. You can try again.", variant: "destructive" });
+              setSubmitting(false);
+            },
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
       // setSubmitting is intentionally NOT reset here —
-      // ondismiss handles the cancel case; the success handler navigates away.
+      // ondismiss/browserFinished handles the cancel case; the success handler navigates away.
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to initiate payment", variant: "destructive" });
       setSubmitting(false);

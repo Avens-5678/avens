@@ -19,16 +19,23 @@ Deno.serve(async (req) => {
     if (!keySecret) throw new Error("RAZORPAY_KEY_SECRET not configured");
     if (!supabaseUrl || !supabaseServiceKey) throw new Error("Supabase credentials not configured");
 
+    const reqBody = await req.json();
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      order_id,   // rental_orders.id (our DB UUID)
+      razorpay_payment_link_id,
+      razorpay_payment_link_reference_id,
+      order_id: explicit_order_id,
+      is_payment_link,
       phone,
       name,
-    } = await req.json();
+    } = reqBody;
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !order_id) {
+    // For payment links, order_id is the reference_id; for standard checkout it's explicit
+    const order_id = explicit_order_id || razorpay_payment_link_reference_id;
+
+    if (!razorpay_payment_id || !razorpay_signature || !order_id) {
       return new Response(
         JSON.stringify({ success: false, error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -36,9 +43,16 @@ Deno.serve(async (req) => {
     }
 
     // --- Signature verification ---
-    // Razorpay signs: razorpay_order_id + "|" + razorpay_payment_id
-    // using HMAC-SHA256 with the key secret.
-    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+    // Payment links: sign payment_link_id + "|" + payment_link_reference_id + "|" + payment_link_status + "|" + razorpay_payment_id
+    // Standard checkout: sign razorpay_order_id + "|" + razorpay_payment_id
+    let signBody: string;
+    if (is_payment_link && razorpay_payment_link_id) {
+      const linkStatus = reqBody.razorpay_payment_link_status || "paid";
+      signBody = `${razorpay_payment_link_id}|${razorpay_payment_link_reference_id}|${linkStatus}|${razorpay_payment_id}`;
+    } else {
+      signBody = `${razorpay_order_id}|${razorpay_payment_id}`;
+    }
+
     const encoder = new TextEncoder();
 
     const cryptoKey = await crypto.subtle.importKey(
@@ -52,7 +66,7 @@ Deno.serve(async (req) => {
     const signatureBuffer = await crypto.subtle.sign(
       "HMAC",
       cryptoKey,
-      encoder.encode(body)
+      encoder.encode(signBody)
     );
 
     const expectedSignature = Array.from(new Uint8Array(signatureBuffer))

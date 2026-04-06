@@ -8,8 +8,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { isNative } from "@/utils/platform";
 
 const Navbar = () => {
+  // Hide entire navbar on mobile / native — MobileBottomNav handles navigation
+  if (isNative()) return null;
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
   const navigate = useNavigate();
@@ -39,10 +42,10 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="glass-dark sticky top-0 z-50" style={{ paddingTop: "var(--safe-area-top)" }}>
+    <nav className="glass-dark sticky top-0 z-50 hidden md:block" style={{ paddingTop: "var(--safe-area-top)" }}>
       <div className="container mx-auto px-5 sm:px-6">
         {/* Desktop layout: 3-column grid */}
-        <div className="hidden md:grid grid-cols-3 items-center h-16">
+        <div className="grid grid-cols-3 items-center h-16">
           {/* Left: Nav Links */}
           <div className="flex items-center gap-6">
             {navLinks.map((link) => (
@@ -120,8 +123,8 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile layout - Amazon-style */}
-        <div className="flex md:hidden items-center justify-between h-14 gap-2">
+        {/* Mobile layout — hidden; MobileBottomNav is the sole mobile nav */}
+        <div className="hidden items-center justify-between h-14 gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -169,7 +172,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-white/8 animate-fade-in">
+          <div className="hidden py-4 border-t border-white/8 animate-fade-in">
             <div className="flex flex-col space-y-1">
               {mobileNavLinks.map((link) => (
                 <Link

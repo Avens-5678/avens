@@ -28,8 +28,8 @@ const LocationRadiusBar = ({ location, radius, onRadiusChange, onDetectGPS, onPi
   const displayName = location?.cityName || location?.pinCode || "Set location";
 
   return (
-    <div className="bg-muted/40 border-b border-border">
-      <div className="container mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+    <div className="bg-muted/40 border-b border-border overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 overflow-x-hidden">
         {/* Location display + changer */}
         <Popover open={popOpen} onOpenChange={setPopOpen}>
           <PopoverTrigger asChild>
@@ -61,9 +61,9 @@ const LocationRadiusBar = ({ location, radius, onRadiusChange, onDetectGPS, onPi
         </Popover>
 
         {/* Radius selector */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-muted-foreground">Radius:</span>
-          <div className="flex gap-1">
+        <div className="flex items-center gap-1.5 flex-shrink-0 overflow-hidden">
+          <span className="text-[10px] text-muted-foreground flex-shrink-0">Radius:</span>
+          <div className="flex gap-1 flex-wrap">
             {RADIUS_OPTIONS.map((r) => (
               <button
                 key={r}

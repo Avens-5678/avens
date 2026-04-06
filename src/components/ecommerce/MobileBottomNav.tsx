@@ -29,15 +29,15 @@ const MobileBottomNav = ({ cartCount }: MobileBottomNavProps) => {
   ];
 
   return (
-    <nav className="fixed !bottom-0 inset-x-0 z-50 bg-background border-t border-border md:hidden pb-[env(safe-area-inset-bottom,0px)]">
-      <div className="flex items-center justify-around h-14">
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-background border-t border-border md:hidden" style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}>
+      <div className="flex items-center h-14">
         {items.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <button
               key={item.label}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative ${
+              className={`flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 h-full transition-colors relative ${
                 isActive ? "text-primary" : "text-muted-foreground"
               }`}
             >

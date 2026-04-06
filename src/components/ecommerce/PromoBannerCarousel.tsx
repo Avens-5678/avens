@@ -90,7 +90,7 @@ const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselPro
     <section className="relative overflow-hidden">
       <div
         className="flex transition-transform duration-700 ease-in-out"
-        style={{ transform: `translateX(-${current * 100}%)` }}
+        style={{ transform: `translateX(-${current * 100}%)`, willChange: "transform", WebkitTransform: `translateX(-${current * 100}%) translateZ(0)` }}
       >
         {banners.map((banner) => (
           <div

@@ -45,5 +45,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Evnting needs camera access to take product photos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Evnting needs photo library access to upload product images</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Evnting needs to save photos to your library</string>
 </dict>
 </plist>

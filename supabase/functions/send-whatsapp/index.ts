@@ -47,8 +47,8 @@ serve(async (req) => {
       );
     }
 
-    const PHONE_NUMBER_ID = Deno.env.get("META_PHONE_NUMBER_ID");
-    const ACCESS_TOKEN = Deno.env.get("META_WHATSAPP_TOKEN");
+    const PHONE_NUMBER_ID = Deno.env.get("META_PHONE_NUMBER_ID") || Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+    const ACCESS_TOKEN = Deno.env.get("META_WHATSAPP_TOKEN") || Deno.env.get("WHATSAPP_ACCESS_TOKEN");
 
     if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
       // Log as failed but don't break the calling flow

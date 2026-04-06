@@ -237,11 +237,11 @@ const EcommerceHeader = ({
 
   return (
     <div className={`bg-evn-950 text-white sticky top-0 z-50 transition-all duration-200 ${scrolled ? "shadow-lg shadow-black/20" : ""}`} style={{ paddingTop: "var(--safe-area-top)" }}>
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto px-4">
         {/* Mobile: two rows */}
         <div className="sm:hidden">
           {/* Row 1: Hamburger + Logo + Cart/Account */}
-          <div className={`flex items-center justify-between transition-all duration-200 ${scrolled ? "h-10" : "h-12"}`}>
+          <div className="flex items-center justify-between h-11">
             <div className="flex items-center gap-2">
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                 <SheetTrigger asChild>
@@ -249,44 +249,44 @@ const EcommerceHeader = ({
                     <Menu className="h-5 w-5" />
                   </button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-72 p-0 bg-evn-950 border-r border-white/10">
+                <SheetContent side="left" className="w-64 p-0 bg-evn-950 border-r border-white/10">
                   <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                  <div className="p-5 border-b border-white/10">
-                    <span className="text-white text-xl font-brand font-bold italic tracking-tight uppercase">
+                  <div className="p-4 border-b border-white/10">
+                    <span className="text-white text-lg font-brand font-bold italic tracking-tight uppercase">
                       Evnting<span className="text-coral-500">.com</span>
                     </span>
                   </div>
-                  <nav className="flex flex-col py-2">
+                  <nav className="flex flex-col py-1">
                     {menuLinks.map(({ href, label, icon: Icon }) => (
-                      <Link key={href} to={href} onClick={() => setMenuOpen(false)} className="flex items-center justify-between px-5 py-3 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-all">
-                        <span className="flex items-center gap-3"><Icon className="h-4 w-4" />{label}</span>
-                        <ChevronRight className="h-4 w-4 opacity-30" />
+                      <Link key={href} to={href} onClick={() => setMenuOpen(false)} className="flex items-center justify-between px-4 py-2.5 text-[13px] text-white/60 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="flex items-center gap-2.5"><Icon className="h-4 w-4" />{label}</span>
+                        <ChevronRight className="h-3.5 w-3.5 opacity-30" />
                       </Link>
                     ))}
                   </nav>
                 </SheetContent>
               </Sheet>
               <button onClick={() => navigate("/")} className="hover:opacity-80 transition-opacity">
-                <span className="text-lg font-brand font-bold italic tracking-tight uppercase text-white">
+                <span className="text-base font-brand font-bold italic tracking-tight uppercase text-white">
                   Evnting<span className="text-coral-500">.com</span>
                 </span>
               </button>
             </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => navigate(getDashboardPath())} className="p-2 hover:bg-white/10 rounded-lg transition-colors" aria-label="Account">
-                <User className="h-5 w-5" />
+            <div className="flex items-center gap-0.5">
+              <button onClick={() => navigate(getDashboardPath())} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors" aria-label="Account">
+                <User className="h-4 w-4 text-white/70" />
               </button>
-              <button onClick={() => navigate("/cart")} className="p-2 hover:bg-white/10 rounded-lg transition-colors relative" aria-label="Cart">
-                <ShoppingCart className="h-5 w-5" />
+              <button onClick={() => navigate("/cart")} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors relative" aria-label="Cart">
+                <ShoppingCart className="h-4 w-4 text-white/70" />
                 {items.length > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-evn-600 text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">{items.length}</span>
+                  <span className="absolute top-0 right-0 bg-coral-500 text-white text-[8px] font-bold rounded-full h-3.5 w-3.5 flex items-center justify-center">{items.length}</span>
                 )}
               </button>
             </div>
           </div>
           {/* Row 2: Full-width search bar */}
-          <div className="pb-2.5 relative" ref={mobileDropdownRef}>
-            <div className="flex w-full rounded-full overflow-hidden border-2 border-evn-400/30 focus-within:border-evn-400 bg-white transition-colors">
+          <div className="pb-2 relative" ref={mobileDropdownRef}>
+            <div className="flex w-full rounded-lg overflow-hidden bg-white/10 focus-within:bg-white focus-within:ring-1 focus-within:ring-evn-400 transition-all group">
               <div className="flex-1 relative">
                 <input
                   ref={inputRef}
@@ -297,16 +297,16 @@ const EcommerceHeader = ({
                   onChange={(e) => { onSearchChange(e.target.value); setShowDropdown(true); setSelectedIndex(-1); }}
                   onFocus={() => setShowDropdown(true)}
                   onKeyDown={handleKeyDown}
-                  className={`w-full px-4 py-2.5 text-gray-900 text-sm outline-none bg-transparent placeholder:text-gray-400 transition-opacity ${isAnimating ? "placeholder:opacity-0" : "placeholder:opacity-100"}`}
+                  className={`w-full px-3 py-2 text-white group-focus-within:text-gray-900 text-[13px] outline-none bg-transparent placeholder:text-white/40 group-focus-within:placeholder:text-gray-400 transition-opacity ${isAnimating ? "placeholder:opacity-0" : "placeholder:opacity-100"}`}
                 />
                 {searchTerm && (
                   <button onClick={() => { onSearchChange(""); setShowDropdown(false); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
-              <button onClick={handleSubmit} className="bg-evn-600 hover:bg-evn-700 px-4 flex items-center justify-center transition-colors">
-                <Search className="h-5 w-5 text-white" />
+              <button onClick={handleSubmit} className="bg-evn-500 hover:bg-evn-400 px-3.5 flex items-center justify-center transition-colors">
+                <Search className="h-3.5 w-3.5 text-white" />
               </button>
             </div>
 
@@ -363,18 +363,17 @@ const EcommerceHeader = ({
         </div>
 
         {/* Desktop: single row */}
-        <div className={`hidden sm:flex items-center gap-4 transition-all duration-200 ${scrolled ? "h-14" : "h-16"}`}>
+        <div className="hidden sm:flex items-center gap-4 h-[52px]">
           <div className="flex items-center gap-2 flex-shrink-0">
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
                 <button className="flex items-center justify-center hover:bg-white/10 rounded-lg p-1.5 transition-all" aria-label="Menu">
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-4 w-4" />
                 </button>
               </SheetTrigger>
-              {/* Sheet content reused from mobile, but only one Sheet instance is open at a time */}
             </Sheet>
             <button onClick={() => navigate("/")} className="hover:opacity-80 transition-opacity">
-              <span className="text-xl font-brand font-bold italic tracking-tight uppercase text-white">
+              <span className="text-lg font-brand font-bold italic tracking-tight uppercase text-white">
                 Evnting<span className="text-coral-500">.com</span>
               </span>
             </button>
@@ -382,11 +381,11 @@ const EcommerceHeader = ({
 
           {/* Desktop search */}
           <div className="flex-1 flex items-center min-w-0 relative" ref={dropdownRef}>
-            <div className="flex w-full rounded-full overflow-hidden border-2 border-evn-400/30 focus-within:border-evn-400 bg-white transition-colors">
+            <div className="flex w-full rounded-lg overflow-hidden bg-white/10 hover:bg-white/15 focus-within:bg-white focus-within:ring-1 focus-within:ring-evn-400 transition-all group">
               <select
                 value={selectedSearchCategory}
                 onChange={(e) => onSearchCategoryChange(e.target.value)}
-                className="bg-gray-50 text-gray-700 text-xs font-medium px-3 py-2 border-r border-gray-200 outline-none cursor-pointer hover:bg-gray-100 max-w-[140px]"
+                className="bg-transparent group-focus-within:bg-gray-50 text-white/60 group-focus-within:text-gray-700 text-[11px] font-medium px-2.5 py-2 border-r border-white/10 group-focus-within:border-gray-200 outline-none cursor-pointer max-w-[130px]"
               >
                 <option value="">All Categories</option>
                 {categories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
@@ -400,16 +399,16 @@ const EcommerceHeader = ({
                   onChange={(e) => { onSearchChange(e.target.value); setShowDropdown(true); setSelectedIndex(-1); }}
                   onFocus={() => setShowDropdown(true)}
                   onKeyDown={handleKeyDown}
-                  className={`w-full px-4 py-2.5 text-gray-900 text-sm outline-none bg-transparent placeholder:text-gray-400 transition-opacity ${isAnimating ? "placeholder:opacity-0" : "placeholder:opacity-100"}`}
+                  className={`w-full px-3 py-2 text-white group-focus-within:text-gray-900 text-[13px] outline-none bg-transparent placeholder:text-white/40 group-focus-within:placeholder:text-gray-400 transition-opacity ${isAnimating ? "placeholder:opacity-0" : "placeholder:opacity-100"}`}
                 />
                 {searchTerm && (
-                  <button onClick={() => { onSearchChange(""); setShowDropdown(false); }} className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
-                    <X className="h-4 w-4" />
+                  <button onClick={() => { onSearchChange(""); setShowDropdown(false); }} className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
-              <button onClick={handleSubmit} className="bg-evn-600 hover:bg-evn-700 px-5 flex items-center justify-center transition-colors">
-                <Search className="h-5 w-5 text-white" />
+              <button onClick={handleSubmit} className="bg-evn-500 hover:bg-evn-400 px-3.5 flex items-center justify-center transition-colors">
+                <Search className="h-3.5 w-3.5 text-white" />
               </button>
             </div>
 
@@ -465,28 +464,22 @@ const EcommerceHeader = ({
           </div>
 
           {/* Desktop right actions */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <button onClick={() => navigate(getDashboardPath())} className="flex items-center gap-1.5 text-xs hover:bg-white/10 rounded-lg px-3 py-2 transition-all">
-              <User className="h-5 w-5" />
-              <div className="text-left hidden lg:block">
-                <span className="block text-[10px] text-white/60 leading-none">{user ? "Hello" : "Hello, Sign in"}</span>
-                <span className="block font-semibold text-white leading-tight">Account</span>
-              </div>
+          <div className="flex items-center gap-0.5 flex-shrink-0">
+            <button onClick={() => navigate(getDashboardPath())} className="flex items-center gap-1.5 hover:bg-white/10 rounded-lg px-2.5 py-1.5 transition-all">
+              <User className="h-4 w-4 text-white/70" />
+              <span className="text-[12px] font-medium text-white/70 hidden lg:inline">{user ? "Account" : "Sign In"}</span>
             </button>
-            <button onClick={() => navigate("/ecommerce/orders")} className="flex items-center gap-1.5 text-xs hover:bg-white/10 rounded-lg px-3 py-2 transition-all">
-              <div className="text-left">
-                <span className="block text-[10px] text-white/60 leading-none">Your</span>
-                <span className="block font-semibold text-white leading-tight">Orders</span>
-              </div>
+            <button onClick={() => navigate("/ecommerce/orders")} className="flex items-center gap-1 hover:bg-white/10 rounded-lg px-2.5 py-1.5 transition-all">
+              <span className="text-[12px] font-medium text-white/70 hidden lg:inline">Orders</span>
             </button>
-            <button onClick={() => navigate("/cart")} className="flex items-center gap-1.5 hover:bg-white/10 rounded-lg px-3 py-2 transition-all relative">
+            <button onClick={() => navigate("/cart")} className="flex items-center gap-1.5 hover:bg-white/10 rounded-lg px-2.5 py-1.5 transition-all relative">
               <div className="relative">
-                <ShoppingCart className="h-6 w-6" />
+                <ShoppingCart className="h-4 w-4 text-white/70" />
                 {items.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-evn-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">{items.length}</span>
+                  <span className="absolute -top-1.5 -right-2 bg-coral-500 text-white text-[8px] font-bold rounded-full h-[15px] w-[15px] flex items-center justify-center">{items.length}</span>
                 )}
               </div>
-              <span className="hidden sm:inline text-xs font-semibold">Cart</span>
+              <span className="hidden lg:inline text-[12px] font-medium text-white/70">Cart</span>
             </button>
           </div>
         </div>

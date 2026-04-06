@@ -70,6 +70,7 @@ import AdminLoyaltyManager from "@/components/admin/AdminLoyaltyManager";
 import AdminSurgeManager from "@/components/admin/AdminSurgeManager";
 import AdminCityManager from "@/components/admin/AdminCityManager";
 import Logo from "@/components/ui/logo";
+import { cn } from "@/lib/utils";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import AdminDashboardHome from "@/components/admin/AdminDashboardHome";
 import AITestingAgent from "@/components/admin/AITestingAgent";
@@ -239,38 +240,40 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
   const currentGroup = menuGroups.find((g) => g.value === activeGroup);
 
   const headerContent = (
-    <header className="bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 text-background px-4 sm:px-6 py-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 sm:space-x-4">
-          <Logo className="scale-75 brightness-0 invert" />
-          <div className="hidden sm:block">
-            <h1 className="text-lg font-bold tracking-tight">Admin Dashboard</h1>
-            <p className="text-xs text-background/60">Manage your platform</p>
-          </div>
-          <span className="sm:hidden text-lg font-bold">Admin</span>
+    <header className="bg-evn-950 text-white px-4 sm:px-6 py-2.5">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <span className="text-base font-brand font-bold italic tracking-tight uppercase">
+              Evnting<span className="text-coral-500">.com</span>
+            </span>
+          </Link>
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/40 bg-white/8 px-2 py-0.5 rounded">
+            <ShieldCheck className="h-3 w-3" /> Admin
+          </span>
         </div>
-        
-        <div className="flex items-center space-x-2 sm:space-x-3">
+
+        <div className="flex items-center gap-1.5">
           <Link
             to="/"
-            className="flex items-center text-background/60 hover:text-background transition-colors text-sm"
+            className="flex items-center gap-1 text-white/50 hover:text-white/80 transition-colors text-[11px] px-2 py-1 rounded-lg hover:bg-white/8"
           >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            <span className="hidden sm:inline">Website</span>
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Site</span>
           </Link>
-          <div className="hidden md:flex items-center gap-3 pl-3 border-l border-background/20">
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
+          <div className="hidden md:flex items-center gap-2 ml-1 pl-2 border-l border-white/10">
+            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-evn-400 to-evn-600 flex items-center justify-center text-white text-[11px] font-bold">
               {currentAdminUser.full_name?.charAt(0) || "A"}
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium">{currentAdminUser.full_name}</p>
-              <p className="text-xs text-background/50 capitalize">{currentAdminUser.role}</p>
+            <div>
+              <p className="text-[11px] font-medium text-white/90 leading-tight">{currentAdminUser.full_name}</p>
+              <p className="text-[9px] text-white/40 capitalize">{currentAdminUser.role}</p>
             </div>
           </div>
-          <Button variant="ghost" onClick={handleLogout} size="sm" className="text-background/70 hover:text-background hover:bg-background/10">
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline ml-1">Logout</span>
-          </Button>
+          <button onClick={handleLogout} className="flex items-center gap-1 text-white/40 hover:text-white/70 hover:bg-white/8 px-2 py-1.5 rounded-lg transition-all text-[11px]">
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
         </div>
       </div>
     </header>
@@ -473,21 +476,24 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
       headerContent={headerContent}
       mobilePrimaryItems={mobilePrimaryItems}
     >
-      {/* Sub-tabs for grouped menus */}
+      {/* Sub-tabs — compact pill bar */}
       {currentGroup?.subTabs && (
-        <div className="mb-6 -mt-1">
+        <div className="mb-5 -mt-1">
           <ScrollArea className="w-full">
-            <div className="flex gap-2 pb-2">
+            <div className="flex gap-1.5 pb-2">
               {currentGroup.subTabs.map((tab) => (
-                <Button
+                <button
                   key={tab.value}
-                  variant={activeSubTab === tab.value ? "default" : "outline"}
-                  size="sm"
                   onClick={() => setActiveSubTab(tab.value)}
-                  className="whitespace-nowrap flex-shrink-0 rounded-full text-xs"
+                  className={cn(
+                    "whitespace-nowrap flex-shrink-0 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all",
+                    activeSubTab === tab.value
+                      ? "bg-evn-600 text-white shadow-sm"
+                      : "bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-50 border border-gray-200"
+                  )}
                 >
                   {tab.label}
-                </Button>
+                </button>
               ))}
             </div>
             <ScrollBar orientation="horizontal" />

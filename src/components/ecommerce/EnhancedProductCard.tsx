@@ -101,8 +101,8 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
   const cardContent = (
     <Card
-      className={`group overflow-hidden border-0 bg-white rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-1 ${
-        isList ? "flex flex-row sm:flex-col shadow-sm hover:shadow-premium-hover" : "shadow-premium hover:shadow-premium-hover"
+      className={`group overflow-hidden border border-gray-100 bg-white rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md h-full flex flex-col ${
+        isList ? "!flex-row sm:!flex-col" : ""
       }`}
       onClick={handleClick}
     >
@@ -141,36 +141,36 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         {!isList && (
           <button
             onClick={(e) => e.stopPropagation()}
-            className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-all duration-200 shadow-sm"
+            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-all duration-200"
           >
-            <Heart className="h-4 w-4" />
+            <Heart className="h-3.5 w-3.5" />
           </button>
         )}
 
         {/* Price badge on image */}
         {!isList && priceInfo && (
-          <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-xl bg-white/85 backdrop-blur-sm shadow-sm">
-            <span className="text-sm font-bold text-gray-900">{priceInfo.price}</span>
-            <span className="text-[10px] text-gray-500 ml-0.5">{priceInfo.unit}</span>
+          <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md bg-white/90 backdrop-blur-sm">
+            <span className="text-[12px] font-bold text-gray-900">{priceInfo.price}</span>
+            <span className="text-[9px] text-gray-500 ml-0.5">{priceInfo.unit}</span>
           </div>
         )}
 
         {/* Badges overlay */}
         {!isList && (
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
             {isVerified && (
-              <Badge className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm gap-1">
-                <BadgeCheck className="h-3 w-3" /> Verified
+              <Badge className="bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0 rounded gap-0.5 h-4">
+                <BadgeCheck className="h-2.5 w-2.5" /> Verified
               </Badge>
             )}
             {hasVirtualTour && (
-              <Badge className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm gap-1">
-                <Eye className="h-3 w-3" /> 360° Tour
+              <Badge className="bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0 rounded gap-0.5 h-4">
+                <Eye className="h-2.5 w-2.5" /> 360°
               </Badge>
             )}
             {isFeatured && !isVerified && (
-              <Badge className="bg-evn-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm gap-1">
-                <Zap className="h-3 w-3" /> Featured
+              <Badge className="bg-evn-600 text-white text-[9px] font-bold px-1.5 py-0 rounded gap-0.5 h-4">
+                <Zap className="h-2.5 w-2.5" /> Featured
               </Badge>
             )}
           </div>
@@ -178,75 +178,42 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
       </div>
 
       {/* Content */}
-      <CardContent className="p-4 space-y-2 flex-1 min-w-0">
-        {/* Category pill */}
-        {rental.categories?.slice(0, 1).map((cat: string) => (
-          <span key={cat} className="inline-block text-[10px] font-semibold uppercase tracking-wider text-evn-600 bg-evn-50 px-2 py-0.5 rounded-md">
-            {cat}
-          </span>
-        ))}
-
-        {/* Assured badge */}
-        {isAssured && (
-          <div className="flex items-center gap-1">
-            <ShieldCheck className="h-3.5 w-3.5 text-evn-600" />
-            <span className="text-[10px] font-bold text-evn-600 uppercase tracking-wide">Evnting Assured</span>
-          </div>
-        )}
-
-        <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-evn-600 transition-colors">
-          {rental.title}
-        </h3>
-
-        {!isList && rental.short_description && (
-          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-            {rental.short_description}
-          </p>
-        )}
-
-        {/* Rating */}
-        <div className="flex items-center gap-1.5">
-          {rental.rating && rental.rating > 0 ? (
-            <>
-              <span className="inline-flex items-center gap-0.5 bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                {rental.rating} <Star className="h-2.5 w-2.5 fill-current" />
-              </span>
-              {rental.review_count > 0 && (
-                <span className="text-[10px] text-gray-400">({rental.review_count})</span>
-              )}
-            </>
-          ) : (
-            <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700">
-              New
+      <CardContent className="p-2 space-y-0.5 flex-1 min-w-0">
+        {/* Category + rating inline */}
+        <div className="flex items-center gap-1">
+          {rental.categories?.slice(0, 1).map((cat: string) => (
+            <span key={cat} className="text-[9px] font-medium uppercase text-gray-400 truncate">
+              {cat}
             </span>
+          ))}
+          {rental.rating && rental.rating > 0 && (
+            <>
+              <span className="text-gray-300">·</span>
+              <span className="inline-flex items-center gap-px text-[9px] font-semibold text-emerald-600">
+                {rental.rating} <Star className="h-2 w-2 fill-current" />
+              </span>
+            </>
           )}
         </div>
 
-        {/* Distance badge */}
-        {rental._distance_km != null && (
-          <Badge variant="secondary" className={`text-[9px] gap-0.5 w-fit rounded-md ${distanceColor(rental._distance_km)}`}>
-            <MapPinIcon className="h-2.5 w-2.5" />{rental._distance_km} km
-          </Badge>
+        <h3 className="font-medium text-gray-900 text-[12px] leading-tight line-clamp-2 group-hover:text-evn-600 transition-colors">
+          {rental.title}
+        </h3>
+
+        {/* Distance + location compact */}
+        {(rental._distance_km != null || rental.address) && (
+          <p className="text-[9px] text-gray-400 truncate flex items-center gap-0.5">
+            <MapPinIcon className="h-2.5 w-2.5 flex-shrink-0" />
+            {rental._distance_km != null ? `${rental._distance_km} km` : rental.address}
+          </p>
         )}
 
         {/* Price (list mode) */}
         {isList && priceInfo && (
-          <div>
-            {isVendorUser && (
-              <span className="text-[9px] font-semibold text-purple-600">Vendor rate</span>
-            )}
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-base font-bold text-gray-900">{priceInfo.price}</span>
-              <span className="text-[10px] text-gray-400">{priceInfo.unit}</span>
-            </div>
+          <div className="flex items-baseline gap-1 pt-0.5">
+            <span className="text-[13px] font-bold text-gray-900">{priceInfo.price}</span>
+            <span className="text-[9px] text-gray-400">{priceInfo.unit}</span>
           </div>
-        )}
-
-        {/* Location */}
-        {rental.address && (
-          <p className="text-[10px] text-gray-400 truncate flex items-center gap-1">
-            <MapPinIcon className="h-3 w-3" /> {rental.address}
-          </p>
         )}
 
         {/* Vendor label */}
@@ -263,7 +230,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
       <HoverCardTrigger asChild>
         {cardContent}
       </HoverCardTrigger>
-      <HoverCardContent side="right" align="start" className="w-72 p-4 space-y-3 z-[60] rounded-2xl shadow-premium-hover border-0">
+      <HoverCardContent side="right" align="start" className="w-64 p-3 space-y-2 z-[60] rounded-lg shadow-lg border border-gray-100">
         <h4 className="font-bold text-sm text-gray-900 leading-snug">{rental.title}</h4>
 
         <p className="text-xs text-gray-500 line-clamp-4">{rental.description || rental.short_description}</p>

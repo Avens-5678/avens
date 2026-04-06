@@ -78,6 +78,7 @@ const EcommerceHeader = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Compact header on scroll
@@ -111,7 +112,10 @@ const EcommerceHeader = ({
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const insideDesktop = dropdownRef.current?.contains(target);
+      const insideMobile = mobileDropdownRef.current?.contains(target);
+      if (!insideDesktop && !insideMobile) {
         setShowDropdown(false);
       }
     };
@@ -281,7 +285,7 @@ const EcommerceHeader = ({
             </div>
           </div>
           {/* Row 2: Full-width search bar */}
-          <div className="pb-2.5 relative" ref={dropdownRef}>
+          <div className="pb-2.5 relative" ref={mobileDropdownRef}>
             <div className="flex w-full rounded-lg overflow-hidden bg-primary-foreground">
               <div className="flex-1 relative">
                 <input

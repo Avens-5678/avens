@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
       });
 
       const result = await response.json();
+      console.log("Meta API send_text response:", JSON.stringify({ ok: response.ok, status: response.status, result }));
 
       // Store outbound message in conversations
       if (session_id) {

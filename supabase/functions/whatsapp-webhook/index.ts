@@ -91,12 +91,34 @@ Deno.serve(async (req) => {
 
       const message = value.messages[0];
       const from = message.from; // sender phone number
-      const msgBody = message.text?.body?.trim() || "";
-      const msgType = message.type || "text"; // text, image, document, audio, video, location, etc.
+      const msgType = message.type || "text";
       const metaMessageId = message.id || null;
       const msgTimestamp = message.timestamp
         ? new Date(parseInt(message.timestamp) * 1000).toISOString()
         : new Date().toISOString();
+
+      // Parse text, interactive replies, and media
+      const interactiveId = message.interactive?.button_reply?.id
+        || message.interactive?.list_reply?.id || null;
+      let msgBody = message.text?.body?.trim()
+        || message.interactive?.button_reply?.title
+        || message.interactive?.list_reply?.title || "";
+      let mediaInfo: string | null = null;
+
+      if (msgType === "image") {
+        mediaInfo = `[Image${message.image?.caption ? `: ${message.image.caption}` : ""}]`;
+        msgBody = message.image?.caption || msgBody;
+      } else if (msgType === "document") {
+        mediaInfo = `[Document: ${message.document?.filename || "unnamed"}]`;
+      } else if (msgType === "audio") {
+        mediaInfo = `[Audio message]`;
+      } else if (msgType === "video") {
+        mediaInfo = `[Video${message.video?.caption ? `: ${message.video.caption}` : ""}]`;
+        msgBody = message.video?.caption || msgBody;
+      } else if (msgType === "location") {
+        mediaInfo = `[Location: ${message.location?.latitude}, ${message.location?.longitude}]`;
+      }
+
       const msgLower = msgBody.toLowerCase();
 
       // Extract sender name from contacts array if available
@@ -112,7 +134,7 @@ Deno.serve(async (req) => {
         message_type: "incoming",
         status: "received",
         meta_message_id: metaMessageId,
-        parameters: { text: msgBody, type: msgType },
+        parameters: { text: msgBody, type: msgType, media_info: mediaInfo, interactive_id: interactiveId },
         sent_at: msgTimestamp,
       });
 
@@ -177,13 +199,42 @@ Deno.serve(async (req) => {
         session_id: session.id,
         phone_number: from,
         direction: "inbound",
-        message_text: msgBody,
+        message_text: mediaInfo || msgBody,
         sent_by: "customer",
       });
 
       // If in human_handoff mode, don't auto-reply (admin handles it)
       if (session.current_flow === "human_handoff") {
         return new Response("OK", { status: 200, headers: corsHeaders });
+      }
+
+      // Acknowledge media messages when bot is active
+      if (mediaInfo && !msgBody) {
+        await sendMessage(from, "Thanks for sharing! Our team can view this when connected. Reply 'menu' for options or type 'agent' to talk to a person.", metaToken!, phoneNumberId!, supabase, session.id);
+        return new Response("OK", { status: 200, headers: corsHeaders });
+      }
+
+      // Handle interactive button/list callbacks
+      if (interactiveId) {
+        if (interactiveId === "back_menu") {
+          await supabase.from("whatsapp_sessions").update({ current_flow: "idle", flow_data: {} }).eq("id", session.id);
+          await sendMainMenu(from, session.user_type || "customer", metaToken!, phoneNumberId!, supabase, session.id);
+          return new Response("OK", { status: 200, headers: corsHeaders });
+        }
+        if (interactiveId.startsWith("toggle_")) {
+          await handleVendorToggleSelection(supabase, session, from, interactiveId, metaToken!, phoneNumberId!);
+          return new Response("OK", { status: 200, headers: corsHeaders });
+        }
+        // Route menu selections by interactive ID
+        const menuRoutes: Record<string, string> = {
+          "menu_track": "1", "menu_orders": "2", "menu_catalog": "3",
+          "menu_support": "4", "menu_agent": "5",
+          "vendor_catalog": "6", "vendor_toggle": "7", "vendor_add": "8", "vendor_orders": "9",
+        };
+        if (menuRoutes[interactiveId]) {
+          await handleIdleMenu(supabase, session, from, menuRoutes[interactiveId], msgBody, metaToken!, phoneNumberId!);
+          return new Response("OK", { status: 200, headers: corsHeaders });
+        }
       }
 
       // Check for immediate handoff triggers
@@ -228,49 +279,109 @@ Deno.serve(async (req) => {
 // Send WhatsApp text message
 async function sendMessage(to: string, text: string, token: string, phoneNumberId: string, supabase: any, sessionId?: string) {
   const url = `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`;
-  await fetch(url, {
+  const response = await fetch(url, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to,
-      type: "text",
-      text: { body: text },
-    }),
+    body: JSON.stringify({ messaging_product: "whatsapp", to, type: "text", text: { body: text } }),
   });
+  const result = await response.json();
+  if (!response.ok) console.error(`[sendMessage] Meta API error: ${response.status}`, result);
 
-  // Store outbound message
   if (supabase && sessionId) {
     await supabase.from("whatsapp_conversations").insert({
-      session_id: sessionId,
-      phone_number: to,
-      direction: "outbound",
-      message_text: text,
-      sent_by: "bot",
+      session_id: sessionId, phone_number: to, direction: "outbound",
+      message_text: text, sent_by: "bot",
     });
   }
 }
 
-// Main menu
+// Send interactive button message (max 3 buttons)
+async function sendInteractiveButtons(
+  to: string, bodyText: string, buttons: Array<{id: string, title: string}>,
+  token: string, phoneNumberId: string, supabase: any, sessionId?: string
+) {
+  const url = `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messaging_product: "whatsapp", to, type: "interactive",
+      interactive: {
+        type: "button", body: { text: bodyText },
+        action: { buttons: buttons.map(b => ({ type: "reply", reply: { id: b.id, title: b.title.substring(0, 20) } })) },
+      },
+    }),
+  });
+  const result = await response.json();
+  if (!response.ok) console.error(`[sendInteractiveButtons] Meta API error: ${response.status}`, result);
+
+  if (supabase && sessionId) {
+    await supabase.from("whatsapp_conversations").insert({
+      session_id: sessionId, phone_number: to, direction: "outbound",
+      message_text: bodyText, sent_by: "bot",
+    });
+  }
+}
+
+// Send interactive list message (up to 10 rows across sections)
+async function sendInteractiveList(
+  to: string, bodyText: string, buttonLabel: string,
+  sections: Array<{title: string, rows: Array<{id: string, title: string, description?: string}>}>,
+  token: string, phoneNumberId: string, supabase: any, sessionId?: string
+) {
+  const url = `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messaging_product: "whatsapp", to, type: "interactive",
+      interactive: {
+        type: "list", body: { text: bodyText },
+        action: { button: buttonLabel.substring(0, 20), sections },
+      },
+    }),
+  });
+  const result = await response.json();
+  if (!response.ok) console.error(`[sendInteractiveList] Meta API error: ${response.status}`, result);
+
+  if (supabase && sessionId) {
+    await supabase.from("whatsapp_conversations").insert({
+      session_id: sessionId, phone_number: to, direction: "outbound",
+      message_text: bodyText, sent_by: "bot",
+    });
+  }
+}
+
+// Main menu — interactive list
 async function sendMainMenu(to: string, userType: string, token: string, phoneNumberId: string, supabase: any, sessionId: string) {
-  let menu = `🎉 *Welcome to Evnting!*\n\nHow can we help you today?\n\n`;
-  menu += `1️⃣ Track Order\n`;
-  menu += `2️⃣ My Orders\n`;
-  menu += `3️⃣ Browse Catalog\n`;
-  menu += `4️⃣ Customer Care\n`;
-  menu += `5️⃣ Talk to a Person\n`;
+  const customerRows = [
+    { id: "menu_track", title: "Track Order", description: "Check your order status" },
+    { id: "menu_orders", title: "My Orders", description: "View recent orders" },
+    { id: "menu_catalog", title: "Browse Catalog", description: "See available items" },
+    { id: "menu_support", title: "Customer Care", description: "Get help with an issue" },
+    { id: "menu_agent", title: "Talk to a Person", description: "Connect with our team" },
+  ];
+
+  const sections: Array<{title: string, rows: Array<{id: string, title: string, description?: string}>}> = [
+    { title: "How can we help?", rows: customerRows },
+  ];
 
   if (userType === "vendor") {
-    menu += `\n--- *Vendor Options* ---\n`;
-    menu += `6️⃣ My Catalog\n`;
-    menu += `7️⃣ Toggle Availability\n`;
-    menu += `8️⃣ Add New Item\n`;
-    menu += `9️⃣ My Assigned Orders\n`;
+    sections.push({
+      title: "Vendor Options",
+      rows: [
+        { id: "vendor_catalog", title: "My Catalog", description: "View your listed items" },
+        { id: "vendor_toggle", title: "Toggle Availability", description: "Mark items available/unavailable" },
+        { id: "vendor_add", title: "Add New Item", description: "List a new rental item" },
+        { id: "vendor_orders", title: "My Assigned Orders", description: "View orders assigned to you" },
+      ],
+    });
   }
 
-  menu += `\n_Reply with a number to proceed._`;
-
-  await sendMessage(to, menu, token, phoneNumberId, supabase, sessionId);
+  await sendInteractiveList(
+    to, "🎉 *Welcome to Evnting!*\n\nHow can we help you today?", "View Menu",
+    sections, token, phoneNumberId, supabase, sessionId
+  );
 }
 
 // Handle idle menu selections
@@ -348,11 +459,16 @@ async function handleTrackOrder(supabase: any, session: any, from: string, order
       `📊 Status: *${o.status}*\n` +
       `📅 Event Date: ${o.event_date || "Not set"}\n` +
       `📍 Location: ${o.location || "Not set"}\n` +
-      `👤 Client: ${o.client_name || "N/A"}\n\n` +
-      `_Reply 'menu' to go back._`;
-    await sendMessage(from, msg, token, phoneNumberId, supabase, session.id);
+      `👤 Client: ${o.client_name || "N/A"}`;
+    await sendInteractiveButtons(from, msg, [
+      { id: "back_menu", title: "Main Menu" },
+      { id: "menu_agent", title: "Talk to a Person" },
+    ], token, phoneNumberId, supabase, session.id);
   } else {
-    await sendMessage(from, "❌ Order not found. Please check your Order ID and try again.\n\n_Reply 'menu' to go back._", token, phoneNumberId, supabase, session.id);
+    await sendInteractiveButtons(from, "❌ Order not found. Please check your Order ID and try again.", [
+      { id: "back_menu", title: "Main Menu" },
+      { id: "menu_track", title: "Try Again" },
+    ], token, phoneNumberId, supabase, session.id);
   }
 
   await supabase.from("whatsapp_sessions").update({ current_flow: "idle" }).eq("id", session.id);
@@ -429,7 +545,11 @@ async function handleSupport(supabase: any, session: any, from: string, question
     );
 
     if (match) {
-      await sendMessage(from, `💡 *${match.question}*\n\n${match.answer}\n\n_Did this help? Reply 'menu' to go back or ask another question._`, token, phoneNumberId, supabase, session.id);
+      await sendInteractiveButtons(from, `💡 *${match.question}*\n\n${match.answer}`, [
+        { id: "back_menu", title: "Main Menu" },
+        { id: "menu_support", title: "Ask Another" },
+        { id: "menu_agent", title: "Talk to Agent" },
+      ], token, phoneNumberId, supabase, session.id);
       await supabase.from("whatsapp_sessions").update({ current_flow: "idle", flow_data: {} }).eq("id", session.id);
       return;
     }
@@ -440,7 +560,10 @@ async function handleSupport(supabase: any, session: any, from: string, question
     await handleHandoff(supabase, session, from, token, phoneNumberId);
   } else {
     await supabase.from("whatsapp_sessions").update({ flow_data: { attempts } }).eq("id", session.id);
-    await sendMessage(from, "🤔 I couldn't find a match. Could you rephrase your question?\n\n_Or type 'agent' to speak with a person._", token, phoneNumberId, supabase, session.id);
+    await sendInteractiveButtons(from, "🤔 I couldn't find a match. Could you rephrase your question?", [
+      { id: "menu_agent", title: "Talk to Agent" },
+      { id: "back_menu", title: "Main Menu" },
+    ], token, phoneNumberId, supabase, session.id);
   }
 }
 
@@ -507,8 +630,13 @@ async function handleVendorCatalog(supabase: any, session: any, from: string, to
   await sendMessage(from, msg, token, phoneNumberId, supabase, session.id);
 }
 
-// Vendor: Toggle availability
+// Vendor: Toggle availability — interactive list
 async function handleVendorToggle(supabase: any, session: any, from: string, token: string, phoneNumberId: string) {
+  if (!session.user_id) {
+    await sendMessage(from, "⚠️ Phone not linked to a vendor account.", token, phoneNumberId, supabase, session.id);
+    return;
+  }
+
   const { data: items } = await supabase
     .from("vendor_inventory")
     .select("id, name, is_available")
@@ -516,18 +644,53 @@ async function handleVendorToggle(supabase: any, session: any, from: string, tok
     .limit(10);
 
   if (!items?.length) {
-    await sendMessage(from, "No items to toggle.\n\n_Reply 'menu' to go back._", token, phoneNumberId, supabase, session.id);
+    await sendInteractiveButtons(from, "No items to toggle.", [
+      { id: "vendor_add", title: "Add New Item" },
+      { id: "back_menu", title: "Main Menu" },
+    ], token, phoneNumberId, supabase, session.id);
     return;
   }
 
-  let msg = "🔄 *Toggle Availability*\n\nReply with the item number:\n\n";
-  items.forEach((item: any, i: number) => {
-    msg += `${i + 1}. ${item.name} — ${item.is_available ? "✅" : "❌"}\n`;
-  });
+  const rows = items.map((item: any) => ({
+    id: `toggle_${item.id}`,
+    title: item.name.substring(0, 24),
+    description: item.is_available ? "Currently: Available ✅" : "Currently: Unavailable ❌",
+  }));
 
-  // For simplicity, toggle first item. In production, you'd track the flow.
-  // Here we just toggle all for demo — the real flow would be multi-step
-  await sendMessage(from, msg + "\n_Feature in progress. Contact admin to toggle items._\n\n_Reply 'menu' to go back._", token, phoneNumberId, supabase, session.id);
+  await sendInteractiveList(from,
+    "🔄 *Toggle Availability*\n\nSelect an item to toggle:",
+    "Select Item",
+    [{ title: "Your Items", rows }],
+    token, phoneNumberId, supabase, session.id
+  );
+}
+
+// Vendor: Handle toggle selection
+async function handleVendorToggleSelection(supabase: any, session: any, from: string, interactiveId: string, token: string, phoneNumberId: string) {
+  const itemId = interactiveId.replace("toggle_", "");
+
+  const { data: item } = await supabase
+    .from("vendor_inventory")
+    .select("id, name, is_available")
+    .eq("id", itemId)
+    .eq("vendor_id", session.user_id)
+    .single();
+
+  if (!item) {
+    await sendMessage(from, "Item not found.", token, phoneNumberId, supabase, session.id);
+    return;
+  }
+
+  const newState = !item.is_available;
+  await supabase.from("vendor_inventory").update({ is_available: newState }).eq("id", itemId);
+
+  await sendInteractiveButtons(from,
+    `${newState ? "✅" : "❌"} *${item.name}* is now ${newState ? "Available" : "Unavailable"}.`,
+    [
+      { id: "vendor_toggle", title: "Toggle Another" },
+      { id: "back_menu", title: "Main Menu" },
+    ], token, phoneNumberId, supabase, session.id
+  );
 }
 
 // Vendor: Assigned orders

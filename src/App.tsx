@@ -8,15 +8,28 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 import { useStatusBar } from "@/hooks/useStatusBar";
 import { initPushNotifications } from "@/services/pushNotifications";
 import { initDeepLinks } from "@/services/deepLinks";
 import OfflineBanner from "@/components/mobile/OfflineBanner";
+import AppLoadingScreen from "@/components/AppLoadingScreen";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+/** Shows branded loading screen until auth resolves */
+const AuthGate = ({ children }: { children: React.ReactNode }) => {
+  const { loading } = useAuth();
+  return (
+    <>
+      <AppLoadingScreen visible={loading} />
+      {children}
+    </>
+  );
+};
 
 /** Runs native platform hooks inside BrowserRouter context */
 const NativeBootstrap = () => {
@@ -71,6 +84,7 @@ const App = () => {
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+    <AuthGate>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -182,6 +196,7 @@ const App = () => {
         </AudioProvider>
       </BrowserRouter>
     </TooltipProvider>
+    </AuthGate>
     </AuthProvider>
   </QueryClientProvider>
   </ThemeProvider>

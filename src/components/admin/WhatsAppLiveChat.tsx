@@ -325,6 +325,27 @@ const WhatsAppLiveChat = ({ employeeMode = false }: WhatsAppLiveChatProps) => {
               </div>
             </ScrollArea>
 
+            {/* Quick Reply Templates */}
+            <div className="px-3 py-2 border-t flex gap-2 overflow-x-auto">
+              {[
+                { label: "Greeting", text: "Hi! Thanks for reaching out to Evnting. How can I help you today?" },
+                { label: "Order ETA", text: "Your order is being processed. You can expect delivery by your event date. I'll send you tracking details once ready." },
+                { label: "Pricing", text: "I'd be happy to help with pricing! Could you share which items or services you're interested in?" },
+                { label: "Escalate", text: "I'm connecting you with our specialist team. They'll respond shortly." },
+                { label: "Closing", text: "Glad I could help! If you need anything else, just message us anytime. Have a great event!" },
+              ].map((qr) => (
+                <Button
+                  key={qr.label}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs whitespace-nowrap flex-shrink-0"
+                  onClick={() => setReplyText(qr.text)}
+                >
+                  {qr.label}
+                </Button>
+              ))}
+            </div>
+
             {/* Reply Input */}
             <div className="p-3 border-t bg-muted/10">
               <div className="flex gap-2">

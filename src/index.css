@@ -12,11 +12,17 @@ body {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   overscroll-behavior: none;
-  overflow-x: hidden;
+  overflow: visible;
+  min-height: 100%;
 }
 
-/* Prevent horizontal overflow on mobile */
+/* html must have height:100% so it stays viewport-sized and becomes
+   the scroll container. Without it, html expands to content height
+   and the viewport has nothing to scroll.
+   overflow-x:hidden prevents horizontal scroll without breaking
+   vertical scroll when paired with height:100%. */
 html {
+  height: 100%;
   overflow-x: hidden;
 }
 

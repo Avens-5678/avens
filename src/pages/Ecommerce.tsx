@@ -19,7 +19,6 @@ import CategoryIconStrip from "@/components/ecommerce/CategoryIconStrip";
 import LocationPrompt from "@/components/ecommerce/LocationPrompt";
 import LocationRadiusBar from "@/components/ecommerce/LocationRadiusBar";
 import DiscoveryRow from "@/components/ecommerce/DiscoveryRow";
-import MobileBottomNav from "@/components/ecommerce/MobileBottomNav";
 import HowItWorks from "@/components/ecommerce/HowItWorks";
 import EventPackages from "@/components/ecommerce/EventPackages";
 import VenueCard from "@/components/ecommerce/VenueCard";
@@ -1161,8 +1160,6 @@ const Ecommerce = () => {
         </div>
       )}
 
-      {/* Mobile Bottom Nav */}
-      <MobileBottomNav cartCount={items.length} />
     </Layout>
   );
 };

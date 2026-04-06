@@ -30,7 +30,8 @@ import {
   Briefcase,
   ShoppingBag,
   MessageCircle,
-  Newspaper
+  Newspaper,
+  PartyPopper
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EnhancedFormSubmissions from "@/components/admin/EnhancedFormSubmissions";
@@ -72,6 +73,7 @@ import Logo from "@/components/ui/logo";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import AdminDashboardHome from "@/components/admin/AdminDashboardHome";
 import AITestingAgent from "@/components/admin/AITestingAgent";
+import AdminEssentials from "@/components/admin/AdminEssentials";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface AdminDashboardProps {
@@ -123,6 +125,14 @@ const menuGroups: MenuGroup[] = [
       { label: "Pricing Rules", value: "pricing-rules" },
       { label: "Surge Pricing", value: "surge-pricing" },
       { label: "Service Cities", value: "service-cities" },
+    ],
+  },
+  {
+    icon: PartyPopper, label: "Essentials", value: "essentials",
+    subTabs: [
+      { label: "Overview", value: "ess-overview" },
+      { label: "Categories", value: "ess-categories" },
+      { label: "Bundles", value: "ess-bundles" },
     ],
   },
   {
@@ -358,6 +368,10 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <AdminSurgeManager />;
       case "service-cities":
         return <AdminCityManager />;
+      case "ess-overview":
+      case "ess-categories":
+      case "ess-bundles":
+        return <AdminEssentials />;
       case "cms-banners":
         return <AdminBannerManager />;
       case "cms-coupons":

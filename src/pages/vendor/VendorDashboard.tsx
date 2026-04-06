@@ -27,12 +27,14 @@ import SiteVisitManager from "@/components/vendor/SiteVisitManager";
 import LaborTracker from "@/components/vendor/LaborTracker";
 import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
 import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
+import EssentialsProductManager from "@/components/vendor/EssentialsProductManager";
+import EssentialsOrderManager from "@/components/vendor/EssentialsOrderManager";
 
 import {
   LayoutDashboard, ClipboardList, Package, MessageSquare,
   UserCheck, ListTodo, IndianRupee, TrendingUp, TrendingDown,
   Star, User, Gift, Truck, MapPin, Users,
-  BookOpen, FileText, Bot, Loader2, Boxes,
+  BookOpen, FileText, Bot, Loader2, Boxes, ShoppingBag, PartyPopper,
 } from "lucide-react";
 
 const VendorDashboard = () => {
@@ -78,6 +80,13 @@ const VendorDashboard = () => {
         { icon: Truck, label: "Deliveries", value: "deliveries" },
         { icon: MessageSquare, label: "Chat", value: "chat", badge: unreadChats || undefined },
         { icon: Package, label: "Inventory", value: "inventory" },
+      ],
+    },
+    {
+      title: "Essentials",
+      items: [
+        { icon: ShoppingBag, label: "Shop Products", value: "shop-products" },
+        { icon: PartyPopper, label: "Shop Orders", value: "shop-orders" },
       ],
     },
     {
@@ -128,6 +137,10 @@ const VendorDashboard = () => {
         return <ChatManager />;
       case "inventory":
         return <InventoryManager />;
+      case "shop-products":
+        return <EssentialsProductManager />;
+      case "shop-orders":
+        return <EssentialsOrderManager />;
       case "team":
         return <EmployeeManager />;
       case "tasks":

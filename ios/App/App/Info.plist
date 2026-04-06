@@ -55,5 +55,14 @@
 	<string>Evnting uses your location to find nearby vendors and calculate delivery distances</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID for quick login to Evnting</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>evnting</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

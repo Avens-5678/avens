@@ -13,13 +13,17 @@ import { Navigate } from "react-router-dom";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 import { useStatusBar } from "@/hooks/useStatusBar";
 import { initPushNotifications } from "@/services/pushNotifications";
+import { initDeepLinks } from "@/services/deepLinks";
+import OfflineBanner from "@/components/mobile/OfflineBanner";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 /** Runs native platform hooks inside BrowserRouter context */
 const NativeBootstrap = () => {
+  const navigate = useNavigate();
   useAndroidBackButton();
   useStatusBar();
-  useEffect(() => { initPushNotifications(); }, []);
+  useEffect(() => { initPushNotifications(); initDeepLinks(navigate); }, [navigate]);
   return null;
 };
 
@@ -72,6 +76,7 @@ const App = () => {
       <Sonner />
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <NativeBootstrap />
+        <OfflineBanner />
         <ScrollToTop />
         <AudioProvider>
           <ErrorBoundary>

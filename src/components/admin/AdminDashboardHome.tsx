@@ -22,6 +22,7 @@ const AdminDashboardHome = ({ onNavigate }: Props) => {
     const load = async () => {
       setLoading(true);
       setError(null);
+      try {
       const monthStart = new Date();
       monthStart.setDate(1);
       monthStart.setHours(0, 0, 0, 0);

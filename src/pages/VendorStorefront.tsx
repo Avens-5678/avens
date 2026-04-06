@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout/Layout";
-import { MapPin, ShieldCheck, MessageCircle, Star, Store, Package } from "lucide-react";
+import { MapPin, ShieldCheck, MessageCircle, Star, Store, Package, Share2 } from "lucide-react";
+import { shareContent } from "@/services/shareService";
 
 interface VendorProfile {
   user_id: string;
@@ -177,6 +178,13 @@ export default function VendorStorefront() {
               className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-xl transition-colors flex-shrink-0"
             >
               <MessageCircle className="h-4 w-4" /> Message
+            </button>
+            <button
+              onClick={() => shareContent({ title: `${displayName} on Evnting`, text: `Check out ${displayName} on Evnting`, url: `https://evnting.com/vendor/${vendorId}` })}
+              className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl border border-border hover:bg-muted transition-colors flex-shrink-0"
+              title="Share"
+            >
+              <Share2 className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
         </div>

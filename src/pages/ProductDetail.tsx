@@ -313,9 +313,14 @@ const ProductDetail = () => {
   };
 
   const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) { await navigator.share({ title: rental?.title, url }); }
-    else { await navigator.clipboard.writeText(url); toast({ title: "Link copied!" }); }
+    const url = `https://evnting.com/ecommerce/${rental?.id}`;
+    try {
+      const { shareContent } = await import("@/services/shareService");
+      await shareContent({ title: rental?.title || "Check this out on Evnting!", text: `${rental?.title} — Book on Evnting`, url });
+    } catch {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied!" });
+    }
   };
 
   const handleZoomMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {

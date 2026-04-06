@@ -180,23 +180,26 @@ const GoogleMapPicker = ({
     });
   }, []);
 
-  const detectGPS = () => {
-    if (!navigator.geolocation) return;
+  const detectGPS = async () => {
     setDetecting(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        mapInstanceRef.current?.setCenter({ lat, lng });
-        mapInstanceRef.current?.setZoom(16);
-        markerRef.current?.setPosition({ lat, lng });
-        markerRef.current?.setAnimation(google.maps.Animation.DROP);
-        reverseGeocode(lat, lng);
-        setDetecting(false);
-      },
-      () => { setDetecting(false); },
-      { timeout: 10000 }
-    );
+    try {
+      const { getCurrentLocation } = await import("@/services/locationService");
+      const { lat, lng } = await getCurrentLocation();
+      mapInstanceRef.current?.setCenter({ lat, lng });
+      mapInstanceRef.current?.setZoom(16);
+      markerRef.current?.setPosition({ lat, lng });
+      markerRef.current?.setAnimation(google.maps.Animation.DROP);
+      reverseGeocode(lat, lng);
+    } catch {
+      // Fallback to browser geolocation
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => { reverseGeocode(pos.coords.latitude, pos.coords.longitude); },
+        () => {},
+        { timeout: 10000 }
+      );
+    } finally {
+      setDetecting(false);
+    }
   };
 
   // Fallback if no API key — show the old Nominatim search

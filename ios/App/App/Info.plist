@@ -51,5 +51,9 @@
 	<string>Evnting needs photo library access to upload product images</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Evnting needs to save photos to your library</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Evnting uses your location to find nearby vendors and calculate delivery distances</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID for quick login to Evnting</string>
 </dict>
 </plist>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "177170641396",
+    "project_id": "evnting-e1216",
+    "storage_bucket": "evnting-e1216.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:177170641396:android:fefacf5a7dc6707ee089a1",
+        "android_client_info": {
+          "package_name": "com.evnting.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC55_76S4628jmiiZn4h0FoLLfeSvp19Cc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

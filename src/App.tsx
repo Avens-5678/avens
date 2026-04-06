@@ -12,9 +12,16 @@ import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 import { useStatusBar } from "@/hooks/useStatusBar";
+import { initPushNotifications } from "@/services/pushNotifications";
+import { useEffect } from "react";
 
 /** Runs native platform hooks inside BrowserRouter context */
-const NativeBootstrap = () => { useAndroidBackButton(); useStatusBar(); return null; };
+const NativeBootstrap = () => {
+  useAndroidBackButton();
+  useStatusBar();
+  useEffect(() => { initPushNotifications(); }, []);
+  return null;
+};
 
 // IMPORTANT: All React.lazy() calls MUST be inside this function, NOT at module level.
 // Vite wraps dynamic import() with __vite_preload which is a const defined AFTER

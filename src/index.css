@@ -610,20 +610,10 @@ html {
       padding-right: 16px !important;
     }
 
-    /* Card containers must clip overflow */
-    [class*="rounded"] {
+    /* Card containers clip overflow — scoped to cards only, not all rounded elements */
+    .card-interactive[class*="rounded"],
+    [data-slot="card"][class*="rounded"] {
       overflow: hidden;
-    }
-
-    /* Minimum touch target size */
-    button, a, [role="button"] {
-      min-height: 44px;
-      min-width: 44px;
-    }
-
-    /* Body text minimum size */
-    p, span, li {
-      font-size: max(14px, inherit);
     }
 
     /* Full-screen dialogs on mobile */

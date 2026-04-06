@@ -8,7 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 import { useStatusBar } from "@/hooks/useStatusBar";

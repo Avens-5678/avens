@@ -24,13 +24,18 @@
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c5285ac0-560f-4504-9750-98d89759062b/id-preview-96ad6950--aab00966-e8d2-4c3d-996a-ab82eca80cc2.lovable.app-1771947025078.png">
     
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5RKKBP5M5S"></script>
+    <!-- Google Analytics (deferred — not needed for first paint) -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-5RKKBP5M5S');
+      // Load gtag script after page becomes interactive
+      window.addEventListener('load', function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-5RKKBP5M5S';
+        document.head.appendChild(s);
+      });
     </script>
     <meta property="og:title" content="Evnting - Premium Event Management">
   <meta name="twitter:title" content="Evnting - Premium Event Management">
@@ -39,8 +44,19 @@
 </head>
 
   <body>
-    <div id="root"></div>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <div id="root">
+      <!-- Inline loading indicator — removed by React once app mounts -->
+      <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;background:#fff;">
+        <div style="text-align:center;">
+          <h1 style="font-family:'Chakra Petch',system-ui,sans-serif;font-size:1.875rem;font-weight:700;font-style:italic;letter-spacing:-0.025em;text-transform:uppercase;color:#1a1a2e;margin:0;">
+            Evnting<span style="color:#F97316">.com</span>
+          </h1>
+          <div style="margin-top:1rem;width:2rem;height:2rem;border:3px solid #e5e7eb;border-top-color:#4F46E5;border-radius:50%;animation:spin 0.8s linear infinite;margin-left:auto;margin-right:auto;"></div>
+        </div>
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    </div>
+    <script defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- WATI WhatsApp widget loaded dynamically by React WhatsAppBot component -->
   </body>

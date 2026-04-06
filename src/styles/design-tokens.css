@@ -1,0 +1,51 @@
+/* ═══════════════════════════════════════════
+   EVNTING DESIGN TOKENS — E-Commerce Premium
+   ═══════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* Brand Colors */
+    --evn-primary: #4F46E5;
+    --evn-primary-hover: #4338CA;
+    --evn-primary-light: #EEF2FF;
+    --evn-primary-glow: rgba(79, 70, 229, 0.15);
+
+    /* Vertical Accent Colors */
+    --evn-rental: #4F46E5;     /* Insta-Rent — Indigo */
+    --evn-venue: #059669;      /* Venues — Emerald */
+    --evn-crew: #D97706;       /* Crew Hub — Amber */
+    --evn-essentials: #DB2777; /* Essentials — Pink */
+
+    /* Surfaces */
+    --evn-bg: #FAFAFA;
+    --evn-surface: #FFFFFF;
+    --evn-surface-raised: #F4F4F5;
+    --evn-surface-muted: #F9FAFB;
+
+    /* Text */
+    --evn-text: #18181B;
+    --evn-text-secondary: #71717A;
+    --evn-text-muted: #A1A1AA;
+
+    /* Borders */
+    --evn-border: #E4E4E7;
+    --evn-border-hover: #D4D4D8;
+
+    /* Shadows — multi-layer */
+    --evn-shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.02);
+    --evn-shadow-md: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.03);
+    --evn-shadow-lg: 0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.06), 0 24px 48px rgba(0,0,0,0.04);
+    --evn-shadow-hover: 0 4px 8px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.06), 0 32px 64px rgba(0,0,0,0.04);
+
+    /* Radius */
+    --evn-radius-sm: 8px;
+    --evn-radius-md: 12px;
+    --evn-radius-lg: 16px;
+    --evn-radius-xl: 20px;
+    --evn-radius-full: 9999px;
+
+    /* Transitions */
+    --evn-ease: cubic-bezier(0.23, 1, 0.32, 1);
+    --evn-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}

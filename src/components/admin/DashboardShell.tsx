@@ -43,13 +43,13 @@ const DashboardShell = ({
   const activeInSecondary = secondaryItems.some((i) => i.value === activeTab);
 
   return (
-    <div className="min-h-screen bg-muted/30 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       {headerContent}
 
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex w-[72px] flex-col items-center py-4 gap-1 bg-background border-r border-border overflow-y-auto shrink-0">
+        <aside className="hidden lg:flex w-[72px] flex-col items-center py-4 gap-1 bg-white border-r border-gray-200 overflow-y-auto shrink-0">
           <TooltipProvider delayDuration={200}>
             {sidebarItems.map((item) => {
               const Icon = item.icon;
@@ -62,8 +62,8 @@ const DashboardShell = ({
                       className={cn(
                         "relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
                         isActive
-                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          ? "bg-evn-600 text-white shadow-lg shadow-evn-600/20"
+                          : "text-gray-400 hover:bg-gray-100 hover:text-gray-700"
                       )}
                     >
                       <Icon className="h-5 w-5" />

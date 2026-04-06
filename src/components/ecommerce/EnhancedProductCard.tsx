@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MultiImageCarousel } from "@/components/ui/multi-image-carousel";
-import { Star, ShieldCheck, Zap, Store, ArrowRight, Eye, BadgeCheck } from "lucide-react";
+import { Star, ShieldCheck, Zap, Store, ArrowRight, Eye, BadgeCheck, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,9 +12,9 @@ import { MapPin as MapPinIcon } from "lucide-react";
 
 // Inline to avoid importing external module into Ecommerce chunk
 const distanceColor = (km: number) =>
-  km <= 10 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-  : km <= 25 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+  km <= 10 ? "bg-emerald-50 text-emerald-700"
+  : km <= 25 ? "bg-amber-50 text-amber-700"
+  : "bg-red-50 text-red-700";
 
 const categoryFallbacks: Record<string, string> = {
   "Structures & Venues": "/fallbacks/structures.svg",
@@ -34,7 +34,7 @@ const getFallbackImage = (categories?: string[]) => {
 };
 
 const PlaceholderSVG = () => (
-  <svg viewBox="0 0 80 80" fill="none" className="w-12 h-12 text-muted-foreground/40">
+  <svg viewBox="0 0 80 80" fill="none" className="w-12 h-12 text-gray-300">
     <rect x="10" y="20" width="60" height="45" rx="4" stroke="currentColor" strokeWidth="2" />
     <path d="M10 52l15-12 10 8 20-16 15 12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
     <circle cx="30" cy="35" r="5" stroke="currentColor" strokeWidth="2" />
@@ -52,9 +52,9 @@ const VendorLabel = ({ name, vendorId }: { name?: string; vendorId?: string }) =
   return (
     <p
       onClick={vendorId ? (e) => { e.stopPropagation(); window.location.href = `/vendor/${vendorId}`; } : undefined}
-      className={`text-[10px] text-muted-foreground truncate flex items-center gap-1 ${vendorId ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+      className={`text-[10px] text-gray-500 truncate flex items-center gap-1 ${vendorId ? "cursor-pointer hover:text-evn-600 transition-colors" : ""}`}
     >
-      <Store className="h-3 w-3" /> Sold by: <span className="font-medium text-foreground">{name}</span>
+      <Store className="h-3 w-3" /> Sold by: <span className="font-medium text-gray-700">{name}</span>
     </p>
   );
 };
@@ -85,7 +85,6 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
   const priceInfo = formatPrice();
   const isAssured = rental.is_verified || rental.is_featured || (rental.rating > 0 && rental.rating >= 4);
-  // isVendorItem already defined above
   const isFeatured = rental.show_on_home || rental.is_featured;
   const isList = viewMode === "list";
   const hasVirtualTour = !!rental.virtual_tour_url;
@@ -102,100 +101,122 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
   const cardContent = (
     <Card
-      className={`group overflow-hidden border border-border/60 bg-card hover:shadow-medium transition-all duration-300 rounded-xl cursor-pointer ${
-        isList ? "flex flex-row sm:flex-col" : ""
+      className={`group overflow-hidden border-0 bg-white rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-1 ${
+        isList ? "flex flex-row sm:flex-col shadow-sm hover:shadow-premium-hover" : "shadow-premium hover:shadow-premium-hover"
       }`}
       onClick={handleClick}
     >
       {/* Image */}
       <div
-        className={`overflow-hidden bg-muted relative ${
-          isList ? "w-28 h-28 flex-shrink-0 sm:w-full sm:h-auto sm:aspect-square" : "aspect-square"
+        className={`overflow-hidden bg-gray-100 relative ${
+          isList ? "w-28 h-28 flex-shrink-0 sm:w-full sm:h-auto sm:aspect-[4/3]" : "aspect-[4/3]"
         }`}
       >
         {rental.image_urls && rental.image_urls.length > 0 ? (
-          <MultiImageCarousel images={rental.image_urls} title={rental.title} className="!aspect-square !rounded-none" />
+          <MultiImageCarousel images={rental.image_urls} title={rental.title} className="!aspect-[4/3] !rounded-none" />
         ) : rental.image_url ? (
           <img
             src={rental.image_url}
             alt={rental.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             loading="lazy"
           />
         ) : (
           <img
             src={getFallbackImage(rental.categories)}
             alt={rental.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             loading="lazy"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = "none";
               (e.target as HTMLImageElement).parentElement!.classList.add("flex", "items-center", "justify-center");
               const svg = document.createElement("div");
-              svg.innerHTML = `<svg viewBox="0 0 80 80" fill="none" class="w-12 h-12 text-muted-foreground/40"><rect x="10" y="20" width="60" height="45" rx="4" stroke="currentColor" stroke-width="2"/><path d="M10 52l15-12 10 8 20-16 15 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="30" cy="35" r="5" stroke="currentColor" stroke-width="2"/><path d="M25 10h30M40 4v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+              svg.innerHTML = `<svg viewBox="0 0 80 80" fill="none" class="w-12 h-12 text-gray-300"><rect x="10" y="20" width="60" height="45" rx="4" stroke="currentColor" stroke-width="2"/><path d="M10 52l15-12 10 8 20-16 15 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="30" cy="35" r="5" stroke="currentColor" stroke-width="2"/><path d="M25 10h30M40 4v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
               (e.target as HTMLImageElement).parentElement!.appendChild(svg.firstChild!);
             }}
           />
         )}
 
+        {/* Wishlist heart */}
+        {!isList && (
+          <button
+            onClick={(e) => e.stopPropagation()}
+            className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-all duration-200 shadow-sm"
+          >
+            <Heart className="h-4 w-4" />
+          </button>
+        )}
+
+        {/* Price badge on image */}
+        {!isList && priceInfo && (
+          <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-xl bg-white/85 backdrop-blur-sm shadow-sm">
+            <span className="text-sm font-bold text-gray-900">{priceInfo.price}</span>
+            <span className="text-[10px] text-gray-500 ml-0.5">{priceInfo.unit}</span>
+          </div>
+        )}
+
         {/* Badges overlay */}
         {!isList && (
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {isVerified && (
-              <Badge className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
+              <Badge className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm gap-1">
                 <BadgeCheck className="h-3 w-3" /> Verified
               </Badge>
             )}
             {hasVirtualTour && (
-              <Badge className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
+              <Badge className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm gap-1">
                 <Eye className="h-3 w-3" /> 360° Tour
               </Badge>
             )}
-            {isVendorItem && !isVerified && (
-              <Badge className="bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
-                <Store className="h-3 w-3" /> Vendor
-              </Badge>
-            )}
-            {isFeatured && (
-              <Badge className="bg-secondary text-secondary-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-sm gap-1">
+            {isFeatured && !isVerified && (
+              <Badge className="bg-evn-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm gap-1">
                 <Zap className="h-3 w-3" /> Featured
               </Badge>
             )}
-            {rental.categories?.slice(0, 1).map((cat: string) => (
-              <Badge key={cat} className="bg-foreground/80 text-primary-foreground text-[10px] font-semibold px-2 py-0.5 rounded shadow-sm backdrop-blur-sm">
-                {cat}
-              </Badge>
-            ))}
           </div>
         )}
       </div>
 
       {/* Content */}
-      <CardContent className="p-3 sm:p-4 space-y-1.5 flex-1 min-w-0">
+      <CardContent className="p-4 space-y-2 flex-1 min-w-0">
+        {/* Category pill */}
+        {rental.categories?.slice(0, 1).map((cat: string) => (
+          <span key={cat} className="inline-block text-[10px] font-semibold uppercase tracking-wider text-evn-600 bg-evn-50 px-2 py-0.5 rounded-md">
+            {cat}
+          </span>
+        ))}
+
         {/* Assured badge */}
         {isAssured && (
           <div className="flex items-center gap-1">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-            <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Evnting Assured</span>
+            <ShieldCheck className="h-3.5 w-3.5 text-evn-600" />
+            <span className="text-[10px] font-bold text-evn-600 uppercase tracking-wide">Evnting Assured</span>
           </div>
         )}
 
-        <h3 className="font-semibold text-foreground text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+        <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-evn-600 transition-colors">
           {rental.title}
         </h3>
 
-        <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-2">
-          {rental.short_description}
-        </p>
+        {!isList && rental.short_description && (
+          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+            {rental.short_description}
+          </p>
+        )}
 
         {/* Rating */}
         <div className="flex items-center gap-1.5">
           {rental.rating && rental.rating > 0 ? (
-            <span className="inline-flex items-center gap-0.5 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
-              {rental.rating} <Star className="h-2.5 w-2.5 fill-current" />
-            </span>
+            <>
+              <span className="inline-flex items-center gap-0.5 bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                {rental.rating} <Star className="h-2.5 w-2.5 fill-current" />
+              </span>
+              {rental.review_count > 0 && (
+                <span className="text-[10px] text-gray-400">({rental.review_count})</span>
+              )}
+            </>
           ) : (
-            <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700">
               New
             </span>
           )}
@@ -203,28 +224,28 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
         {/* Distance badge */}
         {rental._distance_km != null && (
-          <Badge variant="secondary" className={`text-[9px] gap-0.5 w-fit ${distanceColor(rental._distance_km)}`}>
+          <Badge variant="secondary" className={`text-[9px] gap-0.5 w-fit rounded-md ${distanceColor(rental._distance_km)}`}>
             <MapPinIcon className="h-2.5 w-2.5" />{rental._distance_km} km
           </Badge>
         )}
 
-        {/* Price */}
-        {priceInfo && (
+        {/* Price (list mode) */}
+        {isList && priceInfo && (
           <div>
             {isVendorUser && (
-              <span className="text-[9px] font-semibold text-purple-600 dark:text-purple-400">Vendor rate</span>
+              <span className="text-[9px] font-semibold text-purple-600">Vendor rate</span>
             )}
             <div className="flex items-baseline gap-1.5">
-              <span className="text-sm sm:text-base font-bold text-foreground">{priceInfo.price}</span>
-              <span className="text-[10px] text-muted-foreground">{priceInfo.unit}</span>
+              <span className="text-base font-bold text-gray-900">{priceInfo.price}</span>
+              <span className="text-[10px] text-gray-400">{priceInfo.unit}</span>
             </div>
           </div>
         )}
 
         {/* Location */}
         {rental.address && (
-          <p className="text-[10px] text-muted-foreground truncate">
-            📍 {rental.address}
+          <p className="text-[10px] text-gray-400 truncate flex items-center gap-1">
+            <MapPinIcon className="h-3 w-3" /> {rental.address}
           </p>
         )}
 
@@ -242,18 +263,18 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
       <HoverCardTrigger asChild>
         {cardContent}
       </HoverCardTrigger>
-      <HoverCardContent side="right" align="start" className="w-72 p-4 space-y-3 z-[60]">
-        <h4 className="font-bold text-sm text-foreground leading-snug">{rental.title}</h4>
-        
-        <p className="text-xs text-muted-foreground line-clamp-4">{rental.description || rental.short_description}</p>
+      <HoverCardContent side="right" align="start" className="w-72 p-4 space-y-3 z-[60] rounded-2xl shadow-premium-hover border-0">
+        <h4 className="font-bold text-sm text-gray-900 leading-snug">{rental.title}</h4>
+
+        <p className="text-xs text-gray-500 line-clamp-4">{rental.description || rental.short_description}</p>
 
         {/* Specs */}
         {specs && typeof specs === "object" && (
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {Object.entries(specs).slice(0, 3).map(([key, val]) => (
               <div key={key} className="flex justify-between text-[11px]">
-                <span className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
-                <span className="text-foreground font-medium">{String(val)}</span>
+                <span className="text-gray-400 capitalize">{key.replace(/_/g, " ")}</span>
+                <span className="text-gray-700 font-medium">{String(val)}</span>
               </div>
             ))}
           </div>
@@ -263,7 +284,7 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         {rental.amenities && rental.amenities.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {rental.amenities.slice(0, 4).map((a: string) => (
-              <Badge key={a} variant="secondary" className="text-[9px] px-1.5 py-0">
+              <Badge key={a} variant="secondary" className="text-[9px] px-1.5 py-0 rounded-md bg-gray-100 text-gray-600">
                 {a}
               </Badge>
             ))}
@@ -272,14 +293,14 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
 
         {/* Experience for crew */}
         {rental.experience_level && (
-          <p className="text-[11px] text-muted-foreground">
-            Experience: <span className="text-foreground font-medium capitalize">{rental.experience_level}</span>
+          <p className="text-[11px] text-gray-500">
+            Experience: <span className="text-gray-700 font-medium capitalize">{rental.experience_level}</span>
           </p>
         )}
 
         <button
           onClick={(e) => { e.stopPropagation(); handleClick(); }}
-          className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+          className="flex items-center gap-1 text-xs font-semibold text-evn-600 hover:text-evn-700 transition-colors"
         >
           View Details <ArrowRight className="h-3 w-3" />
         </button>

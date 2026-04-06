@@ -1,3 +1,4 @@
+@import './styles/design-tokens.css';
 @tailwind base;
 
 /* ── Native app safe areas ── */
@@ -433,10 +434,12 @@ html {
   /* ═══════ Card Interactions ═══════ */
   .card-interactive {
     @apply transition-all duration-500 ease-out;
-    @apply hover:shadow-2xl hover:-translate-y-1;
-    @apply hover:border-primary/20;
     position: relative;
     overflow: hidden;
+  }
+  .card-interactive:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--evn-shadow-hover, 0 4px 8px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.06), 0 32px 64px rgba(0,0,0,0.04));
   }
 
   .card-interactive::before {
@@ -560,9 +563,21 @@ html {
     left: 100%;
   }
 
+  /* ═══════ Button Active States ═══════ */
+  button:active, a:active, [role="button"]:active {
+    transform: scale(0.97);
+  }
+
   /* ═══════ Loading States ═══════ */
   .skeleton {
-    @apply bg-muted animate-pulse rounded;
+    @apply bg-gray-200 rounded-lg relative overflow-hidden;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 1.5s infinite;
   }
 
   /* ═══════ Spacing & Layout Utilities ═══════ */

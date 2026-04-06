@@ -951,12 +951,12 @@ const Cart = () => {
       />
 
       {/* Breadcrumb */}
-      <div className="bg-muted/40 border-b border-border">
+      <div className="bg-gray-50 border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <button onClick={() => navigate("/ecommerce")} className="hover:text-primary transition-colors">Home</button>
+          <div className="flex items-center gap-1.5 text-xs text-gray-500">
+            <button onClick={() => navigate("/ecommerce")} className="hover:text-evn-600 transition-colors">Home</button>
             <ChevronRight className="h-3 w-3" />
-            <button onClick={() => navigate("/ecommerce")} className="hover:text-primary transition-colors">Shop</button>
+            <button onClick={() => navigate("/ecommerce")} className="hover:text-evn-600 transition-colors">Shop</button>
             <ChevronRight className="h-3 w-3" />
             <span className="text-foreground font-medium">Cart ({items.length})</span>
           </div>

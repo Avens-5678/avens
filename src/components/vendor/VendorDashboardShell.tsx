@@ -64,21 +64,21 @@ const VendorDashboardShell = ({
   const initials = (displayName[0] || "V").toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* ── Desktop Layout ── */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar — desktop only */}
         <aside
           className={cn(
-            "hidden lg:flex flex-col border-r border-border bg-card shrink-0 transition-all duration-200 overflow-hidden",
-            collapsed ? "w-[64px]" : "w-[220px]"
+            "hidden lg:flex flex-col border-r border-gray-200 bg-white shrink-0 transition-all duration-300 overflow-hidden",
+            collapsed ? "w-[72px]" : "w-[240px]"
           )}
         >
           {/* Logo area */}
-          <div className={cn("flex items-center h-14 border-b border-border shrink-0 px-3", collapsed ? "justify-center" : "gap-2.5")}>
+          <div className={cn("flex items-center h-16 border-b border-gray-100 shrink-0 px-4", collapsed ? "justify-center" : "gap-2.5")}>
             {!collapsed && (
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-evn-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                   {initials}
                 </div>
                 <div className="min-w-0">
@@ -88,7 +88,7 @@ const VendorDashboardShell = ({
               </div>
             )}
             {collapsed && (
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
+              <div className="w-9 h-9 rounded-xl bg-evn-600 flex items-center justify-center text-white text-sm font-bold">
                 {initials}
               </div>
             )}
@@ -113,12 +113,12 @@ const VendorDashboardShell = ({
                       onClick={() => onTabChange(item.value)}
                       className={cn(
                         "relative flex items-center gap-2.5 w-full transition-all duration-150",
-                        collapsed ? "justify-center px-2 py-2.5 mx-auto" : "px-3 py-[7px] mx-1.5 rounded-md",
+                        collapsed ? "justify-center px-2 py-2.5 mx-auto" : "px-3 py-2 mx-2 rounded-xl",
                         isActive
                           ? collapsed
-                            ? "text-primary"
-                            : "bg-primary/[0.07] text-primary font-medium border-l-2 border-primary ml-0 pl-[10px]"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            ? "text-evn-600"
+                            : "bg-evn-50 text-evn-700 font-medium"
+                          : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                       )}
                       title={collapsed ? item.label : undefined}
                     >
@@ -170,7 +170,7 @@ const VendorDashboardShell = ({
         {/* Main area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top header bar */}
-          <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0">
+          <header className="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-6 shrink-0">
             {/* Mobile menu button */}
             <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden p-1.5 -ml-1 text-muted-foreground hover:text-foreground">
               <Menu className="h-5 w-5" />
@@ -191,7 +191,7 @@ const VendorDashboardShell = ({
               <NotificationCenter />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold hover:bg-primary/20 transition-colors">
+                  <button className="w-8 h-8 rounded-full bg-evn-100 flex items-center justify-center text-evn-700 text-xs font-bold hover:bg-evn-200 transition-colors">
                     {initials}
                   </button>
                 </DropdownMenuTrigger>
@@ -210,7 +210,7 @@ const VendorDashboardShell = ({
 
           {/* Content */}
           <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
-            <div className="p-4 sm:p-5 lg:p-6 max-w-[1200px]">{children}</div>
+            <div className="p-4 sm:p-5 lg:p-6 max-w-[1200px] mx-auto">{children}</div>
           </main>
         </div>
       </div>

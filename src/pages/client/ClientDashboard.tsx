@@ -1,12 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, User, ArrowLeft, Plus, MessageSquare, Award, Home, HelpCircle } from "lucide-react";
+import { LogOut, Calendar, User, ArrowLeft, MessageSquare, Award, Home, HelpCircle } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
-import EventRequestForm from "@/components/client/EventRequestForm";
 import PastOrders from "@/components/client/PastOrders";
 import ClientProfileSettings from "@/components/client/ClientProfileSettings";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
@@ -19,7 +17,6 @@ import { useUnreadChats } from "@/hooks/useUnreadChats";
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: Home, label: "Home", value: "home" },
   { icon: MessageSquare, label: "Inbox", value: "inbox" },
-  { icon: Plus, label: "New Request", value: "request" },
   { icon: Calendar, label: "My Orders", value: "past-orders" },
   { icon: Award, label: "Loyalty", value: "loyalty" },
   { icon: User, label: "Profile", value: "profile" },
@@ -42,9 +39,7 @@ const ClientDashboard = () => {
   [unreadChats]);
 
   // Read eventType from URL params for pre-filling
-  const prefilledEventType = searchParams.get("type") || "";
-
-  const handleLogout = async () => {
+const handleLogout = async () => {
     await signOut();
     toast({
       title: "Logged Out",
@@ -100,23 +95,6 @@ const ClientDashboard = () => {
         return <ClientDashboardHome onTabChange={setActiveTab} />;
       case "inbox":
         return <ClientMessages />;
-      case "request":
-        return (
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                New Event Request
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Fill out the form below to submit an event request. Our team will review and assign a vendor.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <EventRequestForm onSuccess={() => setActiveTab("tracker")} defaultEventType={prefilledEventType} />
-            </CardContent>
-          </Card>
-        );
       case "past-orders":
         return <PastOrders />;
       case "loyalty":
@@ -136,7 +114,7 @@ const ClientDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
-      mobilePrimaryItems={["home", "inbox", "request", "past-orders"]}
+      mobilePrimaryItems={["home", "inbox", "past-orders", "profile"]}
     >
       {renderContent()}
     </DashboardShell>

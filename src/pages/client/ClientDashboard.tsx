@@ -3,18 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare, Gift, Award, Home, HelpCircle } from "lucide-react";
+import { LogOut, Calendar, User, ArrowLeft, Plus, MessageSquare, Award, Home, HelpCircle } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
-import EventTracker from "@/components/client/EventTracker";
 import PastOrders from "@/components/client/PastOrders";
 import ClientProfileSettings from "@/components/client/ClientProfileSettings";
-import DashboardChatbot from "@/components/dashboard/DashboardChatbot";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
-import EventWorkspace from "@/components/client/EventWorkspace";
 import ClientMessages from "@/components/client/ClientMessages";
-import ClientBundleEvents from "@/components/client/ClientBundleEvents";
 import LoyaltyDashboard from "@/components/client/LoyaltyDashboard";
 import ClientDashboardHome from "@/components/client/ClientDashboardHome";
 import ClientHelpGuide from "@/components/client/ClientHelpGuide";
@@ -22,13 +18,9 @@ import { useUnreadChats } from "@/hooks/useUnreadChats";
 
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: Home, label: "Home", value: "home" },
-  { icon: Bot, label: "AI Assistant", value: "ai" },
-  { icon: FolderOpen, label: "Event Hub", value: "workspace" },
-  { icon: Gift, label: "My Events", value: "events" },
-  { icon: MessageSquare, label: "Messages", value: "messages" },
-  { icon: FileText, label: "My Requests", value: "tracker" },
+  { icon: MessageSquare, label: "Inbox", value: "inbox" },
   { icon: Plus, label: "New Request", value: "request" },
-  { icon: Calendar, label: "Past Orders", value: "past-orders" },
+  { icon: Calendar, label: "My Orders", value: "past-orders" },
   { icon: Award, label: "Loyalty", value: "loyalty" },
   { icon: User, label: "Profile", value: "profile" },
   { icon: HelpCircle, label: "Help & Guide", value: "help" },
@@ -45,7 +37,7 @@ const ClientDashboard = () => {
   const sidebarItems: SidebarItem[] = useMemo(() =>
     baseSidebarItems.map((item) => ({
       ...item,
-      badge: item.value === "messages" ? unreadChats : undefined,
+      badge: item.value === "inbox" ? unreadChats : undefined,
     })),
   [unreadChats]);
 
@@ -106,16 +98,8 @@ const ClientDashboard = () => {
     switch (activeTab) {
       case "home":
         return <ClientDashboardHome onTabChange={setActiveTab} />;
-      case "ai":
-        return null; // Rendered persistently below
-      case "workspace":
-        return <EventWorkspace />;
-      case "events":
-        return <ClientBundleEvents />;
-      case "messages":
+      case "inbox":
         return <ClientMessages />;
-      case "tracker":
-        return <EventTracker />;
       case "request":
         return (
           <Card className="rounded-2xl">
@@ -152,12 +136,9 @@ const ClientDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
-      mobilePrimaryItems={["home", "events", "messages", "tracker"]}
+      mobilePrimaryItems={["home", "inbox", "request", "past-orders"]}
     >
-      <div className={activeTab === "ai" ? "h-full" : "hidden"}>
-        <DashboardChatbot role="client" userName={userName} />
-      </div>
-      {activeTab !== "ai" && renderContent()}
+      {renderContent()}
     </DashboardShell>
   );
 };

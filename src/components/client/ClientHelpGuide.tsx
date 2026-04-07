@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
-  Home, Bot, FolderOpen, Gift, MessageSquare, FileText, Plus,
+  Home, MessageSquare, Plus,
   Calendar, Award, User, ShoppingCart, MapPin, BookOpen, HelpCircle,
 } from "lucide-react";
 
@@ -12,56 +12,19 @@ const SECTIONS = [
     summary: "Your dashboard overview — upcoming bookings, quick actions, and recommendations.",
     body: [
       "See your next event at a glance.",
-      "Quick links to start a new request, browse the marketplace, or open Messages.",
+      "Quick links to start a new request, browse the marketplace, or open Inbox.",
       "Personalized suggestions based on what you've viewed.",
     ],
   },
   {
-    icon: Bot,
-    title: "AI Assistant",
-    summary: "Chat with Evnting AI to plan an event, get rental ideas, or build a quote.",
-    body: [
-      "Tell the AI what you're planning — e.g. \"500-guest wedding in Hyderabad\".",
-      "It can suggest vendors, build a rental cart for you, and submit it as an event request.",
-      "You can also ask follow-up questions like \"add 200 chairs\" and it'll update the cart.",
-    ],
-  },
-  {
-    icon: FolderOpen,
-    title: "Event Hub",
-    summary: "Workspace for an event in progress — vendors, milestones, files, payments.",
-    body: [
-      "Track every vendor assigned to your event in one place.",
-      "See payment milestones and upcoming dates.",
-      "Upload reference photos and notes for vendors.",
-    ],
-  },
-  {
-    icon: Gift,
-    title: "My Events",
-    summary: "All your booked theme bundles (e.g. Birthday, Wedding, Corporate package).",
-    body: [
-      "Bundles group multiple items + services into a single booking.",
-      "Track delivery status and fulfilment for the whole bundle.",
-    ],
-  },
-  {
     icon: MessageSquare,
-    title: "Messages",
-    summary: "Direct chat with vendors after you place a booking (Uber-style).",
+    title: "Inbox",
+    summary: "All your conversations with vendors — Telegram/WhatsApp style.",
     body: [
       "A chat thread is auto-created the moment you book a vendor.",
-      "You can share photos, ask questions, and confirm details up until the event finishes.",
+      "Each thread is tied to the related order — you see context inline.",
+      "Share photos, ask questions, and confirm details until the event finishes.",
       "The unread badge in the sidebar tells you when a vendor replies.",
-    ],
-  },
-  {
-    icon: FileText,
-    title: "My Requests",
-    summary: "All event requests you've submitted, with status updates.",
-    body: [
-      "See whether a request is pending, sent to vendors, quoted, or accepted.",
-      "Open any request to view the quote and accept it.",
     ],
   },
   {
@@ -75,7 +38,7 @@ const SECTIONS = [
   },
   {
     icon: Calendar,
-    title: "Past Orders / My Orders",
+    title: "My Orders",
     summary: "All your rental orders and event bookings — past and ongoing.",
     body: [
       "The All tab shows everything regardless of status.",
@@ -212,10 +175,7 @@ const ClientHelpGuide = () => {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-2">
           <p>
-            Open the <strong>AI Assistant</strong> tab for any question about Evnting, your bookings, or planning your event.
-          </p>
-          <p>
-            Once you've placed a booking, use <strong>Messages</strong> to chat directly with the vendor.
+            Once you've placed a booking, open <strong>Inbox</strong> to chat directly with the vendor about anything related to your event.
           </p>
         </CardContent>
       </Card>

@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
-  Home, MessageSquare, Plus,
-  Calendar, Award, User, ShoppingCart, MapPin, BookOpen, HelpCircle,
+  Home, MessageSquare,
+  Calendar, Award, User, ShoppingCart, MapPin, HelpCircle,
 } from "lucide-react";
 
 const SECTIONS = [
@@ -25,15 +25,6 @@ const SECTIONS = [
       "Each thread is tied to the related order — you see context inline.",
       "Share photos, ask questions, and confirm details until the event finishes.",
       "The unread badge in the sidebar tells you when a vendor replies.",
-    ],
-  },
-  {
-    icon: Plus,
-    title: "New Request",
-    summary: "Submit a fresh event request to be matched with vendors.",
-    body: [
-      "Use this for full-event planning where you want our team to source vendors for you.",
-      "For quick equipment rentals, just go to the Marketplace and add items to your cart.",
     ],
   },
   {
@@ -79,16 +70,6 @@ const QUICK_FLOWS = [
       "Use the location bar to set your area; vendors within radius show up.",
       "Pick an item, choose dates and quantity, click Add to Cart.",
       "Open the cart, pick a saved address (or pin a new one), and pay.",
-    ],
-  },
-  {
-    icon: BookOpen,
-    title: "How to plan a full event",
-    steps: [
-      "Go to New Request and submit your event details.",
-      "Our team matches it to vendors and sends you a quote.",
-      "Accept the quote — vendors get assigned and a chat thread opens.",
-      "Track progress in My Requests / Event Hub.",
     ],
   },
   {

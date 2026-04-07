@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   IndianRupee, Package, ClipboardList, Star, ArrowUpRight,
   ArrowDownRight, MessageSquare, ListTodo, Plus, FileText, AlertTriangle, X,
+  Share2, Copy, Check, ExternalLink,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { format, subDays, startOfDay } from "date-fns";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip,
@@ -20,7 +22,31 @@ interface VendorOverviewProps {
 
 const VendorOverview = ({ onNavigate }: VendorOverviewProps) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [bankBannerDismissed, setBankBannerDismissed] = useState(() => localStorage.getItem("bank_banner_dismissed") === "true");
+  const [storefrontCopied, setStorefrontCopied] = useState(false);
+
+  const storefrontUrl = user ? `${typeof window !== "undefined" ? window.location.origin : "https://evnting.com"}/vendor/${user.id}` : "";
+
+  const shareStorefront = async () => {
+    if (!storefrontUrl) return;
+    const title = "My Evnting storefront";
+    const text = "Check out my storefront on Evnting";
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({ title, text, url: storefrontUrl });
+        return;
+      }
+    } catch (_) {}
+    try {
+      await navigator.clipboard.writeText(storefrontUrl);
+      setStorefrontCopied(true);
+      toast({ title: "Link copied", description: "Send it to your clients on WhatsApp / email." });
+      setTimeout(() => setStorefrontCopied(false), 2000);
+    } catch {
+      toast({ title: "Copy failed", description: storefrontUrl, variant: "destructive" });
+    }
+  };
 
   // Check if bank account is missing
   const { data: profileData } = useQuery({
@@ -130,6 +156,43 @@ const VendorOverview = ({ onNavigate }: VendorOverviewProps) => {
           >
             <X className="h-4 w-4" />
           </button>
+        </div>
+      )}
+
+      {/* ── Share storefront ── */}
+      {user && (
+        <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 via-purple-500/5 to-pink-500/5 p-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
+              <Share2 className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Share your storefront</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Send this link to clients on WhatsApp, Instagram, or email — they'll see your full catalogue and can book directly.
+              </p>
+              <div className="mt-2 flex items-center gap-2 bg-background border border-border rounded-md p-2 text-xs font-mono text-muted-foreground truncate">
+                <span className="truncate flex-1">{storefrontUrl}</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5 flex-shrink-0">
+              <button
+                onClick={shareStorefront}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold rounded-lg transition-colors"
+              >
+                {storefrontCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {storefrontCopied ? "Copied" : "Share"}
+              </button>
+              <a
+                href={storefrontUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border hover:bg-muted text-xs font-medium rounded-lg transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Preview
+              </a>
+            </div>
+          </div>
         </div>
       )}
 

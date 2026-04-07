@@ -2,8 +2,9 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout/Layout";
-import { MapPin, ShieldCheck, MessageCircle, Star, Store, Package, Share2 } from "lucide-react";
+import { MapPin, ShieldCheck, Star, Store, Package, Share2, Check } from "lucide-react";
 import { shareContent } from "@/services/shareService";
+import { useToast } from "@/hooks/use-toast";
 
 interface VendorProfile {
   user_id: string;
@@ -19,11 +20,38 @@ interface VendorProfile {
 export default function VendorStorefront() {
   const { vendorId } = useParams<{ vendorId: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [vendor, setVendor] = useState<VendorProfile | null>(null);
   const [listings, setListings] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"listings" | "reviews" | "about">("listings");
+  const [justCopied, setJustCopied] = useState(false);
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/vendor/${vendorId}`;
+    const title = `${vendor?.company_name || vendor?.full_name || "Vendor"} on Evnting`;
+    const text = `Check out ${title}`;
+    try {
+      // Try Web Share API first (mobile)
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({ title, text, url });
+        return;
+      }
+      // Fall back to existing helper
+      const ok = await shareContent({ title, text, url });
+      if (ok) return;
+    } catch (_) { /* user cancelled or unsupported */ }
+    // Final fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(url);
+      setJustCopied(true);
+      toast({ title: "Link copied", description: "Storefront URL copied to clipboard." });
+      setTimeout(() => setJustCopied(false), 2000);
+    } catch {
+      toast({ title: "Share failed", description: url, variant: "destructive" });
+    }
+  };
 
   const isVerified = useMemo(() => listings.some((l) => l.is_verified), [listings]);
   const categories = useMemo(() => {
@@ -166,25 +194,13 @@ export default function VendorStorefront() {
                 )}
               </div>
             </div>
-            {/* Message button */}
             <button
-              onClick={() => {
-                if (vendor.phone) {
-                  window.open(`https://wa.me/91${vendor.phone.replace(/\D/g, "")}?text=${encodeURIComponent("Hi, I found you on Evnting!")}`, "_blank");
-                } else {
-                  navigate("/ecommerce");
-                }
-              }}
-              className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-xl transition-colors flex-shrink-0"
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-xl transition-colors flex-shrink-0"
+              title="Share storefront"
             >
-              <MessageCircle className="h-4 w-4" /> Message
-            </button>
-            <button
-              onClick={() => shareContent({ title: `${displayName} on Evnting`, text: `Check out ${displayName} on Evnting`, url: `https://evnting.com/vendor/${vendorId}` })}
-              className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl border border-border hover:bg-muted transition-colors flex-shrink-0"
-              title="Share"
-            >
-              <Share2 className="h-4 w-4 text-muted-foreground" />
+              {justCopied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+              <span className="hidden sm:inline">{justCopied ? "Copied" : "Share"}</span>
             </button>
           </div>
         </div>
@@ -205,18 +221,6 @@ export default function VendorStorefront() {
             </div>
           ))}
         </div>
-
-        {/* Mobile message button */}
-        <button
-          onClick={() => {
-            if (vendor.phone) {
-              window.open(`https://wa.me/91${vendor.phone.replace(/\D/g, "")}?text=${encodeURIComponent("Hi, I found you on Evnting!")}`, "_blank");
-            }
-          }}
-          className="sm:hidden w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-xl transition-colors mb-6"
-        >
-          <MessageCircle className="h-4 w-4" /> Message vendor
-        </button>
 
         {/* TABS */}
         <div className="flex border-b border-border mb-6">
@@ -271,9 +275,6 @@ export default function VendorStorefront() {
                       <h4 className="text-xs sm:text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
                         {listing.name}
                       </h4>
-                      {listing.categories?.[0] && (
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{listing.categories[0]}</p>
-                      )}
                       {listing.price_value != null && (
                         <div className="mt-1.5">
                           <span className="text-sm font-bold text-foreground">
@@ -359,28 +360,6 @@ export default function VendorStorefront() {
                 <h4 className="text-sm font-semibold text-foreground mb-2">About</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">{vendor.bio}</p>
               </div>
-            )}
-            {categories.length > 0 && (
-              <div>
-                <h4 className="text-sm font-semibold text-foreground mb-2">Specializations</h4>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((cat) => (
-                    <span key={cat} className="px-3 py-1.5 bg-muted rounded-full text-xs font-medium text-foreground">
-                      {cat}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {vendor.phone && (
-              <a
-                href={`https://wa.me/91${vendor.phone.replace(/\D/g, "")}?text=${encodeURIComponent("Hi, I found you on Evnting!")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
-              </a>
             )}
             {!vendor.bio && categories.length === 0 && (
               <div className="text-center py-12">

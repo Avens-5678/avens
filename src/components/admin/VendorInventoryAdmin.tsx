@@ -353,7 +353,11 @@ const VendorInventoryAdmin = () => {
         <TabsList>
           <TabsTrigger value="vendors"><Users className="h-4 w-4 mr-1" />Vendors ({filteredVendors.length})</TabsTrigger>
           <TabsTrigger value="catalog"><Package className="h-4 w-4 mr-1" />Catalog ({inventory.length})</TabsTrigger>
+          <TabsTrigger value="service-requests"><Package className="h-4 w-4 mr-1" />Service Requests</TabsTrigger>
         </TabsList>
+        <TabsContent value="service-requests" className="mt-4">
+          <ServiceAccessRequests />
+        </TabsContent>
 
         {/* ══ Vendors Tab ══ */}
         <TabsContent value="vendors" className="mt-4">
@@ -725,6 +729,61 @@ const VendorDetailSheet = ({
         </div>
       </SheetContent>
     </Sheet>
+  );
+};
+
+// ── Admin: vendor service access requests ──
+const ServiceAccessRequests = () => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const { data: rows = [] } = useQuery({
+    queryKey: ["service-access-requests"],
+    queryFn: async () => {
+      const { data } = await (supabase.from as any)("vendor_service_access")
+        .select("id, vendor_id, service, status, requested_at")
+        .order("requested_at", { ascending: false });
+      const ids = Array.from(new Set((data || []).map((r: any) => r.vendor_id)));
+      if (ids.length === 0) return data || [];
+      const { data: profs } = await supabase.from("profiles")
+        .select("user_id, company_name, full_name").in("user_id", ids as any);
+      const map = new Map((profs || []).map((p: any) => [p.user_id, p]));
+      return (data || []).map((r: any) => ({ ...r, profile: map.get(r.vendor_id) }));
+    },
+  });
+  const review = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: "approved" | "rejected" }) => {
+      const { error } = await (supabase.from as any)("vendor_service_access")
+        .update({ status, reviewed_at: new Date().toISOString() }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      toast({ title: `Request ${vars.status}` });
+      qc.invalidateQueries({ queryKey: ["service-access-requests"] });
+    },
+  });
+  return (
+    <Card>
+      <CardContent className="p-4 space-y-2">
+        <h3 className="font-semibold mb-2">Vendor Service Access Requests</h3>
+        {rows.length === 0 && <p className="text-sm text-muted-foreground">No requests.</p>}
+        {rows.map((r: any) => (
+          <div key={r.id} className="flex items-center justify-between border rounded-md p-3">
+            <div>
+              <p className="text-sm font-medium">{r.profile?.company_name || r.profile?.full_name || r.vendor_id.slice(0,8)}</p>
+              <p className="text-xs text-muted-foreground">Service: <strong>{r.service}</strong> · Status: {r.status}</p>
+            </div>
+            {r.status === "pending" && (
+              <div className="flex gap-2">
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700"
+                  onClick={() => review.mutate({ id: r.id, status: "approved" })}>Approve</Button>
+                <Button size="sm" variant="destructive"
+                  onClick={() => review.mutate({ id: r.id, status: "rejected" })}>Reject</Button>
+              </div>
+            )}
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 };
 

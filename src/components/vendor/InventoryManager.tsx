@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Package, Plus, Edit, Trash2, Save, X, ImageIcon, Search, Filter, ShieldCheck, IndianRupee, CalendarDays } from "lucide-react";
+import { Loader2, Package, Plus, Edit, Trash2, Save, X, ImageIcon, Search, Filter, ShieldCheck, IndianRupee, CalendarDays, Sparkles, Wand2 } from "lucide-react";
 import CSVUploader from "./CSVUploader";
 import VenueFormFields from "./VenueFormFields";
 import ItemAvailabilityCalendar from "./ItemAvailabilityCalendar";
@@ -111,6 +111,59 @@ const InventoryManager = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [expandedCalendarId, setExpandedCalendarId] = useState<string | null>(null);
+
+  // Warehouses for location dropdown
+  const [warehouses, setWarehouses] = useState<Array<{ id: string; name: string; address: string }>>([]);
+  useEffect(() => {
+    if (!user) return;
+    (supabase.from as any)("vendor_warehouses").select("id,name,address").eq("vendor_id", user.id)
+      .then(({ data }: any) => setWarehouses(data || []));
+  }, [user]);
+
+  // AI helpers
+  const [aiBusy, setAiBusy] = useState<string | null>(null);
+  const [aiKeywords, setAiKeywords] = useState<string[]>([]);
+  const [aiCategorySuggestion, setAiCategorySuggestion] = useState<string | null>(null);
+
+  const callAI = async (action: string) => {
+    if (!user) { toast({ title: "Sign in required" }); return null; }
+    setAiBusy(action);
+    try {
+      const { data, error } = await supabase.functions.invoke("inventory-ai-assist", {
+        body: {
+          action,
+          name: formData.name || "",
+          description: formData.description || "",
+          category: (formData.categories || [])[0] || "",
+          dimensions: { length: formData.max_length, width: formData.max_width, height: formData.max_height },
+        },
+      });
+      if (error) throw error;
+      return data?.result;
+    } catch (e: any) {
+      toast({ title: "AI failed", description: e.message, variant: "destructive" });
+      return null;
+    } finally {
+      setAiBusy(null);
+    }
+  };
+
+  const aiPolish = async () => {
+    const r = await callAI("polish_description");
+    if (r?.text) setFormData((prev) => ({ ...prev, description: r.text }));
+  };
+  const aiKeywordsFetch = async () => {
+    const r = await callAI("suggest_keywords");
+    if (r?.keywords) setAiKeywords(r.keywords);
+  };
+  const aiCategoryFetch = async () => {
+    const r = await callAI("suggest_category");
+    if (r?.category) setAiCategorySuggestion(r.category);
+  };
+  const aiEstimateLogistics = async () => {
+    const r = await callAI("estimate_volume_and_weight");
+    if (r?.volume_units != null) setFormData((prev) => ({ ...prev, volume_units: r.volume_units, labor_weight: r.labor_weight }));
+  };
 
   // Variant state
   const [hasVariants, setHasVariants] = useState(false);
@@ -204,17 +257,23 @@ const InventoryManager = () => {
     }
   };
 
+  const uploadToVendorPhotos = async (file: File, subfolder: string) => {
+    if (!user) throw new Error("Not signed in");
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${subfolder}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${fileExt}`;
+    const { error } = await supabase.storage.from('vendor-photos').upload(fileName, file, { upsert: false });
+    if (error) throw error;
+    const { data: { publicUrl } } = supabase.storage.from('vendor-photos').getPublicUrl(fileName);
+    return publicUrl;
+  };
+
   const handleImageUpload = async (file: File) => {
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `vendor-${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('portfolio-images').upload(fileName, file);
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from('portfolio-images').getPublicUrl(fileName);
+      const publicUrl = await uploadToVendorPhotos(file, 'inventory');
       setFormData(prev => ({ ...prev, image_url: publicUrl }));
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -223,19 +282,11 @@ const InventoryManager = () => {
   const handleMultipleImageUpload = async (files: FileList) => {
     setUploading(true);
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `vendor-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('portfolio-images').upload(fileName, file);
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from('portfolio-images').getPublicUrl(fileName);
-        return publicUrl;
-      });
-      const uploadedUrls = await Promise.all(uploadPromises);
-      setFormData(prev => ({ ...prev, image_urls: [...(prev.image_urls || []), ...uploadedUrls] }));
-      toast({ title: "Success", description: `${uploadedUrls.length} images uploaded` });
+      const uploaded = await Promise.all(Array.from(files).map((f) => uploadToVendorPhotos(f, 'inventory')));
+      setFormData(prev => ({ ...prev, image_urls: [...(prev.image_urls || []), ...uploaded] }));
+      toast({ title: "Success", description: `${uploaded.length} images uploaded` });
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -243,14 +294,10 @@ const InventoryManager = () => {
 
   const handleVariantImageUpload = async (file: File, index: number) => {
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `vendor-variant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-      const { error } = await supabase.storage.from('portfolio-images').upload(fileName, file);
-      if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from('portfolio-images').getPublicUrl(fileName);
+      const publicUrl = await uploadToVendorPhotos(file, 'variants');
       setVariantRows(prev => prev.map((row, i) => i === index ? { ...row, image_url: publicUrl } : row));
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     }
   };
 
@@ -319,6 +366,12 @@ const InventoryManager = () => {
         is_available: formData.is_available !== false,
         image_url: formData.image_url || null,
         image_urls: formData.image_urls || [],
+        price_per_length: formData.price_per_length ? parseFloat(formData.price_per_length) : null,
+        price_per_width: formData.price_per_width ? parseFloat(formData.price_per_width) : null,
+        price_per_height: formData.price_per_height ? parseFloat(formData.price_per_height) : null,
+        max_length: formData.max_length ? parseFloat(formData.max_length) : null,
+        max_width: formData.max_width ? parseFloat(formData.max_width) : null,
+        max_height: formData.max_height ? parseFloat(formData.max_height) : null,
       service_type: formData.service_type || 'rental',
       amenities: formData.service_type === 'venue' ? (formData.amenities || []) : [],
       guest_capacity: formData.service_type === 'venue' ? (formData.guest_capacity || null) : null,
@@ -467,15 +520,44 @@ const InventoryManager = () => {
                     <Input value={formData.short_description || ''} onChange={(e) => setFormData(prev => ({ ...prev, short_description: e.target.value }))} placeholder="Brief description" />
                   </div>
                   <div className="space-y-1">
-                    <Label>Full Description *</Label>
-                    <Textarea value={formData.description || ''} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} rows={3} />
+                    <div className="flex items-center justify-between">
+                      <Label>Full Description *</Label>
+                      <Button type="button" size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={aiPolish} disabled={aiBusy === "polish_description" || !formData.description}>
+                        {aiBusy === "polish_description" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                        Polish with AI
+                      </Button>
+                    </div>
+                    <Textarea value={formData.description || ''} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} rows={3} placeholder="Write a draft — AI will enhance it" />
                   </div>
                   <div className="space-y-1">
-                    <Label>Address / Location</Label>
-                    <Input value={formData.address || ''} onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))} placeholder="e.g. Warehouse 5, HITEC City, Hyderabad" />
+                    <Label>Warehouse / Location</Label>
+                    {warehouses.length === 0 ? (
+                      <p className="text-xs text-amber-600">No warehouses found. Add one in your profile.</p>
+                    ) : warehouses.length === 1 ? (
+                      <Input value={warehouses[0].name + " — " + warehouses[0].address} disabled />
+                    ) : (
+                      <Select value={formData.warehouse_id || ''} onValueChange={(v) => setFormData(prev => ({ ...prev, warehouse_id: v }))}>
+                        <SelectTrigger><SelectValue placeholder="Pick a warehouse" /></SelectTrigger>
+                        <SelectContent>
+                          {warehouses.map((w) => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                   <div className="space-y-1">
-                    <Label>Categories</Label>
+                    <div className="flex items-center justify-between">
+                      <Label>Categories</Label>
+                      <Button type="button" size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={aiCategoryFetch} disabled={aiBusy === "suggest_category" || !formData.name}>
+                        {aiBusy === "suggest_category" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+                        Suggest
+                      </Button>
+                    </div>
+                    {aiCategorySuggestion && (
+                      <div className="text-xs p-2 rounded bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-between">
+                        <span>AI suggests: <strong>{aiCategorySuggestion}</strong></span>
+                        <Button size="sm" variant="link" className="h-auto p-0 text-xs" onClick={() => { addCategory(aiCategorySuggestion); setAiCategorySuggestion(null); }}>Use it</Button>
+                      </div>
+                    )}
                     <Select onValueChange={addCategory}>
                       <SelectTrigger><SelectValue placeholder="Add category" /></SelectTrigger>
                       <SelectContent>{getCategoriesForService(formData.service_type || 'rental').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
@@ -520,7 +602,26 @@ const InventoryManager = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1"><Label>Display Order</Label><Input type="number" value={formData.display_order || 0} onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))} /></div>
-                    <div className="space-y-1"><Label>Keywords</Label><Input value={formData.search_keywords || ''} onChange={(e) => setFormData(prev => ({ ...prev, search_keywords: e.target.value }))} /></div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <Label>Keywords</Label>
+                        <Button type="button" size="sm" variant="ghost" className="h-6 text-xs gap-1" onClick={aiKeywordsFetch} disabled={aiBusy === "suggest_keywords" || !formData.name}>
+                          {aiBusy === "suggest_keywords" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}AI
+                        </Button>
+                      </div>
+                      <Input value={formData.search_keywords || ''} onChange={(e) => setFormData(prev => ({ ...prev, search_keywords: e.target.value }))} />
+                      {aiKeywords.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {aiKeywords.map((k) => (
+                            <Badge key={k} variant="outline" className="cursor-pointer text-xs" onClick={() => {
+                              const cur = (formData.search_keywords || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+                              if (!cur.includes(k)) cur.push(k);
+                              setFormData((prev) => ({ ...prev, search_keywords: cur.join(", ") }));
+                            }}>+ {k}</Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch checked={formData.is_available !== false} onCheckedChange={(c) => setFormData(prev => ({ ...prev, is_available: c }))} />
@@ -625,6 +726,38 @@ const InventoryManager = () => {
                     <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center gap-2">
                       <IndianRupee className="h-4 w-4 text-primary" />
                       <span className="text-sm">Client will see: <span className="font-bold text-primary">₹{Math.round(parseFloat(formData.vendor_base_price) * 1.3).toLocaleString()}</span> / {formData.pricing_unit || 'Per Day'}</span>
+                    </div>
+                  )}
+                  {/* Dimensional pricing — only when unit is sq.m / sq.ft (e.g. stages) */}
+                  {(formData.pricing_unit === "Per Sq.M" || formData.pricing_unit === "Per Sq.Ft") && (
+                    <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+                      <Label className="text-sm font-semibold">Dimensional Pricing</Label>
+                      <p className="text-xs text-muted-foreground">For variable-size items (e.g. stages), set price per dimension and your max supply size.</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div><Label className="text-xs">₹ per Length</Label><Input type="number" value={formData.price_per_length || ''} onChange={(e) => setFormData(prev => ({ ...prev, price_per_length: e.target.value }))} /></div>
+                        <div><Label className="text-xs">₹ per Width</Label><Input type="number" value={formData.price_per_width || ''} onChange={(e) => setFormData(prev => ({ ...prev, price_per_width: e.target.value }))} /></div>
+                        <div><Label className="text-xs">₹ per Height</Label><Input type="number" value={formData.price_per_height || ''} onChange={(e) => setFormData(prev => ({ ...prev, price_per_height: e.target.value }))} /></div>
+                        <div><Label className="text-xs">Max Length</Label><Input type="number" value={formData.max_length || ''} onChange={(e) => setFormData(prev => ({ ...prev, max_length: e.target.value }))} /></div>
+                        <div><Label className="text-xs">Max Width</Label><Input type="number" value={formData.max_width || ''} onChange={(e) => setFormData(prev => ({ ...prev, max_width: e.target.value }))} /></div>
+                        <div><Label className="text-xs">Max Height</Label><Input type="number" value={formData.max_height || ''} onChange={(e) => setFormData(prev => ({ ...prev, max_height: e.target.value }))} /></div>
+                      </div>
+                    </div>
+                  )}
+                  {/* AI volume + labor weight estimator (rental only) */}
+                  {formData.service_type !== "venue" && formData.service_type !== "crew" && (
+                    <div className="border rounded-lg p-3 space-y-2 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-semibold">Logistics (Volume & Labor Weight)</Label>
+                        <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={aiEstimateLogistics} disabled={aiBusy === "estimate_volume_and_weight" || !formData.name}>
+                          {aiBusy === "estimate_volume_and_weight" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                          AI Estimate
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Used for vehicle matching & manpower planning. Let AI estimate if you're unsure.</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div><Label className="text-xs">Volume Units (CBM)</Label><Input type="number" value={formData.volume_units || ''} onChange={(e) => setFormData(prev => ({ ...prev, volume_units: e.target.value }))} /></div>
+                        <div><Label className="text-xs">Labor Weight (kg)</Label><Input type="number" value={formData.labor_weight || ''} onChange={(e) => setFormData(prev => ({ ...prev, labor_weight: e.target.value }))} /></div>
+                      </div>
                     </div>
                   )}
                   <div className="space-y-1">

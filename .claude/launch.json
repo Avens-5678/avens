@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:$PATH /opt/homebrew/bin/npx vite --port 5173"],
+      "port": 5173
+    }
+  ]
+}

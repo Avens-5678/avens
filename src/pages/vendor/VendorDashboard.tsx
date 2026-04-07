@@ -29,6 +29,7 @@ import VendorOfflineBooking from "@/components/vendor/VendorOfflineBooking";
 import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 import EssentialsProductManager from "@/components/vendor/EssentialsProductManager";
 import EssentialsOrderManager from "@/components/vendor/EssentialsOrderManager";
+import RequestServiceAccess from "@/components/vendor/RequestServiceAccess";
 
 import {
   LayoutDashboard, ClipboardList, Package, MessageSquare,
@@ -45,6 +46,8 @@ const VendorDashboard = () => {
   const { toast } = useToast();
   const unreadChats = useUnreadChats("vendor");
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+  const [vendorStatus, setVendorStatus] = useState<string | null>(null);
+  const [services, setServices] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -52,6 +55,13 @@ const VendorDashboard = () => {
       .then(({ data, error }) => {
         if (error) { console.error("Onboarding check failed:", error); setOnboardingDone(true); return; }
         setOnboardingDone(data?.is_completed ?? false);
+      });
+    supabase.from("profiles").select("vendor_status").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => setVendorStatus(data?.vendor_status ?? "pending"));
+    (supabase.from as any)("vendor_service_access").select("service,status").eq("vendor_id", user.id)
+      .then(({ data }: any) => {
+        const approved = (data || []).filter((r: any) => r.status === "approved").map((r: any) => r.service);
+        setServices(approved);
       });
   }, [user]);
 
@@ -63,7 +73,8 @@ const VendorDashboard = () => {
       .then(({ data }) => setVendorName(data?.company_name || data?.full_name || ""));
   }, [user]);
 
-  const sections: NavSection[] = useMemo(() => [
+  const has = (s: string) => services.includes(s);
+  const allSections: NavSection[] = useMemo(() => [
     {
       title: "",
       items: [
@@ -113,9 +124,20 @@ const VendorDashboard = () => {
         { icon: Star, label: "Reviews", value: "reviews" },
         { icon: MapPin, label: "Site Visits", value: "site-visits" },
         { icon: User, label: "Profile", value: "profile" },
+        { icon: Package, label: "Request Services", value: "request-service" },
       ],
     },
   ], [unreadChats]);
+
+  const sections: NavSection[] = useMemo(() => {
+    const filterValues = (vals: string[]) => allSections
+      .map((sec) => ({ ...sec, items: sec.items.filter((it) => !vals.includes(it.value)) }))
+      .filter((sec) => sec.items.length > 0);
+    const hide: string[] = [];
+    if (!has("rental") && !has("venue") && !has("crew")) hide.push("inventory","orders","deliveries","bundle-events","packages","quotes","offline","site-visits");
+    if (!has("essentials")) hide.push("shop-products","shop-orders");
+    return filterValues(hide);
+  }, [allSections, services]);
 
   const userName = useMemo(() => user?.user_metadata?.full_name || user?.email || "", [user]);
 
@@ -163,6 +185,8 @@ const VendorDashboard = () => {
         return <SiteVisitManager />;
       case "profile":
         return <VendorProfileSettings />;
+      case "request-service":
+        return <RequestServiceAccess approved={services} onChange={(s) => setServices(s)} />;
       default:
         return <VendorOverview onNavigate={setActiveTab} />;
     }
@@ -179,8 +203,24 @@ const VendorDashboard = () => {
     );
   }
 
+  // Pending approval gate
+  if (onboardingDone === true && vendorStatus && vendorStatus !== "active") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-4 border rounded-lg p-8 bg-card">
+          <Loader2 className="h-8 w-8 mx-auto text-primary animate-spin" />
+          <h1 className="text-2xl font-semibold">Pending Admin Approval</h1>
+          <p className="text-muted-foreground text-sm">
+            Your vendor application is under review. You'll get a WhatsApp notification once approved, then you can access your dashboard and inventory.
+          </p>
+          <p className="text-xs text-muted-foreground">Status: <span className="font-medium uppercase">{vendorStatus}</span></p>
+        </div>
+      </div>
+    );
+  }
+
   // Loading state
-  if (onboardingDone === null) {
+  if (onboardingDone === null || vendorStatus === null) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   }
 

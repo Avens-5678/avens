@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import confetti from "canvas-confetti";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Loader2, Phone,
-  Package, Building2, Users, Tent, MapPin, Upload, X, Shield, FileText,
+  Package, Building2, Users, Tent, MapPin, Upload, X, Shield, FileText, Plus,
 } from "lucide-react";
+import MapPinPicker from "@/components/ecommerce/MapPinPicker";
 
 // ═══════════════════════════════════════
 // Constants
@@ -91,6 +92,8 @@ interface FormData {
   shop_photo_url: string;
   photos: string[];
   documents: Record<string, string>;
+  has_multiple_warehouses: boolean;
+  warehouses: Array<{ name: string; address: string; lat: number | null; lng: number | null; pincode: string }>;
 }
 
 const INITIAL_FORM: FormData = {
@@ -102,6 +105,8 @@ const INITIAL_FORM: FormData = {
   amenities: [], service_types: [], team_size: "",
   passport_photo_url: "", shop_photo_url: "",
   photos: [], documents: {},
+  has_multiple_warehouses: false,
+  warehouses: [{ name: "", address: "", lat: null, lng: null, pincode: "" }],
 };
 
 // ═══════════════════════════════════════
@@ -619,6 +624,68 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
             {step3Errors.whatsapp_number && <p className="text-xs text-red-500">{step3Errors.whatsapp_number}</p>}
           </div>
 
+          {/* ── Warehouses / Godowns ── */}
+          <div className="space-y-3 pt-4 border-t">
+            <div>
+              <Label className="text-sm font-semibold">Godown / Warehouse</Label>
+              <p className="text-xs text-muted-foreground">Where do you store your inventory? Use the map to pin the exact location.</p>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                id="multi-wh"
+                checked={formData.has_multiple_warehouses}
+                onChange={(e) => update({
+                  has_multiple_warehouses: e.target.checked,
+                  warehouses: e.target.checked ? formData.warehouses : formData.warehouses.slice(0, 1),
+                })}
+              />
+              <label htmlFor="multi-wh">I have multiple warehouses</label>
+            </div>
+            {formData.warehouses.map((wh, idx) => (
+              <div key={idx} className="border rounded-lg p-3 space-y-2 bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold">Warehouse {idx + 1}{idx === 0 && " (Primary)"}</Label>
+                  {idx > 0 && (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => {
+                      const next = formData.warehouses.filter((_, i) => i !== idx);
+                      update({ warehouses: next });
+                    }}>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                <Input
+                  placeholder="Godown name (e.g. Main Warehouse, Hi-Tech City Branch)"
+                  value={wh.name}
+                  onChange={(e) => {
+                    const next = [...formData.warehouses];
+                    next[idx] = { ...next[idx], name: e.target.value };
+                    update({ warehouses: next });
+                  }}
+                />
+                <MapPinPicker
+                  compact
+                  label=""
+                  initialLat={wh.lat || undefined}
+                  initialLng={wh.lng || undefined}
+                  onLocationSelect={(lat, lng, address) => {
+                    const next = [...formData.warehouses];
+                    next[idx] = { ...next[idx], lat, lng, address: address || next[idx].address };
+                    update({ warehouses: next });
+                  }}
+                />
+              </div>
+            ))}
+            {formData.has_multiple_warehouses && (
+              <Button type="button" variant="outline" size="sm" className="w-full gap-2" onClick={() => {
+                update({ warehouses: [...formData.warehouses, { name: "", address: "", lat: null, lng: null, pincode: "" }] });
+              }}>
+                <Plus className="h-3 w-3" /> Add another warehouse
+              </Button>
+            )}
+          </div>
+
           <Button
             onClick={() => {
               // Sync ref values to state before saving
@@ -986,6 +1053,7 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
       setSaving(true);
       try {
         // Write business details to profiles
+        const primary = formData.warehouses[0];
         await supabase.from("profiles").upsert({
           user_id: user!.id,
           company_name: formData.business_name,
@@ -993,8 +1061,40 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
           phone: formData.phone,
           city: formData.city,
           address: formData.city,
-          vendor_status: "pending_review",
+          vendor_status: "pending",
+          godown_address: primary?.address || null,
+          warehouse_lat: primary?.lat || null,
+          warehouse_lng: primary?.lng || null,
         } as any, { onConflict: "user_id" });
+
+        // Insert warehouses
+        const validWh = formData.warehouses.filter((w) => w.name && w.lat && w.lng);
+        if (validWh.length > 0) {
+          await (supabase.from as any)("vendor_warehouses").insert(
+            validWh.map((w, i) => ({
+              vendor_id: user!.id,
+              name: w.name,
+              address: w.address || "",
+              lat: w.lat,
+              lng: w.lng,
+              pincode: w.pincode || null,
+              is_primary: i === 0,
+            }))
+          );
+        }
+
+        // Auto-create approved service_access rows based on selected vendor type
+        const services: string[] = [];
+        if (formData.vendor_type === "equipment") services.push("rental");
+        else if (formData.vendor_type === "venue") services.push("venue");
+        else if (formData.vendor_type === "crew") services.push("crew");
+        else if (formData.vendor_type === "multiple") services.push("rental", "venue", "crew");
+        if (services.length > 0) {
+          await (supabase.from as any)("vendor_service_access").upsert(
+            services.map((s) => ({ vendor_id: user!.id, service: s, status: "approved" })),
+            { onConflict: "vendor_id,service" }
+          );
+        }
 
         // Mark onboarding complete
         await supabase.from("vendor_onboarding_progress").update({

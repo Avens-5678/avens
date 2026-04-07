@@ -30,12 +30,13 @@ import VendorQuoteMaker from "@/components/vendor/VendorQuoteMaker";
 import EssentialsProductManager from "@/components/vendor/EssentialsProductManager";
 import EssentialsOrderManager from "@/components/vendor/EssentialsOrderManager";
 import RequestServiceAccess from "@/components/vendor/RequestServiceAccess";
+import VendorHelpGuide from "@/components/vendor/VendorHelpGuide";
 
 import {
   LayoutDashboard, ClipboardList, Package, MessageSquare,
   UserCheck, ListTodo, IndianRupee, TrendingUp, TrendingDown,
   Star, User, Gift, Truck, MapPin, Users,
-  BookOpen, FileText, Bot, Loader2, Boxes, ShoppingBag, PartyPopper,
+  BookOpen, FileText, Bot, Loader2, Boxes, ShoppingBag, PartyPopper, HelpCircle,
 } from "lucide-react";
 
 const VendorDashboard = () => {
@@ -125,6 +126,7 @@ const VendorDashboard = () => {
         { icon: MapPin, label: "Site Visits", value: "site-visits" },
         { icon: User, label: "Profile", value: "profile" },
         { icon: Package, label: "Request Services", value: "request-service" },
+        { icon: HelpCircle, label: "Help & Guide", value: "help" },
       ],
     },
   ], [unreadChats]);
@@ -187,6 +189,8 @@ const VendorDashboard = () => {
         return <VendorProfileSettings />;
       case "request-service":
         return <RequestServiceAccess approved={services} onChange={(s) => setServices(s)} />;
+      case "help":
+        return <VendorHelpGuide />;
       default:
         return <VendorOverview onNavigate={setActiveTab} />;
     }

@@ -42,6 +42,7 @@ import ProfileManager from "@/components/admin/ProfileManager";
 import AboutContentManager from "@/components/admin/AboutContentManager";
 import TestimonialManager from "@/components/admin/TestimonialManager";
 import EnhancedRentalManager from "@/components/admin/EnhancedRentalManager";
+import AdminHelpGuide from "@/components/admin/AdminHelpGuide";
 import FAQManager from "@/components/admin/FAQManager";
 import IntegrationTester from "@/components/admin/IntegrationTester";
 import EventCenter from "@/components/admin/EventCenter";
@@ -185,6 +186,7 @@ const menuGroups: MenuGroup[] = [
       { label: "Profile", value: "profile" },
     ],
   },
+  { icon: HelpCircle, label: "Help & Guide", value: "help-group", subTabs: [{ label: "How it works", value: "help" }] },
 ];
 
 const sidebarItems: SidebarItem[] = menuGroups.map((g) => ({
@@ -463,6 +465,8 @@ const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => {
         return <WhatsAppTemplates />;
       case "wa-settings":
         return <WhatsAppSettings />;
+      case "help":
+        return <AdminHelpGuide />;
       default:
         return null;
     }

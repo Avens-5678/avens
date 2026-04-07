@@ -12,7 +12,7 @@ import { Search, ShoppingCart, Star, Filter, Eye, Grid3X3, Grid2X2, Columns2, Ro
 import { AnimatedViewToggle } from "@/components/ui/animated-view-toggle";
 import Layout from "@/components/Layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
-import CartModal from "@/components/Cart/CartModal";
+import CartModal from "@/components/cart/CartModal";
 import { ProductImageCarousel } from "@/components/ui/product-image-carousel";
 const EnhancedEcommerce = () => {
   const navigate = useNavigate();

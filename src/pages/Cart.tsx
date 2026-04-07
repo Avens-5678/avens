@@ -17,6 +17,7 @@ import { isMeasurableUnit, calculateCartTotal, calculateManpowerFee, isInstantBo
 import { useLogisticsConfig } from "@/hooks/useLogisticsConfig";
 import { useDynamicTransport } from "@/hooks/useDynamicTransport";
 import GoogleMapPicker from "@/components/shared/GoogleMapPicker";
+import SavedAddressPicker from "@/components/cart/SavedAddressPicker";
 import { formatWhatsAppPhone } from "@/lib/validatePhone";
 import PaymentPlanSelector from "@/components/ecommerce/PaymentPlanSelector";
 import { PaymentPlan, MilestoneBreakdown, calculateMilestoneBreakdown, useCreateMilestones } from "@/hooks/usePaymentMilestones";
@@ -1216,6 +1217,19 @@ const Cart = () => {
                       </div>
                       {showVenueAddressFields && (
                         <>
+                          <SavedAddressPicker
+                            onSelect={(a) =>
+                              setEventDetails((p) => ({
+                                ...p,
+                                venue_address_line1: a.address_line || p.venue_address_line1,
+                                venue_address_line2: a.landmark || p.venue_address_line2,
+                                venue_pincode: a.pincode || p.venue_pincode,
+                                venue_lat: a.lat || p.venue_lat,
+                                venue_lng: a.lng || p.venue_lng,
+                              }))
+                            }
+                            currentAddress={eventDetails}
+                          />
                           <div className="space-y-1">
                             <Label className="text-xs">Venue Address Line 1 *</Label>
                             <Input value={eventDetails.venue_address_line1} onChange={e => setEventDetails(p => ({ ...p, venue_address_line1: e.target.value }))} placeholder="Street address, building name" />

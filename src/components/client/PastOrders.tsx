@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Calendar, MapPin, Users, Package, Clock } from "lucide-react";
 import { format } from "date-fns";
 import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
+import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -52,8 +53,11 @@ const PastOrders = () => {
       <h2 className="text-2xl font-bold">Orders</h2>
       <p className="text-muted-foreground">View your assigned event requests and rental orders.</p>
 
-      <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">
+            All ({allRentalOrders.length})
+          </TabsTrigger>
           <TabsTrigger value="pending">
             <Clock className="h-4 w-4 mr-1" />
             Pending ({pendingRentals.length})
@@ -65,6 +69,23 @@ const PastOrders = () => {
             Events ({allServiceRequests.length})
           </TabsTrigger>
         </TabsList>
+
+        {/* All Rental Orders */}
+        <TabsContent value="all" className="space-y-4 mt-4">
+          {allRentalOrders.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Orders Yet</h3>
+                <p className="text-muted-foreground">Browse the marketplace and place your first booking.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            allRentalOrders.map((order) => (
+              <RentalOrderCard key={order.id} order={order} />
+            ))
+          )}
+        </TabsContent>
 
         {/* Pending Rental Orders */}
         <TabsContent value="pending" className="space-y-4 mt-4">
@@ -213,7 +234,7 @@ const RentalOrderCard = ({ order }: { order: any }) => (
       </div>
       {order.equipment_details && (
         <div className="bg-muted/50 p-3 rounded-md mt-3">
-          <p className="text-sm text-muted-foreground">{order.equipment_details}</p>
+          <EquipmentDetailsDisplay details={order.equipment_details} />
         </div>
       )}
       <div className="mt-3">

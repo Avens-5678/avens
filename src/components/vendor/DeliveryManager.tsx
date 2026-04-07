@@ -131,13 +131,21 @@ const DeliveryManager = () => {
 
   // Upload delivery photo
   const uploadDeliveryPhoto = useCallback(async (deliveryId: string, file: File) => {
-    const path = `delivery/${deliveryId}/${Date.now()}.jpg`;
-    const { error } = await supabase.storage.from("review-photos").upload(path, file);
-    if (error) { toast({ title: "Upload failed", variant: "destructive" }); return; }
-    const { data: urlData } = supabase.storage.from("review-photos").getPublicUrl(path);
-    await supabase.from("delivery_orders").update({
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `${deliveryId}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("delivery-photos").upload(path, file, { upsert: true });
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("delivery-photos").getPublicUrl(path);
+    const { error: updErr } = await supabase.from("delivery_orders").update({
       delivery_photo_url: urlData.publicUrl, status: "delivered", delivered_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     } as any).eq("id", deliveryId);
+    if (updErr) {
+      toast({ title: "Update failed", description: updErr.message, variant: "destructive" });
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ["vendor-deliveries"] });
     toast({ title: "Delivery completed with photo proof" });
   }, [toast, queryClient]);

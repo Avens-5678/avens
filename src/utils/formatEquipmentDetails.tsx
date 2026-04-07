@@ -18,6 +18,9 @@ interface EventDetails {
   event_end_date?: string;
   event_location?: string;
   venue_area?: string;
+  venue_address_line1?: string;
+  venue_address_line2?: string;
+  venue_pincode?: string;
   notes?: string;
 }
 
@@ -145,16 +148,30 @@ export function EquipmentDetailsDisplay({ details }: { details: string }) {
           <p className="font-medium text-foreground">Event Info</p>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
             {(parsed.event_details.event_location ||
-              parsed.event_details.venue_area) && (
-              <div className="col-span-2 flex items-center gap-1.5">
+              parsed.event_details.venue_area ||
+              parsed.event_details.venue_address_line1) && (
+              <div className="col-span-2 flex items-start gap-1.5">
                 <span>📍</span>
                 <span>
                   {[
                     parsed.event_details.venue_area,
+                    parsed.event_details.venue_address_line1,
+                    parsed.event_details.venue_address_line2,
+                    parsed.event_details.venue_pincode,
                     parsed.event_details.event_location,
                   ]
                     .filter(Boolean)
                     .join(", ")}
+                </span>
+              </div>
+            )}
+            {parsed.event_details.customer_name && (
+              <div className="col-span-2 flex items-center gap-1.5">
+                <span>👤</span>
+                <span>
+                  {parsed.event_details.customer_name}
+                  {parsed.event_details.contact_number ? ` · ${parsed.event_details.contact_number}` : ""}
+                  {parsed.event_details.email ? ` · ${parsed.event_details.email}` : ""}
                 </span>
               </div>
             )}

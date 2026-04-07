@@ -6,12 +6,23 @@ const corsHeaders = {
 };
 
 const RENTAL_CATEGORIES = [
-  "Event Structures & Venues",
-  "Exhibition & Stalls",
-  "Climate Control",
-  "Event Production Equipment",
-  "Branding & Décor",
-  "General",
+  "Tents & Canopies","German Hangars","Pagoda Tents","Marquees & Shamianas","Geodesic Domes",
+  "Trussing & Rigging","Stages & Platforms","Risers & Ramps","Dance Floors","Flooring & Carpets",
+  "Exhibition Stalls","Octanorm Booths","Modular Kiosks","Display Counters","Pop-up Displays",
+  "Chairs & Seating","Sofa & Lounge Furniture","Tables & Round Tables","Bar Counters & Bar Stools","Cocktail Tables","VIP Furniture","Outdoor Furniture",
+  "Line Array Sound Systems","PA Systems","Microphones (Wired/Wireless)","DJ Consoles & Mixers","Conference Audio Systems","Speakers & Monitors",
+  "Stage Lighting","Par Cans & LED Pars","Moving Heads","Follow Spots","Truss Lighting","Ambient & Decorative Lighting","Architectural Lighting","Smoke / Haze / Fog Machines",
+  "LED Walls & Screens","Projectors & Screens","Video Walls","Live Streaming Equipment","Cameras & Camcorders","Teleprompters","Translation Booths",
+  "Air Conditioners (Spot/Cassette)","Air Coolers","Heaters & Patio Warmers","Industrial Fans","Misting Systems",
+  "DG Sets / Generators","Power Distribution Boards","Cabling & Extensions","UPS & Inverters","Stabilizers",
+  "Backdrops & Step-and-Repeat","Floral Décor","Theme Décor","Drapes & Fabric Décor","Signage & Standees","Flags & Banners","Balloon Décor","Centerpieces",
+  "Buffet Counters","Chafing Dishes","Crockery & Cutlery","Glassware","Live Counters","BBQ & Tandoor","Bar Equipment","Refrigeration",
+  "Cold Pyro & Sparklers","Confetti & CO2 Cannons","Bubble Machines","Laser Shows",
+  "Barricades","Crowd Barriers","Fire Extinguishers","First Aid Kits","Walkie-Talkies","Metal Detectors",
+  "Portable Toilets","VIP Restrooms","Hand Wash Stations",
+  "Photo Booths","Gaming & Arcade","Inflatables & Bouncy Castles","Carnival Games","VR Experiences",
+  "Golf Carts","Buggies","Transport Vehicles",
+  "Walkie Stackers","Forklifts","Scissor Lifts","Others",
 ];
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";

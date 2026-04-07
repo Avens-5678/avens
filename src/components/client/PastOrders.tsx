@@ -4,12 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEventRequests } from "@/hooks/useEventRequests";
 import { useClientRentalOrders } from "@/hooks/useRentalOrders";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Calendar, MapPin, Users, Package, Clock } from "lucide-react";
+import { Loader2, Calendar, MapPin, Users, Package, Clock, Truck, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
 import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
-import { useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -210,7 +212,21 @@ const PastOrders = () => {
   );
 };
 
-const RentalOrderCard = ({ order }: { order: any }) => (
+const RentalOrderCard = ({ order }: { order: any }) => {
+  const navigate = useNavigate();
+  const [deliveryId, setDeliveryId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data } = await (supabase.from as any)("delivery_orders")
+        .select("id").eq("order_id", order.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (active) setDeliveryId(data?.id || null);
+    })();
+    return () => { active = false; };
+  }, [order.id]);
+
+  return (
   <Card id={`order-${order.id}`} className="transition-all duration-500">
     <CardHeader className="pb-3">
       <div className="flex items-start justify-between">
@@ -255,11 +271,34 @@ const RentalOrderCard = ({ order }: { order: any }) => (
           <EquipmentDetailsDisplay details={order.equipment_details} />
         </div>
       )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {deliveryId && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => navigate(`/track-delivery/${deliveryId}`)}
+          >
+            <Truck className="h-3.5 w-3.5" />
+            Track Order
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1.5"
+          onClick={() => navigate(`/client/dashboard?tab=inbox`)}
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
+          Open Chat
+        </Button>
+      </div>
       <div className="mt-3">
         <OrderQuoteCard orderId={order.id} />
       </div>
     </CardContent>
   </Card>
-);
+  );
+};
 
 export default PastOrders;

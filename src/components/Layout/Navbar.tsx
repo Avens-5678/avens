@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Menu, X, LogIn, User, LogOut, Mail, ChevronRight, MapPin, Search, ShoppingBag, Heart, Headphones, Shield, RefreshCw, Lock } from "lucide-react";
+import { Menu, X, LogIn, User, LogOut, Mail, ChevronRight, MapPin, Search, ShoppingBag, Heart, Headphones, Shield, RefreshCw, Lock, MessageSquare, Calendar, Award, HelpCircle, LayoutDashboard } from "lucide-react";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -100,11 +100,36 @@ const Navbar = () => {
                       <span className="text-[12px] font-medium text-white/70 hidden lg:inline">Account</span>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="rounded-lg w-44 text-sm">
-                    <DropdownMenuItem onClick={() => navigate(getDashboardPath())} className="rounded-md text-[13px]">
-                      <User className="h-3.5 w-3.5 mr-2" />
-                      Dashboard
-                    </DropdownMenuItem>
+                  <DropdownMenuContent align="end" className="rounded-lg w-52 text-sm">
+                    {role === "client" ? (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=inbox")} className="rounded-md text-[13px]">
+                          <MessageSquare className="h-3.5 w-3.5 mr-2" />
+                          Inbox
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=past-orders")} className="rounded-md text-[13px]">
+                          <Calendar className="h-3.5 w-3.5 mr-2" />
+                          My Orders
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=loyalty")} className="rounded-md text-[13px]">
+                          <Award className="h-3.5 w-3.5 mr-2" />
+                          Loyalty
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=profile")} className="rounded-md text-[13px]">
+                          <User className="h-3.5 w-3.5 mr-2" />
+                          Profile & Addresses
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=help")} className="rounded-md text-[13px]">
+                          <HelpCircle className="h-3.5 w-3.5 mr-2" />
+                          Help & Guide
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <DropdownMenuItem onClick={() => navigate(getDashboardPath())} className="rounded-md text-[13px]">
+                        <LayoutDashboard className="h-3.5 w-3.5 mr-2" />
+                        Dashboard
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => signOut()} className="rounded-md text-[13px]">
                       <LogOut className="h-3.5 w-3.5 mr-2" />
                       Sign Out

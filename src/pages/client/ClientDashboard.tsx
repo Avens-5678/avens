@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, User, ArrowLeft, MessageSquare, Award, Home, HelpCircle } from "lucide-react";
+import { LogOut, Calendar, User, ArrowLeft, MessageSquare, Award, HelpCircle } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import PastOrders from "@/components/client/PastOrders";
@@ -10,12 +10,10 @@ import ClientProfileSettings from "@/components/client/ClientProfileSettings";
 import DashboardShell, { SidebarItem } from "@/components/admin/DashboardShell";
 import ClientMessages from "@/components/client/ClientMessages";
 import LoyaltyDashboard from "@/components/client/LoyaltyDashboard";
-import ClientDashboardHome from "@/components/client/ClientDashboardHome";
 import ClientHelpGuide from "@/components/client/ClientHelpGuide";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
-  { icon: Home, label: "Home", value: "home" },
   { icon: MessageSquare, label: "Inbox", value: "inbox" },
   { icon: Calendar, label: "My Orders", value: "past-orders" },
   { icon: Award, label: "Loyalty", value: "loyalty" },
@@ -25,7 +23,7 @@ const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
 
 const ClientDashboard = () => {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "home";
+  const initialTab = searchParams.get("tab") || "inbox";
   const [activeTab, setActiveTab] = useState(initialTab);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -91,8 +89,6 @@ const handleLogout = async () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "home":
-        return <ClientDashboardHome onTabChange={setActiveTab} />;
       case "inbox":
         return <ClientMessages />;
       case "past-orders":
@@ -114,7 +110,7 @@ const handleLogout = async () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerContent={headerContent}
-      mobilePrimaryItems={["home", "inbox", "past-orders", "profile"]}
+      mobilePrimaryItems={["inbox", "past-orders", "loyalty", "profile"]}
     >
       {renderContent()}
     </DashboardShell>

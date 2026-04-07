@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Save, User, AlertCircle } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import SavedAddressesSection from "@/components/client/SavedAddressesSection";
 
 const ClientProfileSettings = () => {
   const { user } = useAuth();
@@ -98,6 +99,7 @@ const ClientProfileSettings = () => {
   }
 
   return (
+    <div className="space-y-4">
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -177,6 +179,8 @@ const ClientProfileSettings = () => {
         </Button>
       </CardContent>
     </Card>
+    <SavedAddressesSection />
+    </div>
   );
 };
 

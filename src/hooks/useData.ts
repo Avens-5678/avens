@@ -358,18 +358,30 @@ export const useVerifiedVendorInventory = () => {
         .order("created_at", { ascending: false });
       if (error) throw error;
 
-      // App-level approval gate (RLS is the primary defence; this is a backup).
+      // Approval gate + denormalize vendor warehouse lat/lng so the marketplace
+      // can compute distance (the row itself doesn't carry warehouse coords).
       const vendorIds = Array.from(new Set((data || []).map((r: any) => r.vendor_id).filter(Boolean)));
-      let activeVendorIds = new Set<string>();
+      const profileMap = new Map<string, any>();
       if (vendorIds.length > 0) {
         const { data: profs } = await supabase
           .from("profiles")
-          .select("user_id, vendor_status")
-          .in("user_id", vendorIds as any)
-          .eq("vendor_status", "active");
-        activeVendorIds = new Set((profs || []).map((p: any) => p.user_id));
+          .select("user_id, vendor_status, warehouse_lat, warehouse_lng, city, company_name")
+          .in("user_id", vendorIds as any);
+        (profs || []).forEach((p: any) => profileMap.set(p.user_id, p));
       }
-      const filtered = (data || []).filter((r: any) => activeVendorIds.has(r.vendor_id));
+      const filtered = (data || [])
+        .filter((r: any) => profileMap.get(r.vendor_id)?.vendor_status === "active")
+        .map((r: any) => {
+          const p = profileMap.get(r.vendor_id);
+          return {
+            ...r,
+            warehouse_lat: r.warehouse_lat ?? p?.warehouse_lat ?? null,
+            warehouse_lng: r.warehouse_lng ?? p?.warehouse_lng ?? null,
+            pickup_lat: r.pickup_lat ?? p?.warehouse_lat ?? null,
+            pickup_lng: r.pickup_lng ?? p?.warehouse_lng ?? null,
+            vendor_city: p?.city || null,
+          };
+        });
 
       // For variant items, surface the cheapest active variant as the
       // displayed price so cards never render "no price".

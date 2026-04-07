@@ -128,10 +128,16 @@ const OrderContextCard = ({ orderId }: Props) => {
       )}
 
       {delivery && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Truck className="h-3 w-3" />
-          Delivery: <span className="font-medium capitalize">{delivery.status?.replace(/_/g, " ")}</span>
-        </div>
+        <button
+          onClick={() => navigate(`/track-delivery/${delivery.id}`)}
+          className="w-full flex items-center justify-between gap-2 text-xs p-2 rounded-md border border-border bg-background hover:bg-muted/50 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <Truck className="h-3 w-3 text-primary" />
+            Delivery: <span className="font-medium capitalize">{delivery.status?.replace(/_/g, " ")}</span>
+          </span>
+          <ChevronRight className="h-3 w-3 text-muted-foreground" />
+        </button>
       )}
 
       <div className="flex gap-2 pt-1">
@@ -143,6 +149,16 @@ const OrderContextCard = ({ orderId }: Props) => {
         >
           View Order <ChevronRight className="h-3 w-3" />
         </Button>
+        {delivery && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs flex-1 gap-1"
+            onClick={() => navigate(`/track-delivery/${delivery.id}`)}
+          >
+            <Truck className="h-3 w-3" /> Track
+          </Button>
+        )}
       </div>
     </div>
   );

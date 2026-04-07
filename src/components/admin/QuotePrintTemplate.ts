@@ -95,7 +95,7 @@ function getSharedData(data: QuotePrintData) {
 
   const logoHtml = companyLogoUrl
     ? `<img src="${companyLogoUrl}" alt="Logo" style="max-height:56px;max-width:180px;object-fit:contain;margin-bottom:6px;display:block;" />`
-    : `<img src="https://avens.lovable.app/lovable-uploads/71b5e9e7-9561-40bd-ad11-4f0a05a4225c.png" alt="Evnting Logo" style="max-height:56px;max-width:180px;object-fit:contain;margin-bottom:6px;display:block;" />`;
+    : `<img src="https://evnting.com/logo.png" alt="Evnting Logo" style="max-height:56px;max-width:180px;object-fit:contain;margin-bottom:6px;display:block;" />`;
 
   const itemsHTML = data.lineItems.map((li, i) => `
     <tr>

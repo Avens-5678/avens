@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
       </table>
 
       <div style="text-align:center;margin:24px 0;">
-        <a href="https://avens.lovable.app/admin" style="display:inline-block;background:#e67e22;color:#fff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:16px;font-weight:bold;">View in Dashboard</a>
+        <a href="https://evnting.com/admin" style="display:inline-block;background:#e67e22;color:#fff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:16px;font-weight:bold;">View in Dashboard</a>
       </div>
     </div>
     <div style="background:#f8f8f8;padding:16px;text-align:center;">

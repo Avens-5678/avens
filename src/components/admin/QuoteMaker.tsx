@@ -376,8 +376,7 @@ const QuoteMaker = ({ prefillOrderId, prefillSourceType, onClose }: QuoteMakerPr
       );
     }
 
-    const baseUrl = "https://avens.lovable.app";
-    // Use custom domain if configured: const baseUrl = "https://evnting.com";
+    const baseUrl = "https://evnting.com";
     const link = `${baseUrl}/quote/${createdQuote.acceptance_token}`;
     await navigator.clipboard.writeText(link);
     toast({ title: "Acceptance Link Copied!", description: "Share this link with the client to accept & sign." });

@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 // DO NOT use React.lazy() at module level — Vite TDZ bug
 let _cachedTestimonials: ReturnType<typeof lazy> | null = null;
 const getTestimonialsSection = () => {
-  if (!_cachedTestimonials) _cachedTestimonials = lazy(() => import("@/components/TestimonialsSection"));
+  if (!_cachedTestimonials) _cachedTestimonials = lazy(() => import("@/components/shared/TestimonialsSection"));
   return _cachedTestimonials;
 };
 

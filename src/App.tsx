@@ -6,8 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
-import ScrollToTop from "@/components/ScrollToTop";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import ScrollToTop from "@/components/shared/ScrollToTop";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
@@ -15,7 +15,7 @@ import { useStatusBar } from "@/hooks/useStatusBar";
 import { initPushNotifications } from "@/services/pushNotifications";
 import { initDeepLinks } from "@/services/deepLinks";
 import OfflineBanner from "@/components/mobile/OfflineBanner";
-import AppLoadingScreen from "@/components/AppLoadingScreen";
+import AppLoadingScreen from "@/components/shared/AppLoadingScreen";
 import { useAuth } from "@/hooks/useAuth";
 import { Capacitor } from "@capacitor/core";
 import { useEffect } from "react";
@@ -65,7 +65,7 @@ function createLazyRoutes() {
     VendorAction: lazy(() => import("./pages/vendor/VendorAction")),
     PaymentCallback: lazy(() => import("./pages/PaymentCallback")),
     NotFound: lazy(() => import("./pages/NotFound")),
-    ProtectedRoute: lazy(() => import("./components/ProtectedRoute")),
+    ProtectedRoute: lazy(() => import("./components/shared/ProtectedRoute")),
     ResetPassword: lazy(() => import("./pages/ResetPassword")),
     PrivacyPolicy: lazy(() => import("./pages/PrivacyPolicy")),
     TermsOfService: lazy(() => import("./pages/TermsOfService")),

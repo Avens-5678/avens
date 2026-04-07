@@ -8,6 +8,8 @@ import { Loader2, Calendar, MapPin, Users, Package, Clock } from "lucide-react";
 import { format } from "date-fns";
 import OrderQuoteCard from "@/components/dashboard/OrderQuoteCard";
 import { EquipmentDetailsDisplay } from "@/utils/formatEquipmentDetails";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -32,6 +34,22 @@ const PastOrders = () => {
   const { user } = useAuth();
   const { data: serviceRequests, isLoading: loadingServices } = useEventRequests();
   const { data: rentalOrders, isLoading: loadingRentals } = useClientRentalOrders(user?.id);
+  const [searchParams] = useSearchParams();
+  const highlightOrderId = searchParams.get("order");
+
+  // Scroll to + flash highlight on the deep-linked order row
+  useEffect(() => {
+    if (!highlightOrderId) return;
+    const t = setTimeout(() => {
+      const el = document.getElementById(`order-${highlightOrderId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-primary", "ring-offset-2");
+        setTimeout(() => el.classList.remove("ring-2", "ring-primary", "ring-offset-2"), 2500);
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [highlightOrderId, rentalOrders]);
 
   const isLoading = loadingServices || loadingRentals;
 
@@ -193,7 +211,7 @@ const PastOrders = () => {
 };
 
 const RentalOrderCard = ({ order }: { order: any }) => (
-  <Card>
+  <Card id={`order-${order.id}`} className="transition-all duration-500">
     <CardHeader className="pb-3">
       <div className="flex items-start justify-between">
         <div>

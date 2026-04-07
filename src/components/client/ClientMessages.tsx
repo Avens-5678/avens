@@ -10,23 +10,35 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare, Send, ArrowLeft, Search, Loader2,
-  Paperclip, FileText, Package,
+  Paperclip, FileText, Package, Megaphone, FolderPlus, ChevronDown, ChevronRight, FolderOpen, X,
 } from "lucide-react";
+import OrderContextCard from "@/components/client/OrderContextCard";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { format, isToday, isYesterday } from "date-fns";
 
 // ── Types ──
 interface Conversation {
   id: string;
-  vendor_id: string;
+  vendor_id: string | null;
   type: string;
   title: string | null;
   client_id: string | null;
   related_order_id: string | null;
+  event_group_id: string | null;
   last_message: string | null;
   last_message_at: string | null;
   unread_count_vendor: number;
   unread_count_client: number;
   created_at: string;
+}
+
+interface EventGroup {
+  id: string;
+  name: string;
+  event_date: string | null;
 }
 
 interface ChatMessage {
@@ -86,8 +98,29 @@ const ClientMessages = () => {
 
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [showNewGroup, setShowNewGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDate, setNewGroupDate] = useState("");
 
-  // Fetch conversations where client_id = me
+  // Lazy create the Evnting Admin conversation if missing
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data: existing } = await (supabase.from as any)("chat_conversations")
+        .select("id").eq("client_id", user.id).eq("type", "admin").maybeSingle();
+      if (!existing) {
+        await (supabase.from as any)("chat_conversations").insert({
+          client_id: user.id, type: "admin", title: "Evnting Admin",
+          last_message: "Welcome — payment alerts, support replies and announcements appear here.",
+          last_message_at: new Date().toISOString(),
+        });
+        queryClient.invalidateQueries({ queryKey: ["client-chat-conversations", user.id] });
+      }
+    })();
+  }, [user, queryClient]);
+
+  // Fetch conversations where client_id = me (both 'client' and 'admin' types)
   const { data: conversations = [], isLoading: convsLoading } = useQuery({
     queryKey: ["client-chat-conversations", user?.id],
     enabled: !!user,
@@ -96,12 +129,47 @@ const ClientMessages = () => {
         .from("chat_conversations")
         .select("*")
         .eq("client_id", user!.id)
-        .eq("type", "client")
+        .in("type", ["client", "admin"])
         .order("last_message_at", { ascending: false, nullsFirst: false });
       if (error) throw error;
       return data as Conversation[];
     },
   });
+
+  // Fetch the client's event groups
+  const { data: eventGroups = [] } = useQuery({
+    queryKey: ["client-event-groups", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await (supabase.from as any)("client_event_groups")
+        .select("id, name, event_date").eq("client_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []) as EventGroup[];
+    },
+  });
+
+  const createEventGroup = async () => {
+    if (!user || !newGroupName.trim()) return;
+    const { error } = await (supabase.from as any)("client_event_groups").insert({
+      client_id: user.id,
+      name: newGroupName.trim(),
+      event_date: newGroupDate || null,
+    });
+    if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Event group created" });
+    setNewGroupName("");
+    setNewGroupDate("");
+    setShowNewGroup(false);
+    queryClient.invalidateQueries({ queryKey: ["client-event-groups", user.id] });
+  };
+
+  const moveConvToGroup = async (convId: string, groupId: string | null) => {
+    const { error } = await (supabase.from as any)("chat_conversations")
+      .update({ event_group_id: groupId }).eq("id", convId);
+    if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
+    queryClient.invalidateQueries({ queryKey: ["client-chat-conversations", user?.id] });
+  };
 
   // Vendor profiles for names
   const vendorIds = useMemo(() => {
@@ -142,6 +210,21 @@ const ClientMessages = () => {
     });
   }, [conversations, searchTerm, profileMap]);
 
+  // Split conversations into: pinned admin, grouped (by event_group_id), and ungrouped
+  const adminConv = filtered.find((c) => c.type === "admin") || null;
+  const vendorConvs = filtered.filter((c) => c.type !== "admin");
+  const groupedByEvent = useMemo(() => {
+    const map = new Map<string, Conversation[]>();
+    vendorConvs.forEach((c) => {
+      if (c.event_group_id) {
+        if (!map.has(c.event_group_id)) map.set(c.event_group_id, []);
+        map.get(c.event_group_id)!.push(c);
+      }
+    });
+    return map;
+  }, [vendorConvs]);
+  const ungroupedConvs = vendorConvs.filter((c) => !c.event_group_id);
+
   const activeConv = conversations.find((c) => c.id === activeConvId) || null;
 
   return (
@@ -150,7 +233,12 @@ const ClientMessages = () => {
         {/* LEFT */}
         <div className={`w-full sm:w-80 sm:border-r border-border flex flex-col ${activeConvId ? "hidden sm:flex" : "flex"}`}>
           <div className="p-3 space-y-2 border-b border-border">
-            <h3 className="text-sm font-semibold text-foreground">Messages</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">Inbox</h3>
+              <Button size="sm" variant="ghost" className="h-6 px-1.5 text-[10px] gap-1" onClick={() => setShowNewGroup(true)}>
+                <FolderPlus className="h-3 w-3" /> Event group
+              </Button>
+            </div>
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search..." className="pl-8 h-8 text-xs" />
@@ -162,41 +250,91 @@ const ClientMessages = () => {
             ) : filtered.length === 0 ? (
               <div className="text-center py-8 text-xs text-muted-foreground">No conversations yet.</div>
             ) : (
-              filtered.map((conv) => {
-                const name = getConvName(conv);
-                const unread = conv.unread_count_client;
-                return (
-                  <button
-                    key={conv.id}
-                    onClick={() => setActiveConvId(conv.id)}
-                    className={`w-full text-left px-3 py-3 border-b border-border/50 hover:bg-muted/50 transition-colors ${conv.id === activeConvId ? "bg-primary/5 border-l-2 border-l-primary" : ""}`}
-                  >
-                    <div className="flex items-start gap-2.5">
-                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
-                        {getInitials(name)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-foreground truncate">{name}</span>
-                          {conv.last_message_at && <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">{formatMsgTime(conv.last_message_at)}</span>}
-                        </div>
-                        <div className="flex items-center justify-between mt-0.5">
-                          <p className="text-xs text-muted-foreground truncate">{conv.last_message || "No messages yet"}</p>
-                          {unread > 0 && (
-                            <span className="flex-shrink-0 ml-2 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">{unread}</span>
-                          )}
-                        </div>
-                        {conv.related_order_id && (
-                          <span className="text-[10px] text-primary flex items-center gap-0.5 mt-0.5"><Package className="h-2.5 w-2.5" />Order linked</span>
-                        )}
-                      </div>
+              <>
+                {/* Pinned Evnting Admin */}
+                {adminConv && (
+                  <ConvRow
+                    conv={adminConv}
+                    activeConvId={activeConvId}
+                    onSelect={setActiveConvId}
+                    name="📣 Evnting Admin"
+                    pinned
+                    eventGroups={eventGroups}
+                    onMoveGroup={moveConvToGroup}
+                  />
+                )}
+
+                {/* Event groups */}
+                {eventGroups.map((g) => {
+                  const groupConvs = groupedByEvent.get(g.id) || [];
+                  if (groupConvs.length === 0) return null;
+                  const collapsed = collapsedGroups[g.id] || false;
+                  return (
+                    <div key={g.id} className="border-b border-border/50">
+                      <button
+                        onClick={() => setCollapsedGroups((p) => ({ ...p, [g.id]: !collapsed }))}
+                        className="w-full px-3 py-2 flex items-center gap-2 bg-muted/40 hover:bg-muted/60 transition-colors"
+                      >
+                        {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                        <FolderOpen className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs font-semibold flex-1 text-left truncate">{g.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{groupConvs.length}</span>
+                      </button>
+                      {!collapsed && groupConvs.map((conv) => (
+                        <ConvRow
+                          key={conv.id}
+                          conv={conv}
+                          activeConvId={activeConvId}
+                          onSelect={setActiveConvId}
+                          name={getConvName(conv)}
+                          indent
+                          eventGroups={eventGroups}
+                          onMoveGroup={moveConvToGroup}
+                        />
+                      ))}
                     </div>
-                  </button>
-                );
-              })
+                  );
+                })}
+
+                {/* Ungrouped vendor convs */}
+                {ungroupedConvs.map((conv) => (
+                  <ConvRow
+                    key={conv.id}
+                    conv={conv}
+                    activeConvId={activeConvId}
+                    onSelect={setActiveConvId}
+                    name={getConvName(conv)}
+                    eventGroups={eventGroups}
+                    onMoveGroup={moveConvToGroup}
+                  />
+                ))}
+              </>
             )}
           </div>
         </div>
+
+        {/* New event group dialog */}
+        <Dialog open={showNewGroup} onOpenChange={setShowNewGroup}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Create event group</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium">Event name</label>
+                <Input value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} placeholder="e.g. Diwali Party" />
+              </div>
+              <div>
+                <label className="text-xs font-medium">Date (optional)</label>
+                <Input type="date" value={newGroupDate} onChange={(e) => setNewGroupDate(e.target.value)} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setShowNewGroup(false)}>Cancel</Button>
+              <Button onClick={createEventGroup} disabled={!newGroupName.trim()}>Create</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* RIGHT */}
         <div className={`flex-1 flex flex-col ${!activeConvId ? "hidden sm:flex" : "flex"}`}>
@@ -217,6 +355,87 @@ const ClientMessages = () => {
           )}
         </div>
       </div>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════
+// Conversation list row (with move-to-group menu)
+// ═══════════════════════════════════════════
+const ConvRow = ({
+  conv, activeConvId, onSelect, name, indent, pinned, eventGroups, onMoveGroup,
+}: {
+  conv: Conversation;
+  activeConvId: string | null;
+  onSelect: (id: string) => void;
+  name: string;
+  indent?: boolean;
+  pinned?: boolean;
+  eventGroups: EventGroup[];
+  onMoveGroup: (convId: string, groupId: string | null) => void;
+}) => {
+  const unread = conv.unread_count_client;
+  const isAdmin = conv.type === "admin";
+  return (
+    <div
+      className={`group relative w-full px-3 py-3 border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer ${
+        conv.id === activeConvId ? "bg-primary/5 border-l-2 border-l-primary" : ""
+      } ${indent ? "pl-7" : ""} ${pinned ? "bg-blue-50/40 dark:bg-blue-950/20" : ""}`}
+      onClick={() => onSelect(conv.id)}
+    >
+      <div className="flex items-start gap-2.5">
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+          isAdmin ? "bg-blue-500 text-white" : "bg-primary/10 text-primary"
+        }`}>
+          {isAdmin ? <Megaphone className="h-4 w-4" /> : getInitials(name)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground truncate">{name}</span>
+            {conv.last_message_at && <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">{formatMsgTime(conv.last_message_at)}</span>}
+          </div>
+          <div className="flex items-center justify-between mt-0.5">
+            <p className="text-xs text-muted-foreground truncate">{conv.last_message || "No messages yet"}</p>
+            {unread > 0 && (
+              <span className="flex-shrink-0 ml-2 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">{unread}</span>
+            )}
+          </div>
+          {conv.related_order_id && (
+            <span className="text-[10px] text-primary flex items-center gap-0.5 mt-0.5"><Package className="h-2.5 w-2.5" />Order linked</span>
+          )}
+        </div>
+      </div>
+      {!isAdmin && eventGroups.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-muted/80"
+              onClick={(e) => e.stopPropagation()}
+              title="Move to event group"
+            >
+              <FolderOpen className="h-3 w-3 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="text-xs">
+            {eventGroups.map((g) => (
+              <DropdownMenuItem
+                key={g.id}
+                onClick={(e) => { e.stopPropagation(); onMoveGroup(conv.id, g.id); }}
+              >
+                {conv.event_group_id === g.id ? "✓ " : ""}{g.name}
+              </DropdownMenuItem>
+            ))}
+            {conv.event_group_id && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMoveGroup(conv.id, null); }}>
+                  <X className="h-3 w-3 mr-1" /> Ungroup
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 };
@@ -371,6 +590,10 @@ const ClientChatPanel = ({
           {conversation.related_order_id && <span className="text-[10px] text-primary flex items-center gap-0.5"><Package className="h-2.5 w-2.5" />Order linked</span>}
         </div>
       </div>
+
+      {conversation.related_order_id && (
+        <OrderContextCard orderId={conversation.related_order_id} />
+      )}
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-1">
         {isLoading ? (

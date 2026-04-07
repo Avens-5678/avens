@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { X, LogIn, User, LogOut, Mail, ChevronRight, MapPin, Search, ShoppingBag, Heart, Headphones, Shield, RefreshCw, Lock, MessageSquare, Calendar, Award, HelpCircle, LayoutDashboard } from "lucide-react";
-import InquiryForm from "@/components/Forms/InquiryForm";
+import InquiryForm from "@/components/forms/InquiryForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";

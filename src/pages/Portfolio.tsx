@@ -3,8 +3,8 @@ import Layout from "@/components/layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
 import { Camera, ArrowRight } from "lucide-react";
 import { useState } from "react";
-import FilterButtons from "@/components/Portfolio/FilterButtons";
-import EventCard from "@/components/Portfolio/EventCard";
+import FilterButtons from "@/components/portfolio/FilterButtons";
+import EventCard from "@/components/portfolio/EventCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 

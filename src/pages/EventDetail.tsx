@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/layout/Layout";
-import InquiryForm from "@/components/Forms/InquiryForm";
+import InquiryForm from "@/components/forms/InquiryForm";
 import { useEvent, usePortfolio } from "@/hooks/useData";
 import { ArrowRight, Calendar, Camera, MapPin, Clock, Users } from "lucide-react";
 

@@ -6,7 +6,7 @@ import Layout from "@/components/layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
 import { ArrowLeft, Camera } from "lucide-react";
 import { useState } from "react";
-import Lightbox from "@/components/Portfolio/Lightbox";
+import Lightbox from "@/components/portfolio/Lightbox";
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
 
 const Gallery = () => {

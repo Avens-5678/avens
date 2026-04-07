@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare, Gift, Award, Home } from "lucide-react";
+import { LogOut, Calendar, FileText, User, ArrowLeft, Plus, Bot, FolderOpen, MessageSquare, Gift, Award, Home, HelpCircle } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Logo from "@/components/ui/logo";
 import EventRequestForm from "@/components/client/EventRequestForm";
@@ -17,6 +17,7 @@ import ClientMessages from "@/components/client/ClientMessages";
 import ClientBundleEvents from "@/components/client/ClientBundleEvents";
 import LoyaltyDashboard from "@/components/client/LoyaltyDashboard";
 import ClientDashboardHome from "@/components/client/ClientDashboardHome";
+import ClientHelpGuide from "@/components/client/ClientHelpGuide";
 import { useUnreadChats } from "@/hooks/useUnreadChats";
 
 const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
@@ -30,6 +31,7 @@ const baseSidebarItems: Omit<SidebarItem, "badge">[] = [
   { icon: Calendar, label: "Past Orders", value: "past-orders" },
   { icon: Award, label: "Loyalty", value: "loyalty" },
   { icon: User, label: "Profile", value: "profile" },
+  { icon: HelpCircle, label: "Help & Guide", value: "help" },
 ];
 
 const ClientDashboard = () => {
@@ -137,6 +139,8 @@ const ClientDashboard = () => {
         return <LoyaltyDashboard />;
       case "profile":
         return <ClientProfileSettings />;
+      case "help":
+        return <ClientHelpGuide />;
       default:
         return null;
     }

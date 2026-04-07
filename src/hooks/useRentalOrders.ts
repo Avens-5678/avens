@@ -86,6 +86,9 @@ export const useVendorRentalOrders = (vendorId?: string) => {
       return data as RentalOrder[];
     },
     enabled: !!vendorId,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,
+    staleTime: 5_000,
   });
 };
 
@@ -102,6 +105,9 @@ export const useClientRentalOrders = (clientId?: string) => {
       return data as RentalOrder[];
     },
     enabled: !!clientId,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000, // poll every 30s as a safety net for status changes
+    staleTime: 5_000,
   });
 };
 

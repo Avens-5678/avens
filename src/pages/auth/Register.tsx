@@ -30,12 +30,9 @@ const registerSchema = z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-}).refine((data) => data.role !== "client" || (data.phone && /^[6-9]\d{9}$/.test(data.phone)), {
+}).refine((data) => !data.phone || /^[6-9]\d{9}$/.test(data.phone), {
   message: "Enter a valid 10-digit mobile starting with 6–9",
   path: ["phone"],
-}).refine((data) => data.role !== "client" || (data.city && data.city.length > 0), {
-  message: "Please select your city",
-  path: ["city"],
 }).refine((data) => !data.gstNumber || /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(data.gstNumber.toUpperCase()), {
   message: "Invalid GSTIN format",
   path: ["gstNumber"],

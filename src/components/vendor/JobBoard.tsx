@@ -84,6 +84,8 @@ const JobBoard = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["vendor_rental_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["client_rental_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["rental_orders"] });
       toast({
         title: variables.action === "accepted" ? "Order Accepted" : "Order Declined",
         description: variables.action === "accepted"

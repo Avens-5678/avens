@@ -85,8 +85,23 @@ const DeliveryManager = () => {
       if (status === "delivered") updates.delivered_at = new Date().toISOString();
       const { error } = await supabase.from("delivery_orders").update(updates).eq("id", id);
       if (error) throw error;
-      // Push notification to customer
+
+      // Mirror the delivery status onto the parent rental_orders row so the
+      // customer's timeline reflects vendor progress.
       const delivery = deliveries.find((d) => d.id === id);
+      const rentalStatusMap: Record<string, string> = {
+        picked_up: "in_progress",
+        in_transit: "out_for_delivery",
+        delivered: "delivered",
+      };
+      const mirrored = rentalStatusMap[status];
+      if (delivery?.order_id && mirrored) {
+        await supabase.from("rental_orders")
+          .update({ status: mirrored, updated_at: new Date().toISOString() } as any)
+          .eq("id", delivery.order_id);
+      }
+
+      // Push notification to customer
       if (delivery?.customer_id) {
         const statusLabels: Record<string, string> = { picked_up: "picked up from vendor", in_transit: "on the way", delivered: "delivered" };
         const label = statusLabels[status];
@@ -105,6 +120,9 @@ const DeliveryManager = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendor-deliveries"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor_rental_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["client_rental_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["rental_orders"] });
       toast({ title: "Status updated" });
     },
     onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),

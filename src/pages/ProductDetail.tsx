@@ -306,6 +306,19 @@ const ProductDetail = () => {
       toast({ title: "Enter dimensions", description: "Please enter valid Length and Breadth.", variant: "destructive" });
       return;
     }
+    // Stock validation — block when requested qty exceeds available stock
+    const stockCap = Math.min(
+      (rental as any).quantity ?? Infinity,
+      availability?.available ?? Infinity
+    );
+    if (!isMeasurable && stockCap !== Infinity && finalQuantity > stockCap) {
+      toast({
+        title: "Insufficient stock",
+        description: `Only ${stockCap} available for the selected dates.`,
+        variant: "destructive",
+      });
+      return;
+    }
     addItem({
       id: rental.id,
       title: rental.title + (selectedVariant ? ` - ${selectedVariant.attribute_value}` : ""),
@@ -594,11 +607,33 @@ const ProductDetail = () => {
                 ) : (
                   <>
                     <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Quantity</h3>
-                    <div className="flex items-center gap-0 border border-border rounded-lg w-fit overflow-hidden">
-                      <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="px-3 py-2 hover:bg-muted transition-colors text-foreground font-medium">−</button>
-                      <span className="px-4 py-2 text-center font-semibold text-foreground border-x border-border min-w-[48px]">{quantity}</span>
-                      <button onClick={() => setQuantity((q) => q + 1)} className="px-3 py-2 hover:bg-muted transition-colors text-foreground font-medium">+</button>
-                    </div>
+                    {(() => {
+                      const stockCap = Math.min(
+                        (rental as any)?.quantity ?? Infinity,
+                        availability?.available ?? Infinity
+                      );
+                      const isOutOfStock = stockCap === 0;
+                      const isLow = stockCap !== Infinity && stockCap <= 3 && stockCap > 0;
+                      return (
+                        <>
+                          <div className="flex items-center gap-0 border border-border rounded-lg w-fit overflow-hidden">
+                            <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="px-3 py-2 hover:bg-muted transition-colors text-foreground font-medium">−</button>
+                            <span className="px-4 py-2 text-center font-semibold text-foreground border-x border-border min-w-[48px]">{quantity}</span>
+                            <button
+                              onClick={() => setQuantity((q) => Math.min(q + 1, stockCap === Infinity ? q + 1 : stockCap))}
+                              disabled={stockCap !== Infinity && quantity >= stockCap}
+                              className="px-3 py-2 hover:bg-muted transition-colors text-foreground font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                            >+</button>
+                          </div>
+                          {isOutOfStock && (
+                            <p className="text-xs text-red-600 mt-1 font-medium">Out of stock</p>
+                          )}
+                          {isLow && (
+                            <p className="text-xs text-amber-600 mt-1 font-medium">Only {stockCap} left</p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </>
                 )}
               </div>

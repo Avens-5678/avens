@@ -87,7 +87,10 @@ const Cart = () => {
   const allItemsPriced = items.length > 0 && items.every(i => i.price_value != null);
   const minBookingHours = logisticsConfig?.min_booking_hours || 48;
   const dateIsSet = !!derivedStartDate;
-  const canInstantBook = allItemsPriced && dateIsSet && isInstantBookable(derivedStartDate, minBookingHours);
+  // Soft warning: booking is in <48h. We still let the user pay via Razorpay;
+  // the order is created as `pending` so the vendor must confirm after payment.
+  const isShortLeadTime = dateIsSet && !isInstantBookable(derivedStartDate, minBookingHours);
+  const canInstantBook = allItemsPriced && dateIsSet; // 48h check no longer blocks payment
   const showInstantBookFlow = allItemsPriced; // Show the flow if all items are priced, but enable button only if date qualifies
   const hasRequiredLocation = !showVenueAddressFields || !!eventDetails.venue_address_line1 || !!primaryVenueAddress;
 
@@ -160,7 +163,7 @@ const Cart = () => {
         }
       }
     }
-  }, [eventDetails.venue_lat, eventDetails.venue_lng, totalVolumeUnits]);
+  }, [eventDetails.venue_lat, eventDetails.venue_lng, totalVolumeUnits, derivedStartDate, items.map(i => i.vendor_id).join("|")]);
 
   const transportFee = dynamicTransportResult?.fee || 0;
 
@@ -418,8 +421,8 @@ const Cart = () => {
       return;
     }
     if (!profileData?.full_name || !profileData?.phone) {
-      toast({ title: "Complete your profile", description: "Please fill in your name and phone number first.", variant: "destructive" });
-      navigate("/client");
+      toast({ title: "Complete your profile", description: "Please add your name and phone number first." });
+      navigate("/client?incomplete=1&return=/cart");
       return;
     }
     if (!derivedStartDate) {
@@ -447,7 +450,9 @@ const Cart = () => {
       const venueLocation = [eventDetails.venue_address_line1 || primaryVenueAddress, eventDetails.venue_address_line2, eventDetails.venue_pincode].filter(Boolean).join(", ");
       const orderId = crypto.randomUUID();
 
-      // Determine if instant book
+      // Determine if instant book.
+      // Short-lead bookings still flow through Razorpay; we just record the order
+      // as `pending` so the vendor must confirm after payment.
       const isInstant = canInstantBook && hasRequiredLocation;
 
       // Create bundle order if multi-category
@@ -672,8 +677,8 @@ const Cart = () => {
       return;
     }
     if (!profileData?.full_name || !profileData?.phone) {
-      toast({ title: "Complete your profile", description: "Please fill in your name and phone number first.", variant: "destructive" });
-      navigate("/client");
+      toast({ title: "Complete your profile", description: "Please add your name and phone number first." });
+      navigate("/client?incomplete=1&return=/cart");
       return;
     }
     if (!derivedStartDate) {
@@ -1290,10 +1295,10 @@ const Cart = () => {
                             <span className="text-lg font-bold text-primary">₹{grandTotal.toLocaleString()}</span>
                           </div>
 
-                          {!canInstantBook && dateIsSet && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400">
-                              ⚠ Event is less than {minBookingHours} hours away — falls back to enquiry mode.
-                            </p>
+                          {isShortLeadTime && (
+                            <div className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md p-2">
+                              ⚠ Heads up — your event is in less than {minBookingHours} hours. You can still pay now via Razorpay; the vendor will confirm shortly after payment.
+                            </div>
                           )}
                         </div>
                       )}

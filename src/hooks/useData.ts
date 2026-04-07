@@ -358,9 +358,22 @@ export const useVerifiedVendorInventory = () => {
         .order("created_at", { ascending: false });
       if (error) throw error;
 
+      // App-level approval gate (RLS is the primary defence; this is a backup).
+      const vendorIds = Array.from(new Set((data || []).map((r: any) => r.vendor_id).filter(Boolean)));
+      let activeVendorIds = new Set<string>();
+      if (vendorIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, vendor_status")
+          .in("user_id", vendorIds as any)
+          .eq("vendor_status", "active");
+        activeVendorIds = new Set((profs || []).map((p: any) => p.user_id));
+      }
+      const filtered = (data || []).filter((r: any) => activeVendorIds.has(r.vendor_id));
+
       // For variant items, surface the cheapest active variant as the
       // displayed price so cards never render "no price".
-      return (data || []).map((row: any) => {
+      return filtered.map((row: any) => {
         if (!row.has_variants) return row;
         const variants: any[] = (row.vendor_inventory_variants || []).filter(
           (v: any) => v.is_active !== false && v.price_value != null

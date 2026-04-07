@@ -7,11 +7,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Save, User } from "lucide-react";
+import { Loader2, Save, User, AlertCircle } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 const ClientProfileSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const isIncomplete = searchParams.get("incomplete") === "1";
+  const returnTo = searchParams.get("return") || "";
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState({
@@ -75,6 +80,10 @@ const ClientProfileSettings = () => {
         title: "Profile Updated",
         description: "Your profile has been saved successfully.",
       });
+      // If we got here from an incomplete-profile redirect, send the user back
+      if (returnTo && profile.full_name && profile.phone) {
+        navigate(returnTo, { replace: true });
+      }
     }
 
     setIsSaving(false);
@@ -97,6 +106,15 @@ const ClientProfileSettings = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isIncomplete && (
+          <div className="flex items-start gap-2 p-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200">
+            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="font-semibold">Complete your profile to continue</p>
+              <p className="text-xs">We need your name and phone number before you can place a booking. Save below and we'll take you back.</p>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="full_name">Full Name</Label>

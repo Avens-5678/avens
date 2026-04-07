@@ -57,15 +57,13 @@ export const useCart = create<CartStore>()(
       addItem: (item) => {
         const { items } = get();
         const key = getCartKey(item.id, item.variant_id);
-        const existing = items.find(i => getCartKey(i.id, i.variant_id) === key);
-        if (existing) {
-          set({
-            items: items.map(i =>
-              getCartKey(i.id, i.variant_id) === key
-                ? { ...i, quantity: i.quantity + (item.quantity || 1) }
-                : i
-            ),
-          });
+        const idx = items.findIndex(i => getCartKey(i.id, i.variant_id) === key);
+        // Replace (not increment) so going back to PDP and updating dates/qty
+        // overwrites the existing cart row instead of stacking on top of stale data.
+        if (idx >= 0) {
+          const next = [...items];
+          next[idx] = { ...next[idx], ...item, quantity: item.quantity || 1 };
+          set({ items: next });
         } else {
           set({ items: [...items, { ...item, quantity: item.quantity || 1 }] });
         }

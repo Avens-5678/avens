@@ -344,7 +344,7 @@ const Ecommerce = () => {
   }>({});
   
   const [deliveryRadius, setDeliveryRadius] = useState(() => {
-    try { return parseInt(localStorage.getItem("evnting_delivery_radius") || "15") || 15; } catch { return 15; }
+    try { return parseInt(localStorage.getItem("evnting_delivery_radius") || "10") || 10; } catch { return 10; }
   });
   const handleRadiusChange = (r: number) => { setDeliveryRadius(r); localStorage.setItem("evnting_delivery_radius", String(r)); };
 
@@ -537,8 +537,11 @@ const Ecommerce = () => {
         rental.slot_types.includes(venueSearchFilters.slot) ||
         rental.slot_types.includes("full_day");
 
-      // Radius filter: include if within radius OR no distance data (don't exclude unknowns)
-      const matchesRadius = !userLocation || rental._distance_km === null || rental._distance_km <= deliveryRadius;
+      // Strict radius filter (Zomato/Swiggy-style): when location is set, only show
+      // items within the radius. Items without coordinates are hidden.
+      const matchesRadius = !userLocation
+        ? true
+        : rental._distance_km != null && rental._distance_km <= deliveryRadius;
 
       return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience && matchesCrewType && matchesVenueGuestCount && matchesVenueEventType && matchesVenueSlot && matchesRadius;
     });
@@ -556,6 +559,11 @@ const Ecommerce = () => {
       case "rating":
         results.sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
+      default:
+        // Default: nearest first when location is set (Swiggy-style)
+        if (userLocation) {
+          results.sort((a: any, b: any) => (a._distance_km ?? Infinity) - (b._distance_km ?? Infinity));
+        }
     }
 
     // Mark unavailable items and sort available-first when date filter is active
@@ -1106,6 +1114,26 @@ const Ecommerce = () => {
                 )}
 
                 <div id="product-grid">
+                  {/* Progressive radius expand (Zomato/Swiggy style) */}
+                  {userLocation && (() => {
+                    const tiers = [5, 10, 25, 50, 100];
+                    const next = tiers.find((t) => t > deliveryRadius);
+                    if (!next) return null;
+                    return (
+                      <div className="mb-3 flex items-center justify-between gap-2 px-3 py-2 rounded-md border border-dashed border-border bg-muted/30">
+                        <span className="text-xs text-muted-foreground">
+                          Showing vendors within <strong>{deliveryRadius} km</strong>
+                          {filteredRentals.length === 0 && " — none found here"}
+                        </span>
+                        <button
+                          onClick={() => handleRadiusChange(next)}
+                          className="text-xs font-semibold text-primary hover:underline whitespace-nowrap"
+                        >
+                          Show vendors up to {next} km →
+                        </button>
+                      </div>
+                    );
+                  })()}
                   {filteredRentals.length === 0 ? (
                     <div className="text-center py-16 px-4">
                       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">

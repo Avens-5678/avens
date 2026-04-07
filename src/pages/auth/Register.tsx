@@ -21,10 +21,27 @@ const registerSchema = z.object({
   role: z.enum(["client", "vendor"], {
     required_error: "Please select a role",
   }),
+  // Client extras (required only when role === "client")
+  phone: z.string().optional(),
+  city: z.string().optional(),
+  address: z.string().optional(),
+  companyName: z.string().optional(),
+  gstNumber: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
+}).refine((data) => data.role !== "client" || (data.phone && /^[6-9]\d{9}$/.test(data.phone)), {
+  message: "Enter a valid 10-digit mobile starting with 6–9",
+  path: ["phone"],
+}).refine((data) => data.role !== "client" || (data.city && data.city.length > 0), {
+  message: "Please select your city",
+  path: ["city"],
+}).refine((data) => !data.gstNumber || /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(data.gstNumber.toUpperCase()), {
+  message: "Invalid GSTIN format",
+  path: ["gstNumber"],
 });
+
+const CITIES = ["Hyderabad", "Mumbai", "Delhi", "Bangalore", "Chennai", "Pune", "Kolkata", "Ahmedabad", "Jaipur", "Other"];
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
@@ -41,6 +58,11 @@ const Register = () => {
       confirmPassword: "",
       fullName: "",
       role: undefined as any,
+      phone: "",
+      city: "",
+      address: "",
+      companyName: "",
+      gstNumber: "",
     },
   });
 
@@ -64,13 +86,21 @@ const Register = () => {
       if (signUpError) throw signUpError;
 
       if (authData.user) {
+        const profileRow: any = {
+          user_id: authData.user.id,
+          email: values.email,
+          full_name: values.fullName,
+        };
+        if (values.role === "client") {
+          profileRow.phone = values.phone || null;
+          profileRow.city = values.city || null;
+          profileRow.address = values.address || null;
+          profileRow.company_name = values.companyName || null;
+          profileRow.gst_number = values.gstNumber ? values.gstNumber.toUpperCase() : null;
+        }
         const { error: profileError } = await supabase
           .from("profiles")
-          .insert({
-            user_id: authData.user.id,
-            email: values.email,
-            full_name: values.fullName,
-          });
+          .insert(profileRow);
 
         if (profileError) {
           console.error("Profile creation error:", profileError);
@@ -280,8 +310,96 @@ const Register = () => {
                       />
                     </div>
 
-              <Button 
-                      type="submit" 
+                    {/* Client-only contact details — collected upfront so first booking is friction-free */}
+                    {selectedRole === "client" && (
+                      <div className="space-y-4 rounded-xl border border-border p-4 bg-muted/30">
+                        <p className="text-sm font-semibold">Contact details</p>
+                        <FormField
+                          control={form.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="tel"
+                                  inputMode="numeric"
+                                  maxLength={10}
+                                  placeholder="10-digit mobile"
+                                  {...field}
+                                  onChange={(e) => field.onChange(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="city"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>City *</FormLabel>
+                              <FormControl>
+                                <select
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                >
+                                  <option value="">Select city</option>
+                                  {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Address (optional)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="House / street / area" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <FormField
+                            control={form.control}
+                            name="companyName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Company (optional)</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="If booking for a company" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="gstNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>GSTIN (optional)</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="22AAAAA0000A1Z5" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+              <Button
+                      type="submit"
                       className="w-full bg-gradient-to-r from-primary to-accent text-lg py-5"
                       disabled={isLoading}
                     >

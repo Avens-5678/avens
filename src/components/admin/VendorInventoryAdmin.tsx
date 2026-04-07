@@ -477,6 +477,7 @@ const VendorInventoryAdmin = () => {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       {vendor && <p className="text-xs text-muted-foreground">by {(vendor as any).company_name || (vendor as any).full_name}</p>}
+                      <LogisticsEditor item={item} />
                       <div className="flex items-center justify-between pt-2 border-t">
                         <div className="flex items-center gap-2">
                           <Switch checked={(item as any).is_verified || false} onCheckedChange={(c) => toggleVerified.mutate({ id: item.id, is_verified: c })} className="scale-75" />
@@ -729,6 +730,60 @@ const VendorDetailSheet = ({
         </div>
       </SheetContent>
     </Sheet>
+  );
+};
+
+// ── Admin-only logistics estimate editor (per inventory item) ──
+const LogisticsEditor = ({ item }: { item: any }) => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [vol, setVol] = useState<string>(item.volume_units?.toString() ?? "");
+  const [lab, setLab] = useState<string>(item.labor_weight?.toString() ?? "");
+  const source = item.logistics_source || "ai_estimate";
+
+  const save = async () => {
+    const { error } = await supabase
+      .from("vendor_inventory")
+      .update({
+        volume_units: vol === "" ? null : Number(vol),
+        labor_weight: lab === "" ? null : Number(lab),
+        logistics_source: "admin_override",
+      })
+      .eq("id", item.id);
+    if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Logistics updated" });
+    qc.invalidateQueries({ queryKey: ["admin-vendor-inventory"] });
+  };
+
+  return (
+    <div className="border border-dashed border-border rounded-md p-2 space-y-1.5 bg-muted/30">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Logistics Estimate</span>
+        <Badge variant="outline" className="text-[9px] capitalize">{source.replace("_", " ")}</Badge>
+      </div>
+      <div className="grid grid-cols-2 gap-1.5">
+        <div>
+          <label className="text-[9px] text-muted-foreground">Volume (CBM)</label>
+          <input
+            type="number"
+            step="0.1"
+            value={vol}
+            onChange={(e) => setVol(e.target.value)}
+            className="w-full h-7 px-2 text-xs border border-input rounded bg-background"
+          />
+        </div>
+        <div>
+          <label className="text-[9px] text-muted-foreground">Labor (kg)</label>
+          <input
+            type="number"
+            value={lab}
+            onChange={(e) => setLab(e.target.value)}
+            className="w-full h-7 px-2 text-xs border border-input rounded bg-background"
+          />
+        </div>
+      </div>
+      <Button size="sm" variant="outline" className="w-full h-6 text-[10px]" onClick={save}>Save logistics</Button>
+    </div>
   );
 };
 

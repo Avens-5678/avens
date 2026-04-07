@@ -19,7 +19,7 @@ interface LocationRadiusBarProps {
   onPinCode: (pin: string) => void;
 }
 
-const RADIUS_OPTIONS = [5, 10, 15, 25, 50];
+const RADIUS_OPTIONS = [5, 10, 25, 50, 100];
 
 const LocationRadiusBar = ({ location, radius, onRadiusChange, onDetectGPS, onPinCode }: LocationRadiusBarProps) => {
   const [pinInput, setPinInput] = useState("");

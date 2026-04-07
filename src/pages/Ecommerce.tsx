@@ -292,6 +292,9 @@ const Ecommerce = () => {
       instagram_url: v.instagram_url || null,
       pickup_lat: v.pickup_lat || null,
       pickup_lng: v.pickup_lng || null,
+      warehouse_lat: v.warehouse_lat || null,
+      warehouse_lng: v.warehouse_lng || null,
+      vendor_city: v.vendor_city || null,
       _source: "vendor",
     }));
     return [...adminItems, ...vendorMapped];
@@ -537,11 +540,15 @@ const Ecommerce = () => {
         rental.slot_types.includes(venueSearchFilters.slot) ||
         rental.slot_types.includes("full_day");
 
-      // Strict radius filter (Zomato/Swiggy-style): when location is set, only show
-      // items within the radius. Items without coordinates are hidden.
+      // Radius filter (Zomato/Swiggy-style): when location is set, only vendor
+      // items within the radius pass. Admin/curated rentals (no vendor, no
+      // coordinates) are nationwide-fulfilled and always pass.
+      const isVendorItem = rental._source === "vendor";
       const matchesRadius = !userLocation
         ? true
-        : rental._distance_km != null && rental._distance_km <= deliveryRadius;
+        : isVendorItem
+          ? (rental._distance_km != null && rental._distance_km <= deliveryRadius)
+          : true;
 
       return matchesSearch && matchesCategory && matchesCity && matchesService && matchesPrice && matchesAvailability && matchesAmenities && matchesCapacity && matchesExperience && matchesCrewType && matchesVenueGuestCount && matchesVenueEventType && matchesVenueSlot && matchesRadius;
     });
@@ -582,34 +589,53 @@ const Ecommerce = () => {
   // Discovery rows for default landing view
   const isDiscoveryView = !activeService && !debouncedSearch && !activeQuickCat && !searchCategory && selectedCategories.length === 0 && promoFilterIds.length === 0 && !vendorFilterId;
 
+  // Apply the same vendor-radius gate to discovery rows so they don't leak
+  // far-away vendors. Admin items pass through unconditionally.
+  const withinRadius = (r: any) => {
+    if (!userLocation) return true;
+    if (r._source !== "vendor") return true;
+    return r._distance_km != null && r._distance_km <= deliveryRadius;
+  };
+  const sortByNearest = (arr: any[]) =>
+    userLocation
+      ? [...arr].sort((a, b) => (a._distance_km ?? Infinity) - (b._distance_km ?? Infinity))
+      : arr;
+
   const discoveryBestRentals = useMemo(() => {
-    return allItems
-      .filter((r: any) => (r.service_type || "rental") === "rental" && r.is_active !== false)
-      .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
-      .slice(0, 12);
-  }, [allItems]);
+    return sortByNearest(
+      itemsWithDistance
+        .filter((r: any) => (r.service_type || "rental") === "rental" && r.is_active !== false)
+        .filter(withinRadius)
+        .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
+    ).slice(0, 12);
+  }, [itemsWithDistance, userLocation, deliveryRadius]);
 
   const discoveryBestInCity = useMemo(() => {
     if (!userLocation?.cityName) return [];
     const city = userLocation.cityName.toLowerCase();
-    return allItems
-      .filter((r: any) => r.address?.toLowerCase().includes(city))
-      .slice(0, 12);
-  }, [allItems, userLocation]);
+    return sortByNearest(
+      itemsWithDistance
+        .filter((r: any) => withinRadius(r) && (r.address?.toLowerCase().includes(city) || r.vendor_city?.toLowerCase().includes(city) || r._source !== "vendor"))
+    ).slice(0, 12);
+  }, [itemsWithDistance, userLocation, deliveryRadius]);
 
   const discoveryBestCrew = useMemo(() => {
-    return allItems
-      .filter((r: any) => (r.service_type || "rental") === "crew" && r.is_active !== false)
-      .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
-      .slice(0, 12);
-  }, [allItems]);
+    return sortByNearest(
+      itemsWithDistance
+        .filter((r: any) => (r.service_type || "rental") === "crew" && r.is_active !== false)
+        .filter(withinRadius)
+        .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
+    ).slice(0, 12);
+  }, [itemsWithDistance, userLocation, deliveryRadius]);
 
   const discoveryTopVenues = useMemo(() => {
-    return allItems
-      .filter((r: any) => (r.service_type || "rental") === "venue" && r.is_active !== false)
-      .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
-      .slice(0, 12);
-  }, [allItems]);
+    return sortByNearest(
+      itemsWithDistance
+        .filter((r: any) => (r.service_type || "rental") === "venue" && r.is_active !== false)
+        .filter(withinRadius)
+        .sort((a: any, b: any) => (b.rating ?? 0) - (a.rating ?? 0))
+    ).slice(0, 12);
+  }, [itemsWithDistance, userLocation, deliveryRadius]);
 
   const featuredProducts = useMemo(() => {
     if (featuredItemIds.length === 0) return [];

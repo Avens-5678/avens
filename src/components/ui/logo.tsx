@@ -2,24 +2,34 @@ import { cn } from "@/lib/utils";
 
 interface LogoProps {
   className?: string;
+  /** Hide the wordmark/tagline beneath the mark. */
+  iconOnly?: boolean;
+  /** Image height in pixels. Defaults to 36. */
+  size?: number;
 }
 
-const Logo = ({ className }: LogoProps) => {
+// Canonical brand mark — drop the file at /public/logo.png and it will
+// be served at the root. Used by Navbar, dashboards, emails, quote PDFs,
+// and anywhere else the brand appears.
+export const LOGO_SRC = "/logo.png";
+
+const Logo = ({ className, iconOnly = false, size = 36 }: LogoProps) => {
   return (
-    <div className={cn("flex items-center space-x-2", className)}>
-      <div className="relative">
-        {/* 3D Blocks representing the logo */}
-        <div className="flex items-end space-x-1">
-          <div className="w-3 h-6 bg-gradient-to-b from-blue-400 to-blue-500 transform rotate-12 opacity-80"></div>
-          <div className="w-3 h-8 bg-gradient-to-b from-blue-300 to-blue-400 transform -rotate-6"></div>
-          <div className="w-3 h-5 bg-gradient-to-b from-blue-500 to-blue-600 transform rotate-12 opacity-90"></div>
-          <div className="w-3 h-7 bg-gradient-to-b from-blue-400 to-blue-500"></div>
+    <div className={cn("flex items-center gap-2", className)}>
+      <img
+        src={LOGO_SRC}
+        alt="Evnting.com"
+        style={{ height: size, width: "auto" }}
+        className="object-contain select-none"
+        loading="eager"
+        decoding="async"
+      />
+      {!iconOnly && (
+        <div className="font-bold leading-tight">
+          <span className="text-primary text-xl font-brand font-bold italic uppercase">Evnting.com</span>
+          <div className="text-muted-foreground text-[10px] tracking-wide">A Panacea of Events</div>
         </div>
-      </div>
-      <div className="font-bold">
-        <span className="text-primary text-xl font-brand font-bold italic uppercase">Evnting.com</span>
-        <div className="text-muted-foreground text-sm -mt-1">Online platform for event production</div>
-      </div>
+      )}
     </div>
   );
 };

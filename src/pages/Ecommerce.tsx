@@ -171,35 +171,37 @@ const EssentialsDiscoveryRow = () => {
 };
 
 // ── Discovery section with Top Picks + Recently Viewed ──
-const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues, featuredItems }: any) => {
+const DiscoverySection = ({ allItems, itemsWithDistance, deliveryRadius, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues, featuredItems }: any) => {
   const { recentIds, clearViewed } = useRecentlyViewed();
 
   // Apply the same vendor-radius gate to recently-viewed and top-picks rows
   // so we never show stale items the user can no longer book from.
-  const _withinRadiusEarly = (r: any) => {
+  const withinRadius = (r: any) => {
     if (!userLocation) return true;
     if (r._source !== "vendor") return true;
     return r._distance_km != null && r._distance_km <= deliveryRadius;
   };
 
+  const pool = (itemsWithDistance && itemsWithDistance.length ? itemsWithDistance : allItems) || [];
+
   const recentlyViewedItems = useMemo(() => {
     if (recentIds.length === 0) return [];
     return recentIds
-      .map((id: string) => itemsWithDistance.find((r: any) => r.id === id))
-      .filter((r: any) => r && _withinRadiusEarly(r));
-  }, [recentIds, itemsWithDistance, userLocation, deliveryRadius]);
+      .map((id: string) => pool.find((r: any) => r.id === id))
+      .filter((r: any) => r && withinRadius(r));
+  }, [recentIds, pool, userLocation, deliveryRadius]);
 
   const topPicksForYou = useMemo(() => {
     if (recentIds.length === 0) return [];
-    const viewedItems = recentIds.map((id: string) => itemsWithDistance.find((r: any) => r.id === id)).filter(Boolean);
+    const viewedItems = recentIds.map((id: string) => pool.find((r: any) => r.id === id)).filter(Boolean);
     const viewedCategories = new Set<string>();
     viewedItems.forEach((item: any) => item.categories?.forEach((c: string) => viewedCategories.add(c)));
     if (viewedCategories.size === 0) return [];
-    return itemsWithDistance
+    return pool
       .filter((r: any) => !recentIds.includes(r.id) && r.categories?.some((c: string) => viewedCategories.has(c)))
-      .filter(_withinRadiusEarly)
+      .filter(withinRadius)
       .slice(0, 12);
-  }, [itemsWithDistance, recentIds, userLocation, deliveryRadius]);
+  }, [pool, recentIds, userLocation, deliveryRadius]);
 
   return (
     <div className="bg-[#F5F5F5] py-2 sm:py-3">
@@ -1019,7 +1021,7 @@ const Ecommerce = () => {
       {/* Discovery Rows — shown on default landing, overlaps carousel */}
       {isDiscoveryView && (
         <div className="-mt-6 relative z-10">
-          <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} featuredItems={featuredProducts} />
+          <DiscoverySection allItems={allItems} itemsWithDistance={itemsWithDistance} deliveryRadius={deliveryRadius} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} featuredItems={featuredProducts} />
           <EventPackages />
           <div className="container mx-auto px-4 sm:px-6">
             <Suspense fallback={null}><LookbookSection /></Suspense>

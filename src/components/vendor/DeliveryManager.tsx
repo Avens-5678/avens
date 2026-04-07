@@ -132,7 +132,7 @@ const DeliveryManager = () => {
   // Upload delivery photo
   const uploadDeliveryPhoto = useCallback(async (deliveryId: string, file: File) => {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const path = `${deliveryId}/${Date.now()}.${ext}`;
+    const path = `delivery/${deliveryId}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("delivery-photos").upload(path, file, { upsert: true });
     if (error) {
       toast({ title: "Upload failed", description: error.message, variant: "destructive" });
@@ -148,6 +148,36 @@ const DeliveryManager = () => {
     }
     queryClient.invalidateQueries({ queryKey: ["vendor-deliveries"] });
     toast({ title: "Delivery completed with photo proof" });
+  }, [toast, queryClient]);
+
+  // Upload pickup-back (return) photo — vendor proves items were retrieved after the event
+  const uploadPickupPhoto = useCallback(async (deliveryId: string, file: File, orderId?: string) => {
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `pickup/${deliveryId}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("delivery-photos").upload(path, file, { upsert: true });
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("delivery-photos").getPublicUrl(path);
+    const { error: updErr } = await (supabase.from as any)("delivery_orders").update({
+      pickup_photo_url: urlData.publicUrl,
+      picked_up_at: new Date().toISOString(),
+      status: "returned",
+      updated_at: new Date().toISOString(),
+    }).eq("id", deliveryId);
+    if (updErr) {
+      toast({ title: "Update failed", description: updErr.message, variant: "destructive" });
+      return;
+    }
+    // Also mark the parent rental order as completed
+    if (orderId) {
+      await supabase.from("rental_orders").update({ status: "completed" } as any).eq("id", orderId);
+    }
+    queryClient.invalidateQueries({ queryKey: ["vendor-deliveries"] });
+    queryClient.invalidateQueries({ queryKey: ["rental_orders"] });
+    queryClient.invalidateQueries({ queryKey: ["client_rental_orders"] });
+    toast({ title: "Items picked up — order marked completed" });
   }, [toast, queryClient]);
 
   // Update driver location
@@ -196,8 +226,11 @@ const DeliveryManager = () => {
     return () => { if (watchId !== null) navigator.geolocation.clearWatch(watchId); };
   }, [watchId]);
 
-  const activeDeliveries = deliveries.filter((d) => !["delivered", "returned", "cancelled"].includes(d.status));
-  const completedDeliveries = deliveries.filter((d) => ["delivered", "returned", "cancelled"].includes(d.status));
+  // Keep "delivered" in the active bucket so the vendor still sees the
+  // "Pick Up Items + Photo" action after the event finishes. Only fully
+  // returned/cancelled rows move to completed.
+  const activeDeliveries = deliveries.filter((d) => !["returned", "cancelled"].includes(d.status));
+  const completedDeliveries = deliveries.filter((d) => ["returned", "cancelled"].includes(d.status));
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>;
 
@@ -276,6 +309,23 @@ const DeliveryManager = () => {
                         </span>
                       </label>
                     </>
+                  )}
+                  {del.status === "delivered" && (
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) uploadPickupPhoto(del.id, f, del.order_id);
+                        }}
+                      />
+                      <span className="inline-flex items-center gap-1 text-xs h-7 px-3 py-1 border border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 rounded-md hover:bg-emerald-100 transition-colors">
+                        <Camera className="h-3 w-3" />Pick Up Items + Photo
+                      </span>
+                    </label>
                   )}
                   <Button size="sm" variant="ghost" className="gap-1 text-xs h-7" onClick={() => setTrackingDialog(del)}>
                     <MapPin className="h-3 w-3" />View Map

@@ -195,6 +195,8 @@ export const useUpdateRentalOrder = () => {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["rental_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor_rental_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["client_rental_orders"] });
       toast({ title: "Order Updated", description: "Rental order has been updated." });
       // Sync to Zoho CRM Products
       syncRentalOrderToZohoProducts('update', result);

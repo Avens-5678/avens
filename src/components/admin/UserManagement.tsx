@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Users, Search, Shield, UserCheck, UserX, Briefcase } from "lucide-react";
+import { Loader2, Users, Search, Shield, UserCheck, UserX, Briefcase, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import EmployeePermissionManager from "./EmployeePermissionManager";
 
@@ -120,6 +120,7 @@ const UserManagement = () => {
 
   return (
     <div className="space-y-6">
+      <PendingVendorApprovals />
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
@@ -302,6 +303,128 @@ const UserManagement = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+// ─────────────────────────────────────────────
+// Pending Vendor Approvals — top-of-page panel
+// ─────────────────────────────────────────────
+const PendingVendorApprovals = () => {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+
+  const { data: pending = [], isLoading } = useQuery({
+    queryKey: ["pending_vendor_approvals"],
+    queryFn: async () => {
+      const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "vendor");
+      const ids = (roles || []).map((r: any) => r.user_id);
+      if (ids.length === 0) return [];
+      const { data } = await supabase.from("profiles")
+        .select("user_id, full_name, company_name, phone, city, vendor_status, created_at, avatar_url")
+        .in("user_id", ids)
+        .eq("vendor_status", "pending");
+      return data || [];
+    },
+  });
+
+  const review = useMutation({
+    mutationFn: async ({ userId, status, reason }: { userId: string; status: "active" | "rejected"; reason?: string }) => {
+      const updates: any = { vendor_status: status };
+      if (status === "rejected" && reason) updates.suspension_reason = reason;
+      const { error } = await supabase.from("profiles").update(updates).eq("user_id", userId);
+      if (error) throw error;
+      // Fire WhatsApp on approve (best-effort)
+      if (status === "active") {
+        try {
+          const { data: prof } = await supabase.from("profiles").select("phone, full_name, company_name").eq("user_id", userId).maybeSingle();
+          if (prof?.phone) {
+            await supabase.functions.invoke("send-whatsapp", {
+              body: {
+                to: "91" + prof.phone,
+                template_name: "vendor_approved",
+                template_params: [prof.company_name || prof.full_name || "Vendor"],
+                recipient_name: prof.full_name || "",
+                recipient_type: "vendor",
+              },
+            });
+          }
+        } catch (_) {}
+      }
+    },
+    onSuccess: (_d, vars) => {
+      toast({ title: vars.status === "active" ? "Vendor approved" : "Vendor rejected" });
+      qc.invalidateQueries({ queryKey: ["pending_vendor_approvals"] });
+      qc.invalidateQueries({ queryKey: ["all_users_with_roles"] });
+    },
+    onError: (e: any) => toast({ title: "Failed", description: e.message, variant: "destructive" }),
+  });
+
+  return (
+    <Card className="border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-amber-600" />
+          Pending Vendor Approvals
+          {pending.length > 0 && (
+            <Badge className="bg-amber-600 hover:bg-amber-700">{pending.length}</Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        ) : pending.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No vendors awaiting approval.</p>
+        ) : (
+          <div className="space-y-2">
+            {pending.map((v: any) => (
+              <div key={v.user_id} className="flex items-center justify-between border rounded-lg p-3 bg-background">
+                <div className="flex items-center gap-3 flex-1">
+                  {v.avatar_url ? (
+                    <img src={v.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover border" />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                      <Users className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{v.company_name || v.full_name || "Unnamed"}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {v.full_name && v.company_name ? `${v.full_name} · ` : ""}{v.phone || "no phone"} · {v.city || "no city"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      Submitted {format(new Date(v.created_at), "MMM d, yyyy")}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="bg-emerald-600 hover:bg-emerald-700 gap-1"
+                    onClick={() => review.mutate({ userId: v.user_id, status: "active" })}
+                    disabled={review.isPending}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="gap-1"
+                    onClick={() => {
+                      const reason = prompt("Reason for rejection (optional):") || undefined;
+                      review.mutate({ userId: v.user_id, status: "rejected", reason });
+                    }}
+                    disabled={review.isPending}
+                  >
+                    <XCircle className="h-3.5 w-3.5" /> Reject
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

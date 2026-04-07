@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Save, User, Building2, MapPin, FileText, BadgeCheck, Camera, X } from "lucide-react";
+import { Loader2, Save, User, Building2, MapPin, FileText, BadgeCheck, Camera, X, Plus, Trash2, Star } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import GoogleMapPicker from "@/components/shared/GoogleMapPicker";
+import { validPincode, minLen } from "@/lib/validators";
 
 const CREW_CATEGORIES = [
   { value: "photographer", label: "Photographer" },
@@ -378,6 +379,9 @@ const VendorProfileSettings = () => {
         </CardContent>
       </Card>
 
+      {/* Multi-Warehouse Manager */}
+      <WarehousesSection />
+
       {/* About Services */}
       <Card>
         <CardHeader>
@@ -511,6 +515,157 @@ const VendorProfileSettings = () => {
         Save Changes
       </Button>
     </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────
+// Multi-warehouse manager — vendor can add/edit/delete
+// extra warehouses; saved to vendor_warehouses table
+// ─────────────────────────────────────────────────────────
+const WarehousesSection = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [draft, setDraft] = useState<{ name: string; address: string; pincode: string; lat: number | null; lng: number | null }>({
+    name: "", address: "", pincode: "", lat: null, lng: null,
+  });
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data } = await (supabase.from as any)("vendor_warehouses")
+      .select("*").eq("vendor_id", user.id).order("is_primary", { ascending: false });
+    setWarehouses(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [user]);
+
+  const draftValid = draft.name.trim().length >= 2 && draft.lat && draft.lng &&
+    (!draft.pincode || !validPincode(draft.pincode));
+
+  const addWarehouse = async () => {
+    if (!user || !draftValid) return;
+    setSaving(true);
+    try {
+      const { error } = await (supabase.from as any)("vendor_warehouses").insert({
+        vendor_id: user.id,
+        name: draft.name.trim(),
+        address: draft.address || "",
+        lat: draft.lat,
+        lng: draft.lng,
+        pincode: draft.pincode || null,
+        is_primary: warehouses.length === 0,
+      });
+      if (error) throw error;
+      toast({ title: "Warehouse added" });
+      setDraft({ name: "", address: "", pincode: "", lat: null, lng: null });
+      setShowAdd(false);
+      await load();
+    } catch (e: any) {
+      toast({ title: "Failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteWarehouse = async (id: string) => {
+    if (!confirm("Delete this warehouse?")) return;
+    const { error } = await (supabase.from as any)("vendor_warehouses").delete().eq("id", id);
+    if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Deleted" });
+    await load();
+  };
+
+  const setPrimary = async (id: string) => {
+    if (!user) return;
+    await (supabase.from as any)("vendor_warehouses").update({ is_primary: false }).eq("vendor_id", user.id);
+    await (supabase.from as any)("vendor_warehouses").update({ is_primary: true }).eq("id", id);
+    await load();
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Building2 className="h-5 w-5" />
+          Warehouses ({warehouses.length})
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+        {!loading && warehouses.length === 0 && !showAdd && (
+          <p className="text-sm text-muted-foreground">No additional warehouses yet.</p>
+        )}
+        {warehouses.map((w) => (
+          <div key={w.id} className="flex items-start justify-between border rounded-lg p-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-sm">{w.name}</p>
+                {w.is_primary && <Badge variant="secondary"><Star className="h-3 w-3 mr-1" />Primary</Badge>}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{w.address}</p>
+              {w.pincode && <p className="text-xs text-muted-foreground">PIN: {w.pincode}</p>}
+            </div>
+            <div className="flex gap-1">
+              {!w.is_primary && (
+                <Button size="sm" variant="ghost" onClick={() => setPrimary(w.id)} title="Set as primary">
+                  <Star className="h-3.5 w-3.5" />
+                </Button>
+              )}
+              <Button size="sm" variant="ghost" onClick={() => deleteWarehouse(w.id)} title="Delete">
+                <Trash2 className="h-3.5 w-3.5 text-red-500" />
+              </Button>
+            </div>
+          </div>
+        ))}
+
+        {showAdd ? (
+          <div className="border rounded-lg p-3 space-y-2 bg-muted/30">
+            <Label className="text-xs font-semibold">New Warehouse</Label>
+            <Input
+              placeholder="Warehouse name"
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            />
+            <GoogleMapPicker
+              height="220px"
+              placeholder="Search warehouse address"
+              onLocationSelect={(lat, lng, address, pincode) =>
+                setDraft({ ...draft, lat, lng, address: address || draft.address, pincode: pincode || draft.pincode })
+              }
+            />
+            <Input
+              placeholder="Address (auto-filled — edit if needed)"
+              value={draft.address}
+              onChange={(e) => setDraft({ ...draft, address: e.target.value })}
+            />
+            <Input
+              placeholder="Pincode"
+              maxLength={6}
+              value={draft.pincode}
+              onChange={(e) => setDraft({ ...draft, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })}
+            />
+            {draft.pincode && validPincode(draft.pincode) && (
+              <p className="text-xs text-red-500">{validPincode(draft.pincode)}</p>
+            )}
+            <div className="flex gap-2">
+              <Button size="sm" onClick={addWarehouse} disabled={!draftValid || saving}>
+                {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save warehouse"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Cancel</Button>
+            </div>
+          </div>
+        ) : (
+          <Button size="sm" variant="outline" className="gap-2" onClick={() => setShowAdd(true)}>
+            <Plus className="h-3 w-3" /> Add new warehouse
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

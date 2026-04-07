@@ -6,10 +6,77 @@ const corsHeaders = {
 };
 
 const RENTAL_CATEGORIES = [
-  "Structures & Venues", "Stages & Platforms", "Lighting & Sound",
-  "Furniture", "Climate Control", "Branding & Signage",
-  "AV Equipment", "Power & Generators", "Décor", "Others",
+  "Event Structures & Venues",
+  "Exhibition & Stalls",
+  "Climate Control",
+  "Event Production Equipment",
+  "Branding & Décor",
+  "General",
 ];
+
+const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
+const MODEL = "claude-sonnet-4-20250514";
+
+function extractJSON(text: string): any | null {
+  if (!text) return null;
+  const cleaned = text.replace(/```json\s*/gi, "").replace(/```/g, "").trim();
+  try { return JSON.parse(cleaned); } catch {}
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (match) {
+    try { return JSON.parse(match[0]); } catch {}
+  }
+  return null;
+}
+
+async function callClaude(opts: {
+  apiKey: string;
+  system?: string;
+  userText: string;
+  imageUrl?: string;
+  maxTokens?: number;
+}): Promise<string> {
+  const content: any[] = [];
+  if (opts.imageUrl) {
+    try {
+      const imgRes = await fetch(opts.imageUrl);
+      if (imgRes.ok) {
+        const buf = new Uint8Array(await imgRes.arrayBuffer());
+        let bin = "";
+        for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+        const b64 = btoa(bin);
+        const mediaType = imgRes.headers.get("content-type") || "image/jpeg";
+        content.push({
+          type: "image",
+          source: { type: "base64", media_type: mediaType, data: b64 },
+        });
+      }
+    } catch (_) {}
+  }
+  content.push({ type: "text", text: opts.userText });
+
+  const body: any = {
+    model: MODEL,
+    max_tokens: opts.maxTokens || 1024,
+    messages: [{ role: "user", content }],
+  };
+  if (opts.system) body.system = opts.system;
+
+  const res = await fetch(ANTHROPIC_URL, {
+    method: "POST",
+    headers: {
+      "x-api-key": opts.apiKey,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Anthropic ${res.status}: ${errText}`);
+  }
+  const data = await res.json();
+  return data?.content?.[0]?.text || "";
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -22,71 +89,82 @@ serve(async (req) => {
       });
     }
 
-    const { action, name = "", description = "", category = "", dimensions = {} } = await req.json();
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "AI not configured" }), {
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) {
+      return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    let systemPrompt = "";
-    let userPrompt = "";
-    let responseFormat: any = null;
+    const {
+      action,
+      name = "",
+      description = "",
+      category = "",
+      image_url = "",
+    } = await req.json();
+
+    let result: any = {};
 
     switch (action) {
-      case "polish_description":
-        systemPrompt = "You polish and enhance vendor product descriptions for an Indian event rental marketplace. Return ONLY the polished description (no preamble). Keep facts intact, fix grammar, make it engaging, 2-4 sentences. Add useful detail when obvious from context.";
-        userPrompt = `Item: ${name}\nCategory: ${category}\nDraft description: ${description}\n\nReturn the polished description only.`;
+      case "polish_description": {
+        const text = await callClaude({
+          apiKey: ANTHROPIC_API_KEY,
+          system: "You polish vendor product descriptions for an Indian event rental marketplace. Return ONLY the polished description as plain text — no preamble, no quotes, no markdown. Keep facts intact, fix grammar, make it engaging, 2–4 sentences.",
+          userText: `Item: ${name}\nCategory: ${category}\nDraft description: ${description || "(none)"}\n\nReturn the polished description only.`,
+          maxTokens: 400,
+        });
+        result = { text: text.trim() };
         break;
-      case "suggest_keywords":
-        systemPrompt = "You suggest 6-10 search keywords for vendor inventory items. Return JSON: {\"keywords\":[\"...\"]}";
-        userPrompt = `Item: ${name}\nDescription: ${description}\nCategory: ${category}`;
-        responseFormat = { type: "json_object" };
+      }
+      case "suggest_short_description": {
+        const text = await callClaude({
+          apiKey: ANTHROPIC_API_KEY,
+          system: "You write punchy 8–12 word product taglines for an event rental marketplace. Return ONLY the tagline — no quotes, no preamble.",
+          userText: `Item name: ${name}\nCategory: ${category || "(unknown)"}\nWrite the tagline.`,
+          maxTokens: 80,
+        });
+        result = { text: text.trim().replace(/^["']|["']$/g, "") };
         break;
-      case "suggest_category":
-        systemPrompt = `You pick the best category from this list: ${RENTAL_CATEGORIES.join(", ")}. Return JSON: {"category":"..."}`;
-        userPrompt = `Item: ${name}\nDescription: ${description}`;
-        responseFormat = { type: "json_object" };
+      }
+      case "suggest_category": {
+        const text = await callClaude({
+          apiKey: ANTHROPIC_API_KEY,
+          system: `You pick the single best category from this exact list: ${RENTAL_CATEGORIES.join(", ")}. Return ONLY JSON: {"category":"..."}`,
+          userText: `Item: ${name}\nDescription: ${description}`,
+          maxTokens: 100,
+        });
+        const parsed = extractJSON(text);
+        result = { category: parsed?.category || null };
         break;
-      case "estimate_volume_and_weight":
-        systemPrompt = "You estimate logistics for event rental items. Volume units = stacked CBM (cubic meters). Labor weight kg. Return JSON: {\"volume_units\":number, \"labor_weight\":number, \"reasoning\":\"...\"}";
-        userPrompt = `Item: ${name}\nCategory: ${category}\nDescription: ${description}\nDimensions: ${JSON.stringify(dimensions)}`;
-        responseFormat = { type: "json_object" };
+      }
+      case "suggest_keywords": {
+        const text = await callClaude({
+          apiKey: ANTHROPIC_API_KEY,
+          system: "Suggest 6–10 search keywords for vendor inventory. Return ONLY JSON: {\"keywords\":[\"...\"]}",
+          userText: `Item: ${name}\nDescription: ${description}\nCategory: ${category}`,
+          maxTokens: 200,
+        });
+        const parsed = extractJSON(text);
+        result = { keywords: parsed?.keywords || [] };
         break;
+      }
+      case "estimate_logistics": {
+        const text = await callClaude({
+          apiKey: ANTHROPIC_API_KEY,
+          system: "You estimate logistics for event-rental items. volume_units = stacked CBM (cubic meters, decimal). labor_weight = kilograms (integer). Use the image if provided plus typical sizes for similar items in India. Return ONLY JSON: {\"volume_units\":number,\"labor_weight\":number,\"source_notes\":\"short reasoning\"}",
+          userText: `Item name: ${name}\nCategory: ${category || "(unknown)"}\nDescription: ${description || "(none)"}\nEstimate the logistics for one unit.`,
+          imageUrl: image_url || undefined,
+          maxTokens: 300,
+        });
+        const parsed = extractJSON(text);
+        result = parsed || { volume_units: null, labor_weight: null, source_notes: text };
+        break;
+      }
       default:
         return new Response(JSON.stringify({ error: "Unknown action" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
-    }
-
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        ...(responseFormat ? { response_format: responseFormat } : {}),
-      }),
-    });
-
-    if (!aiRes.ok) {
-      const text = await aiRes.text();
-      return new Response(JSON.stringify({ error: "AI gateway error", detail: text }), {
-        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const aiJson = await aiRes.json();
-    const content = aiJson.choices?.[0]?.message?.content || "";
-
-    let result: any = { text: content };
-    if (responseFormat) {
-      try { result = JSON.parse(content); } catch { result = { text: content }; }
     }
 
     return new Response(JSON.stringify({ ok: true, action, result }), {

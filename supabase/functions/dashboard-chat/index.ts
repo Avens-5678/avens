@@ -337,6 +337,56 @@ async function executeToolCall(functionName: string, args: Record<string, unknow
   }
 }
 
+// Convert OpenAI-style TOOLS to Anthropic tool format
+const ANTHROPIC_TOOLS = TOOLS.map((t: any) => ({
+  name: t.function.name,
+  description: t.function.description,
+  input_schema: t.function.parameters,
+}));
+
+const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
+const ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
+
+// Convert OpenAI-style chat messages to Anthropic format.
+// Returns { system, messages } where system is a string and messages have user/assistant turns.
+function toAnthropicMessages(systemPrompt: string, oaMessages: any[]) {
+  const out: any[] = [];
+  for (const m of oaMessages) {
+    if (m.role === "system") continue; // handled separately
+    if (m.role === "user" || m.role === "assistant") {
+      out.push({ role: m.role, content: typeof m.content === "string" ? m.content : (m.content || "") });
+    }
+  }
+  return { system: systemPrompt, messages: out };
+}
+
+async function callAnthropic(payload: any): Promise<any> {
+  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not configured");
+  const res = await fetch(ANTHROPIC_URL, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`Anthropic ${res.status}: ${t}`);
+  }
+  return res.json();
+}
+
+function sseFromText(text: string, prelude = ""): Response {
+  const lines: string[] = [];
+  if (prelude) lines.push(prelude);
+  lines.push(`data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`);
+  lines.push(`data: [DONE]\n\n`);
+  return new Response(lines.join(""), { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -350,11 +400,6 @@ serve(async (req) => {
         JSON.stringify({ error: "messages array is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     // Extract user ID from auth token for vendor operations
@@ -379,185 +424,78 @@ serve(async (req) => {
     const basePrompt = role === "vendor" ? VENDOR_SYSTEM_PROMPT : CLIENT_SYSTEM_PROMPT;
     const systemPrompt = basePrompt + rentalCatalog;
 
-    // First call: may return tool calls or content
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages,
-          ],
-          tools: TOOLS,
-          stream: false, // Non-streaming for tool call detection
-        }),
-      }
-    );
+    const { system, messages: anthropicMessages } = toAnthropicMessages(systemPrompt, messages);
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Too many requests. Please wait a moment and try again." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please contact support." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const text = await response.text();
-      console.error("AI gateway error:", response.status, text);
-      return new Response(
-        JSON.stringify({ error: "AI service unavailable. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const result = await response.json();
-    const choice = result.choices?.[0];
-    const assistantMessage = choice?.message;
-
-    // Check if there are tool calls
-    if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
-      const toolResults: Array<{ name: string; result: unknown }> = [];
-
-      for (const toolCall of assistantMessage.tool_calls) {
-        const fnName = toolCall.function.name;
-        let fnArgs: Record<string, unknown>;
-        try {
-          fnArgs = JSON.parse(toolCall.function.arguments);
-        } catch {
-          fnArgs = {};
-        }
-
-        console.log(`Executing tool: ${fnName}`, fnArgs);
-        const toolResult = await executeToolCall(fnName, fnArgs, userId);
-        toolResults.push({ name: fnName, result: toolResult });
-      }
-
-      // Build tool result messages for the follow-up
-      const toolMessages = assistantMessage.tool_calls.map((tc: any, i: number) => ({
-        role: "tool",
-        tool_call_id: tc.id,
-        content: JSON.stringify(toolResults[i].result),
-      }));
-
-      // Second call: get the final response after tool execution (streaming)
-      const followUpResponse = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...messages,
-              assistantMessage,
-              ...toolMessages,
-            ],
-            stream: true,
-          }),
-        }
-      );
-
-      if (!followUpResponse.ok) {
-        // Fallback: return a simple confirmation
-        const confirmations = toolResults.map(tr => {
-          const r = tr.result as any;
-          if (r.success) {
-            if (r.type === "rental_order") return "✅ **Rental inquiry submitted successfully!** Our team will review it shortly.";
-            if (r.type === "form_submission") return "✅ **Inquiry submitted successfully!** We'll get back to you soon.";
-            if (r.type === "vendor_listing") return "✅ **Listing created successfully!** Check your Vendor Inventory to see it.";
-          }
-          return `⚠️ Could not complete action: ${r.error}`;
-        });
-
-        // Return as SSE format for frontend compatibility
-        const text = confirmations.join("\n\n");
-        const sseData = `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\ndata: [DONE]\n\n`;
-        return new Response(sseData, {
-          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-        });
-      }
-
-      // Prepend action markers before the stream so frontend knows what happened
-      const actionMarkers = toolResults.map(tr => {
-        const r = tr.result as any;
-        return `data: ${JSON.stringify({ choices: [{ delta: { content: "" } }], action: { type: r.type, success: r.success, id: r.id, error: r.error } })}\n\n`;
-      }).join("");
-
-      // Create a combined stream: action markers + AI response stream
-      const encoder = new TextEncoder();
-      const markerBytes = encoder.encode(actionMarkers);
-      
-      const combinedStream = new ReadableStream({
-        async start(controller) {
-          // Send action markers first
-          controller.enqueue(markerBytes);
-          
-          // Then pipe the AI response
-          const reader = followUpResponse.body!.getReader();
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              controller.enqueue(value);
-            }
-          } finally {
-            controller.close();
-          }
-        },
-      });
-
-      return new Response(combinedStream, {
-        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-      });
-    }
-
-    // No tool calls — stream a regular response
-    const streamResponse = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages,
-          ],
-          stream: true,
-        }),
-      }
-    );
-
-    if (!streamResponse.ok) {
-      const text = await streamResponse.text();
-      console.error("AI stream error:", streamResponse.status, text);
-      return new Response(
-        JSON.stringify({ error: "AI service unavailable." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    return new Response(streamResponse.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    // First Anthropic call — may stop with tool_use
+    const first = await callAnthropic({
+      model: ANTHROPIC_MODEL,
+      max_tokens: 1500,
+      system,
+      tools: ANTHROPIC_TOOLS,
+      messages: anthropicMessages,
     });
+
+    const firstBlocks: any[] = first?.content || [];
+    const toolUses = firstBlocks.filter((b) => b.type === "tool_use");
+
+    // No tools requested — return assistant text as SSE
+    if (toolUses.length === 0) {
+      const text = firstBlocks.filter((b) => b.type === "text").map((b) => b.text).join("");
+      return sseFromText(text || "");
+    }
+
+    // Execute each tool call
+    const toolResults: Array<{ name: string; result: any; tool_use_id: string }> = [];
+    for (const tu of toolUses) {
+      const r = await executeToolCall(tu.name, tu.input || {}, userId);
+      toolResults.push({ name: tu.name, result: r, tool_use_id: tu.id });
+    }
+
+    // Build the follow-up: assistant turn (the original blocks) + user turn with tool_result blocks
+    const followupMessages = [
+      ...anthropicMessages,
+      { role: "assistant", content: firstBlocks },
+      {
+        role: "user",
+        content: toolResults.map((tr) => ({
+          type: "tool_result",
+          tool_use_id: tr.tool_use_id,
+          content: JSON.stringify(tr.result),
+        })),
+      },
+    ];
+
+    let finalText = "";
+    try {
+      const second = await callAnthropic({
+        model: ANTHROPIC_MODEL,
+        max_tokens: 1500,
+        system,
+        tools: ANTHROPIC_TOOLS,
+        messages: followupMessages,
+      });
+      finalText = (second?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("");
+    } catch (_) {
+      // Fallback confirmation messages
+      finalText = toolResults.map((tr) => {
+        const r = tr.result as any;
+        if (r?.success) {
+          if (r.type === "rental_order") return "✅ **Rental inquiry submitted successfully!** Our team will review it shortly.";
+          if (r.type === "form_submission") return "✅ **Inquiry submitted successfully!** We'll get back to you soon.";
+          if (r.type === "vendor_listing") return "✅ **Listing created successfully!** Check your Vendor Inventory to see it.";
+          return "✅ Done.";
+        }
+        return `⚠️ Could not complete action: ${r?.error || "unknown"}`;
+      }).join("\n\n");
+    }
+
+    // Prepend action markers (frontend uses these for UI affordances)
+    const actionMarkers = toolResults.map((tr) => {
+      const r = tr.result as any;
+      return `data: ${JSON.stringify({ choices: [{ delta: { content: "" } }], action: { type: r?.type, success: r?.success, id: r?.id, error: r?.error } })}\n\n`;
+    }).join("");
+
+    return sseFromText(finalText, actionMarkers);
   } catch (e) {
     console.error("dashboard-chat error:", e);
     return new Response(

@@ -125,7 +125,7 @@ const InventoryManager = () => {
   const [aiKeywords, setAiKeywords] = useState<string[]>([]);
   const [aiCategorySuggestion, setAiCategorySuggestion] = useState<string | null>(null);
 
-  const callAI = async (action: string) => {
+  const callAI = async (action: string, overrides: Record<string, any> = {}) => {
     if (!user) { toast({ title: "Sign in required" }); return null; }
     setAiBusy(action);
     try {
@@ -135,7 +135,8 @@ const InventoryManager = () => {
           name: formData.name || "",
           description: formData.description || "",
           category: (formData.categories || [])[0] || "",
-          dimensions: { length: formData.max_length, width: formData.max_width, height: formData.max_height },
+          image_url: formData.image_url || (formData.image_urls || [])[0] || "",
+          ...overrides,
         },
       });
       if (error) throw error;
@@ -152,6 +153,10 @@ const InventoryManager = () => {
     const r = await callAI("polish_description");
     if (r?.text) setFormData((prev) => ({ ...prev, description: r.text }));
   };
+  const aiShortDesc = async () => {
+    const r = await callAI("suggest_short_description");
+    if (r?.text) setFormData((prev) => ({ ...prev, short_description: r.text }));
+  };
   const aiKeywordsFetch = async () => {
     const r = await callAI("suggest_keywords");
     if (r?.keywords) setAiKeywords(r.keywords);
@@ -160,9 +165,22 @@ const InventoryManager = () => {
     const r = await callAI("suggest_category");
     if (r?.category) setAiCategorySuggestion(r.category);
   };
-  const aiEstimateLogistics = async () => {
-    const r = await callAI("estimate_volume_and_weight");
-    if (r?.volume_units != null) setFormData((prev) => ({ ...prev, volume_units: r.volume_units, labor_weight: r.labor_weight }));
+
+  // Silent logistics estimate triggered after a save — vendor never sees it.
+  const silentEstimateLogistics = async (itemId: string, name: string, imageUrl: string, category: string) => {
+    try {
+      const { data } = await supabase.functions.invoke("inventory-ai-assist", {
+        body: { action: "estimate_logistics", name, image_url: imageUrl, category },
+      });
+      const r = data?.result;
+      if (r?.volume_units != null) {
+        await (supabase.from as any)("vendor_inventory").update({
+          volume_units: r.volume_units,
+          labor_weight: r.labor_weight,
+          logistics_source: "ai_estimate",
+        }).eq("id", itemId);
+      }
+    } catch (_) { /* silent */ }
   };
 
   // Variant state
@@ -426,6 +444,11 @@ const InventoryManager = () => {
       }
 
       toast({ title: "Success", description: editingItem ? "Item updated" : "Item created" });
+      // Silent AI logistics estimate (vendor never sees these inputs)
+      const firstImg = formData.image_url || (formData.image_urls || [])[0] || "";
+      if (formData.name && firstImg) {
+        silentEstimateLogistics(itemId, formData.name, firstImg, (formData.categories || [])[0] || "");
+      }
       await queryClient.invalidateQueries({ queryKey: ['vendor_inventory'] });
       handleCancel();
     } catch (error: any) {
@@ -478,9 +501,13 @@ const InventoryManager = () => {
 
         {/* Create/Edit Modal */}
         <Dialog open={isCreating || !!editingItem} onOpenChange={(open) => !open && handleCancel()}>
-          <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingItem ? "Edit Inventory Item" : "Add New Item"}</DialogTitle>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="-mx-6 -mt-6 mb-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white p-5 rounded-t-lg">
+              <DialogTitle className="text-xl text-white flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                {editingItem ? "Edit Inventory Item" : "New Inventory Item"}
+              </DialogTitle>
+              <p className="text-xs text-indigo-100 mt-1">AI helps you write descriptions, pick categories, and estimate logistics — fill what you can and let us handle the rest.</p>
             </DialogHeader>
 
             {/* Service Type Selector */}
@@ -517,7 +544,13 @@ const InventoryManager = () => {
                   </div>
                   <div className="space-y-1">
                     <Label>Short Description</Label>
-                    <Input value={formData.short_description || ''} onChange={(e) => setFormData(prev => ({ ...prev, short_description: e.target.value }))} placeholder="Brief description" />
+                    <div className="flex gap-2">
+                      <Input className="flex-1" value={formData.short_description || ''} onChange={(e) => setFormData(prev => ({ ...prev, short_description: e.target.value }))} placeholder="Brief tagline" />
+                      <Button type="button" size="sm" variant="outline" className="gap-1" onClick={aiShortDesc} disabled={aiBusy === "suggest_short_description" || !formData.name}>
+                        {aiBusy === "suggest_short_description" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                        Suggest
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
@@ -743,33 +776,7 @@ const InventoryManager = () => {
                       </div>
                     </div>
                   )}
-                  {/* AI volume + labor weight estimator (rental only) */}
-                  {formData.service_type !== "venue" && formData.service_type !== "crew" && (
-                    <div className="border rounded-lg p-3 space-y-2 bg-muted/30">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm font-semibold">Logistics (Volume & Labor Weight)</Label>
-                        <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={aiEstimateLogistics} disabled={aiBusy === "estimate_volume_and_weight" || !formData.name}>
-                          {aiBusy === "estimate_volume_and_weight" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                          AI Estimate
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Used for vehicle matching & manpower planning. Let AI estimate if you're unsure.</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div><Label className="text-xs">Volume Units (CBM)</Label><Input type="number" value={formData.volume_units || ''} onChange={(e) => setFormData(prev => ({ ...prev, volume_units: e.target.value }))} /></div>
-                        <div><Label className="text-xs">Labor Weight (kg)</Label><Input type="number" value={formData.labor_weight || ''} onChange={(e) => setFormData(prev => ({ ...prev, labor_weight: e.target.value }))} /></div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="space-y-1">
-                    <Label>Labor Weight (for manpower calc)</Label>
-                    <Input type="number" min="1" value={formData.labor_weight || 1} onChange={(e) => setFormData(prev => ({ ...prev, labor_weight: parseInt(e.target.value) || 1 }))} placeholder="1" />
-                    <p className="text-xs text-muted-foreground">Weight per unit for loader calculation: 1 chair = 1, 1 sofa = 10</p>
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Volume Units (for vehicle matching)</Label>
-                    <Input type="number" min="1" value={formData.volume_units || 1} onChange={(e) => setFormData(prev => ({ ...prev, volume_units: parseInt(e.target.value) || 1 }))} placeholder="1" />
-                    <p className="text-xs text-muted-foreground">Space in vehicle: 1 chair = 1, 1 sofa = 15, 1 DJ console = 30, 1 LED wall = 50</p>
-                  </div>
+                  {/* Logistics (volume & labor weight) auto-estimated by AI after save — hidden from vendors */}
                 </div>
               ) : (
                 <div className="space-y-4">

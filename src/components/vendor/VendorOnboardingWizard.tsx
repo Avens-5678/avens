@@ -11,7 +11,8 @@ import {
   ArrowLeft, ArrowRight, CheckCircle2, Loader2, Phone,
   Package, Building2, Users, Tent, MapPin, Upload, X, Shield, FileText, Plus,
 } from "lucide-react";
-import MapPinPicker from "@/components/ecommerce/MapPinPicker";
+import GoogleMapPicker from "@/components/shared/GoogleMapPicker";
+import { validIndianMobile, validEmail, validPincode, minLen } from "@/lib/validators";
 
 // ═══════════════════════════════════════
 // Constants
@@ -349,14 +350,22 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
   if (touched.owner_name && formData.owner_name.length < 2) step3Errors.owner_name = "Min 2 characters";
   if (touched.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) step3Errors.email = "Enter a valid email";
   if (touched.city && !formData.city) step3Errors.city = "Select your city";
-  if (touched.whatsapp_number && formData.whatsapp_number.length !== 10) step3Errors.whatsapp_number = "Enter 10-digit number";
+  if (touched.whatsapp_number) {
+    const wErr = validIndianMobile(formData.whatsapp_number);
+    if (wErr) step3Errors.whatsapp_number = wErr;
+  }
+
+  const warehousesValid = formData.warehouses.length > 0 && formData.warehouses.every(
+    (w) => w.name && w.name.trim().length >= 2 && w.lat && w.lng && (!w.pincode || !validPincode(w.pincode))
+  );
 
   const step3Valid =
     formData.business_name.length >= 3 &&
     formData.owner_name.length >= 2 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+    !validEmail(formData.email) &&
     !!formData.city &&
-    formData.whatsapp_number.length === 10;
+    !validIndianMobile(formData.whatsapp_number) &&
+    warehousesValid;
 
   // ── Step 4 validation (dynamic) ──
   const step4Valid = (() => {
@@ -664,17 +673,49 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
                     update({ warehouses: next });
                   }}
                 />
-                <MapPinPicker
-                  compact
-                  label=""
+                {wh.name && minLen(wh.name, 2, "Warehouse name") && (
+                  <p className="text-xs text-red-500">{minLen(wh.name, 2, "Warehouse name")}</p>
+                )}
+                <GoogleMapPicker
+                  height="220px"
                   initialLat={wh.lat || undefined}
                   initialLng={wh.lng || undefined}
-                  onLocationSelect={(lat, lng, address) => {
+                  initialAddress={wh.address || ""}
+                  placeholder="Search address or pin on map"
+                  onLocationSelect={(lat, lng, address, pincode) => {
                     const next = [...formData.warehouses];
-                    next[idx] = { ...next[idx], lat, lng, address: address || next[idx].address };
+                    next[idx] = {
+                      ...next[idx],
+                      lat,
+                      lng,
+                      address: address || next[idx].address,
+                      pincode: pincode || next[idx].pincode,
+                    };
                     update({ warehouses: next });
                   }}
                 />
+                <Input
+                  placeholder="Address (auto-filled from map — edit if needed)"
+                  value={wh.address}
+                  onChange={(e) => {
+                    const next = [...formData.warehouses];
+                    next[idx] = { ...next[idx], address: e.target.value };
+                    update({ warehouses: next });
+                  }}
+                />
+                <Input
+                  placeholder="Pincode"
+                  value={wh.pincode}
+                  maxLength={6}
+                  onChange={(e) => {
+                    const next = [...formData.warehouses];
+                    next[idx] = { ...next[idx], pincode: e.target.value.replace(/\D/g, "").slice(0, 6) };
+                    update({ warehouses: next });
+                  }}
+                />
+                {wh.pincode && validPincode(wh.pincode) && (
+                  <p className="text-xs text-red-500">{validPincode(wh.pincode)}</p>
+                )}
               </div>
             ))}
             {formData.has_multiple_warehouses && (
@@ -1054,6 +1095,7 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
       try {
         // Write business details to profiles
         const primary = formData.warehouses[0];
+        const avatarUrl = formData.passport_photo_url || formData.shop_photo_url || (formData.photos || [])[0] || null;
         await supabase.from("profiles").upsert({
           user_id: user!.id,
           company_name: formData.business_name,
@@ -1065,6 +1107,8 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
           godown_address: primary?.address || null,
           warehouse_lat: primary?.lat || null,
           warehouse_lng: primary?.lng || null,
+          warehouse_pincode: primary?.pincode || null,
+          avatar_url: avatarUrl,
         } as any, { onConflict: "user_id" });
 
         // Insert warehouses

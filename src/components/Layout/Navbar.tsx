@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Menu, X, LogIn, User, LogOut, Mail, ChevronRight, MapPin, Search, ShoppingBag, Heart, Headphones, Shield, RefreshCw, Lock, MessageSquare, Calendar, Award, HelpCircle, LayoutDashboard } from "lucide-react";
+import { X, LogIn, User, LogOut, Mail, ChevronRight, MapPin, Search, ShoppingBag, Heart, Headphones, Shield, RefreshCw, Lock, MessageSquare, Calendar, Award, HelpCircle, LayoutDashboard } from "lucide-react";
 import InquiryForm from "@/components/Forms/InquiryForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -32,7 +32,6 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileContactOpen, setIsMobileContactOpen] = useState(false);
   const location = useLocation();
   const { items } = useCart();

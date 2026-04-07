@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { Search, X, User, ShoppingCart, Menu, Home, Briefcase, Image, Info, BookOpen, HelpCircle, Users, Package, ChevronRight, Clock, TrendingUp, Sparkles } from "lucide-react";
+import { Search, X, User, ShoppingCart, Home, Briefcase, Image, Info, BookOpen, HelpCircle, Users, Package, ChevronRight, Clock, TrendingUp, Sparkles, MessageSquare, Calendar, Award, LogOut, LayoutDashboard } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 
 interface RentalItem {
   id: string;
@@ -47,17 +47,6 @@ const TRENDING_SEARCHES = [
   "Projector",
 ];
 
-const menuLinks = [
-  { href: "/home", label: "Home", icon: Home },
-  { href: "/services", label: "Services", icon: Briefcase },
-  { href: "/portfolio", label: "Portfolio", icon: Image },
-  { href: "/ecommerce", label: "Rental", icon: Package },
-  { href: "/about", label: "About", icon: Info },
-  { href: "/blog", label: "Blog", icon: BookOpen },
-  { href: "/faq", label: "FAQ", icon: HelpCircle },
-  { href: "/team", label: "Team", icon: Users },
-];
-
 const EcommerceHeader = ({
   searchTerm,
   onSearchChange,
@@ -67,10 +56,9 @@ const EcommerceHeader = ({
   allItems = [],
 }: EcommerceHeaderProps) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { role } = useUserRole();
   const { items } = useCart();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -242,40 +230,13 @@ const EcommerceHeader = ({
         <div className="sm:hidden">
           {/* Row 1: Hamburger + Logo + Cart/Account */}
           <div className="flex items-center justify-between h-11">
-            <div className="flex items-center gap-2">
-              <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-                <SheetTrigger asChild>
-                  <button className="flex items-center justify-center hover:bg-white/10 rounded-lg p-1.5 transition-all" aria-label="Menu">
-                    <Menu className="h-5 w-5" />
-                  </button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-64 p-0 bg-evn-950 border-r border-white/10">
-                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                  <div className="p-4 border-b border-white/10">
-                    <span className="text-white text-lg font-brand font-bold italic tracking-tight uppercase">
-                      Evnting<span className="text-coral-500">.com</span>
-                    </span>
-                  </div>
-                  <nav className="flex flex-col py-1">
-                    {menuLinks.map(({ href, label, icon: Icon }) => (
-                      <Link key={href} to={href} onClick={() => setMenuOpen(false)} className="flex items-center justify-between px-4 py-2.5 text-[13px] text-white/60 hover:text-white hover:bg-white/5 transition-all">
-                        <span className="flex items-center gap-2.5"><Icon className="h-4 w-4" />{label}</span>
-                        <ChevronRight className="h-3.5 w-3.5 opacity-30" />
-                      </Link>
-                    ))}
-                  </nav>
-                </SheetContent>
-              </Sheet>
-              <button onClick={() => navigate("/")} className="hover:opacity-80 transition-opacity">
-                <span className="text-base font-brand font-bold italic tracking-tight uppercase text-white">
-                  Evnting<span className="text-coral-500">.com</span>
-                </span>
-              </button>
-            </div>
+            <button onClick={() => navigate("/")} className="hover:opacity-80 transition-opacity">
+              <span className="text-base font-brand font-bold italic tracking-tight uppercase text-white">
+                Evnting<span className="text-coral-500">.com</span>
+              </span>
+            </button>
             <div className="flex items-center gap-0.5">
-              <button onClick={() => navigate(getDashboardPath())} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors" aria-label="Account">
-                <User className="h-4 w-4 text-white/70" />
-              </button>
+              <AccountMenu user={user} role={role} navigate={navigate} signOut={signOut} compact />
               <button onClick={() => navigate("/cart")} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors relative" aria-label="Cart">
                 <ShoppingCart className="h-4 w-4 text-white/70" />
                 {items.length > 0 && (
@@ -365,13 +326,6 @@ const EcommerceHeader = ({
         {/* Desktop: single row */}
         <div className="hidden sm:flex items-center gap-4 h-[52px]">
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-              <SheetTrigger asChild>
-                <button className="flex items-center justify-center hover:bg-white/10 rounded-lg p-1.5 transition-all" aria-label="Menu">
-                  <Menu className="h-4 w-4" />
-                </button>
-              </SheetTrigger>
-            </Sheet>
             <button onClick={() => navigate("/")} className="hover:opacity-80 transition-opacity">
               <span className="text-lg font-brand font-bold italic tracking-tight uppercase text-white">
                 Evnting<span className="text-coral-500">.com</span>
@@ -465,13 +419,7 @@ const EcommerceHeader = ({
 
           {/* Desktop right actions */}
           <div className="flex items-center gap-0.5 flex-shrink-0">
-            <button onClick={() => navigate(getDashboardPath())} className="flex items-center gap-1.5 hover:bg-white/10 rounded-lg px-2.5 py-1.5 transition-all">
-              <User className="h-4 w-4 text-white/70" />
-              <span className="text-[12px] font-medium text-white/70 hidden lg:inline">{user ? "Account" : "Sign In"}</span>
-            </button>
-            <button onClick={() => navigate("/ecommerce/orders")} className="flex items-center gap-1 hover:bg-white/10 rounded-lg px-2.5 py-1.5 transition-all">
-              <span className="text-[12px] font-medium text-white/70 hidden lg:inline">Orders</span>
-            </button>
+            <AccountMenu user={user} role={role} navigate={navigate} signOut={signOut} />
             <button onClick={() => navigate("/cart")} className="flex items-center gap-1.5 hover:bg-white/10 rounded-lg px-2.5 py-1.5 transition-all relative">
               <div className="relative">
                 <ShoppingCart className="h-4 w-4 text-white/70" />
@@ -485,6 +433,81 @@ const EcommerceHeader = ({
         </div>
       </div>
     </div>
+  );
+};
+
+// ─────────────────────────────────────────────
+// Account dropdown — clients see the full menu, vendors/admins
+// see a single Dashboard link. Replaces both the old hamburger
+// nav and the bare "Account" button.
+// ─────────────────────────────────────────────
+const AccountMenu = ({
+  user, role, navigate, signOut, compact,
+}: {
+  user: any;
+  role: string | null;
+  navigate: (path: string) => void;
+  signOut: () => void;
+  compact?: boolean;
+}) => {
+  if (!user) {
+    return (
+      <button
+        onClick={() => navigate("/auth")}
+        className={`flex items-center gap-1.5 hover:bg-white/10 rounded-lg ${compact ? "p-1.5" : "px-2.5 py-1.5"} transition-all`}
+        aria-label="Sign In"
+      >
+        <User className={`${compact ? "h-4 w-4" : "h-4 w-4"} text-white/70`} />
+        {!compact && <span className="text-[12px] font-medium text-white/70 hidden lg:inline">Sign In</span>}
+      </button>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={`flex items-center gap-1.5 hover:bg-white/10 rounded-lg ${compact ? "p-1.5" : "px-2.5 py-1.5"} transition-all`}
+          aria-label="Account"
+        >
+          <User className="h-4 w-4 text-white/70" />
+          {!compact && <span className="text-[12px] font-medium text-white/70 hidden lg:inline">Account</span>}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="rounded-lg w-56 text-sm">
+        {role === "client" ? (
+          <>
+            <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=inbox")}>
+              <MessageSquare className="h-3.5 w-3.5 mr-2" /> Inbox
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=past-orders")}>
+              <Calendar className="h-3.5 w-3.5 mr-2" /> My Orders
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=loyalty")}>
+              <Award className="h-3.5 w-3.5 mr-2" /> Loyalty
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=profile")}>
+              <User className="h-3.5 w-3.5 mr-2" /> Profile & Addresses
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/client/dashboard?tab=help")}>
+              <HelpCircle className="h-3.5 w-3.5 mr-2" /> Help & Guide
+            </DropdownMenuItem>
+          </>
+        ) : role === "vendor" ? (
+          <DropdownMenuItem onClick={() => navigate("/vendor/dashboard")}>
+            <LayoutDashboard className="h-3.5 w-3.5 mr-2" /> Vendor Dashboard
+          </DropdownMenuItem>
+        ) : role === "admin" ? (
+          <DropdownMenuItem onClick={() => navigate("/admin")}>
+            <LayoutDashboard className="h-3.5 w-3.5 mr-2" /> Admin Dashboard
+          </DropdownMenuItem>
+        ) : null}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => signOut()}>
+          <LogOut className="h-3.5 w-3.5 mr-2" /> Sign Out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

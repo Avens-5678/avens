@@ -38,11 +38,22 @@ const RequestServiceAccess = ({ approved, onChange }: Props) => {
 
   const request = async (service: string) => {
     if (!user) return;
-    const { error } = await (supabase.from as any)("vendor_service_access").insert({
-      vendor_id: user.id, service, status: "pending",
-    });
+    // Upsert so re-requesting after a rejection or cancel resets the row
+    const { error } = await (supabase.from as any)("vendor_service_access").upsert(
+      { vendor_id: user.id, service, status: "pending", reviewed_at: null, reviewed_by: null },
+      { onConflict: "vendor_id,service" }
+    );
     if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Request sent", description: "Admin will review your request shortly." });
+    await load();
+  };
+
+  const cancel = async (service: string) => {
+    if (!user) return;
+    const { error } = await (supabase.from as any)("vendor_service_access")
+      .delete().eq("vendor_id", user.id).eq("service", service).eq("status", "pending");
+    if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Request cancelled" });
     await load();
   };
 
@@ -71,6 +82,11 @@ const RequestServiceAccess = ({ approved, onChange }: Props) => {
                 <p className="text-xs text-muted-foreground mb-3">{s.desc}</p>
                 {!status && (
                   <Button size="sm" onClick={() => request(s.key)} disabled={loading}>Request Access</Button>
+                )}
+                {status === "pending" && (
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => cancel(s.key)}>Cancel request</Button>
+                  </div>
                 )}
                 {status === "rejected" && (
                   <Button size="sm" variant="outline" onClick={() => request(s.key)}>Re-request</Button>

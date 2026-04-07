@@ -114,11 +114,21 @@ const InventoryManager = () => {
 
   // Warehouses for location dropdown
   const [warehouses, setWarehouses] = useState<Array<{ id: string; name: string; address: string }>>([]);
+  // Approved services for this vendor (filters "What are you listing?")
+  const [approvedServices, setApprovedServices] = useState<string[]>([]);
   useEffect(() => {
     if (!user) return;
     (supabase.from as any)("vendor_warehouses").select("id,name,address").eq("vendor_id", user.id)
       .then(({ data }: any) => setWarehouses(data || []));
+    (supabase.from as any)("vendor_service_access")
+      .select("service,status").eq("vendor_id", user.id).eq("status", "approved")
+      .then(({ data }: any) => setApprovedServices((data || []).map((r: any) => r.service)));
   }, [user]);
+
+  const visibleServiceOptions = useMemo(
+    () => SERVICE_TYPE_OPTIONS.filter((o) => approvedServices.length === 0 || approvedServices.includes(o.value)),
+    [approvedServices]
+  );
 
   // AI helpers
   const [aiBusy, setAiBusy] = useState<string | null>(null);
@@ -513,8 +523,8 @@ const InventoryManager = () => {
             {/* Service Type Selector */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold">What are you listing?</Label>
-              <div className="grid grid-cols-3 gap-3">
-                {SERVICE_TYPE_OPTIONS.map((opt) => (
+              <div className={`grid gap-3 grid-cols-${Math.max(1, Math.min(visibleServiceOptions.length, 3))}`}>
+                {visibleServiceOptions.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
@@ -533,19 +543,27 @@ const InventoryManager = () => {
 
             <Separator />
 
-            {/* Step 1: Base Product */}
+            {/* Step 1: Base Product (labels adapt to service type) */}
+            {(() => {
+              const st = formData.service_type || 'rental';
+              const labels = st === 'venue'
+                ? { step: 'Step 1: Venue Details', name: 'Venue Name *', namePh: 'e.g. Lakeside Banquet Hall', shortPh: 'Brief venue tagline', descPh: 'Describe the venue, ambience, capacity highlights — AI will polish' }
+                : st === 'crew'
+                ? { step: 'Step 1: Service / Role Details', name: 'Service / Role Name *', namePh: 'e.g. Wedding Photographer', shortPh: 'Brief tagline for your service', descPh: 'Describe what you offer, style, deliverables — AI will polish' }
+                : { step: 'Step 1: Item Details', name: 'Item Name *', namePh: 'e.g. LED Stage Light', shortPh: 'Brief tagline', descPh: 'Write a draft — AI will enhance it' };
+              return (
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Step 1: Item Details</h3>
+              <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">{labels.step}</h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label>Item Name *</Label>
-                    <Input value={formData.name || ''} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g. LED Stage Light" />
+                    <Label>{labels.name}</Label>
+                    <Input value={formData.name || ''} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} placeholder={labels.namePh} />
                   </div>
                   <div className="space-y-1">
                     <Label>Short Description</Label>
                     <div className="flex gap-2">
-                      <Input className="flex-1" value={formData.short_description || ''} onChange={(e) => setFormData(prev => ({ ...prev, short_description: e.target.value }))} placeholder="Brief tagline" />
+                      <Input className="flex-1" value={formData.short_description || ''} onChange={(e) => setFormData(prev => ({ ...prev, short_description: e.target.value }))} placeholder={labels.shortPh} />
                       <Button type="button" size="sm" variant="outline" className="gap-1" onClick={aiShortDesc} disabled={aiBusy === "suggest_short_description" || !formData.name}>
                         {aiBusy === "suggest_short_description" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
                         Suggest
@@ -560,7 +578,7 @@ const InventoryManager = () => {
                         Polish with AI
                       </Button>
                     </div>
-                    <Textarea value={formData.description || ''} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} rows={3} placeholder="Write a draft — AI will enhance it" />
+                    <Textarea value={formData.description || ''} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} rows={3} placeholder={labels.descPh} />
                   </div>
                   <div className="space-y-1">
                     <Label>Warehouse / Location</Label>
@@ -663,6 +681,8 @@ const InventoryManager = () => {
                 </div>
               </div>
             </div>
+              );
+            })()}
 
             {/* Venue-specific fields */}
             {formData.service_type === 'venue' && (

@@ -357,7 +357,7 @@ const ProductDetail = () => {
       />
 
       {/* Breadcrumb */}
-      <div className="bg-muted/40 border-b border-border">
+      <div className="bg-gray-50 border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-2">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <button onClick={() => navigate("/ecommerce")} className="hover:text-primary transition-colors">Home</button>

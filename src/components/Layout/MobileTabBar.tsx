@@ -17,7 +17,10 @@ const MobileTabBar = () => {
   const cartCount = items.length;
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-background border-t border-border md:hidden" style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}>
+    <nav
+      className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 md:hidden"
+      style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}
+    >
       <div className="flex items-center h-[60px]">
         {tabs.map(({ label, icon: Icon, path, match }) => {
           const active = match(pathname);
@@ -38,18 +41,18 @@ const MobileTabBar = () => {
                 }
               }}
               className={`flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 h-full transition-colors ${
-                active ? "text-indigo-600" : "text-gray-400"
+                active ? "text-evn-600" : "text-gray-400"
               }`}
             >
               <span className="relative">
-                <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
+                <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 1.8} />
                 {isCart && cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold px-1">
+                  <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-evn-600 text-white text-[9px] font-bold px-1">
                     {cartCount > 9 ? "9+" : cartCount}
                   </span>
                 )}
               </span>
-              <span className={`text-[10px] leading-none ${active ? "font-semibold" : "font-medium"}`}>
+              <span className={`text-[10px] leading-none ${active ? "font-bold text-evn-600" : "font-medium"}`}>
                 {label}
               </span>
             </button>

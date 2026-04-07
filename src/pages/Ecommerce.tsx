@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect, useRef, lazy, Suspense, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Package, ChevronDown, ChevronUp, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows, Search, Calendar, MessageCircle } from "lucide-react";
+import { Package, ChevronDown, ChevronUp, ChevronRight, X, List, Grid2X2, Square, ShoppingCart, MapPin, Users, Building2, Wrench, Store, ArrowLeft, GitCompareArrows, Search, Calendar, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
 import VenueSearchBar from "@/components/ecommerce/VenueSearchBar";
@@ -102,6 +103,73 @@ const CREW_EXPERIENCE_OPTIONS = [
   { label: "10+ Years", value: "expert" },
 ];
 
+// ── Essentials discovery row ──
+const EssentialsDiscoveryRow = () => {
+  const { data: products } = useQuery({
+    queryKey: ["essential-products-discovery"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("essential_products")
+        .select("id, name, price, compare_price, images, stock_count")
+        .eq("is_active", true)
+        .order("is_featured", { ascending: false })
+        .order("total_sold", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!products || products.length === 0) return null;
+
+  return (
+    <section className="py-3 sm:py-5 border-b border-border/40">
+      <div className="container mx-auto px-3 sm:px-4">
+        <div className="flex items-end justify-between mb-2.5 sm:mb-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm sm:text-base font-bold text-foreground tracking-tight leading-tight truncate inline-flex items-center gap-2">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-pink-500"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"/></svg>
+              Event Essentials
+            </h3>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">Party supplies delivered fast</p>
+          </div>
+          <a href="/essentials" className="flex items-center gap-0.5 text-[11px] font-semibold text-evn-600 hover:underline flex-shrink-0 ml-2">
+            View All <ChevronRight className="h-3 w-3" />
+          </a>
+        </div>
+        <div className="overflow-x-auto scrollbar-hide scroll-smooth">
+          <div className="flex gap-2 sm:gap-2.5 min-w-max pb-2">
+            {products.map((p: any) => {
+              const img = p.images?.[0] || "/placeholder.svg";
+              const discount = p.compare_price && p.compare_price > p.price ? Math.round(((p.compare_price - p.price) / p.compare_price) * 100) : 0;
+              return (
+                <a key={p.id} href={`/essentials/product/${p.id}`} className="w-36 sm:w-44 flex-shrink-0 bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-md transition-shadow h-[220px] sm:h-[260px] flex flex-col">
+                  <div className="relative aspect-square bg-gray-50 p-2 flex-shrink-0">
+                    <img src={img} alt={p.name} className="w-full h-full object-contain" loading="lazy" />
+                    {discount > 0 && (
+                      <span className="absolute top-1.5 left-1.5 bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">{discount}% OFF</span>
+                    )}
+                  </div>
+                  <div className="p-2 flex-1 flex flex-col justify-between">
+                    <h4 className="text-[11px] sm:text-[12px] font-medium text-gray-800 line-clamp-2 leading-tight">{p.name}</h4>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[12px] font-bold text-gray-900">₹{p.price}</span>
+                      {p.compare_price && p.compare_price > p.price && (
+                        <span className="text-[10px] text-gray-400 line-through">₹{p.compare_price}</span>
+                      )}
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ── Discovery section with Top Picks + Recently Viewed ──
 const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues, featuredItems }: any) => {
   const { recentIds, clearViewed } = useRecentlyViewed();
@@ -123,7 +191,7 @@ const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discov
   }, [allItems, recentIds]);
 
   return (
-    <div className="bg-background py-4 sm:py-6">
+    <div className="bg-[#F5F5F5] py-2 sm:py-3">
       {featuredItems.length > 0 && (
         <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-amber-500"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>Featured Products</span>} subtitle="Hand-picked by our team" items={featuredItems} />
       )}
@@ -140,6 +208,7 @@ const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discov
       {discoveryTopVenues.length > 0 && (
         <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-amber-600"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"/></svg>Top Venues Near You</span>} subtitle="Perfect spaces for every occasion" items={discoveryTopVenues} />
       )}
+      <EssentialsDiscoveryRow />
       {recentlyViewedItems.length > 0 && (
         <DiscoveryRow title={<span className="inline-flex items-center gap-2"><svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 text-slate-500"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/></svg>Recently Viewed <span className="text-muted-foreground font-normal text-sm">({recentlyViewedItems.length})</span></span>} subtitle="Pick up where you left off" items={recentlyViewedItems} onClear={clearViewed} />
       )}
@@ -901,27 +970,27 @@ const Ecommerce = () => {
         </Suspense>
       </div>
 
-      {/* Discovery Rows — shown on default landing */}
+      {/* Discovery Rows — shown on default landing, overlaps carousel */}
       {isDiscoveryView && (
-        <>
+        <div className="-mt-6 relative z-10">
           <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} featuredItems={featuredProducts} />
           <EventPackages />
           <div className="container mx-auto px-4 sm:px-6">
             <Suspense fallback={null}><LookbookSection /></Suspense>
           </div>
           <HowItWorks />
-        </>
+        </div>
       )}
 
       {/* Main Content with Sidebar — hidden in discovery view */}
       {!isDiscoveryView && (
-        <section className="py-4 sm:py-6 bg-muted/30">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-4">
+        <section className="py-2 sm:py-3 bg-muted/30">
+          <div className="container mx-auto px-3 sm:px-4 lg:px-3">
             <EcommerceBreadcrumbs activeCategory={activeDisplayCategory} searchTerm={searchTerm} />
 
-            <div className="max-w-7xl mx-auto flex gap-5">
-              <aside className="hidden lg:block w-56 flex-shrink-0">
-                <div className="sticky top-20 bg-card rounded-xl border border-border/60 p-4 shadow-soft overflow-y-auto max-h-[calc(100vh-6rem)]">
+            <div className="max-w-7xl mx-auto flex gap-3">
+              <aside className="hidden lg:block w-52 flex-shrink-0">
+                <div className="sticky top-14 bg-white rounded-lg border border-gray-200 p-3 overflow-y-auto max-h-[calc(100vh-4rem)] text-[13px]">
                   <SidebarFilters />
                 </div>
               </aside>
@@ -942,7 +1011,7 @@ const Ecommerce = () => {
                   </div>
                 )}
 
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-4 bg-card rounded-lg border border-border/60 px-4 py-2.5 shadow-soft">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 bg-white rounded-lg border border-gray-200 px-3 py-1.5 text-[12px]">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setMobileSidebarOpen(true)}
@@ -989,13 +1058,13 @@ const Ecommerce = () => {
                     </select>
 
                     <div className="lg:hidden flex items-center border border-border rounded-md overflow-hidden">
-                      <button onClick={() => setMobileView("list")} className={`p-1.5 transition-colors ${mobileView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <button onClick={() => setMobileView("list")} className={`p-1.5 transition-colors ${mobileView === "list" ? "bg-evn-600 text-white" : "text-gray-400 hover:bg-gray-100"}`}>
                         <List className="h-3.5 w-3.5" />
                       </button>
-                      <button onClick={() => setMobileView("two")} className={`p-1.5 transition-colors ${mobileView === "two" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <button onClick={() => setMobileView("two")} className={`p-1.5 transition-colors ${mobileView === "two" ? "bg-evn-600 text-white" : "text-gray-400 hover:bg-gray-100"}`}>
                         <Grid2X2 className="h-3.5 w-3.5" />
                       </button>
-                      <button onClick={() => setMobileView("one")} className={`p-1.5 transition-colors ${mobileView === "one" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      <button onClick={() => setMobileView("one")} className={`p-1.5 transition-colors ${mobileView === "one" ? "bg-evn-600 text-white" : "text-gray-400 hover:bg-gray-100"}`}>
                         <Square className="h-3.5 w-3.5" />
                       </button>
                     </div>
@@ -1069,9 +1138,9 @@ const Ecommerce = () => {
                     </div>
                   ) : (
                     <div
-                      className={`grid gap-3 sm:gap-4 ${
+                      className={`grid gap-2 sm:gap-2.5 ${
                         mobileView === "list" ? "grid-cols-1" : mobileView === "two" ? "grid-cols-2" : "grid-cols-1"
-                      } sm:grid-cols-2 lg:grid-cols-3`}
+                      } sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`}
                     >
                       {filteredRentals.map((rental) => (
                         <div key={rental.id} className="relative group/card">

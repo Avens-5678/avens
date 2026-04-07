@@ -6,67 +6,78 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Link } from "react-router-dom";
 import { useHeroBanners, useServices, useRentals, useTrustedClients, useAboutContent } from "@/hooks/useData";
 import { useDashboardPath } from "@/hooks/useDashboardPath";
-import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight, Star, Shield, Lock, RefreshCw, Headphones, Zap, MapPin, Clock, Package, Music, Lightbulb, Tent, Utensils, Flower2, Theater } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import InquiryForm from "@/components/Forms/InquiryForm";
-import { GradientText } from "@/components/ui/animated-text";
 import Layout from "@/components/Layout/Layout";
-import { Section } from "@/components/ui/section";
-import { SectionHeader } from "@/components/ui/section-header";
-import { HeroSection } from "@/components/ui/hero-section";
-import { GlassmorphismCard } from "@/components/ui/glassmorphism-card";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ServiceScrollContainer } from "@/components/ui/service-scroll-container";
-import { CursorTrail } from "@/components/ui/cursor-trail";
-import { MagneticButton } from "@/components/ui/magnetic-button";
-import { TiltCard } from "@/components/ui/tilt-card";
-import { BackgroundPattern } from "@/components/ui/background-pattern";
-import { SectionDivider } from "@/components/ui/section-divider";
-import ScrollReveal from "@/components/ui/scroll-reveal";
 
 // DO NOT use React.lazy() at module level — Vite TDZ bug
-// Created at first render via getTestimonialsSection()
 let _cachedTestimonials: ReturnType<typeof lazy> | null = null;
 const getTestimonialsSection = () => {
   if (!_cachedTestimonials) _cachedTestimonials = lazy(() => import("@/components/TestimonialsSection"));
   return _cachedTestimonials;
 };
 
-// Skeleton loaders for faster perceived loading
-const HeroSkeleton = () =>
-<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
-    <div className="text-center space-y-6 max-w-2xl px-4">
-      <Skeleton className="h-16 w-3/4 mx-auto" />
-      <Skeleton className="h-8 w-full" />
-      <Skeleton className="h-8 w-2/3 mx-auto" />
-      <div className="flex gap-4 justify-center">
-        <Skeleton className="h-12 w-40" />
-        <Skeleton className="h-12 w-40" />
-      </div>
-    </div>
-  </div>;
+const PROMO_BANNERS = [
+  { gradient: "from-evn-700 to-evn-900", fadeColor: "#1e1b4b", title: "Wedding Season Sale", subtitle: "Up to 40% off on decor rentals", cta: "Shop Now", link: "/ecommerce?category=Decor+%26+Floral" },
+  { gradient: "from-emerald-700 to-emerald-900", fadeColor: "#064e3b", title: "New Venue Partners", subtitle: "50+ banquet halls just added", cta: "Explore Venues", link: "/ecommerce?service=venue" },
+  { gradient: "from-amber-600 to-amber-800", fadeColor: "#92400e", title: "Hire Top-Rated DJs", subtitle: "Starting at ₹5,000/event", cta: "Find Crew", link: "/ecommerce?service=crew" },
+  { gradient: "from-pink-600 to-pink-800", fadeColor: "#9d174d", title: "Event Essentials", subtitle: "Party supplies delivered fast", cta: "Shop Essentials", link: "/essentials" },
+];
 
+const BROWSE_CATEGORIES = [
+  { label: "Sound Systems", icon: Music, color: "bg-evn-50 text-evn-600", link: "/ecommerce?category=Sound+%26+DJ" },
+  { label: "Lighting", icon: Lightbulb, color: "bg-amber-50 text-amber-600", link: "/ecommerce?category=Lighting" },
+  { label: "Stages", icon: Theater, color: "bg-purple-50 text-purple-600", link: "/ecommerce?category=Stages" },
+  { label: "Tents", icon: Tent, color: "bg-emerald-50 text-emerald-600", link: "/ecommerce?category=Tents+%26+Structures" },
+  { label: "Catering", icon: Utensils, color: "bg-orange-50 text-orange-600", link: "/ecommerce?category=Catering+Equipment" },
+  { label: "Decoration", icon: Flower2, color: "bg-pink-50 text-pink-600", link: "/ecommerce?category=Decor+%26+Floral" },
+];
 
-const CardSkeleton = () =>
-<div className="space-y-4 p-6">
-    <Skeleton className="aspect-video w-full rounded-lg" />
-    <Skeleton className="h-6 w-3/4" />
-    <Skeleton className="h-4 w-full" />
-    <Skeleton className="h-4 w-2/3" />
-  </div>;
+const SERVICE_VERTICALS = [
+  { name: "Insta-Rent", tagline: "2,400+ items", gradient: "from-indigo-500 to-evn-600", icon: Package, link: "/ecommerce" },
+  { name: "Venues", tagline: "340+ spaces", gradient: "from-emerald-500 to-teal-600", icon: MapPin, link: "/ecommerce?service=venue" },
+  { name: "Crew Hub", tagline: "850+ pros", gradient: "from-amber-500 to-orange-600", icon: Users, link: "/ecommerce?service=crew" },
+  { name: "Essentials", tagline: "Party supplies", gradient: "from-rose-400 to-pink-500", icon: Zap, link: "/essentials" },
+];
 
+const HeroSkeleton = () => (
+  <div className="bg-gray-100 rounded-xl h-[140px] md:h-[200px] animate-pulse" />
+);
+
+const CardSkeleton = () => (
+  <div className="bg-white rounded-lg p-2.5 space-y-2">
+    <Skeleton className="aspect-[4/3] w-full rounded-md" />
+    <Skeleton className="h-3 w-3/4" />
+    <Skeleton className="h-3 w-full" />
+    <Skeleton className="h-4 w-1/3" />
+  </div>
+);
 
 const Index = () => {
   const TestimonialsSection = getTestimonialsSection();
   const isMobile = useIsMobile();
   const { getServiceRequestPath } = useDashboardPath();
-  // Core data - only essential for above-the-fold
   const { data: heroBanners, isLoading: loadingBanners } = useHeroBanners();
   const { data: services, isLoading: loadingServices } = useServices();
   const { data: rentals, isLoading: loadingRentals } = useRentals();
   const { data: trustedClients, isLoading: loadingClients } = useTrustedClients();
   const { data: aboutContent } = useAboutContent();
+
+  // Global scroll-reveal observer
+  const pageRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const root = pageRef.current;
+    if (!root) return;
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-visible"); obs.unobserve(e.target); } }),
+      { threshold: 0.1 }
+    );
+    root.querySelectorAll(".animate-on-scroll, .stagger-children").forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  });
 
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [inquiryDialogOpen, setInquiryDialogOpen] = useState(false);
@@ -81,15 +92,28 @@ const Index = () => {
   const autoRotateRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Deals countdown
+  const [countdown, setCountdown] = useState("05:32:18");
+  useEffect(() => {
+    const end = Date.now() + 5 * 3600 * 1000 + 32 * 60 * 1000 + 18 * 1000;
+    const tick = () => {
+      const diff = Math.max(0, end - Date.now());
+      const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+      setCountdown(`${h}:${m}:${s}`);
+    };
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Filter data
   const homeServices = services?.filter((s) => s.show_on_home && s.is_active) || [];
   const homeRentals = rentals?.filter((r) => r.show_on_home && r.is_active) || [];
   const activeClients = trustedClients?.filter((c) => c.is_active) || [];
   const activeBanners = heroBanners?.filter((b) => b.is_active) || [];
 
-  const currentBanner = activeBanners[currentBannerIndex];
-
-  // Auto-hide arrows after 3s of inactivity
+  // Auto-hide arrows after 3s
   const resetArrowTimer = useCallback(() => {
     setShowArrows(true);
     if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current);
@@ -98,452 +122,375 @@ const Index = () => {
 
   useEffect(() => {
     resetArrowTimer();
-    return () => {if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current);};
+    return () => { if (arrowTimeoutRef.current) clearTimeout(arrowTimeoutRef.current); };
   }, [resetArrowTimer]);
 
-  // Auto-rotate banners every 7 seconds (pause on hover)
+  // Auto-rotate promo banners every 5s
   useEffect(() => {
-    if (activeBanners.length <= 1 || isPaused) return;
-
+    if (isPaused) return;
     autoRotateRef.current = setInterval(() => {
-      setCurrentBannerIndex((prev) => (prev + 1) % activeBanners.length);
-    }, 7000);
-
-    return () => {
-      if (autoRotateRef.current) clearInterval(autoRotateRef.current);
-    };
-  }, [activeBanners.length, isPaused]);
+      setCurrentBannerIndex((prev) => (prev + 1) % PROMO_BANNERS.length);
+    }, 5000);
+    return () => { if (autoRotateRef.current) clearInterval(autoRotateRef.current); };
+  }, [isPaused]);
 
   useEffect(() => {
-    if (!loadingBanners) {
-      setShowBannerFallback(false);
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      setShowBannerFallback(true);
-    }, 3500);
-
+    if (!loadingBanners) { setShowBannerFallback(false); return; }
+    const timer = window.setTimeout(() => setShowBannerFallback(true), 3500);
     return () => window.clearTimeout(timer);
   }, [loadingBanners]);
 
-  // Show skeleton only briefly; then render fallback hero if banner query is stuck
-  if (loadingBanners && !showBannerFallback) {
-    return <Layout><HeroSkeleton /></Layout>;
-  }
-
   return (
     <>
-    {!isMobile && <CursorTrail color="hsl(222, 65%, 42%)" size={24} duration={0.6} />}
     <Layout>
-      {/* Hero Section - Simple, no heavy animations */}
-      <HeroSection
-          backgroundImage={currentBanner?.image_url}
-          className="relative overflow-hidden"
-          onMouseMove={resetArrowTimer}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={(e: React.TouchEvent) => {
-            touchStartX.current = e.changedTouches[0].screenX;
-            setIsPaused(true);
-          }}
-          onTouchEnd={(e: React.TouchEvent) => {
-            touchEndX.current = e.changedTouches[0].screenX;
-            if (touchStartX.current !== null && activeBanners.length > 1) {
-              const diff = touchStartX.current - touchEndX.current;
-              if (Math.abs(diff) > 50) {
-                if (diff > 0) {
-                  setCurrentBannerIndex((prev) => prev === activeBanners.length - 1 ? 0 : prev + 1);
-                } else {
-                  setCurrentBannerIndex((prev) => prev === 0 ? activeBanners.length - 1 : prev - 1);
+      <div ref={pageRef} className="bg-[#F5F5F5] min-h-screen">
+        {/* ─── 3a. Hero Banner Carousel ─── */}
+        <section className="relative">
+          <div
+            className="relative overflow-hidden"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onMouseMove={resetArrowTimer}
+            onTouchStart={(e) => { touchStartX.current = e.changedTouches[0].screenX; setIsPaused(true); }}
+            onTouchEnd={(e) => {
+              touchEndX.current = e.changedTouches[0].screenX;
+              if (touchStartX.current !== null) {
+                const diff = touchStartX.current - touchEndX.current;
+                if (Math.abs(diff) > 50) {
+                  setCurrentBannerIndex((prev) => diff > 0
+                    ? (prev + 1) % PROMO_BANNERS.length
+                    : prev === 0 ? PROMO_BANNERS.length - 1 : prev - 1);
                 }
               }
-            }
-            touchStartX.current = null;
-            setIsPaused(false);
-          }}>
-
-        {/* Desktop/Tablet navigation arrows - auto-hide on inactivity */}
-        {!isMobile && activeBanners.length > 1 &&
-          <>
-            <button
-              onClick={() => {setCurrentBannerIndex((prev) => prev === 0 ? activeBanners.length - 1 : prev - 1);resetArrowTimer();}}
-              className={`absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-500 ${showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-              aria-label="Previous banner">
-
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={() => {setCurrentBannerIndex((prev) => prev === activeBanners.length - 1 ? 0 : prev + 1);resetArrowTimer();}}
-              className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition-all duration-500 ${showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-              aria-label="Next banner">
-
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </>
-          }
-
-        <div className="container mx-auto px-5 sm:px-6 text-center relative z-20">
-          <h1 
-            key={`title-${currentBannerIndex}`}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-[1.05] text-white animate-fade-in-up"
-            style={{ animationDuration: '0.8s' }}
+              touchStartX.current = null;
+              setIsPaused(false);
+            }}
           >
-            {currentBanner?.title || "Creating Extraordinary Experiences"}
-          </h1>
-
-          <p 
-            key={`subtitle-${currentBannerIndex}`}
-            className="text-lg sm:text-xl lg:text-2xl font-body mb-12 max-w-3xl mx-auto leading-relaxed text-white/80 animate-fade-in-up opacity-0"
-            style={{ animationDelay: '0.3s', animationDuration: '0.8s', animationFillMode: 'forwards' }}
-          >
-            {currentBanner?.subtitle || "Where vision meets execution. We transform your dreams into unforgettable moments."}
-          </p>
-
-          <div 
-            key={`cta-${currentBannerIndex}`}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up opacity-0"
-            style={{ animationDelay: '0.6s', animationDuration: '0.8s', animationFillMode: 'forwards' }}
-          >
-            <MagneticButton
-                size="lg"
-                strength={15}
-                className="bg-secondary hover:bg-secondary/90 text-white px-8 py-4 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl"
-                asChild>
-              <Link to={`/events/${currentBanner?.event_type?.toLowerCase().replace(/\s+/g, '-') || 'corporate'}`}>
-                {currentBanner?.button_text || "Explore Services"}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </MagneticButton>
-            <MagneticButton
-                variant="outline"
-                size="lg"
-                strength={15}
-                className="backdrop-blur-md bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white px-8 py-4 text-base font-semibold rounded-xl"
-                asChild>
-              <Link to="/portfolio">
-                View Portfolio
-                <Camera className="ml-2 h-5 w-5" />
-              </Link>
-            </MagneticButton>
-          </div>
-        </div>
-
-
-
-      </HeroSection>
-
-      {/* Services Section */}
-      <Section spacing="default" className="relative overflow-hidden">
-        <BackgroundPattern variant="noise" />
-        <div className="container mx-auto px-4">
-          <ScrollReveal animation="fade-in-up">
-            <SectionHeader
-              badge={<Badge variant="outline"><Sparkles className="mr-2 h-4 w-4" />Premium Services</Badge>}
-              title="Exceptional Event Management"
-              description="From intimate gatherings to grand celebrations, we deliver sophistication and excellence." />
-          </ScrollReveal>
-
-          
-          {loadingServices ?
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
-            </div> :
-
-            <ScrollReveal animation="fade-in-up" delay={100}>
-              <ServiceScrollContainer items={homeServices}>
-                {homeServices.map((service) =>
-                <TiltCard key={service.id} tiltDegree={8} scale={1.02} glareMaxOpacity={0.15} className="h-full">
-                <GlassmorphismCard
-                  className="group p-3 md:p-6 hover:shadow-lg transition-shadow duration-300 h-full"
-                  variant="subtle">
-
-                  <div className="space-y-2.5 md:space-y-4">
-                    {service.image_url &&
-                  <div className="relative overflow-hidden rounded-lg aspect-[16/9] md:aspect-video">
-                        <OptimizedImage
-                      src={service.image_url}
-                      alt={service.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-
-                      </div>
-                  }
-                    <div className="space-y-2 md:space-y-3">
-                      <h3 className="text-base md:text-xl font-bold group-hover:text-primary transition-colors line-clamp-1">
-                        {service.title}
-                      </h3>
-                      <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-none">
-                        {service.short_description}
-                      </p>
-                      <Button variant="ghost" className="p-0 h-auto font-semibold" asChild>
-                        <Link to={`/events/${service.event_type.toLowerCase().replace(/\s+/g, '-')}`}>
-                          Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </GlassmorphismCard>
-              </TiltCard>
-              )}
-              </ServiceScrollContainer>
-            </ScrollReveal>
-            }
-
-          {homeServices.length > 0 &&
-            <div className="text-center mt-12">
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/services">
-                  View All Services <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
-            }
-        </div>
-      </Section>
-
-      {/* About CTA Section */}
-      {aboutContent &&
-        <Section variant="gradient" spacing="default">
-          <div className="container mx-auto px-5 sm:px-6 text-center">
-            <div className="max-w-3xl mx-auto space-y-6">
-              <Badge variant="outline" className="mb-4">
-                <User className="mr-2 h-3.5 w-3.5" />
-                About Us
-              </Badge>
-              
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
-                Ready to Start Planning Your
-                <span className="text-primary block">Perfect Event?</span>
-              </h2>
-              
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Let's bring your vision to life with our expertise in creating unforgettable experiences.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-              <Button
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
-                  asChild>
-                   <Link to={getServiceRequestPath('')}>
-                    Start Planning Today
-                    <Calendar className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button variant="outline" size="lg" className="px-8 py-4 text-base font-semibold" asChild>
-                  <Link to="/about">
-                    Learn About Us <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Section>
-        }
-
-      {/* Equipment Rental Section */}
-      <Section spacing="default" variant="muted" className="relative overflow-hidden">
-        <BackgroundPattern variant="dots" />
-        <div className="container mx-auto px-4">
-          <ScrollReveal animation="fade-in-up">
-            <SectionHeader
-              badge={<Badge variant="outline"><Award className="mr-2 h-4 w-4" />Premium Equipment</Badge>}
-              title="Professional Event Rentals"
-              description="High-quality equipment to elevate your event experience." />
-          </ScrollReveal>
-
-          
-          {loadingRentals ?
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
-            </div> :
-
-            <ScrollReveal animation="fade-in-up" delay={100}>
-              <ServiceScrollContainer items={homeRentals.slice(0, 6)}>
-                {homeRentals.slice(0, 6).map((rental) =>
-                <GlassmorphismCard
-                  key={rental.id}
-                  className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
-
-                  <div className="relative">
-                    {rental.image_url ?
-                  <div className="aspect-[16/9] md:aspect-video relative overflow-hidden">
-                        <OptimizedImage
-                      src={rental.image_url}
-                      alt={rental.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-
-                      </div> :
-
-                  <div className="aspect-[16/9] md:aspect-video bg-muted flex items-center justify-center">
-                        <Award className="h-12 w-12 text-muted-foreground" />
-                      </div>
-                  }
-                  </div>
-                  
-                  <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-                    <div className="space-y-1.5 md:space-y-2">
-                      <h3 className="text-base md:text-xl font-bold group-hover:text-primary transition-colors line-clamp-1">
-                        {rental.title}
-                      </h3>
-                      {rental.price_range &&
-                    <Badge variant="secondary" className="font-medium text-xs md:text-sm">
-                          {rental.price_range}
-                        </Badge>
-                    }
-                      <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-none">
-                        {rental.short_description}
-                      </p>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        setSelectedRental(rental);
-                        setInquiryDialogOpen(true);
-                      }}>
-
-                        Inquire
-                      </Button>
-                      <Button size="sm" className="bg-gradient-to-r from-primary to-accent" asChild>
-                        <Link to="/ecommerce">View All</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </GlassmorphismCard>
-              )}
-              </ServiceScrollContainer>
-            </ScrollReveal>
-            }
-
-          {homeRentals.length > 0 &&
-            <div className="text-center mt-12">
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/ecommerce">
-                  View All Equipment <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
-            }
-        </div>
-      </Section>
-
-      {/* Trusted Clients - Marquee */}
-      {activeClients.length > 0 &&
-        <Section spacing="compact">
-          <div className="container mx-auto px-4">
-            <SectionHeader
-              badge={<Badge variant="outline"><Users className="mr-2 h-4 w-4" />Trusted Partners</Badge>}
-              title="Prestigious Clientele"
-              description="Proud to serve leading organizations across various industries." />
-
-            <div className="overflow-hidden relative">
-              {/* Fade edges */}
-              <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-              <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-              
-              <div className="flex animate-marquee w-max items-center gap-12 lg:gap-16 py-4">
-                {[...activeClients, ...activeClients, ...activeClients].map((client, i) =>
+            {/* Banner slides */}
+            <div
+              className="flex transition-transform duration-700 ease-out"
+              style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
+            >
+              {PROMO_BANNERS.map((banner, i) => (
                 <div
-                  key={`${client.id}-${i}`}
-                  className="flex-shrink-0 hover:opacity-80 transition-all duration-300 px-2">
-                    <OptimizedImage
-                    src={client.logo_url}
-                    alt={client.name}
-                    loading="lazy"
-                    className="h-12 w-auto object-contain" />
+                  key={i}
+                  className={`w-full flex-shrink-0 bg-gradient-to-r ${banner.gradient} h-[160px] md:h-[200px] flex items-center px-6 md:px-12`}
+                >
+                  <div className="text-white max-w-md">
+                    <h2 className="text-lg md:text-2xl font-bold mb-1">{banner.title}</h2>
+                    <p className="text-white/80 text-xs md:text-sm mb-3">{banner.subtitle}</p>
+                    <Link
+                      to={banner.link}
+                      className="inline-flex items-center gap-1.5 bg-white text-gray-900 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-white/90 transition-colors"
+                    >
+                      {banner.cta} <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
                   </div>
-                )}
+                </div>
+              ))}
+            </div>
+
+            {/* Nav arrows */}
+            {!isMobile && (
+              <>
+                <button
+                  onClick={() => { setCurrentBannerIndex((prev) => prev === 0 ? PROMO_BANNERS.length - 1 : prev - 1); resetArrowTimer(); }}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 ${showArrows ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => { setCurrentBannerIndex((prev) => (prev + 1) % PROMO_BANNERS.length); resetArrowTimer(); }}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 ${showArrows ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </>
+            )}
+
+            {/* Dots */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {PROMO_BANNERS.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentBannerIndex(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === currentBannerIndex ? "bg-white w-5" : "bg-white/40"}`}
+                />
+              ))}
+            </div>
+
+            {/* Bottom gradient fade — matches current banner color */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-10 transition-all duration-700"
+              style={{ background: `linear-gradient(to bottom, transparent 0%, ${PROMO_BANNERS[currentBannerIndex].fadeColor} 100%)` }}
+            />
+          </div>
+        </section>
+
+        {/* ─── 3b. Service Vertical Pills — overlaps carousel ─── */}
+        <section className="container mx-auto px-3 sm:px-4 py-2.5 animate-on-scroll -mt-5 relative z-10">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide stagger-children">
+            {SERVICE_VERTICALS.map((v) => (
+              <Link
+                key={v.name}
+                to={v.link}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r ${v.gradient} text-white hover:shadow-md hover:scale-[1.02] transition-all flex-shrink-0`}
+              >
+                <v.icon className="h-4 w-4 flex-shrink-0 text-white/90" />
+                <div>
+                  <p className="font-semibold text-[12px] leading-tight">{v.name}</p>
+                  <p className="text-[10px] text-white/70">{v.tagline}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ─── 3c. Deals of the Day ─── */}
+        {homeRentals.length > 0 && (
+          <section className="container mx-auto px-3 sm:px-4 py-3 animate-on-scroll">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm md:text-base font-bold text-gray-900">Deals of the Day</h2>
+                <div className="flex items-center gap-1 text-[11px] text-evn-600 font-medium bg-evn-50 px-2 py-0.5 rounded">
+                  <Clock className="h-3 w-3" />
+                  <span>{countdown}</span>
+                </div>
+              </div>
+              <Link to="/ecommerce" className="text-[11px] font-semibold text-evn-600 hover:text-evn-700 flex items-center gap-0.5">
+                See All <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1">
+              {(loadingRentals ? [1, 2, 3, 4] : homeRentals.slice(0, 6)).map((item: any, i) => (
+                loadingRentals ? <CardSkeleton key={i} /> : (
+                  <Link
+                    key={item.id}
+                    to={`/ecommerce/${item.id}`}
+                    className="flex-shrink-0 w-[160px] md:w-[185px] bg-white rounded-lg hover-lift overflow-hidden group"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="h-8 w-8 text-gray-300" />
+                        </div>
+                      )}
+                      {item.is_featured && (
+                        <span className="absolute top-1.5 left-1.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">DEAL</span>
+                      )}
+                    </div>
+                    <div className="p-2">
+                      <h3 className="font-medium text-[12px] text-gray-900 line-clamp-2 leading-tight group-hover:text-evn-600 transition-colors">{item.title}</h3>
+                      {item.price_range && (
+                        <p className="text-[13px] font-bold text-gray-900 mt-0.5">₹{item.price_range}</p>
+                      )}
+                      {item.rating > 0 && (
+                        <div className="flex items-center gap-0.5 mt-0.5">
+                          <Star className="h-2.5 w-2.5 text-amber-400 fill-amber-400" />
+                          <span className="text-[10px] text-gray-500">{item.rating}</span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── 3d. Popular in City ─── */}
+        {homeRentals.length > 2 && (
+          <section className="container mx-auto px-3 sm:px-4 py-3 animate-on-scroll">
+            <div className="flex items-center justify-between mb-2.5">
+              <h2 className="text-sm md:text-base font-bold text-gray-900">Popular in Hyderabad</h2>
+              <Link to="/ecommerce" className="text-[11px] font-semibold text-evn-600 hover:text-evn-700 flex items-center gap-0.5">
+                See All <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+              {homeRentals.slice(0, 5).map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/ecommerce/${item.id}`}
+                  className="bg-white rounded-lg hover-lift overflow-hidden group"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center"><Package className="h-7 w-7 text-gray-300" /></div>
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <h3 className="font-medium text-[12px] text-gray-900 line-clamp-2 leading-tight group-hover:text-evn-600 transition-colors">{item.title}</h3>
+                    <p className="text-[10px] text-gray-500 line-clamp-1 mt-0.5">{item.short_description}</p>
+                    {item.price_range && (
+                      <p className="text-[13px] font-bold text-gray-900 mt-1">₹{item.price_range}</p>
+                    )}
+                    {item.rating > 0 && (
+                      <div className="flex items-center gap-0.5 mt-0.5">
+                        <Star className="h-2.5 w-2.5 text-amber-400 fill-amber-400" />
+                        <span className="text-[10px] text-gray-500">{item.rating}</span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── 3e. Browse by Category ─── */}
+        <section className="container mx-auto px-3 sm:px-4 py-3 animate-on-scroll">
+          <h2 className="text-sm md:text-base font-bold text-gray-900 mb-2.5">Browse by Category</h2>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 md:grid md:grid-cols-6 md:gap-2.5">
+            {BROWSE_CATEGORIES.map((cat) => (
+              <Link
+                key={cat.label}
+                to={cat.link}
+                className="flex flex-col items-center gap-1.5 flex-shrink-0 w-[72px] md:w-auto py-2 hover:opacity-80 transition-opacity group"
+              >
+                <div className={`w-12 h-12 rounded-full ${cat.color} flex items-center justify-center`}>
+                  <cat.icon className="h-5 w-5" />
+                </div>
+                <span className="text-[10px] md:text-[11px] font-medium text-gray-600 text-center leading-tight">{cat.label}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ─── 3f. Services Section (repurposed as featured) ─── */}
+        {homeServices.length > 0 && (
+          <section className="container mx-auto px-3 sm:px-4 py-3 animate-on-scroll">
+            <div className="flex items-center justify-between mb-2.5">
+              <h2 className="text-sm md:text-base font-bold text-gray-900">Featured Services</h2>
+              <Link to="/services" className="text-[11px] font-semibold text-evn-600 hover:text-evn-700 flex items-center gap-0.5">
+                View All <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1">
+              {homeServices.map((service) => (
+                <Link
+                  key={service.id}
+                  to={`/events/${service.event_type.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="flex-shrink-0 w-[200px] md:w-[220px] bg-white rounded-lg hover-lift overflow-hidden group"
+                >
+                  {service.image_url && (
+                    <div className="aspect-video overflow-hidden bg-gray-50">
+                      <OptimizedImage src={service.image_url} alt={service.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    </div>
+                  )}
+                  <div className="p-2">
+                    <h3 className="font-medium text-[12px] text-gray-900 group-hover:text-evn-600 transition-colors line-clamp-1">{service.title}</h3>
+                    <p className="text-[10px] text-gray-500 line-clamp-2 mt-0.5">{service.short_description}</p>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-evn-600 mt-1.5">
+                      Learn More <ArrowRight className="h-2.5 w-2.5" />
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── Trusted Clients Marquee ─── */}
+        {activeClients.length > 0 && (
+          <section className="py-4 overflow-hidden">
+            <div className="container mx-auto px-3 sm:px-4 mb-2">
+              <h2 className="text-sm md:text-base font-bold text-gray-900">Trusted by Leading Brands</h2>
+            </div>
+            <div className="relative">
+              <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#F5F5F5] to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#F5F5F5] to-transparent z-10 pointer-events-none" />
+              <div className="flex animate-marquee w-max items-center gap-8 lg:gap-12 py-2">
+                {[...activeClients, ...activeClients, ...activeClients].map((client, i) => (
+                  <div key={`${client.id}-${i}`} className="flex-shrink-0 hover:opacity-80 transition-all duration-300 px-1">
+                    <OptimizedImage src={client.logo_url} alt={client.name} loading="lazy" className="h-7 md:h-9 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300" />
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        </Section>
-        }
+          </section>
+        )}
 
-      {/* Testimonials - Lazy loaded */}
-      <Section variant="gradient" spacing="default">
-        <div className="container mx-auto px-4">
-          <Suspense fallback={
-            <div className="text-center py-12">
-              <Skeleton className="h-8 w-64 mx-auto mb-4" />
-              <Skeleton className="h-32 w-full max-w-2xl mx-auto" />
+        {/* ─── 3i. Why Choose Evnting — inline strip ─── */}
+        <section className="border-y border-gray-200 bg-white">
+          <div className="container mx-auto px-3 sm:px-4 py-3">
+            <div className="flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
+              {[
+                { icon: Shield, label: "Verified Vendors" },
+                { icon: Lock, label: "Secure Payments" },
+                { icon: RefreshCw, label: "Easy Returns" },
+                { icon: Headphones, label: "24/7 Support" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-1.5 flex-shrink-0">
+                  <item.icon className="h-3.5 w-3.5 text-evn-600" />
+                  <span className="text-[11px] font-medium text-gray-600">{item.label}</span>
+                </div>
+              ))}
             </div>
-            }>
-            <TestimonialsSection />
-          </Suspense>
-        </div>
-      </Section>
+          </div>
+        </section>
 
-      {/* Final CTA */}
-      <Section variant="muted" spacing="default">
-        <div className="container mx-auto px-5 sm:px-6 text-center">
-          <div className="max-w-3xl mx-auto space-y-6">
-            <Badge variant="outline" className="mb-4">
-              <Heart className="mr-2 h-3.5 w-3.5" />
-              Let's Create Magic Together
-            </Badge>
-            
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-foreground">
-              Ready to Create Your
-              <span className="text-primary block">Dream Event?</span>
-            </h2>
-            
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              From conceptualization to execution, we're here to transform your vision into an 
-              extraordinary experience.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-              <Button
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-base font-semibold"
-                  asChild>
-                  <Link to={getServiceRequestPath('')}>
-                    Start Planning
-                    <Calendar className="ml-2 h-5 w-5" />
-                  </Link>
+        {/* ─── Testimonials ─── */}
+        <section className="py-5 bg-white">
+          <div className="container mx-auto px-3 sm:px-4">
+            <Suspense fallback={
+              <div className="text-center py-4">
+                <Skeleton className="h-6 w-48 mx-auto mb-3" />
+                <Skeleton className="h-24 w-full max-w-2xl mx-auto" />
+              </div>
+            }>
+              <TestimonialsSection />
+            </Suspense>
+          </div>
+        </section>
+
+        {/* ─── CTA Banner ─── */}
+        <section className="container mx-auto px-3 sm:px-4 py-4 animate-on-scroll">
+          <div className="bg-gradient-to-r from-evn-700 to-evn-900 rounded-xl p-5 md:p-8 text-center text-white">
+            <h2 className="text-base md:text-xl font-bold mb-1.5">Ready to Plan Your Dream Event?</h2>
+            <p className="text-white/70 text-xs md:text-sm mb-4 max-w-lg mx-auto">From conceptualization to execution, we transform your vision into an extraordinary experience.</p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button size="sm" className="bg-white text-evn-700 hover:bg-white/90 font-semibold px-5 h-9 rounded-lg text-xs" asChild>
+                <Link to={getServiceRequestPath('')}>
+                  Start Planning <Calendar className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
               </Button>
-              <Button variant="outline" size="lg" className="px-8 py-4 text-base font-semibold" asChild>
-                <Link to="/portfolio">
-                  View Our Work
-                  <Camera className="ml-2 h-5 w-5" />
+              <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10 font-semibold px-5 h-9 rounded-lg text-xs" asChild>
+                <Link to="/ecommerce">
+                  Browse Marketplace <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </Link>
               </Button>
             </div>
           </div>
-        </div>
-      </Section>
+        </section>
+      </div>
 
       {/* Inquiry Dialog */}
       <Dialog open={inquiryDialogOpen} onOpenChange={setInquiryDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
+              <Calendar className="h-5 w-5 text-evn-600" />
               {selectedRental ? `Inquire About ${selectedRental.title}` : 'Event Inquiry'}
             </DialogTitle>
           </DialogHeader>
           <InquiryForm
-              formType={selectedRental ? "rental" : "inquiry"}
-              title={selectedRental ? `${selectedRental.title} Inquiry` : "General Inquiry"}
-              rentalId={selectedRental?.id}
-              rentalTitle={selectedRental?.title}
-              onSuccess={() => {
-                setInquiryDialogOpen(false);
-                setSelectedRental(null);
-              }} />
-
+            formType={selectedRental ? "rental" : "inquiry"}
+            title={selectedRental ? `${selectedRental.title} Inquiry` : "General Inquiry"}
+            rentalId={selectedRental?.id}
+            rentalTitle={selectedRental?.title}
+            onSuccess={() => { setInquiryDialogOpen(false); setSelectedRental(null); }}
+          />
         </DialogContent>
       </Dialog>
     </Layout>
     <WhatsAppBot />
-    </>);
-
+    </>
+  );
 };
 
 export default Index;

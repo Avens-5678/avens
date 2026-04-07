@@ -88,6 +88,7 @@ const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselPro
 
   return (
     <section className="relative overflow-hidden">
+      {/* Banner slides */}
       <div
         className="flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)`, willChange: "transform", WebkitTransform: `translateX(-${current * 100}%) translateZ(0)` }}
@@ -95,7 +96,7 @@ const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselPro
         {banners.map((banner) => (
           <div
             key={banner.id}
-            className="w-full flex-shrink-0 min-h-[180px] md:min-h-[220px] px-6 sm:px-12 relative overflow-hidden flex items-center"
+            className="w-full flex-shrink-0 min-h-[160px] md:min-h-[200px] px-6 sm:px-12 relative overflow-hidden flex items-center"
             style={{
               background: `linear-gradient(135deg, ${banner.gradient_from || "hsl(var(--primary))"}, ${banner.gradient_to || "hsl(var(--accent))"})`,
             }}
@@ -113,16 +114,16 @@ const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselPro
               <div className="absolute -right-12 top-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-white/10" />
               <div className="absolute right-16 top-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-white/5" />
             </div>
-            <div className="container mx-auto flex items-center gap-4 relative py-8 sm:py-10">
-              <div className="w-full md:w-[60%] space-y-2.5 sm:space-y-3">
+            <div className="container mx-auto flex items-center gap-4 relative py-6 sm:py-8 pb-12 sm:pb-14">
+              <div className="w-full md:w-[60%] space-y-2 sm:space-y-2.5">
                 <span className="inline-block text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full">
                   {banner.linked_rental_ids?.length ? "Limited Time" : "New Arrivals"}
                 </span>
-                <h3 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm leading-tight">
+                <h3 className="text-xl md:text-2xl font-bold text-white drop-shadow-sm leading-tight">
                   {banner.title}
                 </h3>
                 {banner.subtitle && (
-                  <p className="text-sm text-white/80 max-w-md leading-relaxed">
+                  <p className="text-xs sm:text-sm text-white/80 max-w-md leading-relaxed">
                     {banner.subtitle}
                   </p>
                 )}
@@ -138,24 +139,33 @@ const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselPro
         ))}
       </div>
 
+      {/* Bottom gradient fade — matches current banner, no hard edge */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-10 transition-all duration-700"
+        style={{
+          background: `linear-gradient(to bottom, transparent 0%, ${banners[current]?.gradient_to || "hsl(var(--accent))"} 100%)`,
+        }}
+      />
+
+      {/* Dots — positioned above the fade */}
       {banners.length > 1 && (
         <>
           <button
             onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/20 hover:bg-background/40 backdrop-blur-sm rounded-full p-1.5 transition-colors"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/10 hover:bg-black/20 backdrop-blur-sm rounded-full p-1.5 transition-colors z-20"
             aria-label="Previous banner"
           >
-            <ChevronLeft className="h-4 w-4 text-primary-foreground" />
+            <ChevronLeft className="h-4 w-4 text-white" />
           </button>
           <button
             onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/20 hover:bg-background/40 backdrop-blur-sm rounded-full p-1.5 transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/10 hover:bg-black/20 backdrop-blur-sm rounded-full p-1.5 transition-colors z-20"
             aria-label="Next banner"
           >
-            <ChevronRight className="h-4 w-4 text-primary-foreground" />
+            <ChevronRight className="h-4 w-4 text-white" />
           </button>
 
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
             {banners.map((_, i) => (
               <button
                 key={i}
@@ -163,8 +173,8 @@ const PromoBannerCarousel = ({ serviceType, onCtaClick }: PromoBannerCarouselPro
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-300",
                   current === i
-                    ? "w-6 bg-primary-foreground"
-                    : "w-1.5 bg-primary-foreground/40 hover:bg-primary-foreground/60"
+                    ? "w-6 bg-white"
+                    : "w-1.5 bg-white/40 hover:bg-white/60"
                 )}
                 aria-label={`Go to banner ${i + 1}`}
               />

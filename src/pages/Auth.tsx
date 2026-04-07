@@ -291,27 +291,51 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <Link to="/" className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="mr-2 h-4 w-4" />
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left: Brand Panel */}
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-evn-600 via-evn-700 to-evn-900 items-center justify-center relative overflow-hidden">
+        {/* Dot grid pattern */}
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="text-center relative z-10">
+          <span className="text-white text-4xl font-brand font-bold italic tracking-tight uppercase">
+            Evnting<span className="text-coral-300">.com</span>
+          </span>
+          <p className="text-white/60 mt-3 text-lg">India's event rental marketplace</p>
+        </div>
+      </div>
+
+      {/* Mobile: small brand header */}
+      <div className="md:hidden bg-gradient-to-r from-evn-600 to-evn-800 px-6 py-8 text-center">
+        <span className="text-white text-2xl font-brand font-bold italic tracking-tight uppercase">
+          Evnting<span className="text-coral-300">.com</span>
+        </span>
+        <p className="text-white/60 mt-1 text-sm">India's event rental marketplace</p>
+      </div>
+
+      {/* Right: Form Panel */}
+      <div className="flex-1 flex items-center justify-center p-6 md:p-12 bg-white">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <Link to="/" className="inline-flex items-center text-gray-400 hover:text-gray-600 text-sm transition-colors mb-6">
+              <ArrowLeft className="mr-1.5 h-4 w-4" />
               Back to Website
             </Link>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {step === "email" && "Welcome back"}
+              {step === "password" && "Enter your password"}
+              {step === "role-select" && "Choose your dashboard"}
+              {step === "forgot-password" && "Reset password"}
+              {step === "google-onboarding" && "Complete your profile"}
+            </h1>
+            <p className="text-gray-500 mt-1">
+              {step === "email" && "Enter your email to continue"}
+              {step === "password" && `Signing in as ${email}`}
+              {step === "role-select" && "Select which dashboard to open"}
+              {step === "forgot-password" && "We'll send you a reset link"}
+              {step === "google-onboarding" && "Just a few more details"}
+            </p>
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Evnting.com
-          </CardTitle>
-          <p className="text-muted-foreground">
-            {step === "email" && "Enter your email to continue"}
-            {step === "password" && `Signing in as ${email}`}
-            {step === "role-select" && "Choose your dashboard"}
-            {step === "forgot-password" && "Reset your password"}
-            {step === "google-onboarding" && "Complete your profile"}
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6 px-6 pb-8">
+          <div className="space-y-6">
           {/* Step 1: Email */}
           {step === "email" && (
             <>
@@ -330,7 +354,7 @@ const Auth = () => {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full bg-evn-600 hover:bg-evn-700 text-white rounded-xl h-12 font-semibold" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
                     Continue
                   </Button>
@@ -346,7 +370,7 @@ const Auth = () => {
                 </div>
               </div>
 
-              <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+              <Button variant="outline" className="w-full rounded-xl h-12 border-gray-200 hover:bg-gray-50" onClick={handleGoogleSignIn}>
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -582,8 +606,9 @@ const Auth = () => {
               </AnimatePresence>
             </div>
           )}
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

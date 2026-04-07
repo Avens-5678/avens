@@ -12,33 +12,32 @@ interface ServiceSelectorProps {
 const services = [
   {
     id: "insta-rent",
-    title: "INSTA-RENT",
-    subtitle: "EQUIPMENT ON DEMAND",
-    highlight: "BROWSE CATALOG",
+    title: "Insta-Rent",
+    highlight: "Browse",
     image: serviceInstarent,
     navigateTo: null,
+    gradient: "from-indigo-500 to-evn-600",
   },
   {
     id: "venues",
-    title: "VENUES",
-    subtitle: "SPACES & LOCATIONS",
-    highlight: "EXPLORE NOW",
+    title: "Venues",
+    highlight: "Explore",
     image: serviceVenues,
     navigateTo: null,
+    gradient: "from-emerald-500 to-teal-600",
   },
   {
     id: "crew-hub",
-    title: "CREW HUB",
-    subtitle: "SKILLED MANPOWER",
-    highlight: "HIRE NOW",
+    title: "Crew Hub",
+    highlight: "Hire",
     image: serviceCrewhub,
     navigateTo: null,
+    gradient: "from-amber-500 to-orange-600",
   },
   {
     id: "essentials",
-    title: "ESSENTIALS",
-    subtitle: "PARTY SUPPLIES & MORE",
-    highlight: "SHOP NOW",
+    title: "Essentials",
+    highlight: "Shop",
     image: null as string | null,
     navigateTo: "/essentials",
     gradient: "from-rose-400 to-pink-500",
@@ -58,135 +57,65 @@ const ServiceSelector = ({ activeService, onServiceChange }: ServiceSelectorProp
   };
 
   return (
-    <section className="relative bg-gradient-to-br from-primary via-primary to-primary-glow overflow-hidden py-10 sm:py-16">
-      {/* Decorative glow */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-secondary/10 rounded-full blur-3xl" />
-      </div>
-
-      <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        {/* Hero text */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
-            Rent equipment & venues.
-            <br />
-            Plan your perfect event.
-          </h2>
-          <p className="text-3xl sm:text-4xl md:text-5xl font-brand italic text-white mt-1">
-            Evnting it!
-          </p>
+    <section className="bg-gradient-to-r from-evn-700 via-evn-600 to-evn-800 py-3 sm:py-4">
+      <div className="container mx-auto px-3 sm:px-4">
+        {/* Desktop: 4 cards in a row */}
+        <div className="hidden md:grid md:grid-cols-4 gap-3 max-w-4xl mx-auto">
+          {services.map((service) => (
+            <button
+              key={service.id}
+              onClick={() => handleClick(service.id)}
+              className={`group relative rounded-xl text-left overflow-hidden transition-all duration-300 hover:scale-[1.03] h-[100px] bg-gradient-to-br ${service.gradient} ${
+                activeService === service.id ? "ring-2 ring-white/60 scale-[1.03]" : ""
+              }`}
+            >
+              <div className="relative z-10 p-3">
+                <h3 className="text-[13px] font-bold text-white">
+                  {service.title}
+                </h3>
+                <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-white/90">
+                  {service.highlight} <ArrowRight className="h-3 w-3" />
+                </span>
+              </div>
+              <div className="absolute bottom-0 right-1 w-16 h-16 opacity-60">
+                {service.image ? (
+                  <img src={service.image} alt={service.title} className="w-full h-full object-contain brightness-0 invert" loading="lazy" />
+                ) : (
+                  <span className="text-4xl opacity-40 select-none absolute bottom-1 right-1">🎉</span>
+                )}
+              </div>
+            </button>
+          ))}
         </div>
 
-        {/* Desktop: 4 cards */}
-        <div className="hidden md:grid md:grid-cols-4 gap-5 max-w-6xl mx-auto">
-          {services.map((service) => {
-            const isEssentials = service.id === "essentials";
-            return (
+        {/* Mobile: horizontal scroll */}
+        <div className="md:hidden">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {services.map((service) => (
               <button
                 key={service.id}
                 onClick={() => handleClick(service.id)}
-                className={`group relative rounded-3xl p-6 pb-5 text-left overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 min-h-[240px] flex flex-col ${
-                  isEssentials
-                    ? "bg-gradient-to-br from-rose-400 to-pink-500 text-white"
-                    : "bg-white"
-                } ${
-                  activeService === service.id
-                    ? "ring-2 ring-secondary shadow-2xl -translate-y-1"
-                    : "shadow-lg"
+                className={`group relative rounded-lg text-left overflow-hidden transition-all h-[80px] w-[120px] flex-shrink-0 bg-gradient-to-br ${service.gradient} ${
+                  activeService === service.id ? "ring-2 ring-white/60" : ""
                 }`}
               >
-                <div className="relative z-10 flex-1">
-                  <h3 className={`text-lg font-extrabold tracking-wide ${isEssentials ? "text-white" : "text-foreground"}`}>
+                <div className="relative z-10 p-2.5">
+                  <h3 className="text-[11px] font-bold text-white">
                     {service.title}
                   </h3>
-                  <p className={`text-[11px] mt-1 tracking-widest uppercase ${isEssentials ? "text-white/80" : "text-muted-foreground"}`}>
-                    {service.subtitle}
-                  </p>
-                  <span className={`inline-block mt-4 text-[11px] font-bold px-3.5 py-1.5 rounded-lg tracking-wide ${
-                    isEssentials
-                      ? "text-rose-600 bg-white/90 border border-white/50"
-                      : "text-secondary border border-secondary/30 bg-secondary/5"
-                  }`}>
-                    {service.highlight}
+                  <span className="inline-flex items-center gap-0.5 mt-1 text-[9px] font-semibold text-white/90">
+                    {service.highlight} <ArrowRight className="h-2.5 w-2.5" />
                   </span>
                 </div>
-
-                {/* Image or emoji fallback */}
-                <div className="absolute bottom-3 right-3 w-32 h-32 opacity-90 group-hover:scale-105 transition-transform duration-300">
+                <div className="absolute bottom-0 right-0 w-12 h-12 opacity-60">
                   {service.image ? (
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="w-full h-full object-contain drop-shadow-lg"
-                      loading="lazy"
-                    />
+                    <img src={service.image} alt={service.title} className="w-full h-full object-contain brightness-0 invert" loading="lazy" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-7xl opacity-40 select-none">
-                      🎉
-                    </div>
+                    <span className="text-2xl opacity-40 select-none absolute bottom-1 right-1">🎉</span>
                   )}
                 </div>
-
-                {/* Arrow */}
-                <div className="relative z-10 mt-auto pt-4">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    isEssentials
-                      ? "bg-white/20 group-hover:bg-white group-hover:text-rose-500"
-                      : "bg-muted/80 group-hover:bg-primary group-hover:text-white"
-                  }`}>
-                    <ArrowRight className="h-4 w-4" />
-                  </div>
-                </div>
               </button>
-            );
-          })}
-        </div>
-
-        {/* Mobile: 2x2 grid */}
-        <div className="md:hidden max-w-md mx-auto">
-          <div className="grid grid-cols-2 gap-3">
-            {services.map((service) => {
-              const isEssentials = service.id === "essentials";
-              return (
-                <button
-                  key={service.id}
-                  onClick={() => handleClick(service.id)}
-                  className={`group relative rounded-2xl p-4 text-left overflow-hidden transition-all min-h-[150px] shadow-lg ${
-                    isEssentials
-                      ? "bg-gradient-to-br from-rose-400 to-pink-500 text-white"
-                      : "bg-white"
-                  } ${
-                    activeService === service.id ? "ring-2 ring-secondary" : ""
-                  }`}
-                >
-                  <div className="relative z-10">
-                    <h3 className={`text-sm font-extrabold tracking-wide ${isEssentials ? "text-white" : "text-foreground"}`}>
-                      {service.title}
-                    </h3>
-                    <p className={`text-[9px] mt-0.5 tracking-widest uppercase ${isEssentials ? "text-white/80" : "text-muted-foreground"}`}>
-                      {service.subtitle}
-                    </p>
-                    <span className={`inline-block mt-2 text-[9px] font-bold px-2 py-0.5 rounded-md ${
-                      isEssentials
-                        ? "text-rose-600 bg-white/90 border border-white/50"
-                        : "text-secondary border border-secondary/30 bg-secondary/5"
-                    }`}>
-                      {service.highlight}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-0 right-0 w-20 h-20 opacity-90">
-                    {service.image ? (
-                      <img src={service.image} alt={service.title} className="w-full h-full object-contain drop-shadow-md" loading="lazy" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-5xl opacity-40 select-none">
-                        🎉
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+            ))}
           </div>
         </div>
       </div>

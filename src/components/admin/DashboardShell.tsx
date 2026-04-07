@@ -43,13 +43,13 @@ const DashboardShell = ({
   const activeInSecondary = secondaryItems.some((i) => i.value === activeTab);
 
   return (
-    <div className="min-h-screen bg-muted/30 flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Header */}
       {headerContent}
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex w-[72px] flex-col items-center py-4 gap-1 bg-background border-r border-border overflow-y-auto shrink-0">
+        {/* Desktop Sidebar — sleek dark */}
+        <aside className="hidden lg:flex w-[68px] flex-col items-center py-3 gap-0.5 bg-evn-950 shrink-0">
           <TooltipProvider delayDuration={200}>
             {sidebarItems.map((item) => {
               const Icon = item.icon;
@@ -60,21 +60,21 @@ const DashboardShell = ({
                     <button
                       onClick={() => onTabChange(item.value)}
                       className={cn(
-                        "relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200",
+                        "relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200",
                         isActive
-                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          ? "bg-white/15 text-white shadow-inner"
+                          : "text-white/40 hover:bg-white/8 hover:text-white/70"
                       )}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-[18px] w-[18px]" />
                       {item.badge && item.badge > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] flex items-center justify-center px-0.5">
+                        <span className="absolute -top-0.5 -right-0.5 bg-coral-500 text-white text-[8px] font-bold rounded-full h-3.5 min-w-[14px] flex items-center justify-center px-0.5">
                           {item.badge > 99 ? "99+" : item.badge}
                         </span>
                       )}
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="font-medium">
+                  <TooltipContent side="right" className="font-medium text-xs">
                     {item.label}
                   </TooltipContent>
                 </Tooltip>
@@ -85,12 +85,12 @@ const DashboardShell = ({
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
-          <div className="p-4 sm:p-6">{children}</div>
+          <div className="p-4 sm:p-6 max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
 
-      {/* Mobile Bottom Tab Bar */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-background border-t border-border z-40 px-1 py-1.5" style={{ paddingBottom: "var(--safe-area-bottom)" }}>
+      {/* Mobile Bottom Tab Bar — glassmorphism */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 z-40 px-1 py-1" style={{ paddingBottom: "var(--safe-area-bottom)" }}>
         <div className="flex items-center justify-around">
           {primaryItems.map((item) => {
             const Icon = item.icon;
@@ -100,19 +100,19 @@ const DashboardShell = ({
                 key={item.value}
                 onClick={() => onTabChange(item.value)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[48px] transition-colors",
+                  "relative flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[48px] transition-all",
                   isActive
-                    ? "text-primary"
-                    : "text-muted-foreground"
+                    ? "text-evn-600"
+                    : "text-gray-400"
                 )}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
                 {item.badge && item.badge > 0 && (
-                  <span className="absolute top-0 right-0.5 bg-red-500 text-white text-[8px] font-bold rounded-full h-3.5 min-w-[14px] flex items-center justify-center px-0.5">
+                  <span className="absolute top-0 right-0.5 bg-coral-500 text-white text-[8px] font-bold rounded-full h-3.5 min-w-[14px] flex items-center justify-center px-0.5">
                     {item.badge > 99 ? "99+" : item.badge}
                   </span>
                 )}
-                <span className="text-[10px] font-medium leading-tight truncate max-w-[56px]">
+                <span className={cn("text-[10px] font-medium leading-tight truncate max-w-[56px]", isActive && "font-semibold")}>
                   {item.label}
                 </span>
               </button>
@@ -125,9 +125,7 @@ const DashboardShell = ({
                 <button
                   className={cn(
                     "flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[48px] transition-colors",
-                    activeInSecondary
-                      ? "text-primary"
-                      : "text-muted-foreground"
+                    activeInSecondary ? "text-evn-600" : "text-gray-400"
                   )}
                 >
                   <MoreHorizontal className="h-5 w-5" />
@@ -136,10 +134,10 @@ const DashboardShell = ({
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[70vh] rounded-t-2xl px-2 pt-4">
                 <SheetHeader className="px-4 pb-2">
-                  <SheetTitle>All Sections</SheetTitle>
+                  <SheetTitle className="text-sm">All Sections</SheetTitle>
                 </SheetHeader>
                 <ScrollArea className="h-full">
-                  <div className="grid grid-cols-3 gap-2 p-2 pb-8">
+                  <div className="grid grid-cols-4 gap-2 p-2 pb-8">
                     {sidebarItems.map((item) => {
                       const Icon = item.icon;
                       const isActive = activeTab === item.value;
@@ -151,14 +149,14 @@ const DashboardShell = ({
                             setMoreOpen(false);
                           }}
                           className={cn(
-                            "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors",
+                            "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all",
                             isActive
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                              ? "bg-evn-600 text-white shadow-md"
+                              : "bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                           )}
                         >
                           <Icon className="h-5 w-5" />
-                          <span className="text-xs font-medium text-center leading-tight">
+                          <span className="text-[10px] font-medium text-center leading-tight">
                             {item.label}
                           </span>
                         </button>

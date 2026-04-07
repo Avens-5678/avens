@@ -344,18 +344,38 @@ export const useActiveFAQ = () => {
 };
 
 // Fetch verified vendor inventory for ecommerce
+// Joins variants so items with has_variants=true (which have NULL price_value
+// on the parent row) still display a "from" price computed from the cheapest
+// variant.
 export const useVerifiedVendorInventory = () => {
   return useQuery({
     queryKey: ["verified-vendor-inventory"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("vendor_inventory")
-        .select("*")
+        .select("*, vendor_inventory_variants(price_value, pricing_unit, stock_quantity, is_active)")
         .eq("is_available", true)
         .order("created_at", { ascending: false });
-
       if (error) throw error;
-      return data;
+
+      // For variant items, surface the cheapest active variant as the
+      // displayed price so cards never render "no price".
+      return (data || []).map((row: any) => {
+        if (!row.has_variants) return row;
+        const variants: any[] = (row.vendor_inventory_variants || []).filter(
+          (v: any) => v.is_active !== false && v.price_value != null
+        );
+        if (variants.length === 0) return row;
+        const cheapest = variants.reduce((min, v) =>
+          v.price_value < min.price_value ? v : min
+        );
+        return {
+          ...row,
+          price_value: row.price_value ?? cheapest.price_value,
+          pricing_unit: row.pricing_unit ?? cheapest.pricing_unit ?? "Per Day",
+          price_from: true, // hint for cards to render "From ₹X"
+        };
+      });
     },
   });
 };

@@ -250,6 +250,7 @@ const Ecommerce = () => {
       categories: v.categories,
       price_value: v.price_value,
       pricing_unit: v.pricing_unit,
+      price_from: v.price_from || false,
       price_range: null,
       address: v.address,
       quantity: v.quantity,

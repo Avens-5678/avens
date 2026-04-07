@@ -217,21 +217,39 @@ const ProductDetail = () => {
   const tierKey = rental?.markup_tier || "mid";
   const isVendorItem = rental?._source === "vendor";
 
+  // Cheapest active variant (used as fallback when nothing is selected yet)
+  const cheapestVariant = useMemo(() => {
+    if (!variants?.length) return null;
+    const active = variants.filter((v: any) => v.is_active !== false && v.price_value != null);
+    if (active.length === 0) return null;
+    return active.reduce((min: any, v: any) => (v.price_value < min.price_value ? v : min));
+  }, [variants]);
+
   const displayPrice = useMemo(() => {
-    const rawPrice = selectedVariant?.price_value ?? rental?.price_value ?? null;
-    const unit = selectedVariant?.pricing_unit ?? (rental as any)?.pricing_unit ?? "Per Day";
+    const fallback = cheapestVariant;
+    const rawPrice =
+      selectedVariant?.price_value ??
+      rental?.price_value ??
+      fallback?.price_value ??
+      null;
+    const unit =
+      selectedVariant?.pricing_unit ??
+      (rental as any)?.pricing_unit ??
+      fallback?.pricing_unit ??
+      "Per Day";
+    const isFrom = !selectedVariant && (rental as any)?.has_variants && rawPrice != null;
 
     if (rawPrice != null && isVendorItem && pricingRules?.length) {
       if (isVendorUser) {
-        return { value: rawPrice, unit, vendorBase: rawPrice };
+        return { value: rawPrice, unit, vendorBase: rawPrice, isFrom };
       }
       const { clientPrice } = applyTieredMarkup(rawPrice, tierKey, pricingRules);
-      return { value: clientPrice, unit, vendorBase: rawPrice };
+      return { value: clientPrice, unit, vendorBase: rawPrice, isFrom };
     }
-    if (rawPrice != null) return { value: rawPrice, unit };
+    if (rawPrice != null) return { value: rawPrice, unit, isFrom };
     if (rental?.price_range) return { text: `₹${rental.price_range}` };
     return null;
-  }, [rental, selectedVariant, pricingRules, tierKey, isVendorItem, isVendorUser]);
+  }, [rental, selectedVariant, cheapestVariant, pricingRules, tierKey, isVendorItem, isVendorUser]);
 
   const currentUnit = displayPrice && "unit" in displayPrice ? displayPrice.unit : undefined;
   const isMeasurable = isMeasurableUnit(currentUnit);
@@ -502,6 +520,7 @@ const ProductDetail = () => {
                   <div className="flex items-baseline gap-2">
                     {"value" in displayPrice ? (
                       <>
+                        {(displayPrice as any).isFrom && <span className="text-sm text-muted-foreground mr-1">From</span>}
                         <span className="text-2xl sm:text-3xl font-bold text-foreground">₹{displayPrice.value.toLocaleString()}</span>
                         <span className="text-sm text-muted-foreground">/ {displayPrice.unit}</span>
                       </>

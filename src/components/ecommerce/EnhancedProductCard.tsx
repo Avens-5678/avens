@@ -77,7 +77,8 @@ const EnhancedProductCard = ({ rental, viewMode }: EnhancedProductCardProps) => 
         const { clientPrice } = applyTieredMarkup(price, tierKey, pricingRules);
         price = isVendorUser ? rental.price_value : clientPrice;
       }
-      return { price: `₹${price.toLocaleString()}`, unit: `/ ${rental.pricing_unit || "Per Day"}` };
+      const prefix = rental.price_from || rental.has_variants ? "From " : "";
+      return { price: `${prefix}₹${price.toLocaleString()}`, unit: `/ ${rental.pricing_unit || "Per Day"}` };
     }
     if (rental.price_range) return { price: `₹${rental.price_range}`, unit: "" };
     return null;

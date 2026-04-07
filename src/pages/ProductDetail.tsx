@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
@@ -83,6 +84,7 @@ const ProductDetail = () => {
   const [searchCat, setSearchCat] = useState("");
   const [isZooming, setIsZooming] = useState(false);
   const [zoomOrigin, setZoomOrigin] = useState("50% 50%");
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
   // Booking dates state (inline on PDP)
@@ -319,31 +321,46 @@ const ProductDetail = () => {
       });
       return;
     }
-    addItem({
-      id: rental.id,
-      title: rental.title + (selectedVariant ? ` - ${selectedVariant.attribute_value}` : ""),
-      price_value: pricePerUnit || null,
-      pricing_unit: selectedVariant?.pricing_unit ?? (rental as any).pricing_unit ?? "Per Day",
-      price_range: rental.price_range,
-      image_url: displayImages[0] || rental.image_url,
-      address: rental.address || undefined,
-      quantity: finalQuantity,
-      variant_id: selectedVariant?.id,
-      variant_label: selectedVariant?.attribute_value,
-      service_type: (rental as any).service_type || "rental",
-      length: isMeasurable ? length : undefined,
-      breadth: isMeasurable ? breadth : undefined,
-      vendor_id: rental._source === "vendor" ? rental.vendor_id : undefined,
-      vendor_pincode: vendorProfile?.warehouse_pincode || undefined,
-      booking_from: format(bookingFrom, "yyyy-MM-dd"),
-      booking_till: format(bookingTill, "yyyy-MM-dd"),
-      check_in: format(bookingFrom, "yyyy-MM-dd"),
-      check_out: format(bookingTill, "yyyy-MM-dd"),
-      booking_slot: isVenue ? bookingSlot : undefined,
-      markup_tier: tierKey,
-      vendor_base_price: isVendorItem ? vendorBasePrice : undefined,
-      volume_units: (rental as any).volume_units || 1,
-    });
+    // If item already in cart, ask whether to replace or add as a new line
+    if (isInCart(rental.id, selectedVariant?.id)) {
+      setShowReplaceDialog(true);
+      return;
+    }
+    commitAddToCart("replace");
+  };
+
+  const commitAddToCart = (mode: "replace" | "new") => {
+    if (!rental || !bookingFrom || !bookingTill) return;
+    const finalQuantity = isMeasurable ? computedArea : quantity;
+    addItem(
+      {
+        id: rental.id,
+        title: rental.title + (selectedVariant ? ` - ${selectedVariant.attribute_value}` : ""),
+        price_value: pricePerUnit || null,
+        pricing_unit: selectedVariant?.pricing_unit ?? (rental as any).pricing_unit ?? "Per Day",
+        price_range: rental.price_range,
+        image_url: displayImages[0] || rental.image_url,
+        address: rental.address || undefined,
+        quantity: finalQuantity,
+        variant_id: selectedVariant?.id,
+        variant_label: selectedVariant?.attribute_value,
+        service_type: (rental as any).service_type || "rental",
+        length: isMeasurable ? length : undefined,
+        breadth: isMeasurable ? breadth : undefined,
+        vendor_id: rental._source === "vendor" ? rental.vendor_id : undefined,
+        vendor_pincode: vendorProfile?.warehouse_pincode || undefined,
+        booking_from: format(bookingFrom, "yyyy-MM-dd"),
+        booking_till: format(bookingTill, "yyyy-MM-dd"),
+        check_in: format(bookingFrom, "yyyy-MM-dd"),
+        check_out: format(bookingTill, "yyyy-MM-dd"),
+        booking_slot: isVenue ? bookingSlot : undefined,
+        markup_tier: tierKey,
+        vendor_base_price: isVendorItem ? vendorBasePrice : undefined,
+        volume_units: (rental as any).volume_units || 1,
+      },
+      { mode }
+    );
+    setShowReplaceDialog(false);
     navigate("/cart");
   };
 
@@ -1234,6 +1251,21 @@ const ProductDetail = () => {
         </div>
       )}
 
+      <AlertDialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>This item is already in your cart</AlertDialogTitle>
+            <AlertDialogDescription>
+              Would you like to <strong>replace</strong> the existing entry with the new dates and quantity, or keep both as <strong>separate bookings</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button variant="outline" onClick={() => commitAddToCart("new")}>Add as separate booking</Button>
+            <AlertDialogAction onClick={() => commitAddToCart("replace")}>Replace existing</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

@@ -529,6 +529,32 @@ const Cart = () => {
       const { error } = await supabase.from("rental_orders").insert(orderData as any);
       if (error) throw error;
 
+      // Auto-create chat thread between client and assigned vendor (Uber-style)
+      if (assignedVendorId) {
+        try {
+          const { data: convo } = await (supabase.from as any)("chat_conversations").insert({
+            vendor_id: assignedVendorId,
+            client_id: user.id,
+            type: "client",
+            title: orderData.title,
+            related_order_id: orderId,
+            last_message: "Order placed — chat opened",
+            last_message_at: new Date().toISOString(),
+          }).select("id").single();
+          if (convo?.id) {
+            await (supabase.from as any)("chat_messages").insert({
+              conversation_id: convo.id,
+              sender_id: user.id,
+              sender_type: "system",
+              message: `Order placed: ${items.length} item(s) for ${derivedStartDate || "TBD"}. You can chat directly here until the event is complete.`,
+              message_type: "system",
+            });
+          }
+        } catch (chatErr) {
+          console.error("Auto-chat creation failed:", chatErr);
+        }
+      }
+
       // Create payment milestones
       if (isInstant && milestoneBreakdown) {
         try {
@@ -783,6 +809,32 @@ const Cart = () => {
         bundle_order_id: rzpBundleOrderId,
       } as any);
       if (orderError) throw orderError;
+
+      // Auto-create chat thread between client and assigned vendor (Uber-style)
+      if (assignedVendorId) {
+        try {
+          const { data: convo } = await (supabase.from as any)("chat_conversations").insert({
+            vendor_id: assignedVendorId,
+            client_id: user.id,
+            type: "client",
+            title: `Booking - ${items.length} item(s)`,
+            related_order_id: orderId,
+            last_message: "Booking confirmed — chat opened",
+            last_message_at: new Date().toISOString(),
+          }).select("id").single();
+          if (convo?.id) {
+            await (supabase.from as any)("chat_messages").insert({
+              conversation_id: convo.id,
+              sender_id: user.id,
+              sender_type: "system",
+              message: `Booking confirmed: ${items.length} item(s) for ${derivedStartDate || "TBD"}. You can chat directly here until the event is complete.`,
+              message_type: "system",
+            });
+          }
+        } catch (chatErr) {
+          console.error("Auto-chat creation failed:", chatErr);
+        }
+      }
 
       // Insert milestones all as pending — verify-razorpay-payment marks milestone 1 paid
       const milestoneRows = milestoneBreakdown.milestones.map(m => ({

@@ -39,7 +39,7 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
-  addItem: (item: CartItem) => void;
+  addItem: (item: CartItem, opts?: { mode?: "replace" | "new" }) => void;
   removeItem: (id: string, variant_id?: string) => void;
   updateQuantity: (id: string, quantity: number, variant_id?: string) => void;
   updateDimensions: (id: string, length: number, breadth: number, variant_id?: string) => void;
@@ -54,8 +54,18 @@ export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      addItem: (item) => {
+      addItem: (item, opts) => {
+        const mode = opts?.mode || "replace";
         const { items } = get();
+        if (mode === "new") {
+          // Force a new row even if same id+variant — useful for "add as separate
+          // booking" so a customer can have two different date ranges of the same item.
+          // Use a synthetic variant_id suffix so the dedup key differs from existing rows.
+          const stamp = `dup_${Date.now()}`;
+          const synthVariant = item.variant_id ? `${item.variant_id}__${stamp}` : stamp;
+          set({ items: [...items, { ...item, variant_id: synthVariant, quantity: item.quantity || 1 }] });
+          return;
+        }
         const key = getCartKey(item.id, item.variant_id);
         const idx = items.findIndex(i => getCartKey(i.id, i.variant_id) === key);
         // Replace (not increment) so going back to PDP and updating dates/qty

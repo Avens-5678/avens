@@ -23,6 +23,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useVendorProfile } from "@/hooks/useVendorProfile";
 import { useRentalVariants, RentalVariant } from "@/hooks/useRentalVariants";
+import { useVendorInventoryVariants } from "@/hooks/useVendorInventory";
 import { useAvailability } from "@/hooks/useAvailability";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
@@ -63,7 +64,10 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { data: rentals, isLoading } = useAllRentals();
   const { data: vendorItems, isLoading: vendorLoading } = useVerifiedVendorInventory();
-  const { data: variants } = useRentalVariants(id);
+  const { data: rentalVariants } = useRentalVariants(id);
+  const { data: vendorVariants } = useVendorInventoryVariants(id);
+  // Vendor items store variants in vendor_inventory_variants; admin items in rental_variants.
+  const variants = ((vendorVariants && vendorVariants.length ? vendorVariants : rentalVariants) || []) as RentalVariant[];
   const { addItem, removeItem, isInCart, getItemCount } = useCart();
   const { toast } = useToast();
   const { data: pricingRules } = usePricingRules();

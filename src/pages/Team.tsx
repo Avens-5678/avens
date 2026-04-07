@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTeamMembers } from "@/hooks/useData";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

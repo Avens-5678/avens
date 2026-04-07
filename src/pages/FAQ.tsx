@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Search, MessageCircle, Phone, Mail, User, HelpCircle, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
 import { useActiveFAQ } from "@/hooks/useData";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";

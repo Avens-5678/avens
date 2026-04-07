@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useCart, CartItem } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

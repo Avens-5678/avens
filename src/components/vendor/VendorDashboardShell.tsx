@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
-import NotificationCenter from "@/components/Layout/NotificationCenter";
+import NotificationCenter from "@/components/layout/NotificationCenter";
 
 export interface NavItem {
   icon: LucideIcon;

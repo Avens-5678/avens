@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
 import { ArrowLeft, Camera } from "lucide-react";
 import { useState } from "react";

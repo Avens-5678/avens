@@ -10,7 +10,7 @@ import { useAllRentals } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { Search, ShoppingCart, Star, Filter, Eye, Grid3X3, Grid2X2, Columns2, Rows3, MapPin } from "lucide-react";
 import { AnimatedViewToggle } from "@/components/ui/animated-view-toggle";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { AnimatedText } from "@/components/ui/animated-text";
 import CartModal from "@/components/cart/CartModal";
 import { ProductImageCarousel } from "@/components/ui/product-image-carousel";

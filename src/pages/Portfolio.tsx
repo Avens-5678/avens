@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { useEvents, usePortfolio } from "@/hooks/useData";
 import { Camera, ArrowRight } from "lucide-react";
 import { useState } from "react";

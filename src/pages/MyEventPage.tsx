@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, CheckCircle2, Package, MessageCircle, ArrowLeft } from "lucide-react";
 

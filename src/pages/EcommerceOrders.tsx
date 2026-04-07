@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useRentalOrders } from "@/hooks/useRentalOrders";

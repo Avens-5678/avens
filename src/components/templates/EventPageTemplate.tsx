@@ -4,7 +4,7 @@ import { useDashboardPath } from "@/hooks/useDashboardPath";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import ScrollReveal from "@/components/ui/scroll-reveal";
 import FloatingParticles from "@/components/ui/floating-particles";
 import MagneticButton from "@/components/ui/magnetic-button";

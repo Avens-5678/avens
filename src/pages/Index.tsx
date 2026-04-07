@@ -9,7 +9,7 @@ import { useDashboardPath } from "@/hooks/useDashboardPath";
 import { ArrowRight, Sparkles, Award, Calendar, Camera, Heart, User, Trophy, Users, ChevronLeft, ChevronRight, Star, Shield, Lock, RefreshCw, Headphones, Zap, MapPin, Clock, Package, Music, Lightbulb, Tent, Utensils, Flower2, Theater } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import InquiryForm from "@/components/Forms/InquiryForm";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Skeleton } from "@/components/ui/skeleton";
 

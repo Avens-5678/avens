@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEssentialsCart } from "@/stores/essentialsCartStore";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import EssentialProductCard from "@/components/essentials/EssentialProductCard";
 import StickyCartBar from "@/components/essentials/StickyCartBar";
 import {

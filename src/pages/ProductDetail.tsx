@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import SiteVisitForm from "@/components/ecommerce/BookingWidget";
 import CrewBookingWidget from "@/components/ecommerce/CrewBookingWidget";

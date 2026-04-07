@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { MapPin, ShieldCheck, Star, Store, Package, Share2, Check } from "lucide-react";
 import { shareContent } from "@/services/shareService";
 import { useToast } from "@/hooks/use-toast";

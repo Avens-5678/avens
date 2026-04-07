@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { useAboutContent, useNewsAchievements } from "@/hooks/useData";
 import { Quote, User, Target, Eye, Award, HelpCircle } from "lucide-react";
 import { Link } from "react-router-dom";

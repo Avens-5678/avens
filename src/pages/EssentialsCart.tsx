@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEssentialsCart } from "@/stores/essentialsCartStore";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

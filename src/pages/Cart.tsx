@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import EcommerceHeader from "@/components/ecommerce/EcommerceHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

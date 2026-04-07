@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef, lazy, Suspense, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { useAllRentals, useVerifiedVendorInventory } from "@/hooks/useData";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate, useSearchParams } from "react-router-dom";

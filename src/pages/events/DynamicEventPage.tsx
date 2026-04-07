@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { useEvent, usePortfolio } from "@/hooks/useData";
 import { useDashboardPath } from "@/hooks/useDashboardPath";
 import { Briefcase, ArrowRight, Camera, ExternalLink, Star, Users, Calendar, Zap, Target, Building, Mic, Monitor, Layout as LayoutIcon } from "lucide-react";

@@ -312,6 +312,7 @@ const UserManagement = () => {
 const PendingVendorApprovals = () => {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const { data: pending = [], isLoading } = useQuery({
     queryKey: ["pending_vendor_approvals"],
@@ -320,7 +321,7 @@ const PendingVendorApprovals = () => {
       const ids = (roles || []).map((r: any) => r.user_id);
       if (ids.length === 0) return [];
       const { data } = await supabase.from("profiles")
-        .select("user_id, full_name, company_name, phone, city, vendor_status, created_at, avatar_url")
+        .select("user_id, full_name, company_name, phone, city, vendor_status, created_at, avatar_url, aadhaar_number, pan_number, aadhaar_url, pan_card_url, gst_certificate_url, godown_address")
         .in("user_id", ids)
         .eq("vendor_status", "pending");
       return data || [];
@@ -378,7 +379,8 @@ const PendingVendorApprovals = () => {
         ) : (
           <div className="space-y-2">
             {pending.map((v: any) => (
-              <div key={v.user_id} className="flex items-center justify-between border rounded-lg p-3 bg-background">
+              <div key={v.user_id} className="border rounded-lg p-3 bg-background space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1">
                   {v.avatar_url ? (
                     <img src={v.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover border" />
@@ -400,6 +402,14 @@ const PendingVendorApprovals = () => {
                 <div className="flex gap-2">
                   <Button
                     size="sm"
+                    variant="outline"
+                    className="gap-1"
+                    onClick={() => setExpandedId(expandedId === v.user_id ? null : v.user_id)}
+                  >
+                    {expandedId === v.user_id ? "Hide" : "View"} documents
+                  </Button>
+                  <Button
+                    size="sm"
                     className="bg-emerald-600 hover:bg-emerald-700 gap-1"
                     onClick={() => review.mutate({ userId: v.user_id, status: "active" })}
                     disabled={review.isPending}
@@ -419,6 +429,49 @@ const PendingVendorApprovals = () => {
                     <XCircle className="h-3.5 w-3.5" /> Reject
                   </Button>
                 </div>
+              </div>
+              {expandedId === v.user_id && (
+                <div className="border-t pt-3 space-y-3 text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <p className="font-semibold text-muted-foreground mb-1">Aadhaar</p>
+                      <p className="font-mono">{v.aadhaar_number || <span className="text-red-500">Not provided</span>}</p>
+                      {v.aadhaar_url ? (
+                        <div className="mt-1 space-y-1">
+                          <a href={v.aadhaar_url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Open file ↗</a>
+                          {/\.(jpe?g|png|webp)$/i.test(v.aadhaar_url) && (
+                            <img src={v.aadhaar_url} alt="Aadhaar" className="mt-1 max-h-48 rounded border" />
+                          )}
+                        </div>
+                      ) : <p className="text-red-500">No file</p>}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-muted-foreground mb-1">PAN</p>
+                      <p className="font-mono">{v.pan_number || <span className="text-red-500">Not provided</span>}</p>
+                      {v.pan_card_url ? (
+                        <div className="mt-1 space-y-1">
+                          <a href={v.pan_card_url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Open file ↗</a>
+                          {/\.(jpe?g|png|webp)$/i.test(v.pan_card_url) && (
+                            <img src={v.pan_card_url} alt="PAN" className="mt-1 max-h-48 rounded border" />
+                          )}
+                        </div>
+                      ) : <p className="text-red-500">No file</p>}
+                    </div>
+                    {v.gst_certificate_url && (
+                      <div>
+                        <p className="font-semibold text-muted-foreground mb-1">GST Certificate</p>
+                        <a href={v.gst_certificate_url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Open file ↗</a>
+                      </div>
+                    )}
+                    {v.godown_address && (
+                      <div>
+                        <p className="font-semibold text-muted-foreground mb-1">Godown address</p>
+                        <p>{v.godown_address}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               </div>
             ))}
           </div>

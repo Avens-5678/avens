@@ -159,15 +159,22 @@ const VendorInventoryAdmin = () => {
   const toggleVerified = useMutation({
     mutationFn: async ({ id, is_verified }: { id: string; is_verified: boolean }) => {
       const { error } = await supabase.from("vendor_inventory")
-        .update({ is_verified, verified_at: is_verified ? new Date().toISOString() : null })
+        .update({ is_verified, verified_at: is_verified ? new Date().toISOString() : null, verified_by: is_verified ? (user?.id || null) : null })
         .eq("id", id);
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["admin_vendor_inventory"] });
-      toast({ title: vars.is_verified ? "Item Verified" : "Verification Removed" });
+      queryClient.invalidateQueries({ queryKey: ["verified-vendor-inventory"] });
+      toast({ title: vars.is_verified ? "Item Approved & Live" : "Approval Removed" });
     },
   });
+
+  // Pending inventory awaiting admin approval
+  const pendingInventory = useMemo(
+    () => (inventory || []).filter((it: any) => !it.is_verified),
+    [inventory]
+  );
 
   // ── Delete item ──
   const deleteItem = useMutation({
@@ -352,9 +359,62 @@ const VendorInventoryAdmin = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="vendors"><Users className="h-4 w-4 mr-1" />Vendors ({filteredVendors.length})</TabsTrigger>
+          <TabsTrigger value="pending" className="relative">
+            <ClipboardList className="h-4 w-4 mr-1" />Pending ({pendingInventory.length})
+            {pendingInventory.length > 0 && <span className="ml-1 h-1.5 w-1.5 rounded-full bg-amber-500" />}
+          </TabsTrigger>
           <TabsTrigger value="catalog"><Package className="h-4 w-4 mr-1" />Catalog ({inventory.length})</TabsTrigger>
           <TabsTrigger value="service-requests"><Package className="h-4 w-4 mr-1" />Service Requests</TabsTrigger>
         </TabsList>
+        <TabsContent value="pending" className="mt-4 space-y-3">
+          {pendingInventory.length === 0 ? (
+            <Card><CardContent className="p-6 text-sm text-center text-muted-foreground">No items awaiting approval.</CardContent></Card>
+          ) : (
+            pendingInventory.map((item: any) => {
+              const vendor = vendors.find((v: any) => v.user_id === item.vendor_id);
+              const img = (item.image_urls && item.image_urls[0]) || item.image_url || null;
+              return (
+                <Card key={item.id}>
+                  <CardContent className="p-4 flex flex-col md:flex-row gap-4">
+                    {img ? (
+                      <img src={img} alt={item.name} className="w-full md:w-40 h-32 object-cover rounded border" />
+                    ) : (
+                      <div className="w-full md:w-40 h-32 rounded border bg-muted flex items-center justify-center text-muted-foreground"><Package className="h-6 w-6" /></div>
+                    )}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-semibold truncate">{item.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {vendor?.company_name || vendor?.full_name || "Unknown vendor"} · {item.category || "Uncategorized"}
+                          </p>
+                        </div>
+                        <Badge className="bg-amber-100 text-amber-700 shrink-0">Pending</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{item.description || item.short_description || "No description"}</p>
+                      <div className="flex flex-wrap gap-3 text-xs pt-1">
+                        <span className="flex items-center gap-1"><IndianRupee className="h-3 w-3" />{item.price_value ?? item.price_per_day ?? "—"}{item.pricing_unit ? ` / ${item.pricing_unit}` : ""}</span>
+                        <span>Qty: {item.quantity ?? "—"}</span>
+                        <span className="text-muted-foreground">Submitted {item.created_at ? format(new Date(item.created_at), "MMM d") : ""}</span>
+                      </div>
+                    </div>
+                    <div className="flex md:flex-col gap-2 md:w-40 shrink-0">
+                      <Button size="sm" variant="outline" className="flex-1 gap-1" onClick={() => { setEditItem(item); setIsFormOpen(true); }}>
+                        <Edit className="h-3.5 w-3.5" /> Review & edit
+                      </Button>
+                      <Button size="sm" className="flex-1 bg-emerald-600 hover:bg-emerald-700 gap-1" disabled={toggleVerified.isPending} onClick={() => toggleVerified.mutate({ id: item.id, is_verified: true })}>
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+                      </Button>
+                      <Button size="sm" variant="destructive" className="flex-1 gap-1" disabled={deleteItem.isPending} onClick={() => { if (confirm("Reject and delete this item?")) deleteItem.mutate(item.id); }}>
+                        <Ban className="h-3.5 w-3.5" /> Reject
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </TabsContent>
         <TabsContent value="service-requests" className="mt-4">
           <ServiceAccessRequests />
         </TabsContent>

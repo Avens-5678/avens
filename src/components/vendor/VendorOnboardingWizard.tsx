@@ -93,6 +93,8 @@ interface FormData {
   shop_photo_url: string;
   photos: string[];
   documents: Record<string, string>;
+  aadhaar_number: string;
+  pan_number: string;
   has_multiple_warehouses: boolean;
   warehouses: Array<{ name: string; address: string; lat: number | null; lng: number | null; pincode: string }>;
 }
@@ -106,6 +108,7 @@ const INITIAL_FORM: FormData = {
   amenities: [], service_types: [], team_size: "",
   passport_photo_url: "", shop_photo_url: "",
   photos: [], documents: {},
+  aadhaar_number: "", pan_number: "",
   has_multiple_warehouses: false,
   warehouses: [{ name: "", address: "", lat: null, lng: null, pincode: "" }],
 };
@@ -1026,7 +1029,10 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
       update({ documents: next });
     };
 
-    const canProceed = !!formData.documents.aadhaar && !!formData.documents.pan;
+    const aadhaarDigits = formData.aadhaar_number.replace(/\s/g, "");
+    const aadhaarValid = /^\d{12}$/.test(aadhaarDigits);
+    const panValid = /^[A-Z]{5}\d{4}[A-Z]$/.test(formData.pan_number.toUpperCase());
+    const canProceed = !!formData.documents.aadhaar && !!formData.documents.pan && aadhaarValid && panValid;
 
     return (
       <StepShell step={6} title="Upload documents" subtitle="Aadhaar and PAN are required for verification" onBack={() => setCurrentStep(5)}>
@@ -1065,6 +1071,40 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
                   />
                   <p className="text-xs text-muted-foreground">Click to upload — PDF, JPG, PNG (max 5MB)</p>
                 </label>
+              )}
+
+              {doc.key === "aadhaar" && (
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-muted-foreground">Aadhaar number</label>
+                  <Input
+                    inputMode="numeric"
+                    placeholder="XXXX XXXX XXXX"
+                    maxLength={14}
+                    value={formData.aadhaar_number}
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
+                      const formatted = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+                      update({ aadhaar_number: formatted });
+                    }}
+                  />
+                  {formData.aadhaar_number && !aadhaarValid && (
+                    <p className="text-[10px] text-red-500">Enter a valid 12-digit Aadhaar number</p>
+                  )}
+                </div>
+              )}
+              {doc.key === "pan" && (
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-muted-foreground">PAN number</label>
+                  <Input
+                    placeholder="ABCDE1234F"
+                    maxLength={10}
+                    value={formData.pan_number}
+                    onChange={(e) => update({ pan_number: e.target.value.toUpperCase().slice(0, 10) })}
+                  />
+                  {formData.pan_number && !panValid && (
+                    <p className="text-[10px] text-red-500">Format: 5 letters, 4 digits, 1 letter</p>
+                  )}
+                </div>
               )}
             </div>
           ))}
@@ -1109,6 +1149,11 @@ const VendorOnboardingWizard = ({ onComplete }: { onComplete: () => void }) => {
           warehouse_lng: primary?.lng || null,
           warehouse_pincode: primary?.pincode || null,
           avatar_url: avatarUrl,
+          aadhaar_number: formData.aadhaar_number.replace(/\s/g, "") || null,
+          pan_number: formData.pan_number.toUpperCase() || null,
+          aadhaar_url: formData.documents.aadhaar || null,
+          pan_card_url: formData.documents.pan || null,
+          gst_certificate_url: formData.documents.gst || null,
         } as any, { onConflict: "user_id" });
 
         // Insert warehouses

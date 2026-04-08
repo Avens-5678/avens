@@ -355,6 +355,7 @@ export const useVerifiedVendorInventory = () => {
         .from("vendor_inventory")
         .select("*, vendor_inventory_variants(price_value, pricing_unit, stock_quantity, is_active)")
         .eq("is_available", true)
+        .eq("is_verified", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
 

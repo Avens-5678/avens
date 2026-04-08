@@ -171,7 +171,7 @@ const EssentialsDiscoveryRow = () => {
 };
 
 // ── Discovery section with Top Picks + Recently Viewed ──
-const DiscoverySection = ({ allItems, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues, featuredItems }: any) => {
+const DiscoverySection = ({ itemsWithDistance, deliveryRadius, userLocation, discoveryBestRentals, discoveryBestInCity, discoveryBestCrew, discoveryTopVenues, featuredItems }: any) => {
   const { recentIds, clearViewed } = useRecentlyViewed();
 
   // Apply the same vendor-radius gate to recently-viewed and top-picks rows
@@ -1019,7 +1019,7 @@ const Ecommerce = () => {
       {/* Discovery Rows — shown on default landing, overlaps carousel */}
       {isDiscoveryView && (
         <div className="-mt-6 relative z-10">
-          <DiscoverySection allItems={allItems} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} featuredItems={featuredProducts} />
+          <DiscoverySection itemsWithDistance={itemsWithDistance} deliveryRadius={deliveryRadius} userLocation={userLocation} discoveryBestRentals={discoveryBestRentals} discoveryBestInCity={discoveryBestInCity} discoveryBestCrew={discoveryBestCrew} discoveryTopVenues={discoveryTopVenues} featuredItems={featuredProducts} />
           <EventPackages />
           <div className="container mx-auto px-4 sm:px-6">
             <Suspense fallback={null}><LookbookSection /></Suspense>
